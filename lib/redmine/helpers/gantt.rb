@@ -116,7 +116,7 @@ module Redmine
       def number_of_rows
         return @number_of_rows if @number_of_rows
 
-        rows = projects.inject(0) {|total, p| total += number_of_rows_on_project(p)}
+        rows = projects.inject(0) {|total, p| total + number_of_rows_on_project(p)}
         [rows, @max_rows].min
       end
 
@@ -538,8 +538,6 @@ module Redmine
         end
         g_width = PDF.right_pane_width
         zoom = g_width / (self.date_to - self.date_from + 1)
-        g_height = 120
-        t_height = g_height + headers_height
         y_start = pdf.GetY
         # Months headers
         month_f = self.date_from
