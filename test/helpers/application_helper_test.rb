@@ -173,8 +173,8 @@ class ApplicationHelperTest < Redmine::HelperTest
       p=. !bar.gif!
     RAW
     with_settings :text_formatting => 'textile' do
-      assert textilizable(raw).include?('<img src="foo.png" alt="" />')
-      assert textilizable(raw).include?('<img src="bar.gif" alt="" />')
+      assert textilizable(raw).include?('<img src="foo.png" alt="foo.png" />')
+      assert textilizable(raw).include?('<img src="bar.gif" alt="bar.gif" />')
     end
   end
 
@@ -186,8 +186,8 @@ class ApplicationHelperTest < Redmine::HelperTest
          'Inline image: <img src="/attachments/download/3/logo.gif" title="This is a logo" alt="This is a logo" loading="lazy" />',
       'Inline WebP image: !logo.webp!' =>
          'Inline WebP image: <img src="/attachments/download/24/logo.webp" title="WebP image" alt="WebP image" loading="lazy" />',
-      'No match: !ogo.gif!' => 'No match: <img src="ogo.gif" alt="" />',
-      'No match: !ogo.GIF!' => 'No match: <img src="ogo.GIF" alt="" />',
+      'No match: !ogo.gif!' => 'No match: <img src="ogo.gif" alt="ogo.gif" />',
+      'No match: !ogo.GIF!' => 'No match: <img src="ogo.GIF" alt="ogo.GIF" />',
       # link image
       '!logo.gif!:http://foo.bar/' =>
          '<a href="http://foo.bar/"><img src="/attachments/download/3/logo.gif" title="This is a logo" alt="This is a logo" loading="lazy" /></a>',
@@ -218,13 +218,13 @@ class ApplicationHelperTest < Redmine::HelperTest
         textilizable('!testfile.PNG!', attachments: attachments)
 
       # When no matching attachments are found
-      assert_match %r[<img src=".+?" alt="" />],
+      assert_match %r[<img src=".+?" alt="no-match.jpg" />],
         textilizable('!no-match.jpg!', attachments: attachments)
       assert_match %r[<img src=".+?" alt="alt text" />],
         textilizable('!no-match.jpg(alt text)!', attachments: attachments)
 
       # When no attachment is registered
-      assert_match %r[<img src=".+?" alt="" />],
+      assert_match %r[<img src=".+?" alt="logo.gif" />],
         textilizable('!logo.gif!', attachments: [])
       assert_match %r[<img src=".+?" alt="alt text" />],
         textilizable('!logo.gif(alt text)!', attachments: [])

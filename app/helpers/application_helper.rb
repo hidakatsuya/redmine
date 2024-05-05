@@ -943,31 +943,33 @@ module ApplicationHelper
     else
       attachments += obj.attachments if obj.respond_to?(:attachments)
     end
-    if attachments.present?
-      title_and_alt_re = /\s+(title|alt)="([^"]*)"/i
 
-      text.gsub!(/src="([^\/"]+\.(bmp|gif|jpg|jpe|jpeg|png|webp))"([^>]*)/i) do |m|
-        filename, ext, other_attrs = $1, $2, $3
+    title_and_alt_re = /\s+(title|alt)="([^"]*)"/i
 
-        # search for the picture in attachments
-        if found = Attachment.latest_attach(attachments, CGI.unescape(filename))
-          image_url = download_named_attachment_url(found, found.filename, :only_path => only_path)
-          desc = found.description.to_s.delete('"')
+    text.gsub!(/src="([^\/"]+\.(bmp|gif|jpg|jpe|jpeg|png|webp))"([^>]*)/i) do |m|
+      filename, ext, other_attrs = $1, $2, $3
 
-          # remove title and alt attributes after extracting them
-          title_and_alt = other_attrs.scan(title_and_alt_re).to_h
-          other_attrs.gsub!(title_and_alt_re, '')
+      # remove title and alt attributes after extracting them
+      title_and_alt = other_attrs.scan(title_and_alt_re).to_h
+      other_attrs.gsub!(title_and_alt_re, '')
 
-          title_and_alt_attrs = if !desc.blank? && title_and_alt['alt'].blank?
-                                  " title=\"#{desc}\" alt=\"#{desc}\""
-                                else
-                                  # restore original title and alt attributes
-                                  " #{title_and_alt.map { |k, v| %[#{k}="#{v}"] }.join(' ')}"
-                                end
-          "src=\"#{image_url}\"#{title_and_alt_attrs} loading=\"lazy\"#{other_attrs}"
-        else
-          m
-        end
+      # search for the picture in attachments
+      if attachments.present? && found = Attachment.latest_attach(attachments, CGI.unescape(filename))
+        image_url = download_named_attachment_url(found, found.filename, :only_path => only_path)
+        desc = found.description.to_s.delete('"')
+
+        title_and_alt_attrs = if !desc.blank? && title_and_alt['alt'].blank?
+                                " title=\"#{desc}\" alt=\"#{desc}\""
+                              else
+                                # restore original title and alt attributes
+                                " #{title_and_alt.map { |k, v| %[#{k}="#{v}"] }.join(' ')}"
+                              end
+        "src=\"#{image_url}\"#{title_and_alt_attrs} loading=\"lazy\"#{other_attrs}"
+      else
+        # If no attached image to draw is found, a broken image icon should be displayed.
+        # Broken image icons are displayed with img tags that have alt attribute set,
+        # so if alt attribute is empty, set the specified file name instead.
+        "src=\"#{filename}\" alt=\"#{title_and_alt['alt'].presence || filename}\"#{other_attrs}"
       end
     end
   end

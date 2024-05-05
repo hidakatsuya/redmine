@@ -78,13 +78,13 @@ class Redmine::WikiFormatting::CommonMark::ApplicationHelperTest < Redmine::Help
           textilizable('![](testfile.PNG)', attachments: attachments)
 
         # When no matching attachments are found
-        assert_match %r[<img src=".+?" alt="">],
+        assert_match %r[<img src=".+?" alt="no-match.jpg">],
           textilizable('![](no-match.jpg)', attachments: attachments)
         assert_match %r[<img src=".+?" alt="alt text">],
           textilizable('![alt text](no-match.jpg)', attachments: attachments)
 
         # When no attachment is registered
-        assert_match %r[<img src=".+?" alt="">],
+        assert_match %r[<img src=".+?" alt="logo.gif">],
           textilizable('![](logo.gif)', attachments: [])
         assert_match %r[<img src=".+?" alt="alt text">],
           textilizable('![alt text](logo.gif)', attachments: [])
