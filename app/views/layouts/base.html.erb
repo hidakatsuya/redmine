@@ -16,6 +16,7 @@
 <%= call_hook :view_layouts_base_html_head %>
 <!-- page specific tags -->
 <%= yield :header_tags -%>
+<%= javascript_importmap_tags %>
 </head>
 <body class="<%= body_css_classes %>" data-text-formatting="<%= Setting.text_formatting %>">
 <%= call_hook :view_layouts_base_body_top %>
