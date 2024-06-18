@@ -156,7 +156,7 @@ DESC
     end
 
     desc 'Runs the plugins tests.'
-    task :test do
+    task :test => "test:_prepare" do
       test_files = FileList[
         "plugins/#{ENV['NAME'] || '*'}/test/unit/**/*_test.rb",
         "plugins/#{ENV['NAME'] || '*'}/test/functional/**/*_test.rb",
@@ -171,7 +171,7 @@ DESC
 
     namespace :test do
       desc 'Runs the plugins unit tests.'
-      task :units => "db:test:prepare" do |t|
+      task :units => :_prepare do |t|
         test_files = FileList["plugins/#{ENV['NAME'] || '*'}/test/unit/**/*_test.rb"]
         if test_files.any?
           $: << "test"
@@ -180,7 +180,7 @@ DESC
       end
 
       desc 'Runs the plugins functional tests.'
-      task :functionals => "db:test:prepare" do |t|
+      task :functionals => :_prepare do |t|
         test_files = FileList["plugins/#{ENV['NAME'] || '*'}/test/functional/**/*_test.rb"]
         if test_files.any?
           $: << "test"
@@ -189,7 +189,7 @@ DESC
       end
 
       desc 'Runs the plugins integration tests.'
-      task :integration => "db:test:prepare" do |t|
+      task :integration => :_prepare do |t|
         test_files = FileList["plugins/#{ENV['NAME'] || '*'}/test/integration/**/*_test.rb"]
         if test_files.any?
           $: << "test"
@@ -198,7 +198,7 @@ DESC
       end
 
       desc 'Runs the plugins system tests.'
-      task :system => "db:test:prepare" do |t|
+      task :system => :_prepare do |t|
         test_files = FileList["plugins/#{ENV['NAME'] || '*'}/test/system/**/*_test.rb"]
         if test_files.any?
           $: << "test"
@@ -207,12 +207,17 @@ DESC
       end
 
       desc 'Runs the plugins ui tests.'
-      task :ui => "db:test:prepare" do |t|
+      task :ui => :_prepare do |t|
         test_files = FileList["plugins/#{ENV['NAME'] || '*'}/test/ui/**/*_test.rb"]
         if test_files.any?
           $: << "test"
           Rails::TestUnit::Runner.run_from_rake 'test', test_files
         end
+      end
+
+      task :_prepare do
+        ENV['RAILS_ENV'] ||= 'test'
+        Rake::Task['db:test:prepare'].invoke
       end
     end
   end
