@@ -325,7 +325,7 @@ class VersionsControllerTest < Redmine::ControllerTest
       :id => 2,
       :version => {
         :name => 'New version name',
-        :effective_date => Date.today.strftime("%Y-%m-%d")
+        :effective_date => Date.today.strftime("%Y-%m-%d"),
       }
     }
     assert_redirected_to :controller => 'projects', :action => 'settings',
@@ -346,6 +346,31 @@ class VersionsControllerTest < Redmine::ControllerTest
     }
     assert_response :success
     assert_select_error /Name cannot be blank/
+  end
+
+  def test_post_update_should_change_default_project_version
+    version3_id = versions(:versions_003).id
+
+    @request.session[:user_id] = 2
+    put :update, :params => {
+      :id => version3_id,
+      :version => {
+        :name => '2.0',
+        :default_project_version => '1'
+      }
+    }
+    assert_response :redirect
+    assert Version.find(version3_id).default_project_version
+
+    put :update, :params => {
+      :id => version3_id,
+      :version => {
+        :name => '2.0',
+        :default_project_version => '0'
+      }
+    }
+    assert_response :redirect
+    assert_not Version.find(version3_id).default_project_version
   end
 
   def test_destroy

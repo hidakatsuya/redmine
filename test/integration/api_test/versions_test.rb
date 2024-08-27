@@ -144,14 +144,21 @@ class Redmine::ApiTest::VersionsTest < Redmine::ApiTest::Base
   end
 
   test "PUT /versions/:id.xml should update the version" do
-    put(
-      '/versions/2.xml',
-      :params => {:version => {:name => 'API update', :wiki_page_title => WikiPage.first.title}},
-      :headers => credentials('jsmith'))
+    params = {
+      :version => {
+        :name => 'API update',
+        :wiki_page_title => WikiPage.first.title,
+        :default_project_version => '1'
+      }
+    }
+    put('/versions/2.xml', :params => params, :headers => credentials('jsmith'))
     assert_response :no_content
     assert_equal '', @response.body
-    assert_equal 'API update', Version.find(2).name
-    assert_equal WikiPage.first, Version.find(2).wiki_page
+    Version.find(2).then do |version|
+      assert_equal 'API update', version.name
+      assert_equal WikiPage.first, version.wiki_page
+      assert version.default_project_version
+    end
   end
 
   test "DELETE /versions/:id.xml should destroy the version" do

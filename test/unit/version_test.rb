@@ -53,6 +53,31 @@ class VersionTest < ActiveSupport::TestCase
     assert_nil project.reload.default_version
   end
 
+  def test_update_default_version
+    version = versions(:versions_005)
+
+    version.update!(default_project_version: '1')
+    assert_equal version, version.reload.project.default_version
+
+    version.update!(default_project_version: '0')
+    assert_nil version.reload.project.default_version
+  end
+
+  def test_default_project_version
+    version5 = versions(:versions_005)
+
+    # When the default version of the project is not set
+    assert_not version5.default_project_version
+
+    # When the default version of the project equals the version5
+    version5.project.update!(default_version: version5)
+    assert version5.default_project_version
+
+    # When the default version of the project is not the version5
+    version5.project.update!(default_version: versions(:versions_007))
+    assert_not version5.default_project_version
+  end
+
   def test_invalid_effective_date_validation
     v = Version.new(:project => Project.find(1), :name => '1.1',
                     :effective_date => '99999-01-01')

@@ -429,8 +429,12 @@ class Version < ApplicationRecord
   end
 
   def update_default_project_version
-    if @default_project_version && project.present?
+    return if project.blank?
+
+    if @default_project_version
       project.update_columns :default_version_id => id
+    else
+      project.update_columns :default_version_id => nil
     end
   end
 
