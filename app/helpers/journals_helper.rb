@@ -40,8 +40,9 @@ module JournalsHelper
 
     if journal.notes.present?
       if options[:reply_links]
+        url = quoted_issue_path(issue, :journal_id => journal, :journal_indice => indice)
         links << link_to_function(icon_with_label('comment', l(:button_quote)),
-                                  "quoteReply('#{j quoted_issue_path(issue, :journal_id => journal, :journal_indice => indice)}')",
+                                  "quoteReply('#{j url}', '#journal-#{j journal.id}-notes')",
                                   :title => l(:button_quote),
                                   :class => 'icon-only icon-comment'
                                  )

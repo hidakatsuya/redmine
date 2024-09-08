@@ -4,7 +4,7 @@
     <%= watcher_link(@topic, User.current) %>
     <%= link_to_function(
           icon_with_label('comment', l(:button_quote)),
-          "quoteReply('#{j url_for(:action => 'quote', :id => @topic, :format => 'js')}')",
+          "quoteReply('#{j url_for(:action => 'quote', :id => @topic, :format => 'js')}', '#message_topic_wiki')",
           :class => 'icon icon-comment') if !@topic.locked? && authorize_for('messages', 'reply') %>
     <%= link_to(
           icon_with_label('edit', l(:button_edit)),
@@ -24,7 +24,7 @@
 
 <div class="message">
 <p><span class="author"><%= authoring @topic.created_on, @topic.author %></span></p>
-<div class="wiki">
+<div id="message_topic_wiki" class="wiki">
 <%= textilizable(@topic, :content) %>
 </div>
 <%= link_to_attachments @topic, :author => false, :thumbnails => true %>
@@ -42,7 +42,7 @@
     <div class="contextual">
       <%= link_to_function(
             icon_with_label('comment', l(:button_quote), icon_only: true),
-            "quoteReply('#{j url_for(:action => 'quote', :id => message, :format => 'js')}')",
+            "quoteReply('#{j url_for(:action => 'quote', :id => message, :format => 'js')}', '#message-#{j message.id} .wiki')",
             :title => l(:button_quote),
             :class => 'icon icon-comment'
           ) if !@topic.locked? && authorize_for('messages', 'reply') %>
