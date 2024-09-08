@@ -226,6 +226,30 @@ class JournalsControllerTest < Redmine::ControllerTest
     assert_response :not_found
   end
 
+  def test_reply_to_issue_with_partial_quote
+    @request.session[:user_id] = 2
+
+    params = { id: 6, quote: 'a private subproject of cookbook' }
+    post :new, params: params, xhr: true
+
+    assert_response :success
+    assert_equal 'text/javascript', response.media_type
+    assert_include 'John Smith wrote:', response.body
+    assert_include '> a private subproject of cookbook', response.body
+  end
+
+  def test_reply_to_note_with_partial_quote
+    @request.session[:user_id] = 2
+
+    params = { id: 6, journal_id: 4, journal_indice: 1, quote: 'a private version' }
+    post :new, params: params, xhr: true
+
+    assert_response :success
+    assert_equal 'text/javascript', response.media_type
+    assert_include 'Redmine Admin wrote in #note-1:', response.body
+    assert_include '> a private version', response.body
+  end
+
   def test_edit_xhr
     @request.session[:user_id] = 1
     get(:edit, :params => {:id => 2}, :xhr => true)

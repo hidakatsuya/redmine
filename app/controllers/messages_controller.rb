@@ -124,7 +124,9 @@ class MessagesController < ApplicationController
     else
       @content = "#{ll(Setting.default_language, :text_user_wrote_in, {:value => @message.author, :link => "message##{@message.id}"})}\n> "
     end
-    @content << @message.content.to_s.strip.gsub(%r{<pre>(.*?)</pre>}m, '[...]').gsub(/(\r?\n|\r\n?)/, "\n> ") + "\n\n"
+
+    quote_text = params[:quote].presence || @message.content.to_s.strip.gsub(%r{<pre>(.*?)</pre>}m, '[...]')
+    @content << quote_text.gsub(/(\r?\n|\r\n?)/, "\n> ") + "\n\n"
 
     respond_to do |format|
       format.html { render_404 }
