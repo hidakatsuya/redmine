@@ -54,4 +54,52 @@ class MessagesTest < ApplicationSystemTestCase
 
     TEXT
   end
+
+  def test_reply_to_topic_message_with_partial_quote
+    assert_text /This is the very first post/
+
+    # Select the part of the topic message through the entire text of the attachment below it.
+    page.execute_script <<-'JS'
+      const range = document.createRange();
+      const message = document.querySelector('#message_topic_wiki');
+      // Select only the text "in the forum" from the text "This is the very first post\nin the forum".
+      range.setStartBefore(message.querySelector('p').childNodes[2]);
+      range.setEndAfter(message.parentNode.querySelector('.attachments'));
+
+      window.getSelection().addRange(range);
+    JS
+
+    within '#content > .contextual' do
+      click_link 'Quote'
+    end
+
+    assert_field 'message_content', with: <<~TEXT
+      Redmine Admin wrote:
+      > in the forum
+
+    TEXT
+  end
+
+  def test_reply_to_message_with_partial_quote
+    assert_text 'Reply to the first post'
+
+    # Select the entire message, including the subject and headers of messages #2 and #3.
+    page.execute_script <<-JS
+      const range = document.createRange();
+      range.setStartBefore(document.querySelector('#message-2'));
+      range.setEndAfter(document.querySelector('#message-3'));
+
+      window.getSelection().addRange(range);
+    JS
+
+    within '#message-2' do
+      click_link 'Quote'
+    end
+
+    assert_field 'message_content', with: <<~TEXT
+      Redmine Admin wrote in message#2:
+      > Reply to the first post
+
+    TEXT
+  end
 end

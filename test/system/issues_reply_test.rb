@@ -37,6 +37,15 @@ class IssuesReplyTest < ApplicationSystemTestCase
       click_link 'Quote'
     end
 
+    # Select the other than the issue description element.
+    page.execute_script <<-JS
+      const range = document.createRange();
+      // Select "Description" text.
+      range.selectNodeContents(document.querySelector('.description > p'))
+
+      window.getSelection().addRange(range);
+    JS
+
     assert_field 'issue_notes', with: <<~TEXT
       John Smith wrote:
       > Unable to print recipes
@@ -53,6 +62,56 @@ class IssuesReplyTest < ApplicationSystemTestCase
     assert_field 'issue_notes', with: <<~TEXT
       Redmine Admin wrote in #note-1:
       > Journal notes
+
+    TEXT
+    assert_selector :css, '#issue_notes:focus'
+  end
+
+  def test_reply_to_issue_with_partial_quote
+    assert_text 'Unable to print recipes'
+
+    # Select only the "print" text from the text "Unable to print recipes" in the description.
+    page.execute_script <<-JS
+      const range = document.createRange();
+      const wiki = document.querySelector('#issue_description_wiki > p').childNodes[0];
+      range.setStart(wiki, 10);
+      range.setEnd(wiki, 15);
+
+      window.getSelection().addRange(range);
+    JS
+
+    within '.issue.details' do
+      click_link 'Quote'
+    end
+
+    assert_field 'issue_notes', with: <<~TEXT
+      John Smith wrote:
+      > print
+
+    TEXT
+    assert_selector :css, '#issue_notes:focus'
+  end
+
+  def test_reply_to_note_with_partial_quote
+    assert_text 'Journal notes'
+
+    # Select the entire details of the note#1 and the part of the note#1's text.
+    page.execute_script <<-JS
+      const range = document.createRange();
+      range.setStartBefore(document.querySelector('#change-1 .details'));
+      // Select only the text "Journal" from the text "Journal notes" in the note-1.
+      range.setEnd(document.querySelector('#change-1 .wiki > p').childNodes[0], 7);
+
+      window.getSelection().addRange(range);
+    JS
+
+    within '#change-1' do
+      click_link 'Quote'
+    end
+
+    assert_field 'issue_notes', with: <<~TEXT
+      Redmine Admin wrote in #note-1:
+      > Journal
 
     TEXT
     assert_selector :css, '#issue_notes:focus'
