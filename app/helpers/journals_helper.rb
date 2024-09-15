@@ -40,13 +40,11 @@ module JournalsHelper
 
     if journal.notes.present?
       if options[:reply_links]
-        links << link_to(icon_with_label('comment', l(:button_quote)),
-                         quoted_issue_path(issue, :journal_id => journal, :journal_indice => indice),
-                         :remote => true,
-                         :method => 'post',
-                         :title => l(:button_quote),
-                         :class => 'icon-only icon-comment'
-                        )
+        links << link_to_function(icon_with_label('comment', l(:button_quote)),
+                                  "quoteReply('#{j quoted_issue_path(issue, :journal_id => journal, :journal_indice => indice)}')",
+                                  :title => l(:button_quote),
+                                  :class => 'icon-only icon-comment'
+                                 )
       end
       if journal.editable_by?(User.current)
         links << link_to(icon_with_label('edit', l(:button_edit)),
