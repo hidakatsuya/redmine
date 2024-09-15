@@ -168,7 +168,7 @@ class JournalsControllerTest < Redmine::ControllerTest
 
   def test_reply_to_issue
     @request.session[:user_id] = 2
-    get(:new, :params => {:id => 6}, :xhr => true)
+    post(:new, :params => {:id => 6}, :xhr => true)
     assert_response :success
 
     assert_equal 'text/javascript', response.media_type
@@ -177,13 +177,13 @@ class JournalsControllerTest < Redmine::ControllerTest
 
   def test_reply_to_issue_without_permission
     @request.session[:user_id] = 7
-    get(:new, :params => {:id => 6}, :xhr => true)
+    post(:new, :params => {:id => 6}, :xhr => true)
     assert_response :forbidden
   end
 
   def test_reply_to_note
     @request.session[:user_id] = 2
-    get(
+    post(
       :new,
       :params => {
         :id => 6,
@@ -202,7 +202,7 @@ class JournalsControllerTest < Redmine::ControllerTest
     journal = Journal.create!(:journalized => Issue.find(2), :notes => 'Privates notes', :private_notes => true)
     @request.session[:user_id] = 2
 
-    get(
+    post(
       :new,
       :params => {
         :id => 2,
@@ -215,7 +215,7 @@ class JournalsControllerTest < Redmine::ControllerTest
     assert_include '> Privates notes', response.body
 
     Role.find(1).remove_permission! :view_private_notes
-    get(
+    post(
       :new,
       :params => {
         :id => 2,

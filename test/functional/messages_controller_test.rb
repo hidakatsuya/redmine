@@ -288,7 +288,7 @@ class MessagesControllerTest < Redmine::ControllerTest
 
   def test_quote_if_message_is_root
     @request.session[:user_id] = 2
-    get(
+    post(
       :quote,
       :params => {
         :board_id => 1,
@@ -306,7 +306,7 @@ class MessagesControllerTest < Redmine::ControllerTest
 
   def test_quote_if_message_is_not_root
     @request.session[:user_id] = 2
-    get(
+    post(
       :quote,
       :params => {
         :board_id => 1,
@@ -324,7 +324,7 @@ class MessagesControllerTest < Redmine::ControllerTest
 
   def test_quote_as_html_should_respond_with_404
     @request.session[:user_id] = 2
-    get(
+    post(
       :quote,
       :params => {
         :board_id => 1,
