@@ -1262,6 +1262,12 @@ function inlineAutoComplete(element) {
     tribute.attach(element);
 }
 
+function quoteReply(path) {
+  $.ajax({
+    url: path,
+    type: 'post'
+  });
+}
 
 $(document).ready(setupAjaxIndicator);
 $(document).ready(hideOnLoad);
