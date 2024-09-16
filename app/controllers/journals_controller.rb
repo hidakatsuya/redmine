@@ -31,6 +31,7 @@ class JournalsController < ApplicationController
   helper :queries
   helper :attachments
   include QueriesHelper
+  include Quotable
 
   def index
     retrieve_query
@@ -65,18 +66,11 @@ class JournalsController < ApplicationController
 
   def new
     @journal = Journal.visible.find(params[:journal_id]) if params[:journal_id]
-    if @journal
-      user = @journal.user
-      text = @journal.notes
-      @content = "#{ll(Setting.default_language, :text_user_wrote_in, {:value => user, :link => "#note-#{params[:journal_indice]}"})}\n> "
+    @content = if @journal
+      quote_issue_journal(@journal, indice: params[:journal_indice], partial_quote: params[:quote])
     else
-      user = @issue.author
-      text = @issue.description
-      @content = "#{ll(Setting.default_language, :text_user_wrote, user)}\n> "
+      quote_issue(@issue, partial_quote: params[:quote])
     end
-    # Replaces pre blocks with [...]
-    text = params[:quote].presence || text.to_s.strip.gsub(%r{<pre>(.*?)</pre>}m, '[...]')
-    @content << text.gsub(/(\r?\n|\r\n?)/, "\n> ") + "\n\n"
   rescue ActiveRecord::RecordNotFound
     render_404
   end
