@@ -2328,6 +2328,19 @@ class ApplicationHelperTest < Redmine::HelperTest
     end
   end
 
+  def test_quote_reply
+    url = quoted_issue_path(issues(:issues_001))
+
+    a_tag = quote_reply(url, '#issue_description_wiki')
+    assert_includes a_tag, %|onclick="#{h "quoteReply('/issues/1/quoted', '#issue_description_wiki'); return false;"}"|
+    assert_includes a_tag, %|class="icon icon-comment"|
+    assert_not_includes a_tag, 'title='
+
+    # When icon_only is true
+    a_tag = quote_reply(url, '#issue_description_wiki', icon_only: true)
+    assert_includes a_tag, %|title="Quote"|
+  end
+
   private
 
   def wiki_links_with_special_characters
