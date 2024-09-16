@@ -1,5 +1,5 @@
 <% content_for :header_tags do %>
-  <%= javascript_include_tag 'quote_reply' %>
+  <%= javascript_for_quote_reply_include_tag %>
 <% end %>
 
 <%= render :partial => 'action_menu' %>
@@ -88,10 +88,7 @@ end %>
 <hr />
 <div class="description">
   <div class="contextual">
-  <%= link_to_function(icon_with_label('comment', l(:button_quote)),
-                       "quoteReply('#{j quoted_issue_path(@issue)}', '#issue_description_wiki')",
-                       :class => 'icon icon-comment '
-                      ) if @issue.notes_addable? %>
+  <%= quote_reply(quoted_issue_path(@issue), '#issue_description_wiki') if @issue.notes_addable? %>
   </div>
 
   <p><strong><%=l(:field_description)%></strong></p>
