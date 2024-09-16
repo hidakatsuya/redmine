@@ -18,6 +18,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 module JournalsHelper
+  include Redmine::QuoteReply::Helper
+
   # Returns the attachments of a journal that are displayed as thumbnails
   def journal_thumbnail_attachments(journal)
     journal.attachments.select(&:thumbnailable?)
@@ -41,11 +43,7 @@ module JournalsHelper
     if journal.notes.present?
       if options[:reply_links]
         url = quoted_issue_path(issue, :journal_id => journal, :journal_indice => indice)
-        links << link_to_function(icon_with_label('comment', l(:button_quote)),
-                                  "quoteReply('#{j url}', '#journal-#{j journal.id}-notes')",
-                                  :title => l(:button_quote),
-                                  :class => 'icon-only icon-comment'
-                                 )
+        links << quote_reply(url, "#journal-#{journal.id}-notes", icon_only: true)
       end
       if journal.editable_by?(User.current)
         links << link_to(icon_with_label('edit', l(:button_edit)),

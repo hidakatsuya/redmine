@@ -17,6 +17,25 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-module MessagesHelper
-  include Redmine::QuoteReply::Helper
+module Redmine
+  module QuoteReply
+    module Helper
+      def javascript_for_quote_reply_include_tag
+        javascript_include_tag 'quote_reply'
+      end
+
+      def quote_reply(url, selector_for_content, icon_only: false)
+        quote_reply_function = "quoteReply('#{j url}', '#{j selector_for_content}')"
+
+        html_options = { class: 'icon icon-comment' }
+        html_options[:title] = l(:button_quote) if icon_only
+
+        link_to_function(
+          icon_with_label('comment', l(:button_quote), icon_only: icon_only),
+          quote_reply_function,
+          html_options
+        )
+      end
+    end
+  end
 end
