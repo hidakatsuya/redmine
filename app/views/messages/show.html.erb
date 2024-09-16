@@ -1,3 +1,7 @@
+<% content_for :header_tags do %>
+  <%= javascript_include_tag 'quote_reply' %>
+<% end %>
+
 <%= board_breadcrumb(@message) %>
 
 <div class="contextual">
