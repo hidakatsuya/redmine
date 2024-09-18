@@ -1920,7 +1920,7 @@ module ApplicationHelper
   end
 
   def quote_reply(url, selector_for_content, icon_only: false)
-    quote_reply_function = "quoteReply('#{j url}', '#{j selector_for_content}')"
+    quote_reply_function = "quoteReply('#{j url}', '#{j selector_for_content}', '#{j Setting.text_formatting}')"
 
     html_options = { class: 'icon icon-comment' }
     html_options[:title] = l(:button_quote) if icon_only
@@ -1930,6 +1930,10 @@ module ApplicationHelper
       quote_reply_function,
       html_options
     )
+  end
+
+  def javascript_for_quote_reply_include_tag
+    javascript_include_tag('turndown-7.2.0', 'quote_reply')
   end
 
   private

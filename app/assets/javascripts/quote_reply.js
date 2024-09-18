@@ -1,11 +1,22 @@
-function quoteReply(path, selectorForContentElement) {
+function quoteReply(path, selectorForContentElement, textFormatting) {
   const contentElement = $(selectorForContentElement).get(0);
-  const quote = QuoteExtractor.extract(contentElement);
+  const quoteHtml = QuoteExtractor.extract(contentElement);
+
+  let formatter;
+
+  switch (textFormatting) {
+    case 'common_mark':
+      formatter = new QuoteCommonMarkFormatter(textFormatting);
+      break;
+    default:
+      formatter = new QuoteNullFormatter(textFormatting);
+      break;
+  }
 
   $.ajax({
     url: path,
     type: 'post',
-    data: { quote: quote }
+    data: { quote: formatter.format(quoteHtml) }
   });
 }
 
@@ -33,11 +44,16 @@ class QuoteExtractor {
       range.setEndAfter(this.targetElement);
     }
 
-    return this.formatRange(range);
+    return this.extractHtmlFrom(range)
   }
 
-  formatRange(range) {
-    return range.toString().trim();
+  extractHtmlFrom(range) {
+    const formattedRange = range.toString().trim();
+    const dummyContainer = document.createElement('div');
+
+    dummyContainer.appendChild(range.cloneContents());
+
+    return dummyContainer.innerHTML;
   }
 
   get selectedRange() {
@@ -58,5 +74,34 @@ class QuoteExtractor {
 
   get isSelected() {
     return this.selection.containsNode(this.targetElement, true);
+  }
+}
+
+class QuoteNullFormatter {
+  constructor(textFormatting) {
+    this.textFormatting = textFormatting;
+  }
+
+  format(quoteHtml) {
+    return quoteHtml;
+  }
+}
+
+class QuoteCommonMarkFormatter extends QuoteNullFormatter {
+  constructor(textFormatting) {
+    super(textFormatting);
+
+    this.turndownService = new TurndownService({
+      codeBlockStyle: 'fenced',
+      headingStyle: 'atx'
+    });
+  }
+
+  format(quoteHtml) {
+    return this.turndownService.turndown(this.normalize(quoteHtml));
+  }
+
+  normalize(quoteHtml) {
+    return quoteHtml.replace(/<code class="(.+?) /, '<code class="language-$1 ');
   }
 }
