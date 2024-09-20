@@ -25,81 +25,95 @@ class MessagesTest < ApplicationSystemTestCase
            :custom_fields, :custom_values, :custom_fields_trackers,
            :watchers, :boards, :messages
 
-  setup do
-    log_user('jsmith', 'jsmith')
-    visit '/boards/1/topics/1'
-  end
-
   def test_reply_to_topic_message
-    within '#content > .contextual' do
-      click_link 'Quote'
+    with_text_formatting 'common_mark' do
+      within '#content > .contextual' do
+        click_link 'Quote'
+      end
+
+      assert_field 'message_content', with: <<~TEXT
+        Redmine Admin wrote:
+        > This is the very first post
+        > in the forum
+
+      TEXT
     end
-
-    assert_field 'message_content', with: <<~TEXT
-      Redmine Admin wrote:
-      > This is the very first post
-      > in the forum
-
-    TEXT
   end
 
   def test_reply_to_message
-    within '#message-2' do
-      click_link 'Quote'
+    with_text_formatting 'textile' do
+      within '#message-2' do
+        click_link 'Quote'
+      end
+
+      assert_field 'message_content', with: <<~TEXT
+        Redmine Admin wrote in message#2:
+        > Reply to the first post
+
+      TEXT
     end
-
-    assert_field 'message_content', with: <<~TEXT
-      Redmine Admin wrote in message#2:
-      > Reply to the first post
-
-    TEXT
   end
 
   def test_reply_to_topic_message_with_partial_quote
-    assert_text /This is the very first post/
+    with_text_formatting 'textile' do
+      assert_text /This is the very first post/
 
-    # Select the part of the topic message through the entire text of the attachment below it.
-    page.execute_script <<-'JS'
-      const range = document.createRange();
-      const message = document.querySelector('#message_topic_wiki');
-      // Select only the text "in the forum" from the text "This is the very first post\nin the forum".
-      range.setStartBefore(message.querySelector('p').childNodes[2]);
-      range.setEndAfter(message.parentNode.querySelector('.attachments'));
+      # Select the part of the topic message through the entire text of the attachment below it.
+      page.execute_script <<-'JS'
+        const range = document.createRange();
+        const message = document.querySelector('#message_topic_wiki');
+        // Select only the text "in the forum" from the text "This is the very first post\nin the forum".
+        range.setStartBefore(message.querySelector('p').childNodes[2]);
+        range.setEndAfter(message.parentNode.querySelector('.attachments'));
 
-      window.getSelection().addRange(range);
-    JS
+        window.getSelection().addRange(range);
+      JS
 
-    within '#content > .contextual' do
-      click_link 'Quote'
+      within '#content > .contextual' do
+        click_link 'Quote'
+      end
+
+      assert_field 'message_content', with: <<~TEXT
+        Redmine Admin wrote:
+        > in the forum
+
+      TEXT
     end
-
-    assert_field 'message_content', with: <<~TEXT
-      Redmine Admin wrote:
-      > in the forum
-
-    TEXT
   end
 
   def test_reply_to_message_with_partial_quote
-    assert_text 'Reply to the first post'
+    with_text_formatting 'common_mark' do
+      assert_text 'Reply to the first post'
 
-    # Select the entire message, including the subject and headers of messages #2 and #3.
-    page.execute_script <<-JS
-      const range = document.createRange();
-      range.setStartBefore(document.querySelector('#message-2'));
-      range.setEndAfter(document.querySelector('#message-3'));
+      # Select the entire message, including the subject and headers of messages #2 and #3.
+      page.execute_script <<-JS
+        const range = document.createRange();
+        range.setStartBefore(document.querySelector('#message-2'));
+        range.setEndAfter(document.querySelector('#message-3'));
 
-      window.getSelection().addRange(range);
-    JS
+        window.getSelection().addRange(range);
+      JS
 
-    within '#message-2' do
-      click_link 'Quote'
+      within '#message-2' do
+        click_link 'Quote'
+      end
+
+      assert_field 'message_content', with: <<~TEXT
+        Redmine Admin wrote in message#2:
+        > Reply to the first post
+
+      TEXT
     end
+  end
 
-    assert_field 'message_content', with: <<~TEXT
-      Redmine Admin wrote in message#2:
-      > Reply to the first post
+  private
 
-    TEXT
+  def with_text_formatting(format)
+    with_settings text_formatting: format do
+      log_user('jsmith', 'jsmith')
+      visit '/boards/1/topics/1'
+
+      yield
+    end
   end
 end
