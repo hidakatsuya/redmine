@@ -77,7 +77,6 @@ class QuoteTextFormatter {
     // Remove all unnecessary anchor elements
     fragment.querySelectorAll('a.wiki-anchor').forEach(e => e.remove());
 
-    // Adjust line breaks when output as text
     const html = this.adjustLineBreaks(fragment.innerHTML);
 
     const result = document.createElement('div');
@@ -171,7 +170,8 @@ class QuoteCommonMarkFormatter {
       }
     });
 
-    // Table elements are not formatted, and the within the table is output as is.
+    // Table does not maintain its original format,
+    // and the text within the table is displayed as it is
     //
     // | A | B | C |
     // |---|---|---|
@@ -180,9 +180,7 @@ class QuoteCommonMarkFormatter {
     // A B C
     // 1 2 3
     turndownService.addRule('table', {
-      filter: (node, options) => {
-        return node.nodeName === 'TD' || node.nodeName === 'TH';
-      },
+      filter: ['td', 'th'],
       replacement: (content, node) => {
         const separator = node.parentElement.lastElementChild === node ? '' : ' ';
         return content + separator;
@@ -207,7 +205,7 @@ class QuoteCommonMarkFormatter {
     // <h1>Title1<a href="#Title" class="wiki-anchor">¶</a></h1> => <h1>Title1</h1>
     htmlFragment.querySelectorAll('a.wiki-anchor').forEach(e => e.remove());
 
-    // Convert code highlight blocks to CommonMark code blocks.
+    // Convert code highlight blocks to CommonMark format code blocks.
     // <code class="ruby" data-language="ruby"> => <code class="language-ruby" data-language="ruby">
     htmlFragment.querySelectorAll('code[data-language]').forEach(e => {
       e.classList.replace(e.dataset['language'], 'language-' + e.dataset['language'])
