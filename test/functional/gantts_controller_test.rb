@@ -171,14 +171,18 @@ class GanttsControllerTest < Redmine::ControllerTest
     )
     assert_response :success
     assert_equal 'application/pdf', @response.media_type
-    assert @response.body.starts_with?('%PDF')
+
+    pdf = PDF::Reader.new(StringIO.new(@response.body))
+    assert_equal 1, pdf.page_count
+    assert_equal 'Gantt eCookbook', pdf.info[:Title]
   end
 
   def test_gantt_should_export_to_pdf_cross_project
     get(:show, :params => {:format => 'pdf'})
-    assert_response :success
-    assert_equal 'application/pdf', @response.media_type
-    assert @response.body.starts_with?('%PDF')
+
+    pdf = PDF::Reader.new(StringIO.new(@response.body))
+    assert_equal 1, pdf.page_count
+    assert_equal 'Gantt', pdf.metadata[:Title]
   end
 
   if Object.const_defined?(:MiniMagick) && convert_installed?

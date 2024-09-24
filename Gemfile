@@ -102,6 +102,7 @@ group :test do
   gem 'mocha', '>= 2.0.1'
   gem 'simplecov', '~> 0.22.0', :require => false
   gem "ffi", platforms: [:mingw, :x64_mingw, :mswin]
+  gem 'pdf-reader'
   # For running system tests
   gem 'puma'
   gem "capybara", ">= 3.39"
