@@ -80,7 +80,7 @@ class QuoteTextFormatter {
     // Remove all unnecessary anchor elements
     fragment.querySelectorAll('a.wiki-anchor').forEach(e => e.remove());
 
-    const html = this.#adjustLineBreaks(fragment.innerHTML);
+    const html = this.#formatLineBreaksAsText(fragment.innerHTML);
 
     const result = document.createElement('div');
     result.innerHTML = html;
@@ -92,7 +92,7 @@ class QuoteTextFormatter {
       .replace(/\n+/g, "\n");
   }
 
-  #adjustLineBreaks(html) {
+  #formatLineBreaksAsText(html) {
     return html
       .replace(/<\/(h1|h2|h3|h4|div|p|li|tr)>/g, "\n</$1>")
       .replace(/<br>/g, "\n")
