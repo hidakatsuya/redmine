@@ -135,7 +135,7 @@ class IssuesSystemTest < ApplicationSystemTestCase
     end
 
     issue = Issue.order('id desc').first
-    assert_equal ['Dave Lopper', 'Some Watcher'], issue.watcher_users.map(&:name).sort
+    assert_equal ['Dave Lopper', 'John Smith', 'Some Watcher'], issue.watcher_users.map(&:name).sort
   end
 
   def test_create_issue_with_attachment
