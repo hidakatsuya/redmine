@@ -85,6 +85,7 @@ end
 
 group :development, :test do
   gem 'debug'
+  gem 'parallel_tests'
 end
 
 group :development do
