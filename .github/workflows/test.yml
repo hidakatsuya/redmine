@@ -39,7 +39,7 @@ jobs:
             database: db/development.sqlite3
           test:
             adapter: sqlite3
-            database: db/test.sqlite3
+            database: db/test<%= ENV['TEST_ENV_NUMBER'] %>.sqlite3
           EOS
 
       - uses: ruby/setup-ruby@v1
@@ -47,11 +47,16 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
 
-      - run: bin/rails db:migrate
+      - name: Prepare db/schema.rb
+        run: bin/rails db:migrate
+        env:
+          RAILS_ENV: development
+
+      - run: bin/rails parallel:setup
         env:
           RAILS_ENV: test
 
-      - run: bin/rails test
-      - run: bin/rails test:system
+      - run: bin/rails parallel:test['test\/(?!system)']
+      - run: bin/rails parallel:test[system]
         env:
           GOOGLE_CHROME_OPTS_ARGS: "headless,disable-gpu,no-sandbox,disable-dev-shm-usage"
