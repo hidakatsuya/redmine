@@ -7,13 +7,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  sqlite3:
+    name: SQLite3 + Ruby${{ matrix.ruby }}
+
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        ruby: ["3.3"]
-        redmine: ["master", "5.1-stable"]
+        ruby: ["3.3", "3.2"]
 
     steps:
       - run: |
