@@ -27,6 +27,10 @@ class InlineAutocompleteSystemTest < ApplicationSystemTestCase
            :workflows, :wikis, :wiki_pages, :wiki_contents, :wiki_content_versions,
            :boards, :messages
 
+  setup do
+    Capybara.reset_sessions!
+  end
+
   def test_inline_autocomplete_for_issues
     log_user('jsmith', 'jsmith')
     visit 'issues/new'
