@@ -1,5 +1,6 @@
 import { Controller } from '@hotwired/stimulus'
 import TurndownService from 'turndown'
+import { post } from '@rails/request.js'
 
 class QuoteExtractor {
   static extract(targetElement) {
@@ -220,10 +221,10 @@ export default class extends Controller {
       formatter = new QuoteTextFormatter();
     }
 
-    $.ajax({
-      url: this.url,
-      type: 'post',
-      data: { quote: formatter.format(selectedRange) }
+    post(this.url, {
+      body: JSON.stringify({ quote: formatter.format(selectedRange) }),
+      contentType: 'application/json',
+      responseKind: 'script'
     });
   }
 }
