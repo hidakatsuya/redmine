@@ -20,21 +20,22 @@
 module Redmine
   module QuoteReply
     module Helper
-      def javascripts_for_quote_reply_include_tag
-        javascript_include_tag 'turndown-7.2.0.min', 'quote_reply'
-      end
-
       def quote_reply(url, selector_for_content, icon_only: false)
-        quote_reply_function = "quoteReply('#{j url}', '#{j selector_for_content}', '#{j Setting.text_formatting}')"
+        button_params = {
+          data: { 'action' => 'quote-reply#quote' },
+          class: 'icon icon-comment'
+        }
+        button_params[:title] = l(:button_quote) if icon_only
 
-        html_options = { class: 'icon icon-comment' }
-        html_options[:title] = l(:button_quote) if icon_only
-
-        link_to_function(
-          sprite_icon('comment', l(:button_quote), icon_only: icon_only),
-          quote_reply_function,
-          html_options
-        )
+        tag.span data: {
+          controller: 'quote-reply',
+          url: url,
+          selector_for_content: selector_for_content,
+          text_formatting: Setting.text_formatting
+        } do
+          link_to sprite_icon('comment', l(:button_quote), icon_only: icon_only), '#',
+            button_params
+        end
       end
     end
 
