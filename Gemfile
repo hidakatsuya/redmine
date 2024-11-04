@@ -18,6 +18,7 @@ gem 'propshaft', '~> 1.1.0'
 gem 'rack', '>= 3.1.3'
 gem "stimulus-rails", "~> 1.3"
 gem "importmap-rails", "~> 2.0"
+gem "requestjs-rails", "~> 0.0.12"
 
 #  Ruby Standard Gems
 gem 'csv', '~> 3.2.8'
