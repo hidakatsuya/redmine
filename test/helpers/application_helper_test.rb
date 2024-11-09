@@ -1868,8 +1868,7 @@ class ApplicationHelperTest < Redmine::HelperTest
 
   def test_link_to_principal_should_link_to_group
     group = Group.find(10)
-    result = link_to('A Team', '/groups/10', :class => 'group')
-    assert_equal result, link_to_principal(group)
+    assert_select_in link_to_principal(group), 'a.group[href=?]', '/groups/10', text: 'A Team'
   end
 
   def test_link_to_principal_should_return_string_representation_for_unknown_type_principal
