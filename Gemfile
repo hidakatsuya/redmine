@@ -52,16 +52,13 @@ end
 
 # Include database gems for the adapters found in the database
 # configuration file
-require 'erb'
-require 'yaml'
 database_file = File.join(File.dirname(__FILE__), "config/database.yml")
 if File.exist?(database_file)
-  yaml_config = ERB.new(IO.read(database_file)).result
-  database_config = YAML.respond_to?(:unsafe_load) ? YAML.unsafe_load(yaml_config) : YAML.load(yaml_config)
-  adapters = database_config.values.filter_map {|c| c['adapter']}.uniq
+  database_config = File.read(database_file)
+  adapters = database_config.scan(/^ *adapter: *(.*)/).flatten.uniq
   if adapters.any?
     adapters.each do |adapter|
-      case adapter
+      case adapter.strip
       when 'mysql2'
         gem 'mysql2', '~> 0.5.0'
         gem "with_advisory_lock"
