@@ -51,6 +51,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install --yes --quiet ghostscript gsfonts
 
+      - uses: browser-actions/setup-chrome@v1
+      - run: chrome --version
+
       - name: Allow imagemagick to read PDF files
         run: |
           echo '<policymap>' > policy.xml
@@ -104,3 +107,9 @@ jobs:
         run: |
           bin/rails test
           bin/rails test:autoload
+
+      - name: Run system tests
+        run: |
+          bin/rails test:system
+        env:
+          GOOGLE_CHROME_OPTS_ARGS: 'headless,disable-gpu,no-sandbox,disable-dev-shm-usage'
