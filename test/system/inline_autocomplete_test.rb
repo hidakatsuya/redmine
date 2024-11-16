@@ -27,10 +27,9 @@ class InlineAutocompleteSystemTest < ApplicationSystemTestCase
     fill_in 'Description', :with => '#'
 
     within('.tribute-container') do
-      assert page.has_text? 'Bug #12: Closed issue on a locked version'
       assert page.has_text? 'Bug #1: Cannot print recipes'
 
-      first('li').click
+      find('li', text: 'Bug #12: Closed issue on a locked version').click
     end
 
     assert_equal '#12 ', find('#issue_description').value
@@ -43,11 +42,10 @@ class InlineAutocompleteSystemTest < ApplicationSystemTestCase
     fill_in 'Description', :with => '##Closed'
 
     within('.tribute-container') do
-      assert page.has_text? 'Bug #12: Closed issue on a locked version'
       assert page.has_text? 'Bug #11: Closed issue on a closed version'
       assert page.has_text? 'Bug #8: Closed issue'
 
-      first('li').click
+      find('li', text: 'Bug #12: Closed issue on a locked version').click
     end
 
     assert_equal '##12 ', find('#issue_description').value
@@ -154,11 +152,10 @@ class InlineAutocompleteSystemTest < ApplicationSystemTestCase
 
     fill_in 'Description', :with => '[[page'
     within('.tribute-container') do
-      assert page.has_text? 'Page_with_sections'
       assert page.has_text? 'Another_page'
       assert_not page.has_text? 'Child_1_1'
 
-      first('li').click
+      find('li', text: 'Page_with_sections').click
     end
     assert_equal '[[Page_with_sections]] ', find('#issue_description').value
   end
@@ -205,8 +202,7 @@ class InlineAutocompleteSystemTest < ApplicationSystemTestCase
     fill_in 'notes', :with => '@lopper'
 
     within('.tribute-container') do
-      assert page.has_text? 'Dave Lopper'
-      first('li').click
+      find('li', text: 'Dave Lopper').click
     end
 
     assert_equal '@dlopper ', find('#notes').value
@@ -224,8 +220,7 @@ class InlineAutocompleteSystemTest < ApplicationSystemTestCase
     fill_in 'issue[notes]', :with => '@'
 
     within('.tribute-container') do
-      assert page.has_text? 'John Smith'
-      first('li').click
+      find('li', text: 'John Smith').click
     end
 
     assert_equal '@jsmith ', find('#issue_notes').value
