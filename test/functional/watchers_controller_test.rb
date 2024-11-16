@@ -201,10 +201,13 @@ class WatchersControllerTest < Redmine::ControllerTest
     }, :xhr => true
     assert_response :success
 
-    assert_match(
-      %r{/watchers/autocomplete_for_user\?object_id%5B%5D=7&object_id%5B%5D=9&object_type=issue},
-      response.body
-    )
+    watcher_autocomplete_url = response.body.scan(
+      %r{/watchers/autocomplete_for_user\?object_id%5B%5D=\d&object_id%5B%5D=\d&object_type=issue}
+    ).first
+
+    assert watcher_autocomplete_url
+    assert_includes watcher_autocomplete_url, 'object_id%5B%5D=7'
+    assert_includes watcher_autocomplete_url, 'object_id%5B%5D=9'
   end
 
   def test_new_without_view_watchers_permission
