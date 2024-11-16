@@ -67,14 +67,22 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # Should not depend on locale since Redmine displays login page
   # using default browser locale which depend on system locale for "real" browsers drivers
   def log_user(login, password)
-    visit '/my/page'
-    assert_equal '/login', current_path
+    visit '/login'
+    unless current_path == '/login'
+      logout
+      visit '/login'
+    end
     within('#login-form form') do
       fill_in 'username', :with => login
       fill_in 'password', :with => password
       find('input[name=login]').click
     end
     assert_equal '/my/page', current_path
+  end
+
+  def logout
+    visit '/logout'
+    click_button 'commit'
   end
 
   def wait_for_ajax
