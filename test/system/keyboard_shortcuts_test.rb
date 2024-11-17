@@ -19,7 +19,7 @@
 
 require_relative '../application_system_test_case'
 
-class InlineAutocompleteSystemTest < ApplicationSystemTestCase
+class KeyboardShortcutsTest < ApplicationSystemTestCase
   def test_keyboard_shortcuts_to_switch_edit_preview_tabs
     log_user('jsmith', 'jsmith')
     visit 'issues/new'
