@@ -2821,13 +2821,15 @@ class IssuesControllerTest < Redmine::ControllerTest
       get(:show, :params => {:id => 1})
     end
     assert_select 'div#watchers ul' do
+      # User(id=2)
       assert_select 'li.user-2' do
         assert_select 'img.gravatar[title=?]', 'John Smith'
         assert_select 'a[href="/users/2"]'
         assert_select 'a[class*=delete]'
       end
+      # Group(id=10)
       assert_select "li.user-10" do
-        assert_select 'img.gravatar[title=?]', 'A Team'
+        assert_select 'img.gravatar[title=?]', 'A Team', false
         assert_select 'a[href="/groups/10"]'
         assert_select 'a[class*=delete]'
       end

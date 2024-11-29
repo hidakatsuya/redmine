@@ -136,14 +136,16 @@ class WikiControllerTest < Redmine::ControllerTest
       end
 
       assert_select 'div#watchers ul' do
+        # User(id=2)
         assert_select 'li.user-2' do
           assert_select 'img.gravatar[title=?]', 'John Smith', is_display_gravatar
           assert_select 'a[href="/users/2"]'
           assert_select 'a[class*=delete]'
         end
-        assert_select 'li.user-10' do
-          assert_select 'img.gravatar[title=?]', 'A Team', is_display_gravatar
-          assert_select 'a[href="/users/10"]', false
+        # Group(id=10)
+        assert_select "li.user-10" do
+          assert_select 'img.gravatar[title=?]', 'A Team', false
+          assert_select 'a[href="/groups/10"]'
           assert_select 'a[class*=delete]'
         end
       end
