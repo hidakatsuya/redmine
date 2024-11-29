@@ -655,7 +655,7 @@ module ApplicationHelper
       principal_check_box << check_box_tag(name, principal.id, false, :id => nil)
       principal_check_box << avatar(principal, :size => 16).to_s if principal.is_a?(User)
       principal_check_box << content_tag('span', principal_icon(principal), :class => "name icon icon-#{principal.class.to_s.downcase}")
-      principal_check_box << principal.to_s
+      principal_check_box << h(principal.to_s)
       s << content_tag('label', principal_check_box.html_safe)
     end
     s.html_safe

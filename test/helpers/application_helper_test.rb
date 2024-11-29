@@ -2046,6 +2046,13 @@ class ApplicationHelperTest < Redmine::HelperTest
     end
   end
 
+  def test_principals_check_box_tag_should_escape_principal_name
+    User.find(1).update!(firstname: "firstname<>'", lastname: 'lastname&"')
+
+    tags = principals_check_box_tags('watcher[user_ids][]', [User.find(1)])
+    assert_include 'firstname&lt;&gt;&#39; lastname&amp;&quot;', tags
+  end
+
   def test_principals_options_for_select_with_users
     User.current = nil
     users = [User.find(2), User.find(4)]
