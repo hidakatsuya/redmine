@@ -497,3 +497,9 @@ module Redmine
     end
   end
 end
+
+if ENV['LOG_SQL']
+  ActiveSupport::Notifications.subscribe('sql.active_record') do |name, start, finish, id, payload|
+    puts "SQL: #{payload[:sql]}"
+  end
+end
