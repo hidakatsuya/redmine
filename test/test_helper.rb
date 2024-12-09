@@ -52,7 +52,7 @@ class ActionView::TestCase
 end
 
 class ActiveSupport::TestCase
-  parallelize(workers: 1)
+  parallelize(workers: :number_of_processors)
 
   include ActionDispatch::TestProcess
 
@@ -60,6 +60,13 @@ class ActiveSupport::TestCase
 
   self.use_transactional_tests = true
   self.use_instantiated_fixtures  = false
+
+  parallelize_setup do |worker|
+    # Set the directory to store thumbnail images for each worker to avoid conflicts
+    storage_for_worker = Pathname.new(Attachment.thumbnails_storage_path).join(worker.to_s)
+    storage_for_worker.mkdir unless storage_for_worker.exist?
+    Attachment.thumbnails_storage_path = storage_for_worker
+  end
 
   def uploaded_test_file(name, mime)
     fixture_file_upload(name.to_s, mime, true)
