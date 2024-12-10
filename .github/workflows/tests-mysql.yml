@@ -1,0 +1,48 @@
+name: Tests with MySQL
+
+on:
+  push:
+
+jobs:
+  tests:
+    name: test mysql ruby-${{ matrix.ruby }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        ruby: ["3.1", "3.2", "3.3"]
+      fail-fast: false
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: redmine_test
+          MYSQL_ROOT_PASSWORD: "root"
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare test database
+        run: |
+          cat > config/database.yml <<EOF
+          test:
+            adapter: mysql2
+            database: redmine_test
+            username: root
+            password: root
+            host: 127.0.0.1
+          EOF
+
+      - name: Run tests
+        uses: ./.github/actions/tests
+        with:
+          ruby: ${{ matrix.ruby }}

@@ -1,0 +1,61 @@
+name: Tests
+description: Run tests
+
+inputs:
+  ruby:
+    description: "Ruby version"
+    required: true
+
+runs:
+  using: composite
+
+  steps:
+    - name: Install dependencies and configure environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install --yes --quiet ghostscript gsfonts locales bzr cvs
+        sudo locale-gen en_US # for bazaar non ascii test
+      shell: bash
+
+    - name: Allow imagemagick to read PDF files
+      run: |
+        echo '<policymap>' > policy.xml
+        echo '<policy domain="coder" rights="read | write" pattern="PDF" />' >> policy.xml
+        echo '</policymap>' >> policy.xml
+        sudo rm /etc/ImageMagick-6/policy.xml
+        sudo mv policy.xml /etc/ImageMagick-6/policy.xml
+      shell: bash
+
+    - name: Install Ruby and gems
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ inputs.ruby }}
+        bundler-cache: true
+
+    - name: Run prepare test environment
+      env:
+        RAILS_ENV: test
+        SCMS: subversion,git,git_utf8,filesystem,bazaar,cvs
+      run: |
+        bundle exec rake ci:about
+        bundle exec rake ci:setup
+        bundle exec rake db:environment:set
+      shell: bash
+
+    - name: Run tests
+      run: |
+        bin/rails test
+      shell: bash
+
+    - name: Run bazaar non ascii test
+      env:
+        LANG: en_US.ISO8859-1
+        LC_ALL: en_US.ISO8859-1
+      run: |
+        bin/rails test test/unit/repository_bazaar_test.rb
+      shell: bash
+
+    - name: Run autoload test
+      run: |
+        bin/rails test:autoload
+      shell: bash
