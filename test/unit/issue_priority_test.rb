@@ -20,8 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class IssuePriorityTest < ActiveSupport::TestCase
-  fixtures :enumerations, :issues
-
   def setup
     User.current = nil
   end

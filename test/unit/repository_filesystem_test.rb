@@ -20,8 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class RepositoryFilesystemTest < ActiveSupport::TestCase
-  fixtures :projects
-
   include Redmine::I18n
 
   REPOSITORY_PATH = Rails.root.join('tmp/test/filesystem_repository').to_s

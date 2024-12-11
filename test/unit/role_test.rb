@@ -20,8 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class RoleTest < ActiveSupport::TestCase
-  fixtures :roles, :workflows, :trackers
-
   def setup
     User.current = nil
   end

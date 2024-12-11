@@ -20,10 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class CustomFieldTest < ActiveSupport::TestCase
-  fixtures :custom_fields, :roles, :projects,
-           :trackers, :issue_statuses,
-           :issues, :users
-
   def setup
     User.current = nil
   end

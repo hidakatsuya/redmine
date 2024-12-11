@@ -20,8 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class CustomValueTest < ActiveSupport::TestCase
-  fixtures :custom_fields, :custom_values, :users
-
   def setup
     User.current = nil
   end

@@ -20,8 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class AuthSourcesControllerTest < Redmine::ControllerTest
-  fixtures :users, :auth_sources
-
   def setup
     @request.session[:user_id] = 1
   end

@@ -20,9 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class CommentTest < ActiveSupport::TestCase
-  fixtures :users, :email_addresses, :news, :comments, :projects, :enabled_modules,
-           :user_preferences, :roles, :members, :member_roles
-
   def setup
     User.current = nil
     @jsmith = User.find(2)

@@ -20,15 +20,6 @@
 require File.expand_path('../../../test_helper', __FILE__)
 
 class Redmine::ApiTest::IssueRelationsTest < Redmine::ApiTest::Base
-  fixtures :projects, :trackers, :issue_statuses, :issues,
-           :enumerations, :users, :issue_categories,
-           :projects_trackers,
-           :roles,
-           :member_roles,
-           :members,
-           :enabled_modules,
-           :issue_relations
-
   test "GET /issues/:issue_id/relations.xml should return issue relations" do
     get '/issues/9/relations.xml', :headers => credentials('jsmith')
 

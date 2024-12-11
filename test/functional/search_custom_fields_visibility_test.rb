@@ -21,19 +21,6 @@ require File.expand_path('../../test_helper', __FILE__)
 
 class SearchCustomFieldsVisibilityTest < Redmine::ControllerTest
   tests SearchController
-  fixtures :projects,
-           :users,
-           :roles,
-           :members,
-           :member_roles,
-           :issue_statuses,
-           :trackers,
-           :projects_trackers,
-           :enabled_modules,
-           :enumerations,
-           :workflows,
-           :custom_fields, :custom_fields_trackers
-
   def setup
     field_attributes = {:field_format => 'string', :is_for_all => true, :is_filter => true, :searchable => true, :trackers => Tracker.all}
     @fields = []

@@ -20,9 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class IssueCategoriesControllerTest < Redmine::ControllerTest
-  fixtures :projects, :users, :members, :member_roles, :roles, :enabled_modules, :issue_categories,
-           :issues
-
   def setup
     User.current = nil
     @request.session[:user_id] = 2

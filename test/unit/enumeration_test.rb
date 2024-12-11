@@ -20,8 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class EnumerationTest < ActiveSupport::TestCase
-  fixtures :enumerations, :issues, :custom_fields, :custom_values
-
   def setup
     User.current = nil
   end

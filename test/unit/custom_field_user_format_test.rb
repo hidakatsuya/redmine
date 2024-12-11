@@ -20,8 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class CustomFieldUserFormatTest < ActiveSupport::TestCase
-  fixtures :custom_fields, :projects, :members, :users, :member_roles, :trackers, :issues
-
   def setup
     User.current = nil
     @field = IssueCustomField.create!(:name => 'Tester', :field_format => 'user')

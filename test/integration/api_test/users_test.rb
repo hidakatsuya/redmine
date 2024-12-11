@@ -20,8 +20,6 @@
 require File.expand_path('../../../test_helper', __FILE__)
 
 class Redmine::ApiTest::UsersTest < Redmine::ApiTest::Base
-  fixtures :users, :email_addresses, :members, :member_roles, :roles, :projects
-
   test "GET /users.xml should return users" do
     users = User.active.order('login')
     users.last.update(twofa_scheme: 'totp')

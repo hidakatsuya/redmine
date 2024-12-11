@@ -21,8 +21,6 @@ require File.expand_path('../../test_helper', __FILE__)
 
 class AuthSourceLdapTest < ActiveSupport::TestCase
   include Redmine::I18n
-  fixtures :auth_sources
-
   def setup
     User.current = nil
   end

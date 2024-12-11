@@ -20,8 +20,6 @@
 require File.expand_path('../../../../test_helper', __FILE__)
 
 class Redmine::CipheringTest < ActiveSupport::TestCase
-  fixtures :auth_sources
-
   def test_password_should_be_encrypted
     Redmine::Configuration.with 'database_cipher_key' => 'secret' do
       plaintext_password = "THIS_IS_A_32_BYTES_LONG_PASSWORD"

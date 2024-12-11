@@ -20,15 +20,6 @@
 require File.expand_path('../../../test_helper', __FILE__)
 
 class Redmine::ApiTest::AttachmentsTest < Redmine::ApiTest::Base
-  fixtures :projects, :trackers, :issue_statuses, :issues,
-           :enumerations, :users, :issue_categories,
-           :projects_trackers,
-           :roles,
-           :member_roles,
-           :members,
-           :enabled_modules,
-           :attachments
-
   def setup
     super
     set_fixtures_attachments_directory

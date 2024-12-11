@@ -20,8 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class UserImportTest < ActiveSupport::TestCase
-  fixtures :users, :auth_sources, :custom_fields
-
   include Redmine::I18n
 
   def setup

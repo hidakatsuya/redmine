@@ -20,8 +20,6 @@
 require File.expand_path('../../../../test_helper', __FILE__)
 
 class Redmine::WikiFormattingTest < ActiveSupport::TestCase
-  fixtures :issues
-
   def test_textile_formatter
     assert_equal Redmine::WikiFormatting::Textile::Formatter, Redmine::WikiFormatting.formatter_for('textile')
     assert_equal Redmine::WikiFormatting::Textile::Helper, Redmine::WikiFormatting.helper_for('textile')

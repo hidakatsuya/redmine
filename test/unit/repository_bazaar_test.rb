@@ -20,8 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class RepositoryBazaarTest < ActiveSupport::TestCase
-  fixtures :projects
-
   include Redmine::I18n
 
   REPOSITORY_PATH = repository_path('bazaar')

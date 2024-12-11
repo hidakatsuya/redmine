@@ -22,8 +22,6 @@ require File.expand_path('../../test_helper', __FILE__)
 class IssueCustomFieldTest < ActiveSupport::TestCase
   include Redmine::I18n
 
-  fixtures :roles
-
   def setup
     User.current = nil
   end

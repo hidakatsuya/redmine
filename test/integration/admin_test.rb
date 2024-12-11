@@ -20,14 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class AdminTest < Redmine::IntegrationTest
-  fixtures :projects, :trackers, :issue_statuses, :issues,
-           :enumerations, :users, :issue_categories,
-           :projects_trackers,
-           :roles,
-           :member_roles,
-           :members,
-           :enabled_modules
-
   def test_add_user
     log_user("admin", "admin")
     get "/users/new"

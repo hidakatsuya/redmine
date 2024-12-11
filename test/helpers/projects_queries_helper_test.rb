@@ -22,9 +22,6 @@ require File.expand_path('../../test_helper', __FILE__)
 class ProjectsQueriesHelperTest < Redmine::HelperTest
   include ProjectsQueriesHelper
 
-  fixtures :projects, :enabled_modules,
-           :custom_fields, :custom_values
-
   def test_csv_value
     c_status = QueryColumn.new(:status)
     c_parent_id = QueryColumn.new(:parent_id)
