@@ -20,25 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class RepositoryTest < ActiveSupport::TestCase
-  fixtures :projects,
-           :trackers,
-           :projects_trackers,
-           :enabled_modules,
-           :repositories,
-           :issues,
-           :issue_statuses,
-           :issue_categories,
-           :changesets,
-           :changes,
-           :users,
-           :email_addresses,
-           :members,
-           :member_roles,
-           :roles,
-           :enumerations,
-           :user_preferences,
-           :watchers
-
   include Redmine::I18n
 
   def setup

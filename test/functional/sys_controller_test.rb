@@ -20,8 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class SysControllerTest < Redmine::ControllerTest
-  fixtures :projects, :repositories, :enabled_modules
-
   def setup
     Setting.sys_api_enabled = '1'
     Setting.enabled_scm = %w(Subversion Git)

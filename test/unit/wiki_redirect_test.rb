@@ -20,8 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class WikiRedirectTest < ActiveSupport::TestCase
-  fixtures :projects, :wikis, :wiki_pages
-
   def setup
     User.current = nil
     @wiki = Wiki.find(1)

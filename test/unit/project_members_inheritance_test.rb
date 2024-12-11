@@ -20,9 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class ProjectMembersInheritanceTest < ActiveSupport::TestCase
-  fixtures :roles, :users,
-           :projects, :trackers, :issue_statuses
-
   def setup
     User.current = nil
     @parent = Project.generate!

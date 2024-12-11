@@ -20,14 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class SearchControllerTest < Redmine::ControllerTest
-  fixtures :projects, :projects_trackers,
-           :enabled_modules, :roles, :users, :members, :member_roles,
-           :issues, :trackers, :issue_statuses, :enumerations,
-           :workflows,
-           :custom_fields, :custom_values,
-           :custom_fields_projects, :custom_fields_trackers,
-           :repositories, :changesets
-
   def setup
     User.current = nil
   end

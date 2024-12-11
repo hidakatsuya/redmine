@@ -20,8 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class ProjectsTest < Redmine::IntegrationTest
-  fixtures :projects, :users, :members, :enabled_modules
-
   def test_archive_project
     subproject = Project.find(1).children.first
     log_user("admin", "admin")

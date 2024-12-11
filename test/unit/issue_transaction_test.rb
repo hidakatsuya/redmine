@@ -20,15 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class IssueTransactionTest < ActiveSupport::TestCase
-  fixtures :projects, :users, :members, :member_roles, :roles,
-           :trackers, :projects_trackers,
-           :versions,
-           :issue_statuses, :issue_categories, :issue_relations, :workflows,
-           :enumerations,
-           :issues,
-           :custom_fields, :custom_fields_projects, :custom_fields_trackers, :custom_values,
-           :time_entries
-
   self.use_transactional_tests = false
 
   def setup

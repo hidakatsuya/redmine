@@ -20,8 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 require 'pp'
 class RepositoryCvsTest < ActiveSupport::TestCase
-  fixtures :projects
-
   include Redmine::I18n
 
   REPOSITORY_PATH = repository_path('cvs')

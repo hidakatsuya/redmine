@@ -20,20 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class IssueImportTest < ActiveSupport::TestCase
-  fixtures :projects, :enabled_modules,
-           :users, :email_addresses,
-           :roles, :members, :member_roles,
-           :issues, :issue_statuses,
-           :trackers, :projects_trackers,
-           :versions,
-           :issue_categories,
-           :enumerations,
-           :workflows,
-           :custom_fields,
-           :custom_values,
-           :custom_fields_projects,
-           :custom_fields_trackers
-
   include Redmine::I18n
 
   def setup

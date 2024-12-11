@@ -20,13 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class TimelogControllerTest < Redmine::ControllerTest
-  fixtures :projects, :enabled_modules, :roles, :members,
-           :member_roles, :issues, :time_entries, :users, :email_addresses,
-           :trackers, :enumerations, :issue_statuses,
-           :custom_fields, :custom_values,
-           :projects_trackers, :custom_fields_trackers,
-           :custom_fields_projects, :issue_categories, :versions
-
   include Redmine::I18n
 
   def setup

@@ -20,8 +20,6 @@
 require File.expand_path('../../../test_helper', __FILE__)
 
 class Redmine::ApiTest::MyTest < Redmine::ApiTest::Base
-  fixtures :users, :email_addresses, :members, :member_roles, :roles, :projects
-
   test "GET /my/account.json should return user" do
     assert Setting.rest_api_enabled?
     get '/my/account.json', :headers => credentials('dlopper', 'foo')

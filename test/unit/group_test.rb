@@ -20,13 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class GroupTest < ActiveSupport::TestCase
-  fixtures :projects, :trackers, :issue_statuses, :issues,
-           :enumerations, :users,
-           :projects_trackers,
-           :roles, :member_roles, :members,
-           :groups_users,
-           :watchers
-
   include Redmine::I18n
 
   def setup

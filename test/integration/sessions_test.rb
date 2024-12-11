@@ -20,8 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class SessionsTest < Redmine::IntegrationTest
-  fixtures :users, :email_addresses, :roles
-
   def setup
     Rails.application.config.redmine_verify_sessions = true
   end

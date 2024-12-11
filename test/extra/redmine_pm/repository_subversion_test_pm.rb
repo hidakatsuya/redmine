@@ -21,8 +21,6 @@ require File.expand_path('../test_case', __FILE__)
 require 'tmpdir'
 
 class RedminePmTest::RepositorySubversionTest < RedminePmTest::TestCase
-  fixtures :projects, :users, :members, :roles, :member_roles, :auth_sources, :enabled_modules
-
   SVN_BIN = Redmine::Configuration['scm_subversion_command'] || "svn"
 
   def test_anonymous_read_on_public_repo_with_permission_should_succeed

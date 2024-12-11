@@ -20,8 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class BoardTest < ActiveSupport::TestCase
-  fixtures :projects, :boards, :messages, :attachments, :watchers
-
   include Redmine::I18n
 
   def setup

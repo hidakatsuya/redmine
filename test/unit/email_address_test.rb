@@ -20,8 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class EmailAddressTest < ActiveSupport::TestCase
-  fixtures :users
-
   def setup
     User.current = nil
   end

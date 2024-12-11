@@ -20,8 +20,6 @@
 require File.expand_path('../../../../../test_helper', __FILE__)
 
 class Redmine::Acts::PositionedWithoutScopeTest < ActiveSupport::TestCase
-  fixtures :trackers, :issue_statuses
-
   def test_create_should_default_to_last_position
     t = Tracker.generate
     t.save!

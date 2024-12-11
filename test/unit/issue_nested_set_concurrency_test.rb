@@ -20,12 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class IssueNestedSetConcurrencyTest < ActiveSupport::TestCase
-  fixtures :projects, :users,
-           :trackers, :projects_trackers,
-           :enabled_modules,
-           :issue_statuses,
-           :enumerations
-
   self.use_transactional_tests = false
 
   def setup

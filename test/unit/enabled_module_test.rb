@@ -20,8 +20,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class EnabledModuleTest < ActiveSupport::TestCase
-  fixtures :projects, :trackers, :issue_statuses, :wikis
-
   def setup
     User.current = nil
   end
