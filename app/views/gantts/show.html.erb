@@ -309,7 +309,7 @@
       style += "height:#{height}px;"
       style += "font-size:0.7em;"
       clss = "gantt_hdr"
-      clss << " nwday" if @gantt.non_working_week_days.include?(wday)
+      clss += " nwday" if @gantt.non_working_week_days.include?(wday)
     %>
     <%= content_tag(:div, :style => style, :class => clss) do %>
       <%= day_num.day %>
@@ -340,7 +340,7 @@
       style += "height: #{height}px;"
       style += "font-size:0.7em;"
       clss = "gantt_hdr"
-      clss << " nwday" if @gantt.non_working_week_days.include?(g_date.cwday)
+      clss += " nwday" if @gantt.non_working_week_days.include?(g_date.cwday)
     %>
     <%= content_tag(:div, :style => style, :class => clss) do %>
       <%= day_letter(g_date.cwday) %>
