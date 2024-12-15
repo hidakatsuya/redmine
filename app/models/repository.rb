@@ -30,7 +30,7 @@ class Repository < ApplicationRecord
   has_many :changesets, lambda{order("#{Changeset.table_name}.committed_on DESC, #{Changeset.table_name}.id DESC")}
   has_many :filechanges, :class_name => 'Change', :through => :changesets
 
-  serialize :extra_info
+  serialize :extra_info, coder: YAML
 
   before_validation :normalize_identifier
   before_save :check_default

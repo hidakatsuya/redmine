@@ -30,7 +30,7 @@ class CustomField < ApplicationRecord
                           :join_table => "#{table_name_prefix}custom_fields_roles#{table_name_suffix}",
                           :foreign_key => "custom_field_id"
   acts_as_positioned
-  serialize :possible_values
+  serialize :possible_values, coder: YAML
   store :format_store
 
   validates_presence_of :name, :field_format

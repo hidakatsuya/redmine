@@ -23,7 +23,7 @@ class UserPreference < ApplicationRecord
   include Redmine::SafeAttributes
 
   belongs_to :user
-  serialize :others
+  serialize :others, coder: YAML
 
   before_save :set_others_hash, :clear_unused_block_settings
 

@@ -22,7 +22,7 @@ require 'csv'
 class Import < ApplicationRecord
   has_many :items, :class_name => 'ImportItem', :dependent => :delete_all
   belongs_to :user
-  serialize :settings
+  serialize :settings, coder: YAML
 
   before_destroy :remove_file
 

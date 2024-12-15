@@ -263,10 +263,10 @@ class Query < ApplicationRecord
   belongs_to :project
   belongs_to :user
   has_and_belongs_to_many :roles, :join_table => "#{table_name_prefix}queries_roles#{table_name_suffix}", :foreign_key => "query_id"
-  serialize :filters
-  serialize :column_names
-  serialize :sort_criteria, type: Array
-  serialize :options, type: Hash
+  serialize :filters, coder: YAML
+  serialize :column_names, coder: YAML
+  serialize :sort_criteria, type: Array, coder: YAML
+  serialize :options, type: Hash, coder: YAML
 
   validates_presence_of :name
   validates_length_of :name, :maximum => 255
