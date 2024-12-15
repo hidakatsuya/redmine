@@ -108,6 +108,8 @@ module RedmineApp
       :same_site => :lax
     )
 
+    config.active_record.belongs_to_required_by_default = false
+
     if File.exist?(File.join(File.dirname(__FILE__), 'additional_environment.rb'))
       instance_eval File.read(File.join(File.dirname(__FILE__), 'additional_environment.rb'))
     end
