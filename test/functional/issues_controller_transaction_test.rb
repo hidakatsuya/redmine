@@ -18,10 +18,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 require_relative '../test_helper'
-require 'issues_controller'
 
 class IssuesControllerTransactionTest < Redmine::ControllerTest
-  tests IssuesController
+  tests :issues
   self.use_transactional_tests = false
 
   def setup
