@@ -30,6 +30,8 @@ module RedmineApp
     # :all can be used as a placeholder for all plugins not explicitly named.
     # config.plugins = [ :exception_notification, :ssl_requirement, :all ]
 
+    config.yjit = true
+
     config.active_support.remove_deprecated_time_with_zone_name = true
     config.active_support.cache_format_version = 7.0
 
