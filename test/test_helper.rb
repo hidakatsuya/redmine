@@ -61,6 +61,14 @@ class ActiveSupport::TestCase
   self.use_transactional_tests = true
   self.use_instantiated_fixtures  = false
 
+  parallelize_setup do |worker|
+    Attachment.thumbnails_storage_path.then do |path|
+      path_for_worker = Pathname.new(path).join(worker.to_s)
+      path_for_worker.mkdir unless path_for_worker.exist?
+      Attachment.thumbnails_storage_path = path_for_worker
+    end
+  end
+
   def uploaded_test_file(name, mime)
     fixture_file_upload(name.to_s, mime, true)
   end
