@@ -52,6 +52,8 @@ jobs:
           sudo apt-get install --yes --quiet ghostscript gsfonts locales bzr cvs
           sudo locale-gen en_US # for bazaar non ascii test
 
+      - run: bzr --version
+
       - name: Allow imagemagick to read PDF files
         run: |
           echo '<policymap>' > policy.xml
