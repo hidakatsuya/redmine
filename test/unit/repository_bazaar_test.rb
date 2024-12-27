@@ -167,7 +167,15 @@ class RepositoryBazaarTest < ActiveSupport::TestCase
     if File.directory?(REPOSITORY_PATH_NON_ASCII) && RUN_LATIN1_OUTPUT_TEST
       # https://www.redmine.org/issues/42024
       def skip_bzr_failure_on_ubuntu24
-        skip 'bzr command fails on Ubuntu 24.04, causing this test to fail'
+        return unless File.exist?('/etc/os-release')
+
+        os_release = File.read('/etc/os-release')
+        name = os_release[/^NAME="(.+?)"$/, 1]
+        version = os_release[/^VERSION_ID="(.+?)"$/, 1]
+
+        if name == 'Ubuntu' && version == '24.04'
+          skip 'bzr command fails on Ubuntu 24.04, causing this test to fail'
+        end
       end
 
       def test_cat_latin1_path
