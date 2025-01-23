@@ -5,7 +5,7 @@
 
 <% reply_links = issue.notes_addable? -%>
 <% for journal in journals %>
-  <div id="change-<%= journal.id %>" class="<%= journal.css_classes %>">
+  <div id="change-<%= journal.id %>" class="<%= journal.css_classes %>" data-controller="quote-reply">
     <div id="note-<%= journal.indice %>" class="note">
     <div class="contextual">
       <span class="journal-actions"><%= render_journal_actions(issue, journal, :reply_links => reply_links) %></span>
@@ -32,7 +32,7 @@
       </div>
     <% end %>
     <% end %>
-    <%= render_notes(issue, journal, :reply_links => reply_links) unless journal.notes.blank? %>
+    <%= render_notes(issue, journal, data: { 'quote-reply-target' => 'content' }) unless journal.notes.blank? %>
     </div>
   </div>
   <%= call_hook(:view_issues_history_journal_bottom, { :journal => journal }) %>

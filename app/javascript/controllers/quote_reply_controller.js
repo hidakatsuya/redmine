@@ -201,27 +201,23 @@ class QuoteCommonMarkFormatter {
 }
 
 export default class extends Controller {
-  initialize() {
-    this.url = this.element.dataset.url;
-    this.selectorForContent = this.element.dataset.selectorForContent;
-    this.textFormatting = this.element.dataset.textFormatting;
-  }
+  static targets = [ 'content' ];
 
   quote(event) {
-    event.preventDefault()
+    event.preventDefault();
 
-    const contentElement = document.querySelector(this.selectorForContent);
-    const selectedRange = QuoteExtractor.extract(contentElement);
+    const { url, textFormatting } = event.params;
+    const selectedRange = QuoteExtractor.extract(this.contentTarget);
 
     let formatter;
 
-    if (this.textFormatting === 'common_mark') {
+    if (textFormatting === 'common_mark') {
       formatter = new QuoteCommonMarkFormatter();
     } else {
       formatter = new QuoteTextFormatter();
     }
 
-    post(this.url, {
+    post(url, {
       body: JSON.stringify({ quote: formatter.format(selectedRange) }),
       contentType: 'application/json',
       responseKind: 'script'

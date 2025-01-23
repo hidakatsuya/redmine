@@ -20,22 +20,18 @@
 module Redmine
   module QuoteReply
     module Helper
-      def quote_reply(url, selector_for_content, icon_only: false)
+      def quote_reply_button(url:, icon_only: false)
         button_params = {
-          data: { 'action' => 'quote-reply#quote' },
+          data: {
+            'action' => 'quote-reply#quote',
+            'quote-reply-url-param' => url,
+            'quote-reply-text-formatting-param' => Setting.text_formatting
+          },
           class: 'icon icon-comment'
         }
         button_params[:title] = l(:button_quote) if icon_only
 
-        tag.span data: {
-          controller: 'quote-reply',
-          url: url,
-          selector_for_content: selector_for_content,
-          text_formatting: Setting.text_formatting
-        } do
-          link_to sprite_icon('comment', l(:button_quote), icon_only: icon_only), '#',
-            button_params
-        end
+        link_to sprite_icon('comment', l(:button_quote), icon_only: icon_only), '#', button_params
       end
     end
 
