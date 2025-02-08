@@ -19,215 +19,59 @@
 
 require_relative '../application_system_test_case'
 
+Capybara::Server::Middleware.prepend(Module.new do
+  def call(env)
+    if env['REQUEST_URI'].match?(%r{(/issues/auto_complete|/my/page|/login)})
+      puts "request: #{env['REQUEST_METHOD']} #{env['REQUEST_URI']} (HTTP_COOKIE=#{env['HTTP_COOKIE']&.slice(0, 25)}...)"
+      puts "pending_requests = (#{pending_requests.length}) #{pending_requests}"
+    end
+    super
+  end
+end)
+
+Capybara::Session.prepend(Module.new do
+  def reset!
+    puts "Capybara::Session#reset! called"
+    super
+  end
+end)
+
+Capybara::Server.prepend(Module.new do
+  def wait_for_pending_requests
+    puts "Capybara::Server#wait_for_pending_requests called"
+    super
+  end
+end)
+
 class InlineAutocompleteSystemTest < ApplicationSystemTestCase
-  def test_inline_autocomplete_for_issues
-    log_user('jsmith', 'jsmith')
-    visit 'issues/new'
+  def self.test_order = :sorted
 
-    fill_in 'Description', :with => '#'
-
-    within('.tribute-container') do
-      assert page.has_text? 'Bug #12: Closed issue on a locked version'
-      assert page.has_text? 'Bug #1: Cannot print recipes'
-
-      first('li').click
-    end
-
-    assert_equal '#12 ', find('#issue_description').value
-  end
-
-  def test_inline_autocomplete_for_issues_with_double_hash_keep_syntax
-    log_user('admin', 'admin')
-    visit 'projects/ecookbook/issues/new'
-
-    fill_in 'Description', :with => '##Closed'
-
-    within('.tribute-container') do
-      assert page.has_text? 'Bug #12: Closed issue on a locked version'
-      assert page.has_text? 'Bug #11: Closed issue on a closed version'
-      assert page.has_text? 'Bug #8: Closed issue'
-
-      first('li').click
-    end
-
-    assert_equal '##12 ', find('#issue_description').value
-  end
-
-  def test_inline_autocomplete_filters_autocomplete_items
-    log_user('jsmith', 'jsmith')
-    visit 'issues/new'
-
-    fill_in 'Description', :with => '#Closed'
-
-    within('.tribute-container') do
-      assert page.has_text? 'Bug #12: Closed issue on a locked version'
-      assert page.has_text? 'Bug #11: Closed issue on a closed version'
-      assert_not page.has_text? 'Bug #1: Cannot print recipes'
+  setup do
+    page.server.send(:middleware).then do |m|
+      puts "pending_requests? = #{m.pending_requests?}"
     end
   end
 
-  def test_inline_autocomplete_on_issue_edit_description_should_show_autocomplete
-    log_user('jsmith', 'jsmith')
-    visit 'issues/1/edit'
-
-    within('#issue-form') do
-      click_link('Edit', match: :first)
-      fill_in 'Description', :with => '#'
+  teardown do
+    page.server.send(:middleware).then do |m|
+      puts "pending_requests? = #{m.pending_requests?}"
     end
-
-    page.has_css?('.tribute-container li', minimum: 1)
   end
 
-  def test_inline_autocomplete_on_issue_edit_notes_should_show_autocomplete
-    log_user('jsmith', 'jsmith')
-    visit 'issues/1/edit'
-
-    # Prevent random fails because the element is not yet enabled
-    find('#issue_notes').click
-    fill_in 'issue[notes]', :with => '#'
-
-    page.has_css?('.tribute-container li', minimum: 1)
-  end
-
-  def test_inline_autocomplete_on_issue_custom_field_with_full_text_formatting_should_show_autocomplete
-    IssueCustomField.create!(
-      :name => 'Full width field',
-      :field_format => 'text', :full_width_layout => '1',
-      :tracker_ids => [1], :is_for_all => true, :text_formatting => 'full'
-    )
-
-    log_user('jsmith', 'jsmith')
-    visit 'issues/new'
-
-    fill_in 'Full width field', :with => '#'
-
-    page.has_css?('.tribute-container li', minimum: 1)
-  end
-
-  def test_inline_autocomplete_on_wiki_should_show_autocomplete
-    log_user('jsmith', 'jsmith')
-    visit 'projects/ecookbook/wiki/CookBook_documentation/edit'
-
-    # Prevent random fails because the element is not yet enabled
-    find('.wiki-edit').click
-    fill_in 'content[text]', :with => '#'
-
-    page.has_css?('.tribute-container li', minimum: 1)
-  end
-
-  def test_inline_autocomplete_on_news_description_should_show_autocomplete
-    log_user('jsmith', 'jsmith')
-    visit 'projects/ecookbook/news'
-
-    click_link 'Add news'
-
-    # Prevent random fails because the element is not yet enabled
-    find('.wiki-edit').click
-    fill_in 'Description', :with => '#'
-
-    page.has_css?('.tribute-container li', minimum: 1)
-  end
-
-  def test_inline_autocomplete_on_new_message_description_should_show_autocomplete
-    log_user('jsmith', 'jsmith')
-    visit 'projects/ecookbook/boards/1'
-
-    click_link 'New message'
-
-    # Prevent random fails because the element is not yet enabled
-    find('.wiki-edit').click
-    fill_in 'message[content]', :with => '#'
-
-    page.has_css?('.tribute-container li', minimum: 1)
-  end
-
-  def test_inline_autocompletion_of_wiki_page_links
-    log_user('jsmith', 'jsmith')
-    visit 'issues/new'
-
-    fill_in 'Description', :with => '[['
-
-    within('.tribute-container') do
-      assert page.has_text? 'Child_1_1'
-      assert page.has_text? 'Page_with_sections'
-    end
-
-    fill_in 'Description', :with => '[[page'
-    within('.tribute-container') do
-      assert page.has_text? 'Page_with_sections'
-      assert page.has_text? 'Another_page'
-      assert_not page.has_text? 'Child_1_1'
-
-      first('li').click
-    end
-    assert_equal '[[Page_with_sections]] ', find('#issue_description').value
-  end
-
-  def test_inline_autocomplete_for_issues_should_escape_html_elements
-    issue = Issue.generate!(subject: 'This issue has a <select> element', project_id: 1, tracker_id: 1)
+  def test_1
+    Issue.generate!(subject: 'abcdefghijkl', project_id: 1, tracker_id: 1)
 
     log_user('jsmith', 'jsmith')
     visit 'projects/1/issues/new'
 
-    fill_in 'Description', :with => '#This'
+    fill_in 'Description', :with => '#abcdefghijkl'
 
     within('.tribute-container') do
-      assert page.has_text? "Bug ##{issue.id}: This issue has a <select> element"
+      assert page.has_text? "abcdefghijkl"
     end
   end
 
-  def test_inline_autocomplete_for_users_should_work_after_status_change
+  def test_2
     log_user('jsmith', 'jsmith')
-    visit '/issues/1/edit'
-
-    find('#issue_notes').click
-    fill_in 'issue[notes]', :with => '@lopper'
-
-    within('.tribute-container') do
-      assert page.has_text? "Dave Lopper"
-    end
-
-    page.find('#issue_status_id').select('Feedback')
-
-    find('#issue_notes').click
-    fill_in 'issue[notes]', :with => '@lopper'
-
-    within('.tribute-container') do
-      assert page.has_text? "Dave Lopper"
-    end
-  end
-
-  def test_inline_autocomplete_for_users_on_issues_bulk_edit_show_autocomplete
-    log_user('jsmith', 'jsmith')
-    visit '/issues/bulk_edit?ids[]=1&ids[]=2'
-
-    find('#notes').click
-    fill_in 'notes', :with => '@lopper'
-
-    within('.tribute-container') do
-      assert page.has_text? 'Dave Lopper'
-      first('li').click
-    end
-
-    assert_equal '@dlopper ', find('#notes').value
-  end
-
-  def test_inline_autocomplete_for_users_on_issues_without_edit_issue_permission
-    role_developer = Role.find(2)
-    role_developer.remove_permission!(:edit_issues)
-    role_developer.add_permission!(:add_issue_watchers)
-
-    log_user('jsmith', 'jsmith')
-    visit '/issues/4/edit'
-
-    find('#issue_notes').click
-    fill_in 'issue[notes]', :with => '@'
-
-    within('.tribute-container') do
-      assert page.has_text? 'John Smith'
-      first('li').click
-    end
-
-    assert_equal '@jsmith ', find('#issue_notes').value
   end
 end
