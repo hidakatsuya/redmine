@@ -72,6 +72,7 @@ class InlineAutocompleteSystemTest < ApplicationSystemTestCase
   end
 
   def test_2
+    Capybara.reset_sessions!
     log_user('jsmith', 'jsmith')
   end
 end
