@@ -498,8 +498,8 @@ class IssuesSystemTest < ApplicationSystemTestCase
 
     puts "** #{Time.now} page.find('#issue_project_id').select('OnlineStore'): begin"
     page.find('#issue_project_id').select('OnlineStore')
-    # wait for ajax response
-    assert page.has_select?('issue_project_id', selected: 'OnlineStore')
+    # Wait until the project change is complete
+    assert_select 'issue_fixed_version_id', options: ['(No change)', 'none', 'Alpha', 'Systemwide visible version']
     puts "** #{Time.now} page.find('#issue_project_id').select('OnlineStore'): end"
 
     assert_selector 'input[type=submit]', count: 2
