@@ -25,6 +25,7 @@ class Issue < ApplicationRecord
   before_validation :clear_disabled_fields
   before_save :set_parent_id
   include Redmine::NestedSet::IssueNestedSet
+  include DisableOptimisticLocking
 
   belongs_to :project
   belongs_to :tracker
@@ -111,6 +112,9 @@ class Issue < ApplicationRecord
 
   before_save :close_duplicates, :update_done_ratio_from_issue_status,
               :force_updated_on_change, :update_closed_on
+
+  before_update :disable_handling_of_update_conflicts
+
   after_save do |issue|
     if !issue.saved_change_to_id? && issue.saved_change_to_project_id?
       issue.send :after_project_change
@@ -2114,5 +2118,15 @@ class Issue < ApplicationRecord
   def roles_for_workflow(user)
     roles = user.admin ? Role.all.to_a : user.roles_for_project(project)
     roles.select(&:consider_workflow?)
+  end
+
+  # Disable handling of update conflicts when adding notes only
+  def disable_handling_of_update_conflicts
+    adding_notes_only =
+      changed_attributes.except(:updated_on, :lock_version).empty? &&
+      current_journal&.notes.present? &&
+      current_journal&.details.blank?
+
+    self.optimistic_locking_disabled = adding_notes_only
   end
 end
