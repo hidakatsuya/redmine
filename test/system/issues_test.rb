@@ -496,9 +496,11 @@ class IssuesSystemTest < ApplicationSystemTestCase
     submit_buttons = page.all('input[type=submit]')
     assert_equal 'Copy', submit_buttons[0].value
 
+    puts "** #{Time.now} page.find('#issue_project_id').select('OnlineStore'): begin"
     page.find('#issue_project_id').select('OnlineStore')
     # wait for ajax response
     assert page.has_select?('issue_project_id', selected: 'OnlineStore')
+    puts "** #{Time.now} page.find('#issue_project_id').select('OnlineStore'): end"
 
     assert_selector 'input[type=submit]', count: 2
     submit_buttons = page.all('input[type=submit]')

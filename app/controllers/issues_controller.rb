@@ -295,6 +295,9 @@ class IssuesController < ApplicationController
       end
     end
     target_projects ||= @projects
+    if @target_project&.id == 2
+      puts "** #{Time.now} IssuesController#bulk_edit by selecting OutlineStore project: begin"
+    end
 
     @trackers = target_projects.map {|p| Issue.allowed_target_trackers(p)}.reduce(:&)
     if params[:issue]
@@ -344,6 +347,10 @@ class IssuesController < ApplicationController
 
     @issue_params = params[:issue] || {}
     @issue_params[:custom_field_values] ||= {}
+    if @target_project&.id == 2
+      sleep 0.1
+      puts "** #{Time.now} IssuesController#bulk_edit by selecting OutlineStore project: end"
+    end
   end
 
   def bulk_update
