@@ -109,5 +109,7 @@ module RedmineApp
     if File.exist?(File.join(File.dirname(__FILE__), 'additional_environment.rb'))
       instance_eval File.read(File.join(File.dirname(__FILE__), 'additional_environment.rb'))
     end
+
+    config.active_support.to_time_preserves_timezone = :zone
   end
 end
