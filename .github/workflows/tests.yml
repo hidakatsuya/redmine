@@ -3,6 +3,9 @@ name: Tests
 on:
   push:
 
+env:
+  RUBYOPT: "-w"
+
 jobs:
   tests:
     name: test ${{matrix.db}} ruby-${{ matrix.ruby }}
