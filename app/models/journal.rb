@@ -30,6 +30,8 @@ class Journal < ApplicationRecord
   has_many :details, :class_name => "JournalDetail", :dependent => :delete_all, :inverse_of => :journal
   attr_accessor :indice
 
+  has_many :stars, as: :starable, dependent: :delete_all
+
   acts_as_event(
     :title =>
        Proc.new do |o|

@@ -41,6 +41,8 @@ module JournalsHelper
     end
 
     if journal.notes.present?
+      links << render(partial: 'stars/edit', locals: { starable: journal })
+
       if options[:reply_links]
         url = quoted_issue_path(issue, :journal_id => journal, :journal_indice => indice)
         links << quote_reply(url, "#journal-#{journal.id}-notes", icon_only: true)
