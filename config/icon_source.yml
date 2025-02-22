@@ -209,3 +209,7 @@
   svg: square-rounded-plus
 - name: toggle-minus
   svg: square-rounded-minus
+- name: watch
+  svg: eye
+- name: unwatch
+  svg: eye-off
