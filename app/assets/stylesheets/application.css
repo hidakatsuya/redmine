@@ -1515,6 +1515,21 @@ div.wiki *:not(pre)>code, div.wiki>code {
   border-radius: 0.1em;
 }
 
+a.copy-pre-content-link {
+  position: absolute;
+  top: 0px;
+  right: 15px;
+  padding: 8px 5px 0px 0px;
+  cursor: pointer;
+  display: none;
+}
+.pre-wrapper {
+  position: relative;
+}
+.pre-wrapper:hover a.copy-pre-content-link:not(.copied) {
+  display: block;
+}
+
 div.wiki ul.toc {
   background-color: #ffffdd;
   border: 1px solid #e4e4e4;

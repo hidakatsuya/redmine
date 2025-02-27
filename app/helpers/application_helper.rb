@@ -1915,6 +1915,14 @@ module ApplicationHelper
     end
   end
 
+  def heads_for_i18n
+    javascript_tag(
+      "rm = window.rm || {};" \
+      "rm.I18n = rm.I18n || {};" \
+      "rm.I18n.buttonCopy = '#{l(:button_copy)}';"
+    )
+  end
+
   def heads_for_auto_complete(project)
     data_sources = autocomplete_data_sources(project)
     javascript_tag(

@@ -209,3 +209,5 @@
   svg: square-rounded-plus
 - name: toggle-minus
   svg: square-rounded-minus
+- name: copy-pre-content
+  svg: clipboard
