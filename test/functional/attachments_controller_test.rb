@@ -319,6 +319,36 @@ class AttachmentsControllerTest < Redmine::ControllerTest
     assert_equal 'text/javascript', @response.media_type
   end
 
+  def test_download_pdf_file
+    set_tmp_attachments_directory
+    attachment = Attachment.create!(
+      file: mock_file_with_options(original_filename: "hello.pdf", content_type: "application/pdf"),
+      author_id: 2,
+      container: Issue.find(1)
+    )
+
+    get(:download, params:  { id: attachment.id })
+    assert_response :success
+    assert_includes response.headers['Content-Disposition'], 'inline; filename="hello.pdf"'
+    assert_equal 'application/pdf', response.media_type
+  end
+
+  def test_download_pdf_file_with_safari
+    set_tmp_attachments_directory
+    attachment = Attachment.create!(
+      file: mock_file_with_options(original_filename: "hello.pdf", content_type: "application/pdf"),
+      author_id: 2,
+      container: Issue.find(1)
+    )
+
+    request.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.1 Safari/605.1.15'
+    get(:download, params:  { id: attachment.id })
+
+    assert_response :success
+    assert_includes response.headers['Content-Disposition'], 'attachment; filename="hello.pdf"'
+    assert_equal 'application/pdf', response.media_type
+  end
+
   def test_download_version_file_with_issue_tracking_disabled
     Project.find(1).disable_module! :issue_tracking
     get(:download, :params => {:id => 9})

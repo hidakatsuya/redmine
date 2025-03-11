@@ -78,7 +78,7 @@ class AttachmentsController < ApplicationController
       # images are sent inline
       send_file @attachment.diskfile, :filename => filename_for_content_disposition(@attachment.filename),
                                       :type => detect_content_type(@attachment),
-                                      :disposition => disposition(@attachment)
+                                      :disposition => download_disposition(@attachment)
     end
   end
 
@@ -299,9 +299,9 @@ class AttachmentsController < ApplicationController
     content_type
   end
 
-  def disposition(attachment)
+  def download_disposition(attachment)
     if attachment.is_pdf?
-      'inline'
+      Browser.new(request.user_agent).safari? ? 'attachment' : 'inline'
     else
       'attachment'
     end
