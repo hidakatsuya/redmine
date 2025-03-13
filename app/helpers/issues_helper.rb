@@ -21,6 +21,7 @@ module IssuesHelper
   include ApplicationHelper
   include Redmine::Export::PDF::IssuesPdfHelper
   include IssueStatusesHelper
+  include ReactionsHelper
 
   def issue_list(issues, &)
     ancestors = []
