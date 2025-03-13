@@ -97,6 +97,7 @@ en:
     array:
       sentence_connector: "and"
       skip_last_comma: false
+      words_connector: ", "
 
   activerecord:
     errors:
@@ -522,6 +523,7 @@ en:
   setting_show_status_changes_in_mail_subject: Show status changes in issue mail notifications subject
   setting_project_list_defaults: Projects list defaults
   setting_twofa: Two-factor authentication
+  setting_reactions_enabled: Enable reactions for issues and forums
 
   permission_add_project: Create project
   permission_add_subprojects: Create subprojects
@@ -1425,3 +1427,4 @@ en:
   text_project_destroy_enter_identifier: "To confirm, please enter the project's identifier (%{identifier}) below."
   field_name_or_email_or_login: Name, email or login
   setting_wiki_tablesort_enabled: Javascript based table sorting in wiki content
+  reaction_reacted_by: "%{user_names} reacted"

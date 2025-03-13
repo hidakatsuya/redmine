@@ -116,6 +116,9 @@ ja:
     array:
       sentence_connector: "及び"
       skip_last_comma: true
+      words_connector: "、"
+      two_words_connector: "、"
+      last_word_connector: "、"
 
   activerecord:
     errors:
@@ -1450,3 +1453,5 @@ ja:
     zero: "%{filename}"
     other: "%{filename} ほか%{count}件"
   setting_wiki_tablesort_enabled: Javascript based table sorting in wiki content
+  reaction_reacted_by: "%{user_names} がリアクションしました"
+  setting_reactions_enabled: チケットとフォーラムでリアクション機能を有効にする

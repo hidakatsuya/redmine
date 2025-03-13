@@ -1,0 +1,21 @@
+<%= turbo_frame_tag dom_id(reactable, :reactions) do %>
+  <% if reaction = reactable.reactions.find_by(user: User.current) %>
+    <%= link_to(
+          reaction_path(reaction, reactable_type: reactable.class.name, reactable_id: reactable),
+          data: { turbo_method: :delete },
+          class: ['reaction', 'reacted', 'icon'],
+          title: reacted_user_names(reactable)
+        ) do %>
+          <%= sprite_icon('thumb-up-reacted', reactable.reactions.size) %>
+    <% end %>
+  <% else %>
+    <%= link_to(
+          reactions_path(reactable_type: reactable.class.name, reactable_id: reactable),
+          data: { turbo_method: :post },
+          class: ['reaction', 'icon'],
+          title: reacted_user_names(reactable)
+        ) do %>
+          <%= sprite_icon('thumb-up', reactable.reactions.size) %>
+    <% end %>
+  <% end %>
+<% end %>

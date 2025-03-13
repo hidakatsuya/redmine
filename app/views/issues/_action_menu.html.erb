@@ -1,4 +1,5 @@
 <div class="contextual">
+<%= reaction_button @issue %>
 <%= link_to sprite_icon('edit', l(:button_edit)), edit_issue_path(@issue),
             :onclick => 'showAndScrollTo("update", "issue_notes"); return false;',
             :class => 'icon icon-edit ', :accesskey => accesskey(:edit) if @issue.editable? %>
