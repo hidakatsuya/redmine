@@ -92,6 +92,7 @@ end
 
 group :development, :test do
   gem 'debug'
+  gem 'brakeman', '~> 7.0', require: false
 end
 
 group :development do
