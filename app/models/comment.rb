@@ -22,11 +22,16 @@ class Comment < ApplicationRecord
   belongs_to :commented, :polymorphic => true, :counter_cache => true
   belongs_to :author, :class_name => 'User'
 
+  has_many :reactions, as: :reactable, dependent: :delete_all
+  has_many :reacted_users, through: :reactions, source: :user
+
   validates_presence_of :commented, :author, :content
 
   after_create_commit :send_notification
 
   safe_attributes 'comments'
+
+  delegate :visible?, to: :commented
 
   def comments=(arg)
     self.content = arg

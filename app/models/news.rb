@@ -39,6 +39,9 @@ class News < ApplicationRecord
   after_create :add_author_as_watcher
   after_create_commit :send_notification
 
+  has_many :reactions, as: :reactable, dependent: :delete_all
+  has_many :reacted_users, through: :reactions, source: :user
+
   scope :visible, (lambda do |*args|
     joins(:project).
     where(Project.allowed_to_condition(args.shift || User.current, :view_news, *args))

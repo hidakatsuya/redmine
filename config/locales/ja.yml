@@ -1454,4 +1454,4 @@ ja:
     other: "%{filename} ほか%{count}件"
   setting_wiki_tablesort_enabled: Javascript based table sorting in wiki content
   reaction_reacted_by: "%{user_names} がリアクションしました"
-  setting_reactions_enabled: チケットとフォーラムでリアクション機能を有効にする
+  setting_reactions_enabled: リアクション機能を有効にする

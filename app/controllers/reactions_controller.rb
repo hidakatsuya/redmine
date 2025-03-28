@@ -4,7 +4,7 @@ class ReactionsController < ApplicationController
   before_action :set_reactable
   before_action :set_reaction, only: [:destroy]
 
-  REACTABLE_TYPES = %w(Journal Issue Message)
+  REACTABLE_TYPES = %w(Journal Issue Message News Comment)
 
   # POST /reactions
   def create
