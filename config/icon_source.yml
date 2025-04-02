@@ -211,8 +211,6 @@
   svg: square-rounded-minus
 - name: thumb-up
   svg: thumb-up
-- name: thumb-up-reacted
+- name: thumb-up-filled
   svg: thumb-up
   style: filled
-- name: heart
-  svg: heart

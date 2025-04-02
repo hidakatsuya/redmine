@@ -1,45 +1,40 @@
 class ReactionsController < ApplicationController
   before_action :ensure_enabled
+  before_action :set_reactable, :authorize_reactable
 
-  before_action :set_reactable
-  before_action :set_reaction, only: [:destroy]
+  REACTABLE_OBJECTS = %w(Journal Issue Message News Comment)
 
-  REACTABLE_TYPES = %w(Journal Issue Message News Comment)
-
-  # POST /reactions
   def create
-    @reaction = @reactable.reactions.find_or_initialize_by(user: User.current)
+    reaction = @reactable.reactions.find_or_initialize_by(user: User.current)
 
-    unless @reaction.persisted? || @reaction.save
-      # TODO: Handle error
-      head :unprocessable_entity
-    end
+    # Do nothing if the reaction already exists.
+    return if @reaction.persisted?
+
+    reaction.save!
   end
 
-  # DELETE /reactions/1
   def destroy
-    @reaction.destroy! if @reaction
+    reaction = @reactable.reactions.by(User.current).find_by(id: params[:id])
+    reaction&.destroy!
   end
 
   private
 
   def ensure_enabled
-    head :forbidden unless Setting.reactions_enabled?
-  end
-
-  def set_reaction
-    @reaction = @reactable.reactions.by(User.current).find_by(id: params[:id])
+    head :forbidden #unless Setting.reactions_enabled?
   end
 
   def set_reactable
     reactable_type = params[:reactable_type]
 
-    if REACTABLE_TYPES.exclude?(reactable_type)
-      raise ArgumentError, "Invalid reactable type: #{reactable_type}"
+    if REACTABLE_OBJECTS.exclude?(reactable_type)
+      raise ArgumentError, 'Invalid reactable object'
     end
 
     @reactable = reactable_type.constantize.find(params[:reactable_id])
+  end
 
+  def authorize_reactable
     head :forbidden unless @reactable.visible?(User.current)
   end
 end
