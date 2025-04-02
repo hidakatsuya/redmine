@@ -29,6 +29,9 @@ class Message < ApplicationRecord
                      :preload => {:board => :project},
                      :project_key => "#{Board.table_name}.project_id"
 
+  has_many :reactions, as: :reactable, dependent: :delete_all
+  has_many :reacted_users, through: :reactions, source: :user
+
   acts_as_event(
     :title => Proc.new {|o| "#{o.board.name}: #{o.subject}"},
     :description => :content,

@@ -587,6 +587,7 @@ div.square {
 .contextual {float:right; white-space: nowrap; line-height:1.4em;margin:5px 0px; padding-left: 10px; font-size:0.9em;}
 .contextual input, .contextual select {font-size:0.9em;}
 .message .contextual { margin-top: 0; }
+#comments .contextual { margin-top: 0; }
 
 .splitcontent {overflow: auto; display: flex; flex-wrap: wrap;}
 .splitcontentleft {flex: 1; margin-right: 5px;}
@@ -1696,6 +1697,31 @@ td.gantt_selected_column .gantt_hdr,.gantt_selected_column_container {
 .version-behind-schedule a, .issue-behind-schedule a {color: #f66914;}
 .version-overdue a, .issue-overdue a, .project-overdue a {color: #f00;}
 
+/* Tooltip */
+.reaction {
+  position: relative;
+}
+
+.reaction .tooltip-text {
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  transform: translateX(-45%);
+  bottom: 25px;
+  display: inline-block;
+  padding: 5px;
+  background: #333;
+  color: #fff;
+  border-radius: 3px;
+  transition: 0.3s ease-in;
+  z-index: 999999999;
+  pointer-events: none;
+}
+.reaction:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
 /***** Badges *****/
 .badge {
   position:relative;
@@ -1989,6 +2015,15 @@ color: #555; text-shadow: 1px 1px 0 #fff;
 .repository-graph {width:75%; margin-bottom:2em;}
 
 img.filecontent.image {background-image: url(/transparent.png);}
+
+/* Reaction styles */
+a.reaction.reacted .icon-svg {
+  fill: #169;
+  stroke: none;
+}
+a.reaction.reacted:hover .icon-svg {
+  fill: red;
+}
 
 /* Custom JQuery styles */
 .ui-autocomplete, .ui-menu {

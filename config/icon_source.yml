@@ -209,3 +209,10 @@
   svg: square-rounded-plus
 - name: toggle-minus
   svg: square-rounded-minus
+- name: thumb-up
+  svg: thumb-up
+- name: thumb-up-reacted
+  svg: thumb-up
+  style: filled
+- name: heart
+  svg: heart
