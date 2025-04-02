@@ -2,8 +2,8 @@
   <% if reaction = reactable.reactions.find_by(user: User.current) %>
     <%= link_to(
           reaction_path(reaction, reactable_type: reactable.class.name, reactable_id: reactable),
-          data: { turbo_method: :delete },
-          class: ['reaction', 'reacted', 'icon'],
+          data: { turbo_method: :delete, controller: 'tooltip' },
+          class: ['reaction', 'reacted', 'icon', 'no-tooltip'],
           title: reacted_user_names(reactable)
         ) do %>
           <%= sprite_icon('thumb-up-reacted', reactable.reactions.size) %>
@@ -11,8 +11,8 @@
   <% else %>
     <%= link_to(
           reactions_path(reactable_type: reactable.class.name, reactable_id: reactable),
-          data: { turbo_method: :post },
-          class: ['reaction', 'icon'],
+          data: { turbo_method: :post, controller: 'tooltip' },
+          class: ['reaction', 'icon', 'no-tooltip'],
           title: reacted_user_names(reactable)
         ) do %>
           <%= sprite_icon('thumb-up', reactable.reactions.size) %>
