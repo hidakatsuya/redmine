@@ -1938,12 +1938,6 @@ module ApplicationHelper
     )
   end
 
-  def reaction_button(reactable)
-    return unless Setting.reactions_enabled?
-
-    render(partial: 'reactions/edit', locals: { reactable: reactable }) if reactable.visible?(User.current)
-  end
-
   private
 
   def wiki_helper

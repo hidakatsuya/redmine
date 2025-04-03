@@ -1,5 +1,5 @@
 <%= turbo_frame_tag dom_id(reactable, :react) do %>
-  <% if reaction = reactable.reactions.find_by(user: User.current) %>
+  <% if reaction.present? %>
     <%= link_to(
           reaction_path(reaction, reactable_type: reactable.class.name, reactable_id: reactable),
           data: {
