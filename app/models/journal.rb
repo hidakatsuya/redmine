@@ -30,6 +30,11 @@ class Journal < ApplicationRecord
   has_many :details, :class_name => "JournalDetail", :dependent => :delete_all, :inverse_of => :journal
   attr_accessor :indice
 
+  has_many :reactions, as: :reactable, dependent: :delete_all
+  has_many :reacted_users, through: :reactions, source: :user
+
+  scope :with_reactions, -> { preload(:reactions, :reacted_users) if Setting.reactions_enabled? }
+
   acts_as_event(
     :title =>
        Proc.new do |o|

@@ -42,6 +42,9 @@ class Issue < ApplicationRecord
   has_many :relations_from, :class_name => 'IssueRelation', :foreign_key => 'issue_from_id', :dependent => :delete_all
   has_many :relations_to, :class_name => 'IssueRelation', :foreign_key => 'issue_to_id', :dependent => :delete_all
 
+  has_many :reactions, as: :reactable, dependent: :delete_all
+  has_many :reacted_users, through: :reactions, source: :user
+
   acts_as_attachable :after_add => :attachment_added, :after_remove => :attachment_removed
   acts_as_customizable
   acts_as_watchable
@@ -916,6 +919,7 @@ class Issue < ApplicationRecord
     result = journals.
       preload(:details).
       preload(:user => :email_address).
+      with_reactions.
       reorder(:created_on, :id).to_a
 
     result.each_with_index {|j, i| j.indice = i + 1}

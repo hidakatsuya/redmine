@@ -1,0 +1,7 @@
+(() => {
+  const buttonContainer = $('[data-reaction-button-id=<%= reaction_button_id_for @reactable %>]');
+
+  removeTooltip(buttonContainer);
+  buttonContainer.html($('<%=j render partial: 'reactions/button', locals: { reactable: @reactable, reaction: nil } %>').children());
+  setupTooltip(buttonContainer);
+})();

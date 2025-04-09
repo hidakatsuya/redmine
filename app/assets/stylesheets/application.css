@@ -2027,6 +2027,15 @@ color: #555; text-shadow: 1px 1px 0 #fff;
 
 img.filecontent.image {background-image: url(/transparent.png);}
 
+/* Reaction styles */
+a.reaction.reacted .icon-svg {
+  fill: #169;
+  stroke: none;
+}
+a.reaction.reacted:hover .icon-svg {
+  fill: red;
+}
+
 /* Custom JQuery styles */
 .ui-autocomplete, .ui-menu {
   border-radius: 2px;

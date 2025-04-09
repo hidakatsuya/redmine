@@ -1,0 +1,21 @@
+<%= tag.span data: { 'reaction-button-id': reaction_button_id_for(reactable) } do %>
+  <% if reaction.present? %>
+    <%= link_to(
+          reaction_path(reaction, reactable_type: reactable.class.name, reactable_id: reactable),
+          remote: true, method: :delete,
+          class: ['icon', 'reaction', 'reacted'],
+          title: reacted_user_names(reactable)
+        ) do %>
+          <%= sprite_icon('thumb-up-filled', reactable.reactions.size) %>
+    <% end %>
+  <% else %>
+    <%= link_to(
+          reactions_path(reactable_type: reactable.class.name, reactable_id: reactable),
+          remote: true, method: :post,
+          class: ['icon', 'reaction'],
+          title: reacted_user_names(reactable)
+        ) do %>
+          <%= sprite_icon('thumb-up', reactable.reactions.size) %>
+    <% end %>
+  <% end %>
+<% end %>

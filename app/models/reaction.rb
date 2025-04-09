@@ -17,7 +17,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-module MessagesHelper
-  include Redmine::QuoteReply::Helper
-  include ReactionsHelper
+class Reaction < ApplicationRecord
+  belongs_to :reactable, polymorphic: true
+  belongs_to :user
+
+  scope :by, ->(user) { where(user: user) }
 end

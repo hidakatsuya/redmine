@@ -97,6 +97,7 @@ en:
     array:
       sentence_connector: "and"
       skip_last_comma: false
+      words_connector: ", "
 
   activerecord:
     errors:
@@ -527,6 +528,7 @@ en:
   setting_twofa: Two-factor authentication
   setting_related_issues_default_columns: Related and sub issues list defaults
   setting_display_related_issues_table_headers: Show table headers
+  setting_reactions_enabled: Enable reactions
 
   permission_add_project: Create project
   permission_add_subprojects: Create subprojects
