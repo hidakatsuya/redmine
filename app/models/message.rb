@@ -19,6 +19,8 @@
 
 class Message < ApplicationRecord
   include Redmine::SafeAttributes
+  include Redmine::Reaction::Reactable
+
   belongs_to :board
   belongs_to :author, :class_name => 'User'
   acts_as_tree :counter_cache => :replies_count, :order => "#{Message.table_name}.created_on ASC"
@@ -28,11 +30,6 @@ class Message < ApplicationRecord
   acts_as_searchable :columns => ['subject', 'content'],
                      :preload => {:board => :project},
                      :project_key => "#{Board.table_name}.project_id"
-
-  has_many :reactions, as: :reactable, dependent: :delete_all
-  has_many :reacted_users, through: :reactions, source: :user
-
-  scope :with_reactions, -> { preload(reactions: :user) if Setting.reactions_enabled? }
 
   acts_as_event(
     :title => Proc.new {|o| "#{o.board.name}: #{o.subject}"},

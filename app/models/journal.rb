@@ -19,6 +19,7 @@
 
 class Journal < ApplicationRecord
   include Redmine::SafeAttributes
+  include Redmine::Reaction::Reactable
 
   belongs_to :journalized, :polymorphic => true
   # added as a quick fix to allow eager loading of the polymorphic association
@@ -29,11 +30,6 @@ class Journal < ApplicationRecord
   belongs_to :updated_by, :class_name => 'User'
   has_many :details, :class_name => "JournalDetail", :dependent => :delete_all, :inverse_of => :journal
   attr_accessor :indice
-
-  has_many :reactions, as: :reactable, dependent: :delete_all
-  has_many :reacted_users, through: :reactions, source: :user
-
-  scope :with_reactions, -> { preload(:reactions, :reacted_users) if Setting.reactions_enabled? }
 
   acts_as_event(
     :title =>

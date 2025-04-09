@@ -25,6 +25,7 @@ class Issue < ApplicationRecord
   before_validation :clear_disabled_fields
   before_save :set_parent_id
   include Redmine::NestedSet::IssueNestedSet
+  include Redmine::Reaction::Reactable
 
   belongs_to :project
   belongs_to :tracker
@@ -41,9 +42,6 @@ class Issue < ApplicationRecord
 
   has_many :relations_from, :class_name => 'IssueRelation', :foreign_key => 'issue_from_id', :dependent => :delete_all
   has_many :relations_to, :class_name => 'IssueRelation', :foreign_key => 'issue_to_id', :dependent => :delete_all
-
-  has_many :reactions, as: :reactable, dependent: :delete_all
-  has_many :reacted_users, through: :reactions, source: :user
 
   acts_as_attachable :after_add => :attachment_added, :after_remove => :attachment_removed
   acts_as_customizable
