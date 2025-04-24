@@ -25,8 +25,9 @@ module ReactionsHelper
 
     reaction ||= object.reaction_by(User.current)
 
-    count = object.reactions.size
-    tooltip = reaction_tooltip_for(object, count)
+    user_names = object.reaction_user_names
+    count = user_names.size
+    tooltip = reaction_tooltip_for(user_names, count)
 
     if User.current.logged?
       if reaction&.persisted?
@@ -81,10 +82,10 @@ module ReactionsHelper
     tag.span(data: { 'reaction-button-id': reaction_id_for(object) }, &)
   end
 
-  def reaction_tooltip_for(object, count)
+  def reaction_tooltip_for(user_names, count)
     return if count.zero?
 
-    user_names = object.reaction_users.take(DISPLAY_REACTION_USERS_LIMIT).map(&:name)
+    user_names = user_names.take(DISPLAY_REACTION_USERS_LIMIT)
 
     if count > DISPLAY_REACTION_USERS_LIMIT
       others = count - DISPLAY_REACTION_USERS_LIMIT

@@ -101,6 +101,8 @@ group :development do
   gem 'yard', require: false
   gem 'svg_sprite', require: false
   gem 'bullet'
+  gem "memory_profiler", "~> 1.1"
+  gem 'rack-mini-profiler'
 end
 
 group :test do

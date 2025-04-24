@@ -917,8 +917,8 @@ class Issue < ApplicationRecord
     result = journals.
       preload(:details).
       preload(:user => :email_address).
-      with_reactions.
-      reorder(:created_on, :id).to_a
+      reorder(:created_on, :id).
+      load_with_reactions
 
     result.each_with_index {|j, i| j.indice = i + 1}
 
