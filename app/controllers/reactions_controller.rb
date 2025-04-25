@@ -17,35 +17,39 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-class Comment < ApplicationRecord
-  include Redmine::SafeAttributes
-  include Redmine::Reaction::Reactable
+class ReactionsController < ApplicationController
+  before_action :check_enabled
 
-  belongs_to :commented, :polymorphic => true, :counter_cache => true
-  belongs_to :author, :class_name => 'User'
+  before_action :require_login
+  before_action :set_object, :authorize_reactable
 
-  validates_presence_of :commented, :author, :content
-
-  after_create_commit :send_notification
-
-  safe_attributes 'comments'
-
-  delegate :visible?, to: :commented
-
-  def comments=(arg)
-    self.content = arg
+  def create
+    @reaction = @object.reactions.find_or_create_by!(user: User.current)
   end
 
-  def comments
-    content
+  def destroy
+    @reaction = @object.reactions.by(User.current).find_by(id: params[:id])
+    @reaction&.destroy
   end
 
   private
 
-  def send_notification
-    event = "#{commented.class.name.underscore}_comment_added"
-    if Setting.notified_events.include?(event)
-      Mailer.public_send(:"deliver_#{event}", self)
+  def check_enabled
+    render_403 unless Setting.reactions_enabled?
+  end
+
+  def set_object
+    object_type = params[:object_type]
+
+    unless Redmine::Reaction::REACTABLE_TYPES.include?(object_type)
+      render_403
+      return
     end
+
+    @object = object_type.constantize.find(params[:object_id])
+  end
+
+  def authorize_reactable
+    render_403 unless @object.visible?(User.current)
   end
 end

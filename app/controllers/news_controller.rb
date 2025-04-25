@@ -67,7 +67,7 @@ class NewsController < ApplicationController
   end
 
   def show
-    @comments = @news.comments.to_a
+    @comments = @news.comments.load_with_reactions
     @comments.reverse! if User.current.wants_comments_in_reverse_order?
   end
 

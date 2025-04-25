@@ -25,6 +25,7 @@ class Issue < ApplicationRecord
   before_validation :clear_disabled_fields
   before_save :set_parent_id
   include Redmine::NestedSet::IssueNestedSet
+  include Redmine::Reaction::Reactable
 
   belongs_to :project
   belongs_to :tracker
@@ -916,7 +917,8 @@ class Issue < ApplicationRecord
     result = journals.
       preload(:details).
       preload(:user => :email_address).
-      reorder(:created_on, :id).to_a
+      reorder(:created_on, :id).
+      load_with_reactions
 
     result.each_with_index {|j, i| j.indice = i + 1}
 
