@@ -3331,6 +3331,26 @@ class IssuesControllerTest < Redmine::ControllerTest
     assert_select 'span.badge.badge-private', text: 'Private'
   end
 
+  def test_show_should_display_reactions
+    @request.session[:user_id] = nil
+
+    get :show, params: { id: 1 }
+
+    assert_response :success
+    assert_select 'span[data-reaction-button-id=reaction_issue_1] span.reaction-button' do
+      assert_select 'span.icon-label', '3'
+    end
+    assert_select 'span[data-reaction-button-id=reaction_journal_1] span.reaction-button'
+    assert_select 'span[data-reaction-button-id=reaction_journal_2] span.reaction-button'
+
+    # Should not display reactions when reactions feature is disabled.
+    Setting.reactions_enabled = false
+    get :show, params: { id: 1 }
+
+    assert_response :success
+    assert_select 'span[data-reaction-button-id]', false
+  end
+
   def test_show_should_not_display_edit_attachment_icon_for_user_without_edit_issue_permission_on_tracker
     role = Role.find(2)
     role.set_permission_trackers 'edit_issues', [2, 3]
