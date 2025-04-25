@@ -40,6 +40,10 @@
 <div class="subject">
 <%= render_issue_subject_with_tree(@issue) %>
 </div>
+
+<div class="reaction">
+  <%= reaction_button @issue %>
+</div>
         <p class="author">
         <%= authoring @issue.created_on, @issue.author %>.
         <% if @issue.created_on != @issue.updated_on %>
