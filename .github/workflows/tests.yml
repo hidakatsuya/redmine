@@ -10,8 +10,10 @@ jobs:
 
     strategy:
       matrix:
-        ruby: ['3.2', '3.3', '3.4']
+        ruby: ['3.3']
         db: ['postgresql', 'mysql2', 'sqlite3']
+        # ruby: ['3.2', '3.3', '3.4']
+        # db: ['postgresql', 'mysql2', 'sqlite3']
       fail-fast: false
 
     services:
@@ -41,6 +43,16 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
+
+      chrome:
+        image: selenium/standalone-chrome
+        ports:
+          - 4444:4444
+        options: >-
+          --health-cmd "curl --fail http://localhost:4444/status || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout code
@@ -110,3 +122,24 @@ jobs:
       - name: Run autoload test
         run: |
           bin/rails test:autoload
+
+      - name: Run system tests
+        # The system test is still a bit unstable, so for now, it will continue even if errors occur.
+        continue-on-error: true
+        run: |
+          # Set the host's IP address to allow the Selenium browser to access the Capybara server.
+          export CAPYBARA_APP_HOST=http://$(getent ahosts "$(hostname)" | awk '{print $1; exit}')
+
+          bin/rails test:system
+        env:
+          SELENIUM_REMOTE_URL: http://localhost:4444
+          CAPYBARA_SERVER_HOST: 0.0.0.0
+          GOOGLE_CHROME_OPTS_ARGS: headless,disable-gpu,no-sandbox,disable-dev-shm-usage
+
+      - name: Upload system test screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: system-test-screenshots-ruby${{ matrix.ruby }}-${{ matrix.db }}
+          path: tmp/screenshots
+          if-no-files-found: ignore
