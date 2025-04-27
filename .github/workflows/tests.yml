@@ -62,9 +62,6 @@ jobs:
 
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: 135
-          install-chromedriver: true
 
       - if: ${{ matrix.db == 'sqlite3' }}
         name: Prepare test database for sqlite3
