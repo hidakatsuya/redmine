@@ -214,7 +214,20 @@ class ReactionsControllerTest < Redmine::ControllerTest
     assert_response :forbidden
   end
 
-  test 'create by anonymous user should respond with 403' do
+  test 'create by anonymou user should respond with 401 when feature is disabled' do
+    Setting.reactions_enabled = '0'
+    @request.session[:user_id] = nil
+
+    assert_no_difference 'Reaction.count' do
+      post :create, params: {
+        object_type: 'Issue',
+        object_id: issues(:issues_002).id
+      }, xhr: true
+    end
+    assert_response :unauthorized
+  end
+
+  test 'create by anonymous user should respond with 401' do
     @request.session[:user_id] = nil
 
     assert_no_difference 'Reaction.count' do

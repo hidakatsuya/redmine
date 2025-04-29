@@ -18,9 +18,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 class ReactionsController < ApplicationController
-  before_action :check_enabled
-
   before_action :require_login
+
+  before_action :check_enabled
   before_action :set_object, :authorize_reactable
 
   def create
