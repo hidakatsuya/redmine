@@ -60,6 +60,13 @@ jobs:
           sudo rm /etc/ImageMagick-6/policy.xml
           sudo mv policy.xml /etc/ImageMagick-6/policy.xml
 
+      - name: Setup Chrome
+        run: |
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+          google-chrome --version
+        working-directory: /tmp
+
       - if: ${{ matrix.db == 'sqlite3' }}
         name: Prepare test database for sqlite3
         run: |
@@ -110,3 +117,9 @@ jobs:
       - name: Run autoload test
         run: |
           bin/rails test:autoload
+
+      - name: Run system tests
+        run: |
+          bin/rails test:system
+        env:
+          GOOGLE_CHROME_OPTS_ARGS: headless,disable-gpu,no-sandbox,disable-dev-shm-usage
