@@ -332,4 +332,17 @@ class ReactionsControllerTest < Redmine::ControllerTest
 
     assert_response :forbidden
   end
+
+  test 'create should respond with 404 for non-JS requests' do
+    issue = issues(:issues_002)
+
+    assert_no_difference 'Reaction.count' do
+      post :create, params: {
+        object_type: 'Issue',
+        object_id: issue.id
+      } # Sending an HTML request by omitting xhr: true
+    end
+
+    assert_response :not_found
+  end
 end
