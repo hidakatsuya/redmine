@@ -24,12 +24,22 @@ class ReactionsController < ApplicationController
   before_action :set_object, :authorize_reactable
 
   def create
-    @reaction = @object.reactions.find_or_create_by!(user: User.current)
+    respond_to do |format|
+      format.js do
+        @reaction = @object.reactions.find_or_create_by!(user: User.current)
+      end
+      format.any { head :not_found }
+    end
   end
 
   def destroy
-    @reaction = @object.reactions.by(User.current).find_by(id: params[:id])
-    @reaction&.destroy
+    respond_to do |format|
+      format.js do
+        @reaction = @object.reactions.by(User.current).find_by(id: params[:id])
+        @reaction&.destroy
+      end
+      format.any { head :not_found }
+    end
   end
 
   private
