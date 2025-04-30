@@ -42,6 +42,8 @@ Rails.application.config.to_prepare do
     paths = theme.asset_paths
     Rails.application.config.assets.redmine_extension_paths << paths if paths.present?
   end
+
+  Rack::MiniProfiler.config.enable_advanced_debugging_tools = true
 end
 
 Rails.application.deprecators[:redmine] = ActiveSupport::Deprecation.new('7.0', 'Redmine')
