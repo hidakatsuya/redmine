@@ -2064,6 +2064,15 @@ img.filecontent.image {background-image: url(/transparent.png);}
   margin-left: 3px;
   margin-bottom: -1px;
 }
+.reaction-button.readonly {
+  cursor: default;
+}
+.reaction-button.readonly .icon-svg {
+  stroke: #999;
+}
+.reaction-button.readonly .icon-label {
+  color: #999;
+}
 div.issue.details .reaction {
   float: right;
   font-size: 0.9em;
