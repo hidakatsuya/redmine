@@ -25,30 +25,21 @@ class Reaction < ApplicationRecord
 
   scope :by, ->(user) { where(user: user) }
 
-  # Returns a mapping of reactable IDs to an array of user names
-  #
-  # Returns:
-  # {
-  #   1 => ["Alice", "Bob"],
-  #   2 => ["Charlie"],
-  #   ...
-  # }
-  def self.users_map_for_reactables(reactable_type, reactable_ids)
+  def self.users_map_for_reactables(reactable_type, reactable_ids, user)
     reactions = preload(:user)
                   .select(:reactable_id, :user_id)
                   .where(reactable_type: reactable_type, reactable_id: reactable_ids)
                   .order(id: :desc)
 
-    reactable_user_pairs = reactions.map do |reaction|
-      [reaction.reactable_id, reaction.user.name]
-    end
+    visible_user_ids = Set.new(User.visible(user).pluck(:id))
 
-    # Group by reactable_id and transform values to extract only user name
-    # [[1, "Alice"], [1, "Bob"], [2, "Charlie"], ...]
-    # =>
-    # { 1 => ["Alice", "Bob"], 2 => ["Charlie"], ...}
-    reactable_user_pairs
-      .group_by(&:first)
-      .transform_values { |pairs| pairs.map(&:last) }
+    reactions.group_by(&:reactable_id).transform_values do |grouped_reactions|
+      visible_users = grouped_reactions.filter_map do |reaction|
+        reaction.user if visible_user_ids.include?(reaction.user.id)
+      end
+
+      { count: grouped_reactions.size, visible_users: visible_users }
+    end
   end
 end
+

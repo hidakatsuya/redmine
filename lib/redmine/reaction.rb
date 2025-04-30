@@ -32,29 +32,29 @@ module Redmine
         has_many :reactions, -> { order(id: :desc) }, as: :reactable, dependent: :delete_all
         has_many :reaction_users, through: :reactions, source: :user
 
-        attr_writer :reaction_user_names, :reaction_count
+        attr_writer :visible_reaction_users, :reaction_count
       end
 
       class_methods do
-        def load_with_reactions
+        def load_with_reactions(user = User.current)
           objects = all.to_a
 
           return objects unless Setting.reactions_enabled?
 
-          object_users_map = ::Reaction.users_map_for_reactables(self.name, objects.map(&:id))
+          object_users_map = ::Reaction.users_map_for_reactables(self.name, objects.map(&:id), user)
 
           objects.each do |object|
-            all_user_names = object_users_map[object.id] || []
+            count, visible_users = object_users_map[object.id]&.values_at(:count, :visible_users)
 
-            object.reaction_count = all_user_names.size
-            object.reaction_user_names = all_user_names.take(DISPLAY_REACTION_USERS_LIMIT)
+            object.reaction_count = count.to_i
+            object.visible_reaction_users = visible_users&.take(DISPLAY_REACTION_USERS_LIMIT) || []
           end
           objects
         end
       end
 
-      def reaction_user_names
-        @reaction_user_names || reaction_users.take(DISPLAY_REACTION_USERS_LIMIT).map(&:name)
+      def visible_reaction_users(user = User.current)
+        @visible_reaction_users || reaction_users.visible(user).take(DISPLAY_REACTION_USERS_LIMIT)
       end
 
       def reaction_count

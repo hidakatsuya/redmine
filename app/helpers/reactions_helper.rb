@@ -24,7 +24,7 @@ module ReactionsHelper
     reaction ||= object.reaction_by(User.current)
 
     count = object.reaction_count
-    user_names = object.reaction_user_names
+    user_names = object.visible_reaction_users.map(&:name)
 
     tooltip = build_reaction_tooltip(user_names, count)
 
@@ -85,9 +85,9 @@ module ReactionsHelper
     return if count.zero?
 
     display_user_names = user_names.dup
+    others = count - user_names.size
 
-    if count > Redmine::Reaction::DISPLAY_REACTION_USERS_LIMIT
-      others = count - Redmine::Reaction::DISPLAY_REACTION_USERS_LIMIT
+    if others.positive?
       display_user_names << I18n.t(:reaction_text_x_other_users, count: others)
     end
 
