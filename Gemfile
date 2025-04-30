@@ -126,3 +126,7 @@ end
 Dir.glob File.expand_path("../plugins/*/{Gemfile,PluginGemfile}", __FILE__) do |file|
   eval_gemfile file
 end
+
+gem "memory_profiler", "~> 1.1"
+gem 'rack-mini-profiler'
+gem 'stackprof'
