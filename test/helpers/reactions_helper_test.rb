@@ -56,7 +56,7 @@ class ReactionsHelperTest < ActionView::TestCase
     issue = issues(:issues_002) # Issue without reactions
     result = reaction_button(issue)
 
-    assert_select_in result, 'span.reaction-button[title]', false
+    assert_select_in result, 'a.reaction-button[title]', false
   end
 
   test 'reaction_button includes tooltip with all usernames when reactions are 10 or fewer' do
