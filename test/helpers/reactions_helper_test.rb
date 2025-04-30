@@ -48,7 +48,7 @@ class ReactionsHelperTest < ActionView::TestCase
 
     result = reaction_button(journals(:journals_001))
 
-    assert_select_in result, 'span.reaction-button[title=?]', 'John Smith'
+    assert_select_in result, 'span.reaction-button.readonly[title=?]', 'John Smith'
     assert_select_in result, 'a.reaction-button', false
   end
 
