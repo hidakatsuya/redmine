@@ -2061,6 +2061,7 @@ img.filecontent.image {background-image: url(/transparent.png);}
   fill: #c61a1a;
 }
 .reaction-button .icon-label {
+  color: #169;
   margin-left: 3px;
   margin-bottom: -1px;
 }
