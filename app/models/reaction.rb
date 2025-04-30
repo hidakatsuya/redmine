@@ -25,30 +25,28 @@ class Reaction < ApplicationRecord
 
   scope :by, ->(user) { where(user: user) }
 
-  # Returns a mapping of reactable IDs to an array of user names
+  # Returns a hash mapping reactable IDs to their reaction counts and visible user names.
   #
-  # Returns:
   # {
-  #   1 => ["Alice", "Bob"],
-  #   2 => ["Charlie"],
+  #   1 => [2, ['Visible User1', 'Visible User2'],
+  #   2 => [1, ['Visible User3']]
   #   ...
   # }
-  def self.users_map_for_reactables(reactable_type, reactable_ids)
+  def self.counts_and_visible_user_names_by(reactable_type, reactable_ids, user)
     reactions = preload(:user)
                   .select(:reactable_id, :user_id)
                   .where(reactable_type: reactable_type, reactable_id: reactable_ids)
                   .order(id: :desc)
 
-    reactable_user_pairs = reactions.map do |reaction|
-      [reaction.reactable_id, reaction.user.name]
-    end
+    visible_user_ids = User.visible(user).pluck(:id).to_set
 
-    # Group by reactable_id and transform values to extract only user name
-    # [[1, "Alice"], [1, "Bob"], [2, "Charlie"], ...]
-    # =>
-    # { 1 => ["Alice", "Bob"], 2 => ["Charlie"], ...}
-    reactable_user_pairs
-      .group_by(&:first)
-      .transform_values { |pairs| pairs.map(&:last) }
+    reactions.group_by(&:reactable_id).transform_values do |reactions_by_reactable|
+      # Retrieve the names of reaction users that the user can see.
+      visible_user_names = reactions_by_reactable.filter_map do |reaction|
+        reaction.user.name if visible_user_ids.include?(reaction.user.id)
+      end
+
+      [reactions_by_reactable.size, visible_user_names]
+    end
   end
 end

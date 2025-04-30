@@ -43,40 +43,60 @@ class Redmine::ReactionTest < ActiveSupport::TestCase
     end
   end
 
-  test 'load_with_reactions returns an array and preloads reaction_user_names' do
+  test 'load_with_reactions returns an array and preloads visible_reaction_user_names and reaction_count' do
     issues = Issue.where(id: [1, 6]).order(:id).load_with_reactions
 
     assert_equal [issues(:issues_001), issues(:issues_006)], issues
 
     assert_no_queries do
-      assert_equal ['Dave Lopper', 'John Smith', 'Redmine Admin'], issues.first.reaction_user_names
-      assert_equal ['John Smith'], issues.second.reaction_user_names
+      assert_equal ['Dave Lopper', 'John Smith', 'Redmine Admin'], issues.first.visible_reaction_user_names
+      assert_equal 3, issues.first.reaction_count
+
+      assert_equal ['John Smith'], issues.second.visible_reaction_user_names
+      assert_equal 1, issues.second.reaction_count
     end
   end
 
-  test 'load_with_reactions returns an array and does not preload reaction_user_names' do
+  test 'load_with_reactions returns an array and does not preload visible_reaction_user_names and reaction_count' do
     Setting.reactions_enabled = '0'
 
     journals = Journal.where(id: 1).load_with_reactions
 
     assert_equal [journals(:journals_001)], journals
-    assert_nil journals.first.instance_variable_get(:@reaction_user_names)
+    assert_nil journals.first.instance_variable_get(:@visible_reaction_user_names)
+    assert_nil journals.first.instance_variable_get(:@reaction_count)
   end
 
-  test 'reaction_user_names returns an array of user names' do
-    assert_equal ['John Smith'], comments(:comments_001).reaction_user_names
+  test 'visible_reaction_user_names returns user names ordered by their newest reactions' do
+    issue4 = issues(:issues_004)
 
-    # When user names are preloaded by load_with_reactions
-    comment = Comment.where(id: [1]).load_with_reactions.first
+    Reaction.create!(reactable: issue4, user: users(:users_001))
+    Reaction.create!(reactable: issue4, user: users(:users_002))
+    Reaction.create!(reactable: issue4, user: users(:users_003))
+
+    # When calling visible_reaction_user_names on an object loaded with load_with_reactions
+    issue = Issue.where(id: 4).load_with_reactions.first
     assert_no_queries do
-      assert_equal ['John Smith'], comment.reaction_user_names
+      assert_equal [
+        users(:users_003).name,
+        users(:users_002).name,
+        users(:users_001).name
+      ], issue.visible_reaction_user_names
     end
+
+    # When calling visible_reaction_user_names on an object loaded without load_with_reactions
+    issue = Issue.find(4)
+    assert_equal [
+      users(:users_003).name,
+      users(:users_002).name,
+      users(:users_001).name
+    ], issue.visible_reaction_user_names
   end
 
   test 'reaction_users returns users ordered by their newest reactions' do
-    Reaction.create(reactable: @issue, user: users(:users_001))
-    Reaction.create(reactable: @issue, user: users(:users_002))
-    Reaction.create(reactable: @issue, user: users(:users_003))
+    Reaction.create!(reactable: @issue, user: users(:users_001))
+    Reaction.create!(reactable: @issue, user: users(:users_002))
+    Reaction.create!(reactable: @issue, user: users(:users_003))
 
     assert_equal [
       users(:users_003),

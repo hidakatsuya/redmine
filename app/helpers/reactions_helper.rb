@@ -23,10 +23,10 @@ module ReactionsHelper
 
     reaction ||= object.reaction_by(User.current)
 
+    visible_user_names = object.visible_reaction_user_names
     count = object.reaction_count
-    user_names = object.reaction_user_names
 
-    tooltip = build_reaction_tooltip(user_names, count)
+    tooltip = build_reaction_tooltip(visible_user_names, count)
 
     if User.current.logged?
       if reaction&.persisted?
@@ -81,13 +81,13 @@ module ReactionsHelper
     tag.span(data: { 'reaction-button-id': reaction_id_for(object) }, &)
   end
 
-  def build_reaction_tooltip(user_names, count)
+  def build_reaction_tooltip(visible_user_names, count)
     return if count.zero?
 
-    display_user_names = user_names.dup
+    display_user_names = visible_user_names.dup
+    others = count - visible_user_names.size
 
-    if count > Redmine::Reaction::DISPLAY_REACTION_USERS_LIMIT
-      others = count - Redmine::Reaction::DISPLAY_REACTION_USERS_LIMIT
+    if others.positive?
       display_user_names << I18n.t(:reaction_text_x_other_users, count: others)
     end
 

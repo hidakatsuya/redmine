@@ -35,24 +35,49 @@ class ReactionTest < ActiveSupport::TestCase
     assert_equal [reactions(:reaction_002)], user2_reactions
   end
 
-  test 'users_map_for_reactables returns correct mapping for given reactable_type and reactable_ids' do
+  test 'counts_and_visible_user_names_by returns correct mapping for given reactable_type and reactable_ids' do
     issue1 = issues(:issues_001)
     issue6 = issues(:issues_006)
 
-    result = Reaction.users_map_for_reactables('Issue', [issue1.id, issue6.id])
+    result = Reaction.counts_and_visible_user_names_by('Issue', [issue1.id, issue6.id], users(:users_001))
 
     expected_result = {
-      issue1.id => ['Dave Lopper', 'John Smith', 'Redmine Admin'],
-      issue6.id => ['John Smith']
+      issue1.id => [3, ['Dave Lopper', 'John Smith', 'Redmine Admin']],
+      issue6.id => [1, ['John Smith']]
     }
 
     assert_equal expected_result, result
   end
 
-  test 'users_map_for_reactables returns empty hash when no reactions exist' do
-    result = Reaction.users_map_for_reactables('Issue', [3, 4, 5])
+  test 'counts_and_visible_user_names_by returns empty hash when no reactions exist' do
+    result = Reaction.counts_and_visible_user_names_by('Issue', [3, 4, 5], users(:users_001))
 
     assert_equal({}, result)
+  end
+
+  test 'counts_and_visible_user_names_by filters invisible users' do
+    # User Misc
+    logged_user = users(:users_008)
+
+    # Set users_visibility to "members_of_visible_projects" for all roles assigned to User1.
+    logged_user.roles.each do |role|
+      role.update!(users_visibility: 'members_of_visible_projects')
+    end
+
+    invisible_user = User.generate!(firstname: 'Invisible', lastname: 'User')
+
+    # Add reactions from Invisible User and jsmith (a visible user) to Issue(id=4).
+    issues(:issues_004).reactions += [
+      Reaction.new(user: invisible_user),
+      Reaction.new(user: users(:users_002))
+    ]
+
+    result = Reaction.counts_and_visible_user_names_by('Issue', [issues(:issues_004).id], logged_user)
+
+    expected_result = {
+      issues(:issues_004).id => [2, ['John Smith']]
+    }
+    assert_equal expected_result, result
   end
 
   test "should prevent duplicate reactions with unique constraint under concurrent creation" do

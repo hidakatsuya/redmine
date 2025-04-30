@@ -136,6 +136,28 @@ class ReactionsHelperTest < ActionView::TestCase
     end
   end
 
+  test 'reaction_button includes only visible usernames in tooltip' do
+    journal1 = journals(:journals_002)
+
+    visible_user = User.generate!(firstname: 'Visible', lastname: 'User')
+    invisible_user1 = User.generate!(firstname: 'Invisible', lastname: 'User1')
+    invisible_user2 = User.generate!(firstname: 'Invisible', lastname: 'User2')
+
+    journal1.reactions.create!(user: visible_user)
+    journal1.reactions.create!(user: invisible_user1)
+    journal1.reactions.create!(user: invisible_user2)
+
+    # Make only one user visible to the current user
+    User.stubs(:visible).with(User.current).returns(User.where(id: visible_user))
+
+    result = with_locale 'en' do
+      reaction_button(journal1)
+    end
+
+    expected_tooltip = 'Visible User and 2 others'
+    assert_select_in result, 'a.reaction-button[title=?]', expected_tooltip
+  end
+
   private
 
   def build_reactions(count)
