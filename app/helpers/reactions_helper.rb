@@ -71,7 +71,7 @@ module ReactionsHelper
 
   def reaction_button_readonly(object, count, tooltip)
     reaction_button_wrapper object do
-      tag.span(class: 'icon reaction-button', title: tooltip) do
+      tag.span(class: 'icon reaction-button readonly', title: tooltip) do
         sprite_icon('thumb-up', count)
       end
     end
