@@ -40,6 +40,10 @@ class ApplicationController < ActionController::Base
 
   layout 'base'
 
+  before_action do
+    Rack::MiniProfiler.authorize_request
+  end
+
   def verify_authenticity_token
     unless api_request?
       super
