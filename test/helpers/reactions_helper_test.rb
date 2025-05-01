@@ -43,10 +43,20 @@ class ReactionsHelperTest < ActionView::TestCase
     assert_nil reaction_button(issues(:issues_004))
   end
 
-  test 'reaction_button for anonymous users shows static icon' do
+  test 'reaction_button for anonymous users shows readonly button' do
     User.current = nil
 
     result = reaction_button(journals(:journals_001))
+
+    assert_select_in result, 'span.reaction-button.readonly[title=?]', 'John Smith'
+    assert_select_in result, 'a.reaction-button', false
+  end
+
+  test 'reaction_button for inactive projects shows readonly button' do
+    issue6 = issues(:issues_006)
+    issue6.project.update!(status: Project::STATUS_CLOSED)
+
+    result = reaction_button(issue6)
 
     assert_select_in result, 'span.reaction-button.readonly[title=?]', 'John Smith'
     assert_select_in result, 'a.reaction-button', false

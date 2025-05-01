@@ -116,4 +116,72 @@ class Redmine::ReactionTest < ActiveSupport::TestCase
       @issue.destroy
     end
   end
+
+  test 'visible? returns true when reactions are enabled and object is visible to user' do
+    object = issues(:issues_007)
+    user = users(:users_002)
+    Setting.reactions_enabled = '1'
+
+    assert Redmine::Reaction.visible?(object, user)
+  end
+
+  test 'visible? returns false when reactions are disabled' do
+    object = issues(:issues_007)
+    user = users(:users_002)
+    Setting.reactions_enabled = '0'
+
+    assert_not Redmine::Reaction.visible?(object, user)
+  end
+
+  test 'visible? returns false when object is not visible to user' do
+    object = issues(:issues_007)
+    user = users(:users_002)
+    Setting.reactions_enabled = '1'
+
+    object.expects(:visible?).with(user).returns(false)
+
+    assert_not Redmine::Reaction.visible?(object, user)
+  end
+
+  test 'writable? returns true for various reactable objects when user is logged in, object is visible, and project is active' do
+    reactable_objects = {
+      issue: issues(:issues_007),
+      message: messages(:messages_001),
+      news: news(:news_001),
+      journal: journals(:journals_001),
+      comment: comments(:comments_002)
+    }
+    user = users(:users_002)
+    Setting.reactions_enabled = '1'
+
+    reactable_objects.each do |type, object|
+      assert Redmine::Reaction.writable?(object, user), "Expected writable? to return true for #{type}"
+    end
+  end
+
+  test 'writable? returns false when user is not logged in' do
+    object = issues(:issues_007)
+    user = User.anonymous
+    Setting.reactions_enabled = '1'
+
+    assert_not Redmine::Reaction.writable?(object, user)
+  end
+
+  test 'writable? returns false when project is inactive' do
+    object = issues(:issues_007)
+    user = users(:users_002)
+    object.project.update!(status: Project::STATUS_ARCHIVED)
+    Setting.reactions_enabled = '1'
+
+    assert_not Redmine::Reaction.writable?(object, user)
+  end
+
+  test 'writable? returns false when project is closed' do
+    object = issues(:issues_007)
+    user = users(:users_002)
+    Setting.reactions_enabled = '1'
+    object.project.update!(status: Project::STATUS_CLOSED)
+
+    assert_not Redmine::Reaction.writable?(object, user)
+  end
 end
