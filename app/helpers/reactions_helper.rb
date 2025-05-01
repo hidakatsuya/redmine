@@ -19,7 +19,7 @@
 
 module ReactionsHelper
   def reaction_button(object, reaction = nil)
-    return unless Setting.reactions_enabled? && object.visible?(User.current)
+    return unless Redmine::Reaction.visible?(object, User.current)
 
     reaction ||= object.reaction_by(User.current)
 
@@ -28,7 +28,7 @@ module ReactionsHelper
 
     tooltip = build_reaction_tooltip(user_names, count)
 
-    if User.current.logged?
+    if Redmine::Reaction.writable?(object, User.current)
       if reaction&.persisted?
         reaction_button_reacted(object, reaction, count, tooltip)
       else

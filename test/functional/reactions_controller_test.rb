@@ -358,4 +358,33 @@ class ReactionsControllerTest < Redmine::ControllerTest
 
     assert_response :not_found
   end
+
+  test 'create should respond with 403 when project is closed' do
+    issue = issues(:issues_010)
+    issue.project.update!(status: Project::STATUS_CLOSED)
+
+    assert_no_difference 'Reaction.count' do
+      post :create, params: {
+        object_type: 'Issue',
+        object_id: issue.id
+      }, xhr: true
+    end
+
+    assert_response :forbidden
+  end
+
+  test 'destroy should respond with 403 when project is closed' do
+    reaction = reactions(:reaction_005)
+    reaction.reactable.project.update!(status: Project::STATUS_CLOSED)
+
+    assert_no_difference 'Reaction.count' do
+      delete :destroy, params: {
+        id: reaction.id,
+        object_type: reaction.reactable_type,
+        object_id: reaction.reactable_id
+      }, xhr: true
+    end
+
+    assert_response :forbidden
+  end
 end
