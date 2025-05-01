@@ -40,6 +40,10 @@ class Comment < ApplicationRecord
     content
   end
 
+  def project
+    commented.respond_to?(:project) ? commented.project : nil
+  end
+
   private
 
   def send_notification
