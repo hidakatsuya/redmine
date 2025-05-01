@@ -28,25 +28,32 @@ class Reaction < ApplicationRecord
   # Returns a hash mapping reactable IDs to their reaction counts and visible user names.
   #
   # {
-  #   1 => [2, ['Visible User1', 'Visible User2'],
-  #   2 => [1, ['Visible User3']]
+  #   1 => ['Visible User1', 'Visible User2'],
+  #   2 => ['Visible User3']
   #   ...
   # }
-  def self.counts_and_visible_user_names_by(reactable_type, reactable_ids, user)
+  def self.visible_user_names_by(reactable_type, reactables, user)
     reactions = preload(:user)
                   .select(:reactable_id, :user_id)
-                  .where(reactable_type: reactable_type, reactable_id: reactable_ids)
                   .order(id: :desc)
+                  .merge(reactables)
 
     visible_user_ids = User.visible(user).pluck(:id).to_set
 
-    reactions.group_by(&:reactable_id).transform_values do |reactions_by_reactable|
-      # Retrieve the names of reaction users that the user can see.
-      visible_user_names = reactions_by_reactable.filter_map do |reaction|
-        reaction.user.name if visible_user_ids.include?(reaction.user.id)
-      end
+    reactions.each_with_object({}) do |reaction, m|
+      next unless visible_user_ids.include?(reaction.user.id)
 
-      [reactions_by_reactable.size, visible_user_names]
+      m[reaction.reactable_id] ||= {
+        count: 0,
+        visible_user_names: [],
+        user_reaction_id: nil
+      }
+
+      m[reaction.reactable_id].then do |data|
+        data[:count] += 1
+        data[:visible_user_names] << reaction.user.name unless data[:visible_user_names].include?(reaction.user.name)
+        data[:user_reaction_id] = reaction.id if reaction.user == user
+      end
     end
   end
 end

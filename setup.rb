@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# system "bin/rails db:fixtures:load"
+system "bin/rails db:fixtures:load"
 
 # Issue(id=1)を取得
 issue = Issue.find_by(id: 1)

@@ -42,26 +42,26 @@ module Redmine
         has_many :reactions, -> { order(id: :desc) }, as: :reactable, dependent: :delete_all
         has_many :reaction_users, through: :reactions, source: :user
 
-        attr_writer :visible_reaction_user_names, :reaction_count
+        attr_writer :reaction_data
       end
 
       class_methods do
         def load_with_reactions(user = User.current)
+          return all.to_a unless Setting.reactions_enabled?
+
           objects = all.to_a
 
-          return objects unless Setting.reactions_enabled?
-
-          counts_and_visible_user_names = ::Reaction.counts_and_visible_user_names_by(self.name, objects.map(&:id), user)
+          visible_user_names = ::Reaction.visible_user_names_by(self.name, objects.map(&:id), user)
 
           objects.each do |object|
-            count, visible_user_names = counts_and_visible_user_names[object.id]
-
             # To prevent increased memory usage when loading a large number of reactions,
             # such as when displaying details of issues with many Journals,
             # only the minimum necessary information for displaying reaction button is retained in the target object.
-            object.reaction_count = count.to_i
-            object.visible_reaction_user_names = visible_user_names&.take(DISPLAY_REACTION_USERS_LIMIT) || []
+
+            object.reaction_data =
+            object.visible_reaction_user_names = visible_user_names[object.id]&.take(DISPLAY_REACTION_USERS_LIMIT) || []
           end
+
           objects
         end
       end
@@ -71,7 +71,7 @@ module Redmine
       end
 
       def reaction_count
-        @reaction_count || reaction_users.size
+        reactions.size
       end
 
       def reaction_by(user)
