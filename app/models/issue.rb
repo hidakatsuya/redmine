@@ -918,7 +918,7 @@ class Issue < ApplicationRecord
       preload(:details).
       preload(:user => :email_address).
       reorder(:created_on, :id).
-      load_with_reactions
+      to_a
 
     result.each_with_index {|j, i| j.indice = i + 1}
 
@@ -929,6 +929,9 @@ class Issue < ApplicationRecord
     end
     Journal.preload_journals_details_custom_fields(result)
     result.select! {|journal| journal.notes? || journal.visible_details.any?}
+
+    Journal.preload_reaction_details(result)
+
     result
   end
 

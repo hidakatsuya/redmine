@@ -24,31 +24,42 @@ class Reaction < ApplicationRecord
   validates :reactable_type, inclusion: { in: Redmine::Reaction::REACTABLE_TYPES }
 
   scope :by, ->(user) { where(user: user) }
+  scope :for_reactable, ->(reactable) { where(reactable: reactable) }
 
-  # Returns a mapping of reactable IDs to an array of user names
-  #
-  # Returns:
-  # {
-  #   1 => ["Alice", "Bob"],
-  #   2 => ["Charlie"],
-  #   ...
-  # }
-  def self.users_map_for_reactables(reactable_type, reactable_ids)
+  # Represents reaction details for a reactable object
+  Detail = Struct.new(
+    # Total number of reactions
+    :reaction_count,
+    # Users who reacted and are visible to the target user
+    :visible_users,
+    # Reaction of the target user
+    :user_reaction
+  ) do
+    def initialize(reaction_count: 0, visible_users: [], user_reaction: nil)
+      super
+    end
+  end
+
+  def self.build_detail_map_for(reactables, user)
     reactions = preload(:user)
-                  .select(:reactable_id, :user_id)
-                  .where(reactable_type: reactable_type, reactable_id: reactable_ids)
+                  .for_reactable(reactables)
+                  .select(:id, :reactable_id, :user_id)
                   .order(id: :desc)
 
-    reactable_user_pairs = reactions.map do |reaction|
-      [reaction.reactable_id, reaction.user.name]
-    end
+    # Prepare IDs of users who reacted and are visible to the user
+    visible_user_ids = User.visible(user)
+                         .joins(:reactions)
+                         .where(reactions: for_reactable(reactables))
+                         .pluck(:id).to_set
 
-    # Group by reactable_id and transform values to extract only user name
-    # [[1, "Alice"], [1, "Bob"], [2, "Charlie"], ...]
-    # =>
-    # { 1 => ["Alice", "Bob"], 2 => ["Charlie"], ...}
-    reactable_user_pairs
-      .group_by(&:first)
-      .transform_values { |pairs| pairs.map(&:last) }
+    reactions.each_with_object({}) do |reaction, m|
+      m[reaction.reactable_id] ||= Detail.new
+
+      m[reaction.reactable_id].then do |detail|
+        detail.reaction_count += 1
+        detail.visible_users << reaction.user if visible_user_ids.include?(reaction.user.id)
+        detail.user_reaction = reaction if reaction.user == user
+      end
+    end
   end
 end
