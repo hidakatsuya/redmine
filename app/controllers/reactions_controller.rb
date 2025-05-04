@@ -26,7 +26,7 @@ class ReactionsController < ApplicationController
   def create
     respond_to do |format|
       format.js do
-        @reaction = @object.reactions.find_or_create_by!(user: User.current)
+        @object.reactions.find_or_create_by!(user: User.current)
       end
       format.any { head :not_found }
     end
@@ -35,8 +35,8 @@ class ReactionsController < ApplicationController
   def destroy
     respond_to do |format|
       format.js do
-        @reaction = @object.reactions.by(User.current).find_by(id: params[:id])
-        @reaction&.destroy
+        reaction = @object.reactions.by(User.current).find_by(id: params[:id])
+        reaction&.destroy
       end
       format.any { head :not_found }
     end

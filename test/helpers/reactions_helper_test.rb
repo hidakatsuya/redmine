@@ -102,17 +102,46 @@ class ReactionsHelperTest < ActionView::TestCase
     assert_select_in result, 'a.reaction-button[title=?]', expected_tooltip
   end
 
-  test 'reaction_button for reacted object' do
-    issue = issues(:issues_001)
-    reaction = issue.reactions.find_by(user: User.current)
+  test 'reaction_button displays non-visible users as "X other" in the tooltip' do
+    issue2 = issues(:issues_002)
+
+    issue2.reaction_detail = Reaction::Detail.new(
+      # The remaining 3 users are non-visible users
+      reaction_count: 5,
+      visible_users: users(:users_002, :users_003)
+    )
 
     result = with_locale('en') do
-      reaction_button(issue, reaction)
+      reaction_button(issue2)
+    end
+
+    assert_select_in result, 'a.reaction-button[title=?]', 'John Smith, Dave Lopper, and 3 others'
+
+    # When all users are non-visible users
+    issue2.reaction_detail = Reaction::Detail.new(
+      reaction_count: 2,
+      visible_users: []
+    )
+
+    result = with_locale('en') do
+      reaction_button(issue2)
+    end
+
+    assert_select_in result, 'a.reaction-button[title=?]', '2 others'
+  end
+
+  test 'reaction_button for reacted object' do
+    User.current = users(:users_002)
+
+    issue = issues(:issues_001)
+
+    result = with_locale('en') do
+      reaction_button(issue)
     end
     tooltip = 'Dave Lopper, John Smith, and Redmine Admin'
 
     assert_select_in result, 'span[data-reaction-button-id=?]', 'reaction_issue_1' do
-      href = reaction_path(reaction, object_type: 'Issue', object_id: 1)
+      href = reaction_path(issue.reaction_detail.user_reaction, object_type: 'Issue', object_id: 1)
 
       assert_select 'a.icon.reaction-button.reacted[href=?]', href do
         assert_select 'use[href*=?]', 'thumb-up-filled'
@@ -127,10 +156,9 @@ class ReactionsHelperTest < ActionView::TestCase
     User.current = users(:users_004)
 
     issue = issues(:issues_001)
-    reaction = issue.reactions.find_by(user: User.current)
 
     result = with_locale('en') do
-      reaction_button(issue, reaction)
+      reaction_button(issue)
     end
     tooltip = 'Dave Lopper, John Smith, and Redmine Admin'
 

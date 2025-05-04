@@ -22,9 +22,6 @@ module Redmine
     # Types of objects that can have reactions
     REACTABLE_TYPES = %w(Journal Issue Message News Comment)
 
-    # Maximum number of users to display in the reaction button tooltip
-    DISPLAY_REACTION_USERS_LIMIT = 10
-
     # Returns true if the user can view the reaction information of the object
     def self.visible?(object, user = User.current)
       Setting.reactions_enabled? && object.visible?(user)
@@ -39,44 +36,34 @@ module Redmine
       extend ActiveSupport::Concern
 
       included do
-        has_many :reactions, -> { order(id: :desc) }, as: :reactable, dependent: :delete_all
-        has_many :reaction_users, through: :reactions, source: :user
+        has_many :reactions, as: :reactable, dependent: :delete_all
 
-        attr_writer :reaction_user_names, :reaction_count
+        attr_writer :reaction_detail
       end
 
       class_methods do
-        def load_with_reactions
-          objects = all.to_a
+        # Preloads reaction details for a collection of objects
+        def preload_reaction_details(objects)
+          return unless Setting.reactions_enabled?
 
-          return objects unless Setting.reactions_enabled?
-
-          object_users_map = ::Reaction.users_map_for_reactables(self.name, objects.map(&:id))
+          details = ::Reaction.build_detail_map_for(objects, User.current)
 
           objects.each do |object|
-            all_user_names = object_users_map[object.id] || []
-
-            object.reaction_count = all_user_names.size
-            object.reaction_user_names = all_user_names.take(DISPLAY_REACTION_USERS_LIMIT)
+            object.reaction_detail = details.fetch(object.id) { ::Reaction::Detail.new }
           end
-          objects
         end
       end
 
-      def reaction_user_names
-        @reaction_user_names || reaction_users.take(DISPLAY_REACTION_USERS_LIMIT).map(&:name)
+      def reaction_detail
+        # Loads and returns reaction details if they are not already loaded.
+        # This is intended for cases where explicit preloading is unnecessary,
+        # such as retrieving reactions for a single issue on its detail page.
+        load_reaction_detail unless defined?(@reaction_detail)
+        @reaction_detail
       end
 
-      def reaction_count
-        @reaction_count || reaction_users.size
-      end
-
-      def reaction_by(user)
-        if reactions.loaded?
-          reactions.find { _1.user_id == user.id }
-        else
-          reactions.find_by(user: user)
-        end
+      def load_reaction_detail
+        self.class.preload_reaction_details([self])
       end
     end
   end
