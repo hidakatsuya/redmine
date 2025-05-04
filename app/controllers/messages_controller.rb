@@ -49,7 +49,9 @@ class MessagesController < ApplicationController
       reorder("#{Message.table_name}.created_on ASC, #{Message.table_name}.id ASC").
       limit(@reply_pages.per_page).
       offset(@reply_pages.offset).
-      load_with_reactions
+      to_a
+
+    Message.preload_reaction_details(@replies)
 
     @reply = Message.new(:subject => "RE: #{@message.subject}")
     render :action => "show", :layout => false if request.xhr?

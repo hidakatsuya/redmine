@@ -18,15 +18,19 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 module ReactionsHelper
-  def reaction_button(object, reaction = nil)
+  # Maximum number of users to display in the reaction button tooltip
+  DISPLAY_REACTION_USERS_LIMIT = 10
+
+  def reaction_button(object)
     return unless Redmine::Reaction.visible?(object, User.current)
 
-    reaction ||= object.reaction_by(User.current)
+    detail = object.reaction_detail
 
-    count = object.reaction_count
-    user_names = object.reaction_user_names
+    reaction = detail.user_reaction
+    count = detail.reaction_count
+    visible_user_names = detail.visible_users.take(DISPLAY_REACTION_USERS_LIMIT).map(&:name)
 
-    tooltip = build_reaction_tooltip(user_names, count)
+    tooltip = build_reaction_tooltip(visible_user_names, count)
 
     if Redmine::Reaction.writable?(object, User.current)
       if reaction&.persisted?
@@ -81,13 +85,13 @@ module ReactionsHelper
     tag.span(data: { 'reaction-button-id': reaction_id_for(object) }, &)
   end
 
-  def build_reaction_tooltip(user_names, count)
+  def build_reaction_tooltip(visible_user_names, count)
     return if count.zero?
 
-    display_user_names = user_names.dup
+    display_user_names = visible_user_names.dup
+    others = count - visible_user_names.size
 
-    if count > Redmine::Reaction::DISPLAY_REACTION_USERS_LIMIT
-      others = count - Redmine::Reaction::DISPLAY_REACTION_USERS_LIMIT
+    if others.positive?
       display_user_names << I18n.t(:reaction_text_x_other_users, count: others)
     end
 

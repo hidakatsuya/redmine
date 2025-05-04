@@ -3332,19 +3332,35 @@ class IssuesControllerTest < Redmine::ControllerTest
   end
 
   def test_show_should_display_reactions
-    @request.session[:user_id] = nil
+    current_user = User.generate!
+
+    User.add_to_project(current_user, projects(:projects_001),
+      Role.generate!(users_visibility: 'members_of_visible_projects', permissions: [:view_issues]))
+
+    @request.session[:user_id] = current_user.id
 
     get :show, params: { id: 1 }
 
     assert_response :success
-    assert_select 'span[data-reaction-button-id=reaction_issue_1] span.reaction-button' do
-      assert_select 'span.icon-label', '3'
-    end
-    assert_select 'span[data-reaction-button-id=reaction_journal_1] span.reaction-button'
-    assert_select 'span[data-reaction-button-id=reaction_journal_2] span.reaction-button'
 
-    # Should not display reactions when reactions feature is disabled.
+    assert_select 'span[data-reaction-button-id=reaction_issue_1]' do
+      # The current_user can only see members who belong to projects that the current_user has access to.
+      # Since the Redmine Admin user does not belong to any projects visible to the current_user,
+      # the Redmine Admin user's name is not displayed in the reaction user list. Instead, "1 other" is shown.
+      assert_select 'a.reaction-button[title=?]', 'Dave Lopper, John Smith, and 1 other' do
+        assert_select 'span.icon-label', '3'
+      end
+    end
+
+    assert_select 'span[data-reaction-button-id=reaction_journal_1]' do
+      assert_select 'a.reaction-button[title=?]', 'John Smith'
+    end
+    assert_select 'span[data-reaction-button-id=reaction_journal_2] a.reaction-button'
+  end
+
+  def test_should_not_display_reactions_when_reactions_feature_is_disabled
     Setting.reactions_enabled = false
+
     get :show, params: { id: 1 }
 
     assert_response :success
