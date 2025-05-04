@@ -26,75 +26,102 @@ class Redmine::ReactionTest < ActiveSupport::TestCase
     Setting.reactions_enabled = '1'
   end
 
-  test 'reaction_by returns reaction for specific user' do
-    reaction = Reaction.create(reactable: @issue, user: @user)
+  test 'preload_reaction_details preloads ReactionDetail for all objects in the collection' do
+    User.current = users(:users_002)
 
-    assert_equal reaction, @issue.reaction_by(@user)
-    assert_nil @issue.reaction_by(users(:users_003)) # Another user
-  end
+    issue1 = issues(:issues_001)
+    issue2 = issues(:issues_002)
 
-  test 'reaction_by finds reaction when reactions are preloaded' do
-    reaction = Reaction.create(reactable: @issue, user: @user)
+    assert_nil issue1.instance_variable_get(:@reaction_detail)
+    assert_nil issue2.instance_variable_get(:@reaction_detail)
 
-    issue_with_reactions = Issue.preload(:reactions).find(@issue.id)
+    Issue.preload_reaction_details([issue1, issue2])
 
+    expected_issue1_reaction_detail = Reaction::Detail.new(
+      reaction_count: 3,
+      visible_users: [users(:users_003), users(:users_002), users(:users_001)],
+      user_reaction: reactions(:reaction_002)
+    )
+
+    # ReactionDetail is already preloaded, so calling reaction_detail does not execute any query.
     assert_no_queries do
-      assert_equal reaction.id, issue_with_reactions.reaction_by(@user).id
+      assert_equal expected_issue1_reaction_detail, issue1.reaction_detail
+
+      # Even when an object has no reactions, an empty ReactionDetail is set.
+      assert_equal Reaction::Detail.new(
+        reaction_count: 0,
+        visible_users: [],
+        user_reaction: nil
+      ), issue2.reaction_detail
     end
   end
 
-  test 'load_with_reactions returns an array and preloads reaction_user_names' do
-    issues = Issue.where(id: [1, 6]).order(:id).load_with_reactions
+  test 'visible_users in ReactionDetail preloaded by preload_reaction_details does not include non-visible users' do
+    current_user = User.current = User.generate!
+    visible_user = users(:users_002)
+    non_visible_user = User.generate!
 
-    assert_equal [issues(:issues_001), issues(:issues_006)], issues
+    project = Project.generate!
+    role = Role.generate!(users_visibility: 'members_of_visible_projects')
 
-    assert_no_queries do
-      assert_equal ['Dave Lopper', 'John Smith', 'Redmine Admin'], issues.first.reaction_user_names
-      assert_equal ['John Smith'], issues.second.reaction_user_names
+    User.add_to_project(current_user, project, role)
+    User.add_to_project(visible_user, project, roles(:roles_001))
+
+    issue = Issue.generate!(project: project)
+
+    [current_user, visible_user, non_visible_user].each do |user|
+      issue.reactions.create!(user: user)
     end
+
+    Issue.preload_reaction_details([issue])
+
+    # non_visible_user is not visible to current_user because they do not belong to any project.
+    assert_equal [visible_user, current_user], issue.reaction_detail.visible_users
   end
 
-  test 'load_with_reactions returns an array and does not preload reaction_user_names' do
+  test 'preload_reaction_details does nothing when the reaction feature is disabled' do
     Setting.reactions_enabled = '0'
 
-    journals = Journal.where(id: 1).load_with_reactions
+    User.current = users(:users_002)
+    news1 = news(:news_001)
 
-    assert_equal [journals(:journals_001)], journals
-    assert_nil journals.first.instance_variable_get(:@reaction_user_names)
-  end
+    # Stub the Setting to avoid executing queries for retrieving settings,
+    # making it easier to confirm no queries are executed by preload_reaction_details().
+    Setting.stubs(:reactions_enabled?).returns(false)
 
-  test 'reaction_user_names returns an array of user names' do
-    assert_equal ['John Smith'], comments(:comments_001).reaction_user_names
-
-    # When user names are preloaded by load_with_reactions
-    comment = Comment.where(id: [1]).load_with_reactions.first
     assert_no_queries do
-      assert_equal ['John Smith'], comment.reaction_user_names
+      News.preload_reaction_details([news1])
     end
+
+    assert_nil news1.instance_variable_get(:@reaction_detail)
   end
 
-  test 'reaction_users returns users ordered by their newest reactions' do
-    Reaction.create(reactable: @issue, user: users(:users_001))
-    Reaction.create(reactable: @issue, user: users(:users_002))
-    Reaction.create(reactable: @issue, user: users(:users_003))
+  test 'reaction_detail loads and returns ReactionDetail if it is not preloaded' do
+    message7 = messages(:messages_007)
 
-    assert_equal [
-      users(:users_003),
-      users(:users_002),
-      users(:users_001)
-    ], @issue.reaction_users
+    User.current = users(:users_002)
+    assert_nil message7.instance_variable_get(:@reaction_detail)
+
+    assert_equal Reaction::Detail.new(
+      reaction_count: 1,
+      visible_users: [users(:users_002)],
+      user_reaction: reactions(:reaction_009)
+    ), message7.reaction_detail
   end
 
-  test 'destroy should delete associated reactions' do
-    @issue.reactions.create!(
-      [
-        {user: users(:users_001)},
-        {user: users(:users_002)}
-      ]
-    )
-    assert_difference 'Reaction.count', -2 do
-      @issue.destroy
-    end
+  test 'load_reaction_detail loads ReactionDetail for the object itself' do
+    comment1 = comments(:comments_001)
+
+    User.current = users(:users_001)
+    assert_nil comment1.instance_variable_get(:@reaction_detail)
+
+    comment1.load_reaction_detail
+
+    assert_equal Reaction::Detail.new(
+      reaction_count: 1,
+      visible_users: [users(:users_002)],
+      user_reaction: nil
+    ), comment1.reaction_detail
   end
 
   test 'visible? returns true when reactions are enabled and object is visible to user' do
