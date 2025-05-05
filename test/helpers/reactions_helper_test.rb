@@ -130,6 +130,14 @@ class ReactionsHelperTest < ActionView::TestCase
     assert_select_in result, 'a.reaction-button[title=?]', '2 others'
   end
 
+  test 'reaction_button formats the tooltip content based on the support.array settings of each locale' do
+    result = with_locale('ja') do
+      reaction_button(issues(:issues_001))
+    end
+
+    assert_select_in result, 'a.reaction-button[title=?]', 'Dave Lopper、John Smith、Redmine Admin'
+  end
+
   test 'reaction_button for reacted object' do
     User.current = users(:users_002)
 
