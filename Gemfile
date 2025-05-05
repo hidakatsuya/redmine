@@ -8,6 +8,7 @@ gem 'mini_mime', '~> 1.1.0'
 gem "actionpack-xml_parser"
 gem 'roadie-rails', '~> 3.3.0'
 gem 'marcel'
+gem 'ostruct'
 gem 'mail', '~> 2.8.1'
 gem 'nokogiri', '~> 1.18.3'
 gem 'i18n', '~> 1.14.1'
