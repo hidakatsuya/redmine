@@ -26,6 +26,10 @@ class Redmine::ReactionTest < ActiveSupport::TestCase
     Setting.reactions_enabled = '1'
   end
 
+  teardown do
+    Setting.clear_cache
+  end
+
   test 'preload_reaction_details preloads ReactionDetail for all objects in the collection' do
     User.current = users(:users_002)
 
@@ -127,15 +131,15 @@ class Redmine::ReactionTest < ActiveSupport::TestCase
   test 'visible? returns true when reactions are enabled and object is visible to user' do
     object = issues(:issues_007)
     user = users(:users_002)
-    Setting.reactions_enabled = '1'
 
     assert Redmine::Reaction.visible?(object, user)
   end
 
   test 'visible? returns false when reactions are disabled' do
+    Setting.reactions_enabled = '0'
+
     object = issues(:issues_007)
     user = users(:users_002)
-    Setting.reactions_enabled = '0'
 
     assert_not Redmine::Reaction.visible?(object, user)
   end
@@ -143,7 +147,6 @@ class Redmine::ReactionTest < ActiveSupport::TestCase
   test 'visible? returns false when object is not visible to user' do
     object = issues(:issues_007)
     user = users(:users_002)
-    Setting.reactions_enabled = '1'
 
     object.expects(:visible?).with(user).returns(false)
 
@@ -159,7 +162,6 @@ class Redmine::ReactionTest < ActiveSupport::TestCase
       comment: comments(:comments_002)
     }
     user = users(:users_002)
-    Setting.reactions_enabled = '1'
 
     reactable_objects.each do |type, object|
       assert Redmine::Reaction.writable?(object, user), "Expected writable? to return true for #{type}"
@@ -169,7 +171,6 @@ class Redmine::ReactionTest < ActiveSupport::TestCase
   test 'writable? returns false when user is not logged in' do
     object = issues(:issues_007)
     user = User.anonymous
-    Setting.reactions_enabled = '1'
 
     assert_not Redmine::Reaction.writable?(object, user)
   end
@@ -178,7 +179,6 @@ class Redmine::ReactionTest < ActiveSupport::TestCase
     object = issues(:issues_007)
     user = users(:users_002)
     object.project.update!(status: Project::STATUS_ARCHIVED)
-    Setting.reactions_enabled = '1'
 
     assert_not Redmine::Reaction.writable?(object, user)
   end
@@ -186,7 +186,6 @@ class Redmine::ReactionTest < ActiveSupport::TestCase
   test 'writable? returns false when project is closed' do
     object = issues(:issues_007)
     user = users(:users_002)
-    Setting.reactions_enabled = '1'
     object.project.update!(status: Project::STATUS_CLOSED)
 
     assert_not Redmine::Reaction.writable?(object, user)

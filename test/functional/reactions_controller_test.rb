@@ -20,10 +20,14 @@
 require_relative '../test_helper'
 
 class ReactionsControllerTest < Redmine::ControllerTest
-  def setup
+  setup do
     Setting.reactions_enabled = '1'
     # jsmith
     @request.session[:user_id] = users(:users_002).id
+  end
+
+  teardown do
+    Setting.clear_cache
   end
 
   test 'create for issue' do

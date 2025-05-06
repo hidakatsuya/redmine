@@ -136,11 +136,12 @@ class MessagesControllerTest < Redmine::ControllerTest
     assert_select 'span[data-reaction-button-id=reaction_message_6] a.reaction-button'
 
     # Should not display reactions when reactions feature is disabled.
-    Setting.reactions_enabled = false
-    get :show, params: { board_id: 1, id: 4 }
+    with_settings reactions_enabled: '0' do
+      get :show, params: { board_id: 1, id: 4 }
 
-    assert_response :success
-    assert_select 'span[data-reaction-button-id]', false
+      assert_response :success
+      assert_select 'span[data-reaction-button-id]', false
+    end
   end
 
   def test_get_new
