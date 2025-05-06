@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 require 'optparse'
-require 'ostruct'
 require 'date'
 require 'uri'
 require 'net/http'
@@ -12,10 +11,13 @@ VERSION = '1.0.0'
 ARGV << '-h' if ARGV.empty?
 
 class OptionsParser
+  Options = Struct.new(:version_id, :release_date, :api_url, :api_key)
+
   def self.parse(args)
-    options = OpenStruct.new
-    options.release_date = ''
-    options.api_url = 'https://www.redmine.org'
+    options = Options.new(
+      release_date: '',
+      api_url: 'https://www.redmine.org'
+    )
 
     opt_parser = OptionParser.new do |opts|
       opts.banner = 'Usage: changelog_generator.rb [options]'
