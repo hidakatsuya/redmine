@@ -3359,12 +3359,12 @@ class IssuesControllerTest < Redmine::ControllerTest
   end
 
   def test_should_not_display_reactions_when_reactions_feature_is_disabled
-    Setting.reactions_enabled = false
+    with_settings reactions_enabled: '0' do
+      get :show, params: { id: 1 }
 
-    get :show, params: { id: 1 }
-
-    assert_response :success
-    assert_select 'span[data-reaction-button-id]', false
+      assert_response :success
+      assert_select 'span[data-reaction-button-id]', false
+    end
   end
 
   def test_show_should_not_display_edit_attachment_icon_for_user_without_edit_issue_permission_on_tracker
