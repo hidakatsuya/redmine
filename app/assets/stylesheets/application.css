@@ -2138,15 +2138,18 @@ div.issue.details .reaction {
   float: right;
   font-size: 0.9em;
   margin-top: 0.5em;
-  clear: both;
+  margin-left: 10px;
+  clear: right;
 }
 div.message .reaction {
   float: right;
   font-size: 0.9em;
+  margin-left: 10px;
 }
 div.news .reaction {
   float: right;
   font-size: 0.9em;
+  margin-left: 10px;
 }
 
 /* Custom JQuery styles */
