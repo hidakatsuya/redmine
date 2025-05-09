@@ -45,7 +45,7 @@ jobs:
           --health-retries=3
 
       chrome:
-        image: selenium/standalone-chrome
+        image: selenium/standalone-chrome:132.0
         ports:
           - 4444:4444
         options: >-
