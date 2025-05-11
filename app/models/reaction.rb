@@ -57,7 +57,7 @@ class Reaction < ApplicationRecord
 
       m[reaction.reactable_id].then do |detail|
         detail.reaction_count += 1
-        detail.visible_users << reaction.user if visible_user_ids.include?(reaction.user.id)
+        detail.visible_users << reaction.user if visible_user_ids.include?(reaction.user&.id)
         detail.user_reaction = reaction if reaction.user == user
       end
     end
