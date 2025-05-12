@@ -53,6 +53,8 @@ class Reaction < ApplicationRecord
                          .pluck(:id).to_set
 
     reactions.each_with_object({}) do |reaction, m|
+      next unless reaction.user
+
       m[reaction.reactable_id] ||= Detail.new
 
       m[reaction.reactable_id].then do |detail|

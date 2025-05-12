@@ -117,4 +117,14 @@ class ReactionTest < ActiveSupport::TestCase
       result[issue.id].visible_users.sort_by(&:id)
     )
   end
+
+  # When the user data associated with a reaction is missing for some reason (data inconsistency)
+  test 'build_detail_map_for ignores reactions with orphaned user IDs' do
+    # Reaction (id=4) is associated with Journal (id=1)
+    reactions(:reaction_004).user.delete
+
+    result = Reaction.build_detail_map_for([journals(:journals_001)], users(:users_001))
+
+    assert_empty result
+  end
 end
