@@ -28,14 +28,12 @@ class Reaction < ApplicationRecord
 
   # Represents reaction details for a reactable object
   Detail = Struct.new(
-    # Total number of reactions
-    :reaction_count,
     # Users who reacted and are visible to the target user
     :visible_users,
     # Reaction of the target user
     :user_reaction
   ) do
-    def initialize(reaction_count: 0, visible_users: [], user_reaction: nil)
+    def initialize(visible_users: [], user_reaction: nil)
       super
     end
   end
@@ -56,7 +54,6 @@ class Reaction < ApplicationRecord
       m[reaction.reactable_id] ||= Detail.new
 
       m[reaction.reactable_id].then do |detail|
-        detail.reaction_count += 1
         detail.visible_users << reaction.user if visible_user_ids.include?(reaction.user.id)
         detail.user_reaction = reaction if reaction.user == user
       end

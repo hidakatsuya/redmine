@@ -27,7 +27,7 @@ module ReactionsHelper
     detail = object.reaction_detail
 
     reaction = detail.user_reaction
-    count = detail.reaction_count
+    count = detail.visible_users.size
     visible_user_names = detail.visible_users.take(DISPLAY_REACTION_USERS_LIMIT).map(&:name)
 
     tooltip = build_reaction_tooltip(visible_user_names, count)
