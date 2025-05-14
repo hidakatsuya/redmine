@@ -8,7 +8,10 @@
   <div id="change-<%= journal.id %>" class="<%= journal.css_classes %>">
     <div id="note-<%= journal.indice %>" class="note">
     <div class="contextual">
-      <span class="journal-actions"><%= render_journal_actions(issue, journal, :reply_links => reply_links) %></span>
+      <span class="journal-actions">
+        <%= reaction_button(journal) %>
+        <span class="jorunal-note-actions"><%= render_journal_actions(issue, journal, :reply_links => reply_links) %></span>
+      </span>
       <a href="#note-<%= journal.indice %>" class="journal-link">#<%= journal.indice %></a>
     </div>
     <h4 class='note-header'>

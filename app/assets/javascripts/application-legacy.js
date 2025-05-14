@@ -426,7 +426,7 @@ function showIssueHistory(journal, url) {
       tab_content.find('.journal').show();
       tab_content.find('.journal:not(.has-notes)').hide();
       tab_content.find('.journal .wiki').show();
-      tab_content.find('.journal .contextual .journal-actions').show();
+      tab_content.find('.journal .contextual .journal-note-actions').show();
 
       // always show thumbnails in notes tab
       var thumbnails = tab_content.find('.journal .thumbnails');
@@ -439,13 +439,13 @@ function showIssueHistory(journal, url) {
       tab_content.find('.journal:not(.has-details)').hide();
       tab_content.find('.journal .wiki').hide();
       tab_content.find('.journal .thumbnails').hide();
-      tab_content.find('.journal .contextual .journal-actions').hide();
+      tab_content.find('.journal .contextual .journal-note-actions').hide();
       break;
     default:
       tab_content.find('.journal').show();
       tab_content.find('.journal .wiki').show();
       tab_content.find('.journal .thumbnails').show();
-      tab_content.find('.journal .contextual .journal-actions').show();
+      tab_content.find('.journal .contextual .journal-note-actions').show();
   }
 
   return false;
