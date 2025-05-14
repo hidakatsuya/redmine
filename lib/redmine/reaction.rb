@@ -23,13 +23,13 @@ module Redmine
     REACTABLE_TYPES = %w(Journal Issue Message News Comment)
 
     # Returns true if the user can view the reaction of the object
-    def self.viewable?(object, user = User.current)
+    def self.visible?(object, user = User.current)
       Setting.reactions_enabled? && object.visible?(user)
     end
 
     # Returns true if the user can add/remove a reaction to/from the object
     def self.editable?(object, user = User.current)
-      user.logged? && viewable?(object, user) && object&.project&.active?
+      user.logged? && visible?(object, user) && object&.project&.active?
     end
 
     module Reactable

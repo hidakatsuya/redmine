@@ -124,29 +124,29 @@ class Redmine::ReactionTest < ActiveSupport::TestCase
     ), comment1.reaction_detail
   end
 
-  test 'viewable? returns true when reactions are enabled and object is visible to user' do
+  test 'visible? returns true when reactions are enabled and object is visible to user' do
     object = issues(:issues_007)
     user = users(:users_002)
 
-    assert Redmine::Reaction.viewable?(object, user)
+    assert Redmine::Reaction.visible?(object, user)
   end
 
-  test 'viewable? returns false when reactions are disabled' do
+  test 'visible? returns false when reactions are disabled' do
     Setting.reactions_enabled = '0'
 
     object = issues(:issues_007)
     user = users(:users_002)
 
-    assert_not Redmine::Reaction.viewable?(object, user)
+    assert_not Redmine::Reaction.visible?(object, user)
   end
 
-  test 'viewable? returns false when object is not visible to user' do
+  test 'visible? returns false when object is not visible to user' do
     object = issues(:issues_007)
     user = users(:users_002)
 
     object.expects(:visible?).with(user).returns(false)
 
-    assert_not Redmine::Reaction.viewable?(object, user)
+    assert_not Redmine::Reaction.visible?(object, user)
   end
 
   test 'editable? returns true for various reactable objects when user is logged in, object is visible, and project is active' do

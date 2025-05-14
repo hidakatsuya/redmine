@@ -22,7 +22,7 @@ module ReactionsHelper
   DISPLAY_REACTION_USERS_LIMIT = 10
 
   def reaction_button(object)
-    return unless Redmine::Reaction.viewable?(object, User.current)
+    return unless Redmine::Reaction.visible?(object, User.current)
 
     detail = object.reaction_detail
 
