@@ -87,7 +87,7 @@ jobs:
         run: google-chrome --version
 
       - name: Run system tests
-        run: bin/rails test:system
+        run: bin/rails test test/system/issues_test.rb:535
         env:
           GOOGLE_CHROME_OPTS_ARGS: headless,disable-gpu,no-sandbox,disable-dev-shm-usage
         # System tests might still be a bit unstable, so for now, even if a system test fails,

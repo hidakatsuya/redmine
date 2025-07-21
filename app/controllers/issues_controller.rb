@@ -48,6 +48,7 @@ class IssuesController < ApplicationController
     retrieve_query(IssueQuery, use_session)
 
     if @query.valid?
+      sleep 5
       respond_to do |format|
         format.html do
           @issue_count = @query.issue_count
