@@ -43,6 +43,39 @@ class WorkflowsController < ApplicationController
   end
 
   def update
+    # JSONリクエスト対応
+    if request.content_type == 'application/json'
+      begin
+        json = JSON.parse(request.body.read)
+        transitions = json['transitions'] || {}
+        # extraからtracker_id, role_idを取得して@trackers/@rolesをセット
+        tracker_ids = json.dig('extra', 'tracker_id[]') || []
+        role_ids = json.dig('extra', 'role_id[]') || []
+        @trackers = Tracker.where(id: tracker_ids)
+        @roles = Role.where(id: role_ids)
+        # 互換性のためdeep_dup
+        transitions = Marshal.load(Marshal.dump(transitions))
+        transitions.each_value do |transitions_by_new_status|
+          transitions_by_new_status.each_value do |transition_by_rule|
+            transition_by_rule.reject! {|rule, transition| transition == 'no_change'}
+          end
+        end
+        WorkflowTransition.replace_transitions(@trackers, @roles, transitions)
+        # リダイレクト先URLをJSONで返す
+        redirect_url = edit_workflows_path(
+          role_id: (role_ids.presence || @roles.map(&:id)),
+          tracker_id: (tracker_ids.presence || @trackers.map(&:id)),
+          used_statuses_only: (json.dig('extra', 'used_statuses_only') || params[:used_statuses_only])
+        )
+        render json: {redirect_url: redirect_url}
+        return
+      rescue => e
+        render json: {error: "JSONリクエストの処理に失敗しました: #{e.message}"}, status: :bad_request
+        return
+      end
+    end
+
+    # 従来のフォーム送信
     if @roles && @trackers && params[:transitions]
       transitions = params[:transitions].deep_dup
       transitions.each_value do |transitions_by_new_status|

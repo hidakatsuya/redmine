@@ -14,7 +14,6 @@
 # - https://github.com/rack/rack/blob/v3.1.16/lib/rack/query_parser.rb#L54
 # - https://github.com/rack/rack/blob/v3.1.16/lib/rack/query_parser.rb#L57
 ENV['RACK_QUERY_PARSER_BYTESIZE_LIMIT'] ||= '33554432'
-ENV['RACK_QUERY_PARSER_PARAMS_LIMIT'] ||= '65536'
 
 # Set up gems listed in the Gemfile.
 ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../../Gemfile', __FILE__)

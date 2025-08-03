@@ -508,4 +508,49 @@ class WorkflowsControllerTest < Redmine::ControllerTest
       order('tracker_id, role_id, old_status_id, new_status_id').
       collect {|w| [w.old_status, w.new_status_id]}
   end
+
+  def test_patch_update_with_large_number_of_statuses_json
+    @request.session[:user_id] = 1 # 管理者ユーザーID
+    WorkflowTransition.delete_all
+
+    num_statuses = 40
+    transitions_data = {}
+
+    # Allowed statuses for a new issue (status_id = 0)
+    transitions_data['0'] = {}
+    (1..num_statuses).each do |status_id|
+      transitions_data['0'][status_id.to_s] = {'always' => '1'}
+    end
+
+    # Status transitions between statuses
+    (1..num_statuses).each do |status_id_from|
+      transitions_data[status_id_from.to_s] = {}
+      (1..num_statuses).each do |status_id_to|
+        next if status_id_from == status_id_to
+
+        transitions_data[status_id_from.to_s][status_id_to.to_s] = {
+          'always' => '1', 'author' => '1', 'assignee' => '1'
+        }
+      end
+    end
+
+    json_payload = {
+      transitions: transitions_data,
+      extra: {
+        'role_id[]' => ['2'],
+        'tracker_id[]' => ['1'],
+        'used_statuses_only' => ['1']
+      }
+    }
+
+    # Content-Typeをapplication/jsonにセット
+    @request.headers['Content-Type'] = 'application/json'
+    assert_nothing_raised do
+      patch :update,
+        params: {},
+        body: JSON.dump(json_payload),
+        xhr: true
+    end
+    assert_response :success
+  end
 end
