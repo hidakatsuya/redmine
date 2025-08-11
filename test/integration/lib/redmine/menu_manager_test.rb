@@ -129,20 +129,23 @@ class MenuManagerTest < Redmine::IntegrationTest
     Project.find(3).enabled_module_names = %w(time_tracking)
     EnabledModule.where(:project_id => [4, 6]).delete_all
 
-    log_user('dlopper', 'foo')
-    get '/projects'
-    assert_select '#main-menu' do
-      assert_select 'a.projects',     :count => 1
-      assert_select 'a.activity',     :count => 1
+    # Ensure the projects index uses board display type for this test
+    with_settings :project_list_display_type => 'board' do
+      log_user('dlopper', 'foo')
+      get '/projects'
+      assert_select '#main-menu' do
+        assert_select 'a.projects',     :count => 1
+        assert_select 'a.activity',     :count => 1
 
-      assert_select 'a.issues',       :count => 1 # issue_tracking
-      assert_select 'a.time-entries', :count => 1 # time_tracking
-      assert_select 'a.gantt',        :count => 0 # gantt
-      assert_select 'a.calendar',     :count => 1 # calendar
-      assert_select 'a.news',         :count => 0 # news
-    end
-    assert_select '#projects-index' do
-      assert_select 'a.project',      :count => 4
+        assert_select 'a.issues',       :count => 1 # issue_tracking
+        assert_select 'a.time-entries', :count => 1 # time_tracking
+        assert_select 'a.gantt',        :count => 0 # gantt
+        assert_select 'a.calendar',     :count => 1 # calendar
+        assert_select 'a.news',         :count => 0 # news
+      end
+      assert_select '#projects-index' do
+        assert_select 'a.project',      :count => 4
+      end
     end
   end
 
