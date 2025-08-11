@@ -1,0 +1,13 @@
+.DS_Store
+.yardoc
+
+.rspec
+.ruby-version
+
+Gemfile.lock
+doc
+tmp
+pkg
+.bundle
+.history
+vendor/

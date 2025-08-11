@@ -1,0 +1,192 @@
+1.21.4 2025-05-06
+       - mini_magick v5.0 supoort and marcel gem added (#100, #102, #105)
+       - Warning "literal string will be frozen in the future" appears on Ruby 3.4 (#101, #103, #106) (by pavel)
+       - Support Ruby 3.4 and Rails 7.2/8.0 (#104)
+       - Support Ruby 3.3 and Rails 7.1 (#96)
+       - convertHTMLColorToDec was changed to deprecated. use convert_html_color_to_dec_array instead (#95)
+       - Colour gradients support (#94)
+       - Fixed putjavascript() method not being a protected method. (#93)
+
+1.21.3 2023-07-15
+       - Javascript Form & XHTML Form support (#84)
+
+1.21.2 2023-06-27
+       - Resolving infinite loops when rtl == true. (#89)
+       - Ruby 2.4 is not compatible with loofah 2.21 or higher (#87)
+       - Order bookmarks by page and y for addTOC() and addHTMLTOC(). (#86)
+       - Order bookmarks by page and y (#85) (by skalimer0)
+
+1.21.1 2023-03-20
+       - Changed version description of PDF PRODUCER. (#83)
+       - fix isValidCSSSelectorForTag method. (#82)
+       - Improved compatibility with ImageMagick 7.1.1-0 and later when using mini_magick. (#81)
+       - Fixed parsepng method to support transparent GIF and PNG tRNS transparency. (#80)
+       - ImageMagick7 support in RMagick 5.2.0. (#79)
+       - Add support WebP image. (#77)
+
+1.21.0 2023-02-13
+       - Support for Ruby 3.0.0, 3.1.0, 3.2.0. (Drop support for Ruby 2.2 and earlier.) (#66)
+       - Support Rails 6 and Rails 7. (Drop support for Rails 3.x, 4.x) (#66, #72)
+       - Fix RMagick 5.0 compatible. (#66)
+       - Infinite loop has been resolved. (#68, #74)
+       - Fixed a bug that caused the x position to shift when an <img> tag was behind a <li> tag in HTML. (#74)
+       - fix: Incorrect characters when copying out of a generated PDF with Unicode fonts. (#71)
+       - Suppresses output for Circle(), Ellipse(), PieSector(), and PieSectorXY() when the radius is 0. (#67)
+       - Don't change an object while iterating over it (#59) (by thegcat)
+       - fix : bidi bug (#56) (by ahorek)
+       - Avoid rdoc stack level too deep (SystemStackError) in gem install. (#76)
+       - PDF example output option OUTPUT=true added (#70)
+       - Make the image file path acquisition process extensible (#58) (by yui-har)
+
+1.20.1 2019-08-21
+       - fix license warning. (by pavel)
+       - Removed test resource from distribution target in gemspec.
+
+1.20.0 2019-08-11
+       - Added support for MiniMagick.
+       - Fix RMagick 4.0 compatible.
+       - freeze unicode tables. (by pavel)
+
+1.19.8 2019-01-30
+       - Fixed a bug that escaping parentheses when <div style = "text-align: justify;"> is specified in write_html method.
+
+1.19.7 2019-01-20
+       - Ruby 2.6 supported.
+       - utf8Bidi() X6,X7 bug fixed.
+
+1.19.6 2018-10-06
+       - The problem of the line feed position of Ln() function has been fixed.
+       - Fixed a problem of line feed position occurring in the following <pre> tag of HTML in the following cases.
+         When a <br> tag is included immediately after the start of the <pre> tag.
+         When a <br> tag is included immediately before the end of the <pre> tag.
+         When a line feed is included immediately after the start of the tag.
+         When a line feed is included immediately before the end of the tag.
+       - Fixed a problem of line feed position occurring in the following </pre> and <p> tags of HTML in the following cases.
+         When a space is included between the </pre> tag and the <p> tag.
+       - Cell link bug fixed.
+       - Examples test added.
+
+1.19.5 2018-06-24
+       - Fixed that the handling of Tempfile was wrong.
+       - Fixed compatibility problem with Magick::RGBColorspace and Magick::SRGBColorspace.
+         image_alpha_mask function has been fixed to use Magick :: ExtractAlphaChannel.
+       - Deleted exception handling of ImagePngAlpha function.
+
+1.19.4 2018-06-16
+       - Ruby 2.5 supported.
+       - Rails 5.2 supported.
+       - Fixed exception handling of ImagePngAlpha function.
+
+1.19.3 2017-09-10
+       - Rails 5.1 supported.
+       - nil link bug fixed. (by jkraemer)
+
+1.19.2 2017-04-08
+       - Ruby 1.9/2.0 on Windows install problem fixed.
+
+1.19.1 2017-03-30
+       - Ruby 2.4 supported.
+       - Fixed get image file from remote URL
+       - Fixed get image file with Non-ASCII file name.
+       - Fixed function of SetFont bold/italic/bold and italic problem for CID-0 fonts.
+       - Fixed issue where backslash is duplicated in table tag. (by t-gergely)
+       - Fixed strict htmlentities dependency.
+       - Added the ability to specify abs-path font files. (by Artemiy Solopov)
+       - Use correct brackets to get second character in a string. (by vrobert)
+
+1.19.0 2015-11-20
+       - Update base version to TCPDF 5.2.000.
+       - IMPORTANT: Support for font subsetting was added by default to reduce the size of documents using large unicode font files.
+           If you embed the whole font in the PDF, the person on the other end can make changes to it even if he didn't have your font.
+           If you subset the font, file size of the PDF will be smaller but the person who receives your PDF would need to have your same font in order to make changes to your PDF.
+       - The signature of the SetFont() and AddFont() methods were changed to include the font subsetting option (subsetting is applied by default).
+       - html anchors support. (by Oleg German)
+       - Test framework is changed to test-unit.
+           This particular error will occur when the test suite is run from outside a Rails environment.
+           Support the test suite is run from outside a Rails environment.
+       - Fonts file was separated in rbpdf-font.gem.
+
+1.18.7 2015-10-18
+       - Fixed case of missing HTML <pre> tag texts with whitespace. (use htmlentities gem liblary.)
+       - Fixed HTML Image function y position problem with png alpha image.
+
+1.18.6 2015-06-20
+       - Fixed page boxes problem for iOS.
+       - The dependence to the Rails environment was reduced.
+       - Fixed Image tag's style attribute width/height parameter problem.
+       - Open angled bracket '<' by HTML sanitize bug fixed.
+
+1.18.5 2015-01-24
+       - Rails 4.2 and Ruby 2.2 supported.
+       - Fix Rails 4.2 (new HTML sanitizer) compatible.
+       - Method getHTMLUnitToUnits() and SetDisplayMode() was fixed, and the problem when dividing, by an integer was fixed. 
+       - Remove Rails 4.2 deprecated ::ActionView::Base.sanitized_allowed_css_properties=.
+       - Fixed no left padding problem on tables.
+       - Fixed thead tag position problem on page break.
+       - fix case of missing HTML image (without height attribute) file. 
+
+1.18.4 2014-12-21
+       - utf8Bidi() Persion 0x200C(8204) and endedletter bug fixed.
+       - utf8Bidi() Bidirectional Algorithm X9/I1 rule BN(ZERO WIDTH NON-JOINER) bug fixed.
+       - utf8Bidi() Bidirectional Algorithm N1/N2 rule B/S/WS/ON bug fixed.
+       - utf8Bidi() Bidirectional Algorithm W2/W7 rule bug fixed.
+       - utf8Bidi() Bidirectional Algorithm N1/N2 rule multiple NIs bug fixed.
+       - RTL direction problem fixed. isRTLTextDir direction bug fixed.
+       - utf8Bidi() speed was improved.
+
+1.18.3 2014-12-06
+       - fixed img and hr self html tag DOM problem.
+       - fixed HTML table problem in writeHTMLCell function.
+       - fixed the problem which is not separated when table tag continues.
+       - fixed the problem that CSS classes don't work in thead table section.
+       - HTML image margin was fixed so that a picture in the HTML table didn't overwrite a boundary line.
+       - Method Write() was fixed to handle arabic strings.
+       - Parameter of the method was changed fixed.
+       - getPageDimensions, getBreakMargin, GetBreakMargin, startPageGroup methods fixed.
+       - LICENSE.TXT file added.
+
+1.18.2 2014-10-25 
+       - getNumLines and a getStringHeight function fixed the problem which is wrong by the case of two or more lines.
+       - fix case of missing image file.
+
+1.18.1 2014-09-15 
+       - ImagePngAlpha function fixed for the error case where an alpha channel cannot be deleted.
+       - getimagesize function fixed for MAC OS rmagick.
+       - getimagesize function fixed for grayscale JPEG Image.
+       - 16-bit PNG with alpha channel image support improved. (use RMagick liblary)
+
+1.18.0 2014-08-16 
+       - rfpdf product name and TCPDF class name changed to RBPDF.
+       - ImagePngAlpha function added.
+
+1.17.4 2014-07-28
+       - getNumLines, getStringHeight, getMargins function added.
+       - fix large image file page break bug.
+
+1.17.3 2014-07-16 Several bug fixed.
+
+1.17.2 2014-07-09 FreeSerif font added from GNU FreeFont(20080912).
+
+1.17   2014-05-18 Update base version to TCPDF 5.1.002. Ruby 2.0/2.1 support. FPDF is deprecated.
+
+1.16   2012-09-08 Rails 3.* and Ruby 1.9.* support, and fix FPDF severral bug.
+       Jun NAITOH took over development of RFPDF from Edwin Moss.
+
+1.15   2009-11-20 Rails 2.* support - Thanks to Prawnto plugin for showing the way to the new TemplateHandler
+
+1.14   2006-09-26
+       * Added support for @options_for_rfpdf hash for configuration:
+       * Added :filename option in this hash
+       If you're using the same settings for @options_for_rfpdf often, you might want to 
+       put your assignment in a before_filter (perhaps overriding :filename, etc in your actions).
+
+1.13   Updated to fpdf.rb 1.53d.
+       Added makefont and fpdf_eps.
+       Handle \n at the beginning of a string in MultiCell.
+       Tried to fix clipping issue in MultiCell - still needs some work.
+
+1.12   Added Korean support
+1.11   Added Japanese support
+1.10   Added Chinese support
+1.00   Added view template functionality
+
