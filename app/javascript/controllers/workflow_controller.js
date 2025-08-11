@@ -11,11 +11,20 @@ export default class extends Controller {
 
   captureCurrentState() {
     const state = {}
-    const checkboxes = this.formTarget.querySelectorAll('input[type="checkbox"][name^="transitions"]')
     
+    // Handle checkboxes
+    const checkboxes = this.formTarget.querySelectorAll('input[type="checkbox"][name^="transitions"]')
     checkboxes.forEach(checkbox => {
       if (!checkbox.disabled) {
         state[checkbox.name] = checkbox.checked
+      }
+    })
+    
+    // Handle select dropdowns (used when there are mixed role/tracker combinations)
+    const selects = this.formTarget.querySelectorAll('select[name^="transitions"]')
+    selects.forEach(select => {
+      if (select.value !== 'no_change') {
+        state[select.name] = select.value === '1'
       }
     })
     
@@ -23,16 +32,22 @@ export default class extends Controller {
   }
 
   setupChangeListeners() {
+    // Handle checkboxes
     const checkboxes = this.formTarget.querySelectorAll('input[type="checkbox"][name^="transitions"]')
-    
     checkboxes.forEach(checkbox => {
       if (!checkbox.disabled) {
-        checkbox.addEventListener('change', this.onCheckboxChange.bind(this))
+        checkbox.addEventListener('change', this.onInputChange.bind(this))
       }
+    })
+    
+    // Handle select dropdowns
+    const selects = this.formTarget.querySelectorAll('select[name^="transitions"]')
+    selects.forEach(select => {
+      select.addEventListener('change', this.onInputChange.bind(this))
     })
   }
 
-  onCheckboxChange(event) {
+  onInputChange(event) {
     // Optional: Could add visual feedback here
   }
 
@@ -88,19 +103,46 @@ export default class extends Controller {
     const currentState = this.captureCurrentState()
     const changedTransitions = {}
 
-    // Get all checkboxes and build the full current transitions state
+    // Get all form inputs and build the full current transitions state
     // but only include transitions that have changed
     const hasChanges = Object.keys(currentState).some(name => {
       return this.originalState[name] !== currentState[name]
     })
 
-    if (!hasChanges) {
+    // Also check for changes from selects that were originally "no_change"
+    const selects = this.formTarget.querySelectorAll('select[name^="transitions"]')
+    const hasSelectChanges = Array.from(selects).some(select => {
+      const originalHadValue = this.originalState.hasOwnProperty(select.name)
+      const currentValue = select.value
+      return currentValue !== 'no_change' && (!originalHadValue || this.originalState[select.name] !== (currentValue === '1'))
+    })
+
+    if (!hasChanges && !hasSelectChanges) {
       return {}
     }
 
     // Build full transitions state for changed areas
     // We need to send complete transition data for replace_transitions to work correctly
     const transitionsByStatus = this.groupTransitionsByStatus(currentState)
+    
+    // Add select elements that changed from "no_change"
+    selects.forEach(select => {
+      if (select.value !== 'no_change') {
+        const match = select.name.match(/transitions\[(\d+)\]\[(\d+)\]\[(\w+)\]/)
+        if (match) {
+          const [, oldStatusId, newStatusId, type] = match
+          
+          if (!transitionsByStatus[oldStatusId]) {
+            transitionsByStatus[oldStatusId] = {}
+          }
+          if (!transitionsByStatus[oldStatusId][newStatusId]) {
+            transitionsByStatus[oldStatusId][newStatusId] = {}
+          }
+          
+          transitionsByStatus[oldStatusId][newStatusId][type] = select.value
+        }
+      }
+    })
     
     // Only include status groups that have changes
     Object.keys(transitionsByStatus).forEach(oldStatusId => {
@@ -111,7 +153,17 @@ export default class extends Controller {
         // Check if any transition in this group changed
         const hasStatusChange = Object.keys(transitions).some(rule => {
           const fullKey = `${originalKey}[${rule}]`
-          return this.originalState[fullKey] !== currentState[fullKey]
+          const currentValue = transitions[rule]
+          const originalValue = this.originalState[fullKey]
+          
+          // Handle different value types
+          if (typeof originalValue === 'boolean' && typeof currentValue === 'string') {
+            return originalValue !== (currentValue === '1')
+          } else if (typeof originalValue === 'string' && typeof currentValue === 'boolean') {
+            return (originalValue === '1') !== currentValue
+          } else {
+            return originalValue !== currentValue
+          }
         })
         
         if (hasStatusChange) {
@@ -141,7 +193,15 @@ export default class extends Controller {
           grouped[oldStatusId][newStatusId] = {}
         }
         
-        grouped[oldStatusId][newStatusId][type] = state[name] ? '1' : '0'
+        // Handle both boolean (from checkboxes) and string (from selects) values
+        const value = state[name]
+        if (typeof value === 'boolean') {
+          grouped[oldStatusId][newStatusId][type] = value ? '1' : '0'
+        } else if (typeof value === 'string') {
+          grouped[oldStatusId][newStatusId][type] = value
+        } else {
+          grouped[oldStatusId][newStatusId][type] = value ? '1' : '0'
+        }
       }
     })
     
