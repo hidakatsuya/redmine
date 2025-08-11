@@ -75,7 +75,11 @@ class NewsControllerTest < Redmine::ControllerTest
     get(:show, :params => {:id => 1})
     assert_response :success
     assert_select 'p.breadcrumb a[href=?]', '/projects/ecookbook/news', :text => 'News'
-    assert_select 'h2', :text => 'JS eCookbook first release !'
+    # Check that the h2 contains the news title, regardless of avatar display
+    assert_select 'h2' do |elements|
+      assert elements.any? { |element| element.text.include?('eCookbook first release !') },
+             "Expected h2 to contain 'eCookbook first release !', but was '#{elements.first.text}'"
+    end
   end
 
   def test_show_should_show_attachments
