@@ -57,6 +57,18 @@ Always reference these instructions first and fallback to search or bash command
 - System tests: `bin/rails test:system` (requires Chrome/ChromeDriver)
 - Autoload tests: `bin/rails test:autoload`
 
+**Test Execution Methods - Reference GitHub Actions Workflows:**
+For comprehensive test execution methods, always reference the GitHub Actions workflows:
+- **Primary test workflow**: `.github/workflows/tests.yml` - Shows how tests are run across Ruby 3.2/3.3/3.4 with PostgreSQL/MySQL2/SQLite3
+- **Environment setup**: `.github/actions/setup-redmine/action.yml` - Composite action that configures the complete test environment including:
+  - System dependencies (ghostscript, gsfonts, locales, bzr, cvs)
+  - ImageMagick policy configuration for PDF handling
+  - Database configuration for different adapters
+  - Ruby/bundler setup with caching
+  - Test environment preparation with `ci:about`, `ci:setup`, `db:environment:set`
+
+The CI workflows provide the authoritative reference for test execution commands and environment setup procedures.
+
 **Run Linting:**
 - Ruby code: `sudo bundle exec rubocop --parallel` (takes ~33 seconds, NEVER CANCEL)
 - CSS files: `npx stylelint "app/assets/stylesheets/**/*.css"` (takes ~1 second)
@@ -140,3 +152,34 @@ Always run these commands before committing:
 
 ## Screenshot
 ![Redmine Admin Interface](https://github.com/user-attachments/assets/438ca77b-3314-4810-8a07-4ddc8344dd23)
+
+## Redmine.org Patch Submission
+
+**Important**: For issues that require patches to be submitted to redmine.org, include the following information in the pull request:
+
+**Redmine.org Ticket Title:**
+```
+Add GitHub Copilot development instructions for improved coding agent support
+```
+
+**Redmine.org Ticket Content:**
+```
+This patch adds comprehensive GitHub Copilot instructions (/.github/copilot-instructions.md) to help coding agents work effectively with the Redmine codebase.
+
+The instructions provide:
+- Complete setup procedures with validated timing benchmarks
+- Test execution methods referencing GitHub Actions workflows
+- Development environment configuration and troubleshooting
+- CI/CD integration details and validation procedures
+- Project structure overview and common development patterns
+
+This enhancement will improve development experience for contributors using AI coding assistants and ensure consistent development practices across the project.
+
+The instructions are based on validated procedures and include references to existing CI workflows for authoritative test execution methods.
+```
+
+**Submission Process:**
+1. Complete the pull request with all changes and validation
+2. Create a ticket on redmine.org with the above title and content
+3. Attach the patch file to the redmine.org ticket
+4. Link the redmine.org ticket in the pull request description
