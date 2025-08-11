@@ -250,6 +250,58 @@ class WorkflowsControllerTest < Redmine::ControllerTest
     assert_response :found
   end
 
+  def test_update_workflow_with_json_request
+    WorkflowTransition.delete_all
+
+    transitions_data = {
+      '4' => {'5' => {'always' => '1'}},
+      '3' => {'1' => {'always' => '1'}, '2' => {'always' => '1'}}
+    }
+
+    patch :update, :params => {
+      :role_id => 2,
+      :tracker_id => 1,
+      :transitions => transitions_data
+    }, :as => :json
+
+    assert_response :success
+    json_response = JSON.parse(response.body)
+    assert_equal 'success', json_response['status']
+
+    assert_equal 3, WorkflowTransition.where(:tracker_id => 1, :role_id => 2).count
+    assert          WorkflowTransition.where(:role_id => 2, :tracker_id => 1, :old_status_id => 3, :new_status_id => 2).exists?
+    assert_not      WorkflowTransition.where(:role_id => 2, :tracker_id => 1, :old_status_id => 5, :new_status_id => 4).exists?
+  end
+
+  def test_update_workflow_json_delta_only
+    # Test that we can update workflow with only delta changes instead of full state
+    WorkflowTransition.delete_all
+    
+    # Create initial workflow
+    WorkflowTransition.create!(:role_id => 2, :tracker_id => 1, :old_status_id => 3, :new_status_id => 1)
+
+    # Send only the change delta (add one transition, remove nothing)
+    transitions_data = {
+      '4' => {'5' => {'always' => '1'}}  # Only the new transition
+    }
+
+    patch :update, :params => {
+      :role_id => 2,
+      :tracker_id => 1,
+      :transitions => transitions_data
+    }, :as => :json
+
+    assert_response :success
+    json_response = JSON.parse(response.body)
+    assert_equal 'success', json_response['status']
+
+    # The original transition should be removed (since we're using replace_transitions)
+    # and only the new one should exist
+    assert_equal 1, WorkflowTransition.where(:tracker_id => 1, :role_id => 2).count
+    assert          WorkflowTransition.where(:role_id => 2, :tracker_id => 1, :old_status_id => 4, :new_status_id => 5).exists?
+    assert_not      WorkflowTransition.where(:role_id => 2, :tracker_id => 1, :old_status_id => 3, :new_status_id => 1).exists?
+  end
+
   def test_get_permissions
     get :permissions
 
