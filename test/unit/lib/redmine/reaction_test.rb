@@ -21,7 +21,7 @@ require_relative '../../../test_helper'
 
 class Redmine::ReactionTest < ActiveSupport::TestCase
   include Redmine::ClearSettingCache
-  
+
   setup do
     @user = users(:users_002)
     @issue = issues(:issues_007)
