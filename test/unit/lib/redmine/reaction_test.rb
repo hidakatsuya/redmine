@@ -20,14 +20,12 @@
 require_relative '../../../test_helper'
 
 class Redmine::ReactionTest < ActiveSupport::TestCase
+  include Redmine::ClearSettingCache
+  
   setup do
     @user = users(:users_002)
     @issue = issues(:issues_007)
     Setting.reactions_enabled = '1'
-  end
-
-  teardown do
-    Setting.clear_cache
   end
 
   test 'preload_reaction_details preloads ReactionDetail for all objects in the collection' do

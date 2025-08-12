@@ -21,14 +21,11 @@ require_relative '../test_helper'
 
 class ReactionsHelperTest < ActionView::TestCase
   include ReactionsHelper
+  include Redmine::ClearSettingCache
 
   setup do
     User.current = users(:users_002)
     Setting.reactions_enabled = '1'
-  end
-
-  teardown do
-    Setting.clear_cache
   end
 
   test 'reaction_id_for generates a DOM id' do

@@ -20,16 +20,14 @@
 require_relative '../test_helper'
 
 class MailHandlerTest < ActiveSupport::TestCase
+  include Redmine::ClearSettingCache
+  
   FIXTURES_PATH = File.dirname(__FILE__) + '/../fixtures/mail_handler'
 
   def setup
     ActionMailer::Base.deliveries.clear
     Setting.notified_events = Redmine::Notifiable.all.collect(&:name)
     User.current = nil
-  end
-
-  def teardown
-    Setting.clear_cache
   end
 
   def test_add_issue_with_specific_overrides

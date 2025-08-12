@@ -294,6 +294,13 @@ class ActiveSupport::TestCase
 end
 
 module Redmine
+  module ClearSettingCache
+    def teardown
+      Setting.clear_cache
+      super
+    end
+  end
+
   class MockFile
     attr_reader :size, :original_filename, :content_type
 
@@ -315,6 +322,7 @@ module Redmine
   end
 
   class RoutingTest < ActionDispatch::IntegrationTest
+    include Redmine::ClearSettingCache
     def should_route(arg)
       arg = arg.dup
       request = arg.keys.detect {|key| key.is_a?(String)}
@@ -337,6 +345,7 @@ module Redmine
   class HelperTest < ActionView::TestCase
     include Redmine::I18n
     include Propshaft::Helper
+    include Redmine::ClearSettingCache
 
     def setup
       super
@@ -346,6 +355,7 @@ module Redmine
   end
 
   class ControllerTest < ActionController::TestCase
+    include Redmine::ClearSettingCache
     # Returns the issues that are displayed in the list in the same order
     def issues_in_list
       ids = css_select('tr.issue td.id').map {|e| e.text.to_i}
@@ -399,6 +409,7 @@ module Redmine
   end
 
   class IntegrationTest < ActionDispatch::IntegrationTest
+    include Redmine::ClearSettingCache
     def setup
       ActionMailer::MailDeliveryJob.disable_test_adapter
       super
