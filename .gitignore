@@ -41,7 +41,6 @@
 *.rbc
 
 /.bundle
-/vendor/bundle
 /Gemfile.lock
 /Gemfile.local
 

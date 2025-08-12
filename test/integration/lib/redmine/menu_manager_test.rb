@@ -22,6 +22,10 @@ require_relative '../../../test_helper'
 class MenuManagerTest < Redmine::IntegrationTest
   include Redmine::I18n
 
+  def teardown
+    Setting.clear_cache
+  end
+
   def test_project_menu_with_specific_locale
     get '/projects/ecookbook/issues',
         :headers => {'HTTP_ACCEPT_LANGUAGE' => 'fr,fr-fr;q=0.8,en-us;q=0.5,en;q=0.3'}
@@ -129,23 +133,20 @@ class MenuManagerTest < Redmine::IntegrationTest
     Project.find(3).enabled_module_names = %w(time_tracking)
     EnabledModule.where(:project_id => [4, 6]).delete_all
 
-    # Ensure the projects index uses board display type for this test
-    with_settings :project_list_display_type => 'board' do
-      log_user('dlopper', 'foo')
-      get '/projects'
-      assert_select '#main-menu' do
-        assert_select 'a.projects',     :count => 1
-        assert_select 'a.activity',     :count => 1
+    log_user('dlopper', 'foo')
+    get '/projects'
+    assert_select '#main-menu' do
+      assert_select 'a.projects',     :count => 1
+      assert_select 'a.activity',     :count => 1
 
-        assert_select 'a.issues',       :count => 1 # issue_tracking
-        assert_select 'a.time-entries', :count => 1 # time_tracking
-        assert_select 'a.gantt',        :count => 0 # gantt
-        assert_select 'a.calendar',     :count => 1 # calendar
-        assert_select 'a.news',         :count => 0 # news
-      end
-      assert_select '#projects-index' do
-        assert_select 'a.project',      :count => 4
-      end
+      assert_select 'a.issues',       :count => 1 # issue_tracking
+      assert_select 'a.time-entries', :count => 1 # time_tracking
+      assert_select 'a.gantt',        :count => 0 # gantt
+      assert_select 'a.calendar',     :count => 1 # calendar
+      assert_select 'a.news',         :count => 0 # news
+    end
+    assert_select '#projects-index' do
+      assert_select 'a.project',      :count => 4
     end
   end
 
