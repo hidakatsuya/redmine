@@ -75,6 +75,14 @@ The CI workflows provide the authoritative reference for test execution commands
 - CSS files: `npx stylelint "app/assets/stylesheets/**/*.css"` (takes ~1 second)
 - Security audit: `sudo bundle exec bundle audit check --update` (takes ~2 seconds)
 
+## Implementation Guidelines
+
+When writing new code, follow these style guidelines:
+
+- **Hash notation**: Use `{ key: 'value' }` syntax for hashes
+- **Modern Ruby syntax**: Use the latest Ruby syntax as long as RuboCop rules allow it and compatibility is maintained within supported Ruby versions
+- **Code style**: Follow existing patterns in the codebase and ensure all changes pass RuboCop linting
+
 ## Validation
 
 - ALWAYS run through at least one complete end-to-end scenario after making changes.
