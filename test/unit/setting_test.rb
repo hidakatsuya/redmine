@@ -26,7 +26,6 @@ class SettingTest < ActiveSupport::TestCase
 
   def test_read_default
     Setting.delete_all
-    Setting.clear_cache
 
     assert_equal "Redmine", Setting.app_title
     assert Setting.self_registration?
@@ -122,7 +121,6 @@ class SettingTest < ActiveSupport::TestCase
     assert_equal 'UTF-8', Setting.commit_update_keywords.first['keywords'].encoding.name
   ensure
     Setting.where(:name => 'commit_update_keywords').delete_all
-    Setting.clear_cache
   end
 
   def test_mail_from_format_should_be_validated
