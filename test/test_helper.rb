@@ -323,6 +323,7 @@ module Redmine
 
   class RoutingTest < ActionDispatch::IntegrationTest
     include Redmine::ClearSettingCache
+
     def should_route(arg)
       arg = arg.dup
       request = arg.keys.detect {|key| key.is_a?(String)}
@@ -356,6 +357,7 @@ module Redmine
 
   class ControllerTest < ActionController::TestCase
     include Redmine::ClearSettingCache
+
     # Returns the issues that are displayed in the list in the same order
     def issues_in_list
       ids = css_select('tr.issue td.id').map {|e| e.text.to_i}
@@ -410,6 +412,7 @@ module Redmine
 
   class IntegrationTest < ActionDispatch::IntegrationTest
     include Redmine::ClearSettingCache
+
     def setup
       ActionMailer::MailDeliveryJob.disable_test_adapter
       super
