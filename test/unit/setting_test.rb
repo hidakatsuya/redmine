@@ -20,8 +20,6 @@
 require_relative '../test_helper'
 
 class SettingTest < ActiveSupport::TestCase
-  include Redmine::ClearSettingCache
-
   def setup
     User.current = nil
   end

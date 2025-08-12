@@ -21,7 +21,6 @@ require_relative '../test_helper'
 
 class ReactionsHelperTest < ActionView::TestCase
   include ReactionsHelper
-  include Redmine::ClearSettingCache
 
   setup do
     User.current = users(:users_002)
