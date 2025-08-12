@@ -44,7 +44,8 @@ Always reference these instructions first and fallback to search or bash command
    ```
 5. Generate session secret: `sudo bundle exec rake generate_secret_token` (takes ~2 seconds)
 6. Run database migration: `sudo bundle exec rake db:migrate RAILS_ENV="production"` (takes ~5 seconds)
-7. Compile assets: `sudo bundle exec rake assets:precompile RAILS_ENV="production"` (takes ~2 seconds)
+7. Load sample data: `bin/rails db:fixtures:load RAILS_ENV=production` (takes ~3 seconds)
+8. Compile assets: `sudo bundle exec rake assets:precompile RAILS_ENV="production"` (takes ~2 seconds)
 
 **Run the Application:**
 - Install test dependencies for server: `sudo bundle install --with test` (takes ~27 seconds)
@@ -77,9 +78,9 @@ The CI workflows provide the authoritative reference for test execution commands
 ## Validation
 
 - ALWAYS run through at least one complete end-to-end scenario after making changes.
-- Test the login flow by navigating to `http://localhost:3000`, clicking "Sign in", logging in with admin/admin, and verifying the administration interface loads.
+- Test the login flow by navigating to `http://localhost:3000`, clicking "Sign in", logging in with admin/admin, and verifying the home screen loads after password change.
 - Always run `bundle exec rubocop --parallel` and `npx stylelint "app/assets/stylesheets/**/*.css"` before committing or the CI (.github/workflows/linters.yml) will fail.
-- Run the full test suite before major changes as the CI (.github/workflows/tests.yml) tests against Ruby 3.2, 3.3, 3.4 with PostgreSQL, MySQL2, and SQLite3.
+- For local testing, use the latest environment only: Ruby 3.4 with SQLite3. The CI will handle testing across all supported versions.
 
 ## Common Issues and Workarounds
 
@@ -150,9 +151,6 @@ Always run these commands before committing:
 - Access admin interface at `/admin` after login
 - Change passwords at `/my/password`
 
-## Screenshot
-![Redmine Admin Interface](https://github.com/user-attachments/assets/438ca77b-3314-4810-8a07-4ddc8344dd23)
-
 ## Redmine.org Patch Submission
 
 **Important**: For issues that require patches to be submitted to redmine.org, include the following information in the pull request:
@@ -177,9 +175,3 @@ This enhancement will improve development experience for contributors using AI c
 
 The instructions are based on validated procedures and include references to existing CI workflows for authoritative test execution methods.
 ```
-
-**Submission Process:**
-1. Complete the pull request with all changes and validation
-2. Create a ticket on redmine.org with the above title and content
-3. Attach the patch file to the redmine.org ticket
-4. Link the redmine.org ticket in the pull request description
