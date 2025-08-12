@@ -25,8 +25,6 @@ class SettingTest < ActiveSupport::TestCase
   end
 
   def test_read_default
-    Setting.delete_all
-
     assert_equal "Redmine", Setting.app_title
     assert Setting.self_registration?
     assert !Setting.login_required?
