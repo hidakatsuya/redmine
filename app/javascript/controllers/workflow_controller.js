@@ -22,17 +22,30 @@ export default class extends Controller {
       transitions: changedTransitions
     }
 
-    const response = await patch(this.formTarget.action, {
-      body: JSON.stringify(payload),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-CSRF-Token': this.getCSRFToken()
-      }
-    })
+    try {
+      const response = await patch(this.formTarget.action, {
+        body: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-Token': this.getCSRFToken()
+        }
+      })
 
-    if (response.ok) {
-      this.redirectToReferer()
+      if (response.ok) {
+        this.redirectToReferer()
+      } else {
+        // Log error and stay on page for debugging
+        console.error('Workflow update failed:', response.status, response.statusText)
+        try {
+          const errorData = await response.json()
+          console.error('Error details:', errorData)
+        } catch (e) {
+          console.error('Could not parse error response')
+        }
+      }
+    } catch (error) {
+      console.error('Network error during workflow update:', error)
     }
   }
 
