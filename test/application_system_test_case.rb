@@ -40,6 +40,13 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     GOOGLE_CHROME_OPTS_ARGS.each do |arg|
       driver_option.add_argument arg
     end
+    # Add unique user data directory to avoid session conflicts
+    driver_option.add_argument "--user-data-dir=#{Dir.mktmpdir}"
+    # Add additional arguments to ensure unique session
+    driver_option.add_argument "--disable-web-security"
+    driver_option.add_argument "--disable-features=VizDisplayCompositor"
+    driver_option.add_argument "--disable-dev-shm-usage"
+    driver_option.add_argument "--no-first-run"
     driver_option.add_preference 'download.default_directory',   DOWNLOADS_PATH.gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
     driver_option.add_preference 'download.prompt_for_download', false
     driver_option.add_preference 'plugins.plugins_disabled',     ["Chrome PDF Viewer"]
