@@ -42,7 +42,12 @@ class IssuesImportTest < ApplicationSystemTestCase
 
     assert_difference 'Issue.count', 3 do
       click_button 'Import'
-      assert page.has_content?('3 items have been imported')
+      # Wait for all AJAX requests to complete as the import process
+      # uses continuous AJAX calls to update progress and then redirects
+      wait_for_ajax
+      # Additional wait to ensure the final redirect has completed
+      # and the success message is rendered
+      assert page.has_content?('3 items have been imported', wait: 10)
     end
   end
 end
