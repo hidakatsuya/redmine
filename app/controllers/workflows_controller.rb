@@ -51,7 +51,7 @@ class WorkflowsController < ApplicationController
         end
       end
       WorkflowTransition.replace_transitions(@trackers, @roles, transitions)
-      render json: { status: 'success', message: l(:notice_successful_update) }
+      render json: { status: 'success', message: l(:notice_successful_update) }, status: :ok
     else
       render json: { status: 'error', message: 'Invalid parameters' }, status: :unprocessable_entity
     end
@@ -104,6 +104,11 @@ class WorkflowsController < ApplicationController
   end
 
   private
+
+  def api_request?
+    # Override to handle JSON requests without format parameter
+    super || (request.content_type&.include?('application/json'))
+  end
 
   def find_sources_and_targets
     @roles = Role.sorted.select(&:consider_workflow?)
