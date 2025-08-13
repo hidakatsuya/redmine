@@ -51,7 +51,6 @@ class WorkflowsController < ApplicationController
         end
       end
       WorkflowTransition.replace_transitions(@trackers, @roles, transitions)
-      
       render json: { status: 'success', message: l(:notice_successful_update) }
     else
       render json: { status: 'error', message: 'Invalid parameters' }, status: :unprocessable_entity
