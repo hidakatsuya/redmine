@@ -273,67 +273,6 @@ class WorkflowsControllerTest < Redmine::ControllerTest
     assert_not      WorkflowTransition.where(:role_id => 2, :tracker_id => 1, :old_status_id => 5, :new_status_id => 4).exists?
   end
 
-  def test_update_workflow_json_delta_only
-    # Test that we can update workflow with only delta changes instead of full state
-    WorkflowTransition.delete_all
-    
-    # Create initial workflow
-    WorkflowTransition.create!(:role_id => 2, :tracker_id => 1, :old_status_id => 3, :new_status_id => 1)
-
-    # Send only the change delta (add one transition, remove nothing)
-    transitions_data = {
-      '4' => {'5' => {'always' => '1'}}  # Only the new transition
-    }
-
-    patch :update, :params => {
-      :role_id => 2,
-      :tracker_id => 1,
-      :transitions => transitions_data,
-      :delta_update => true
-    }, :as => :json
-
-    assert_response :success
-    json_response = JSON.parse(response.body)
-    assert_equal 'success', json_response['status']
-
-    # With delta_update, the system should merge with existing workflows
-    # The new transition should be added but existing ones preserved
-    # However, since replace_transitions replaces all workflows for the role/tracker,
-    # only the new transition will exist unless we send the full desired state
-    transitions_count = WorkflowTransition.where(:tracker_id => 1, :role_id => 2).count
-    assert transitions_count > 0, "At least one transition should exist"
-  end
-
-  def test_update_workflow_with_large_payload_reduction
-    # Test that demonstrates the payload reduction benefit
-    WorkflowTransition.delete_all
-
-    # Simulate a large number of statuses (create some dummy ones for test)
-    old_status_count = IssueStatus.count
-    
-    # Simulate changing only a few transitions out of many possible combinations
-    # This represents the scenario where only a small delta is sent instead of full state
-    small_transitions_data = {
-      '1' => {'2' => {'always' => '1'}},
-      '2' => {'3' => {'author' => '1'}}
-    }
-
-    patch :update, :params => {
-      :role_id => 2,
-      :tracker_id => 1,
-      :transitions => small_transitions_data,
-      :delta_update => true
-    }, :as => :json
-
-    assert_response :success
-    json_response = JSON.parse(response.body)
-    assert_equal 'success', json_response['status']
-
-    # Verify the transitions were created
-    assert WorkflowTransition.where(:role_id => 2, :tracker_id => 1, :old_status_id => 1, :new_status_id => 2).exists?
-    assert WorkflowTransition.where(:role_id => 2, :tracker_id => 1, :old_status_id => 2, :new_status_id => 3, :author => true).exists?
-  end
-
   def test_get_permissions
     get :permissions
 

@@ -62,7 +62,7 @@
         </fieldset>
         <%= javascript_tag "hideFieldset($('#assignee_workflows'))" unless @workflows['assignee'].present? %>
       </div>
-      <%= submit_tag l(:button_save), data: { action: 'click->workflow#submitChanges', workflow_target: 'submit' } %>
+      <%= submit_tag l(:button_save), data: { action: 'click->workflow#submitChanges' } %>
     <% end %>
   </div>
 <% end %>

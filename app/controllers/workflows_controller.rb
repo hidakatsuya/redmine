@@ -45,12 +45,6 @@ class WorkflowsController < ApplicationController
   def update
     if @roles && @trackers && params[:transitions]
       transitions = params[:transitions].deep_dup
-      
-      # Handle delta updates - merge with existing state
-      if params[:delta_update] && request.format.json?
-        transitions = merge_delta_transitions(transitions)
-      end
-      
       transitions.each_value do |transitions_by_new_status|
         transitions_by_new_status.each_value do |transition_by_rule|
           transition_by_rule.reject! {|rule, transition| transition == 'no_change'}
@@ -58,24 +52,9 @@ class WorkflowsController < ApplicationController
       end
       WorkflowTransition.replace_transitions(@trackers, @roles, transitions)
       
-      respond_to do |format|
-        format.html do
-          flash[:notice] = l(:notice_successful_update)
-          redirect_to_referer_or edit_workflows_path
-        end
-        format.json do
-          render json: { status: 'success', message: l(:notice_successful_update) }
-        end
-      end
+      render json: { status: 'success', message: l(:notice_successful_update) }
     else
-      respond_to do |format|
-        format.html do
-          redirect_to_referer_or edit_workflows_path
-        end
-        format.json do
-          render json: { status: 'error', message: 'Invalid parameters' }, status: :unprocessable_entity
-        end
-      end
+      render json: { status: 'error', message: 'Invalid parameters' }, status: :unprocessable_entity
     end
   end
 
@@ -126,62 +105,6 @@ class WorkflowsController < ApplicationController
   end
 
   private
-
-  def merge_delta_transitions(delta_transitions)
-    # Get existing workflows for the current trackers/roles
-    existing_workflows = WorkflowTransition.
-      where(:role_id => @roles.map(&:id), :tracker_id => @trackers.map(&:id)).
-      preload(:old_status, :new_status)
-
-    # Build the full transitions hash from existing workflows
-    full_transitions = {}
-    
-    # Include all possible statuses (0 for new issues + all existing statuses)
-    all_status_ids = ([0] + @statuses.map(&:id)).map(&:to_s)
-    
-    all_status_ids.each do |old_status_id|
-      @statuses.each do |new_status|
-        new_status_id = new_status.id.to_s
-        
-        # Skip self-transitions for non-zero old_status
-        next if old_status_id != "0" && old_status_id == new_status_id
-        
-        unless full_transitions[old_status_id]
-          full_transitions[old_status_id] = {}
-        end
-        
-        unless full_transitions[old_status_id][new_status_id]
-          full_transitions[old_status_id][new_status_id] = {}
-        end
-        
-        # Set default values for each transition type
-        %w[always author assignee].each do |rule|
-          existing_workflow = existing_workflows.find do |w|
-            w.old_status_id == old_status_id.to_i &&
-            w.new_status_id == new_status_id.to_i &&
-            ((rule == 'always' && !w.author && !w.assignee) ||
-             (rule == 'author' && w.author) ||
-             (rule == 'assignee' && w.assignee))
-          end
-          
-          full_transitions[old_status_id][new_status_id][rule] = existing_workflow ? '1' : '0'
-        end
-      end
-    end
-    
-    # Apply the delta changes
-    delta_transitions.each do |old_status_id, transitions_by_new_status|
-      transitions_by_new_status.each do |new_status_id, transition_by_rule|
-        transition_by_rule.each do |rule, value|
-          if full_transitions[old_status_id] && full_transitions[old_status_id][new_status_id]
-            full_transitions[old_status_id][new_status_id][rule] = value
-          end
-        end
-      end
-    end
-    
-    full_transitions
-  end
 
   def find_sources_and_targets
     @roles = Role.sorted.select(&:consider_workflow?)
