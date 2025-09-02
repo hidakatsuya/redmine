@@ -19,7 +19,7 @@
 
 class GanttsController < ApplicationController
   menu_item :gantt
-  before_action :find_optional_project
+  before_action :find_optional_project, :only => [:show]
 
   rescue_from Query::StatementInvalid, :with => :query_statement_invalid
 
@@ -54,5 +54,32 @@ class GanttsController < ApplicationController
                   :filename => "#{basename}.pdf")
       end
     end
+  end
+
+  def change_duration
+    return render_error(:status => :unprocessable_entity) unless request.xhr?
+
+    @obj = Issue.find(params[:id])
+    raise Unauthorized unless @obj.visible?
+
+    ActiveRecord::Base.transaction do
+      @obj.init_journal(User.current)
+      @obj.safe_attributes = duration_params
+      unless @obj.save
+        render_403(:message => @obj.errors.full_messages.join)
+        raise ActiveRecord::Rollback
+      end
+      retrieve_query
+    rescue ActiveRecord::StaleObjectError
+      render_403(:message => :notice_issue_update_conflict)
+    rescue ActiveRecord::RecordNotFound
+      render_404
+    end
+  end
+
+  private
+
+  def duration_params
+    params.require(:change_duration).permit(:start_date, :due_date, :lock_version)
   end
 end

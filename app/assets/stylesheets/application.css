@@ -1827,7 +1827,7 @@ td.gantt_watcher_users_column div.issue_watcher_users ul li:not(:last-child)::af
 
 .task {
   position: absolute;
-  height:8px;
+  height:10px;
   font-size:0.8em;
   color:var(--oc-gray-6);
   padding:0;
@@ -1836,27 +1836,76 @@ td.gantt_watcher_users_column div.issue_watcher_users ul li:not(:last-child)::af
   white-space:nowrap;
 }
 
-.task.label {width:100%;}
-.task.label.project, .task.label.version { font-weight: bold; }
+.task.line { left: 0; }
+.task div.tooltip:hover span.tip { font-size: inherit; }
+.task .task_todo .label { font-size: inherit; }
+.task.project .task_todo .label { margin-top: -4px; }
+.task.version .task_todo .label { margin-top: -3px; }
 
-.task_late { background:var(--oc-red-5) url(/task_late.png); border: 1px solid var(--oc-red-5); }
-.task_done { background:var(--oc-green-7) url(/task_done.png); border: 1px solid var(--oc-green-7); }
-.task_todo { background:var(--oc-gray-5) url(/task_todo.png); border: 1px solid var(--oc-gray-5); }
+.task .label { position: absolute; width: auto; }
+.task.project .label, .task.version .label { font-weight: bold; }
 
-.task_todo.parent { background: var(--oc-gray-6); border: 1px solid var(--oc-gray-6); height: 3px;}
-.task_late.parent, .task_done.parent { height: 3px;}
-.task.parent.marker.starting  { position: absolute; background: url(/task_parent_end.png) no-repeat 0 0; width: 8px; height: 16px; margin-left: -4px; left: 0px; top: -1px;}
-.task.parent.marker.ending { position: absolute; background: url(/task_parent_end.png) no-repeat 0 0; width: 8px; height: 16px; margin-left: -4px; right: 0px; top: -1px;}
+.task_late { position: absolute; height: inherit; background: var(--oc-red-5); }
+.task_done { position: absolute; height: inherit; background: var(--oc-green-7); }
+.task_todo { position: absolute; height: inherit; background: var(--oc-gray-5); }
 
-.version.task_late { background:var(oc-red-5) url(/milestone_late.png); border: 1px solid var(oc-red-5); height: 2px; margin-top: 3px;}
-.version.task_done { background:var(--oc-green-7) url(/milestone_done.png); border: 1px solid var(--oc-green-7); height: 2px; margin-top: 3px;}
-.version.task_todo { background:var(--oc-white) url(/milestone_todo.png); border: 1px solid var(--oc-white); height: 2px; margin-top: 3px;}
-.version.marker { background-image:url(/version_marker.png); background-repeat: no-repeat; border: 0; margin-left: -4px; margin-top: 1px; }
+.parent .task_todo { background: var(--oc-gray-6); height: 5px; }
+.parent .task_late, .parent .task_done { height: 5px; }
+.parent .marker {
+  background: var(--oc-gray-6);
+  display: inline-block;
+  position: absolute;
+  width: 8px;
+  height: 6px;
+  margin-left: -5px;
+  margin-bottom: -4px;
+}
 
-.project.task_late { background:var(oc-red-5) url(/milestone_late.png); border: 1px solid var(oc-red-5); height: 2px; margin-top: 3px;}
-.project.task_done { background:var(--oc-green-7) url(/milestone_done.png); border: 1px solid var(--oc-green-7); height: 2px; margin-top: 3px;}
-.project.task_todo { background:var(--oc-white) url(/milestone_todo.png); border: 1px solid var(--oc-white); height: 2px; margin-top: 3px;}
-.project.marker { background-image:url(/project_marker.png); background-repeat: no-repeat; border: 0; margin-left: -4px; margin-top: 1px; }
+.version .task_late { background: var(--oc-red-5); height: 4px; }
+.version .task_done { background: var(--oc-green-7); height: 4px; }
+.version .task_todo { background: var(--oc-gray-5); height: 4px; margin-top: 3px; }
+.version .marker {
+  width: 0;
+  height: 0;
+  border: 5px solid transparent;
+  border-bottom-color: var(--oc-black);
+  position: absolute;
+  margin-top: -5px;
+  margin-left: -6px;
+}
+.version .marker:after {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: 5px;
+  width: 0;
+  height: 0;
+  border: 5px solid transparent;
+  border-top-color: var(--oc-black);
+}
+
+.project .task_late { background: var(--oc-red-5); height: 2px; }
+.project .task_done { background: var(--oc-green-7); height: 2px; }
+.project .task_todo { background: var(--oc-gray-5); height: 2px; margin-top: 4px; }
+.project .marker {
+  width: 0;
+  height: 0;
+  border: 5px solid transparent;
+  border-bottom-color: var(--oc-blue-5);
+  position: absolute;
+  margin-top: -5px;
+  margin-left: -6px;
+}
+.project .marker:after {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: 5px;
+  width: 0;
+  height: 0;
+  border: 5px solid transparent;
+  border-top-color: var(--oc-blue-5);
+}
 
 .version-behind-schedule a, .issue-behind-schedule a {color: var(--oc-yellow-8);}
 .version-overdue a, .issue-overdue a, .project-overdue a {color: var(--oc-red-8);}

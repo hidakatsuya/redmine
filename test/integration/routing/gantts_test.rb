@@ -26,5 +26,7 @@ class RoutingGanttsTest < Redmine::RoutingTest
 
     should_route 'GET /projects/foo/issues/gantt' => 'gantts#show', :project_id => 'foo'
     should_route 'GET /projects/foo/issues/gantt.pdf' => 'gantts#show', :project_id => 'foo', :format => 'pdf'
+
+    should_route 'PUT /issues/gantt/123/change_duration' => 'gantts#change_duration', :id => '123'
   end
 end

@@ -1,0 +1,30 @@
+var elm;
+<%
+gantt = Redmine::Helpers::Gantt.new(params)
+durations = gantt.duration(@obj, self, @query)
+durations.each do |duration|
+  elm_subject = duration[:elm_subject]
+  elm_todo = duration[:elm_todo]
+  todo_context = duration[:todo_context]
+  subject_content = duration[:subject_content]
+  columns = duration[:columns]
+  obj = duration[:obj]
+%>
+if ($('<%= raw(elm_subject) %>').length) {
+  $('<%= elm_todo %>').each(function (_, task) {
+    var el_parent = $(task).parent();
+    el_parent.html('<%= raw(todo_context) %>');
+    var number_of_rows = el_parent.attr('data-number-of-rows');
+    if (number_of_rows) {
+      el_parent.find('div[data-number-of-rows]').attr('data-number-of-rows', number_of_rows);
+    }
+  });
+  $('<%= raw(elm_subject) %>').replaceWith('<%= raw(subject_content) %>');
+  <% columns.each do |column| -%>
+  elm = $('div.gantt_selected_column_content #<%= column.name %>_issue_<%= obj.id %>');
+  if(elm.length) {
+    elm.html('<%= escape_javascript(column_content(column, obj)) %>');
+  }
+  <% end -%>
+}
+<% end -%>

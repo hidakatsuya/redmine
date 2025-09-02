@@ -7,14 +7,12 @@
 var draw_gantt = null;
 var draw_top;
 var draw_right;
-var draw_left;
 
 var rels_stroke_width = 2;
 
 function setDrawArea() {
-  draw_top   = $("#gantt_draw_area").position().top;
+  draw_top   = $("#gantt_draw_area").offset().top;
   draw_right = $("#gantt_draw_area").width();
-  draw_left  = $("#gantt_area").scrollLeft();
 }
 
 function getRelationsArray() {
@@ -45,27 +43,27 @@ function drawRelations() {
       return;
     }
     var issue_height = issue_from.height();
-    var issue_from_top   = issue_from.position().top  + (issue_height / 2) - draw_top;
+    var issue_from_top   = issue_from.offset().top  + (issue_height / 2) - draw_top;
     var issue_from_right = issue_from.position().left + issue_from.width();
-    var issue_to_top   = issue_to.position().top  + (issue_height / 2) - draw_top;
+    var issue_to_top   = issue_to.offset().top  + (issue_height / 2) - draw_top;
     var issue_to_left  = issue_to.position().left;
     var color = issue_relation_type[element_issue["rel_type"]]["color"];
     var landscape_margin = issue_relation_type[element_issue["rel_type"]]["landscape_margin"];
     var issue_from_right_rel = issue_from_right + landscape_margin;
     var issue_to_left_rel    = issue_to_left    - landscape_margin;
-    draw_gantt.path(["M", issue_from_right + draw_left,     issue_from_top,
-                     "L", issue_from_right_rel + draw_left, issue_from_top])
+    draw_gantt.path(["M", issue_from_right,     issue_from_top,
+                     "L", issue_from_right_rel, issue_from_top])
                    .attr({stroke: color,
                           "stroke-width": rels_stroke_width
                           });
     if (issue_from_right_rel < issue_to_left_rel) {
-      draw_gantt.path(["M", issue_from_right_rel + draw_left, issue_from_top,
-                       "L", issue_from_right_rel + draw_left, issue_to_top])
+      draw_gantt.path(["M", issue_from_right_rel, issue_from_top,
+                       "L", issue_from_right_rel, issue_to_top])
                      .attr({stroke: color,
                           "stroke-width": rels_stroke_width
                           });
-      draw_gantt.path(["M", issue_from_right_rel + draw_left, issue_to_top,
-                       "L", issue_to_left + draw_left,        issue_to_top])
+      draw_gantt.path(["M", issue_from_right_rel, issue_to_top,
+                       "L", issue_to_left,        issue_to_top])
                      .attr({stroke: color,
                           "stroke-width": rels_stroke_width
                           });
@@ -73,28 +71,28 @@ function drawRelations() {
       var issue_middle_top = issue_to_top +
                                 (issue_height *
                                    ((issue_from_top > issue_to_top) ? 1 : -1));
-      draw_gantt.path(["M", issue_from_right_rel + draw_left, issue_from_top,
-                       "L", issue_from_right_rel + draw_left, issue_middle_top])
+      draw_gantt.path(["M", issue_from_right_rel, issue_from_top,
+                       "L", issue_from_right_rel, issue_middle_top])
                      .attr({stroke: color,
                           "stroke-width": rels_stroke_width
                           });
-      draw_gantt.path(["M", issue_from_right_rel + draw_left, issue_middle_top,
-                       "L", issue_to_left_rel + draw_left,    issue_middle_top])
+      draw_gantt.path(["M", issue_from_right_rel, issue_middle_top,
+                       "L", issue_to_left_rel,    issue_middle_top])
                      .attr({stroke: color,
                           "stroke-width": rels_stroke_width
                           });
-      draw_gantt.path(["M", issue_to_left_rel + draw_left, issue_middle_top,
-                       "L", issue_to_left_rel + draw_left, issue_to_top])
+      draw_gantt.path(["M", issue_to_left_rel, issue_middle_top,
+                       "L", issue_to_left_rel, issue_to_top])
                      .attr({stroke: color,
                           "stroke-width": rels_stroke_width
                           });
-      draw_gantt.path(["M", issue_to_left_rel + draw_left, issue_to_top,
-                       "L", issue_to_left + draw_left,     issue_to_top])
+      draw_gantt.path(["M", issue_to_left_rel, issue_to_top,
+                       "L", issue_to_left,     issue_to_top])
                      .attr({stroke: color,
                           "stroke-width": rels_stroke_width
                           });
     }
-    draw_gantt.path(["M", issue_to_left + draw_left, issue_to_top,
+    draw_gantt.path(["M", issue_to_left, issue_to_top,
                      "l", -4 * rels_stroke_width, -2 * rels_stroke_width,
                      "l", 0, 4 * rels_stroke_width, "z"])
                    .attr({stroke: "none",
@@ -107,11 +105,11 @@ function drawRelations() {
 
 function getProgressLinesArray() {
   var arr = new Array();
-  var today_left = $('#today_line').position().left;
+  var today_left = $('#today_line').position().left + $("#gantt_area").scrollLeft();
   arr.push({left: today_left, top: 0});
   $.each($('div.issue-subject, div.version-name'), function(index, element) {
     if(!$(element).is(':visible')) return true;
-    var t = $(element).position().top - draw_top ;
+    var t = $(element).offset().top - draw_top ;
     var h = ($(element).height() / 9);
     var element_top_upper  = t - h;
     var element_top_center = t + (h * 3);
@@ -128,8 +126,11 @@ function getProgressLinesArray() {
         arr.push({left: draw_right, top: element_top_upper, is_right_edge: true});
         arr.push({left: draw_right, top: element_top_lower, is_right_edge: true, none_stroke: true});
       } else if (issue_done.length > 0) {
-        var done_left = issue_done.first().position().left +
-                           issue_done.first().width();
+        var done_left = today_left;
+        var issue_todo = $("#task-todo-" + $(element).attr("id"));
+        if (issue_todo.length > 0){
+          done_left = issue_done.first().position().left;
+        }
         arr.push({left: done_left, top: element_top_center});
       } else if (is_behind_start) {
         arr.push({left: 0 , top: element_top_upper, is_left_edge: true});
@@ -148,6 +149,7 @@ function getProgressLinesArray() {
 }
 
 function drawGanttProgressLines() {
+  if (!$("#today_line").length) return;
   var arr = getProgressLinesArray();
   var color = $("#today_line")
                     .css("border-left-color");
@@ -157,8 +159,8 @@ function drawGanttProgressLines() {
         (!("is_right_edge" in arr[i - 1] && "is_right_edge" in arr[i]) &&
          !("is_left_edge"  in arr[i - 1] && "is_left_edge"  in arr[i]))
         ) {
-      var x1 = (arr[i - 1].left == 0) ? 0 : arr[i - 1].left + draw_left;
-      var x2 = (arr[i].left == 0)     ? 0 : arr[i].left     + draw_left;
+      var x1 = (arr[i - 1].left == 0) ? 0 : arr[i - 1].left;
+      var x2 = (arr[i].left == 0)     ? 0 : arr[i].left;
       draw_gantt.path(["M", x1, arr[i - 1].top,
                        "L", x2, arr[i].top])
                    .attr({stroke: color, "stroke-width": 2});
@@ -316,3 +318,110 @@ function disable_unavailable_columns(unavailable_columns) {
     $('#available_c, #selected_c').children("[value='" + value + "']").prop('disabled', true);
   });
 }
+
+initGanttDnD = function() {
+  var grid_x = 0;
+  if ($('#zoom').length) {
+    switch(parseInt($('#zoom').val())) {
+    case 4:
+      grid_x = 16;
+      break;
+    case 3:
+      grid_x = 8;
+      break;
+    }
+  }
+  if (grid_x > 0) {
+    $('.leaf .task_todo').draggable({
+      containment: 'parent',
+      axis: 'x',
+      grid: [grid_x, 0],
+      opacity: 0.5,
+      cursor: 'move',
+      revertDuration: 100,
+      start: function (_, ui) {
+        var helper = ui.helper[0];
+        helper.startLeft = ui.position.left;
+      },
+    });
+
+    $('.task.line').droppable({
+      accept: '.leaf .task_todo',
+      drop: function (event, ui) {
+        var target = $(ui.draggable);
+        var url = target.attr('data-url-change-duration');
+        var object = JSON.parse(target.attr('data-object'));
+        var startLeft = target[0].startLeft;
+        var relative_days = Math.floor((ui.position.left - startLeft) / grid_x);
+        if (relative_days == 0) {
+          return;
+        }
+        var start_date = new Date(object.start_date);
+        start_date.setDate(start_date.getDate() + relative_days);
+        start_date =
+          [
+            start_date.getFullYear(),
+            ('0' + (start_date.getMonth() + 1)).slice(-2),
+            ('0' + start_date.getDate()).slice(-2)
+          ].join('-');
+        var due_date = null;
+        if (object.due_date !== null) {
+          due_date = new Date(object.due_date);
+          due_date.setDate(due_date.getDate() + relative_days);
+          due_date =
+            [
+              due_date.getFullYear(),
+              ('0' + (due_date.getMonth() + 1)).slice(-2),
+              ('0' + due_date.getDate()).slice(-2)
+            ].join('-');
+        }
+
+        $('#selected_c option:not(:disabled)').prop('selected', true);
+        var form = $('#query_from').serializeArray();
+        var json_param = {};
+        form.forEach(function (data) {
+          var key = data.name;
+          var value = data.value;
+          if (/\[\]$/.test(key)) {
+            if (!json_param.hasOwnProperty(key)) {
+              json_param[key] = [];
+            }
+            json_param[key].push(value);
+          } else {
+            json_param[key] = value;
+          }
+        });
+        $('#selected_c option:not(:disabled)').prop('selected', false);
+        Object.assign(json_param, {
+          change_duration: {
+            start_date: start_date,
+            due_date: due_date,
+            lock_version: object.lock_version,
+          },
+        });
+
+        $.ajax({
+          type: 'PUT',
+          url: url,
+          data: json_param,
+          dataType: 'script',
+        }).done(function (_) {
+          drawGanttHandler();
+          initGanttDnD();
+        }).fail(function (jqXHR) {
+          var contents = $('<div>' + jqXHR.responseText + '</div>');
+          var error_message = contents.find('p#errorExplanation');
+          if (error_message.length) {
+            $('div#content h2:first-of-type').after(error_message);
+            $('p#errorExplanation').hide('fade', {}, 3000, function() {
+              $(this).remove();
+            });
+          }
+          ui.draggable.animate({left: ui.draggable[0].startLeft}, 'fast');
+        });
+      }
+    });
+  }
+};
+
+$(document).ready(initGanttDnD);

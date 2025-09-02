@@ -643,6 +643,68 @@ module Redmine
         pdf.Output
       end
 
+      def duration(issue, view, query)
+        @view = view
+        @query = query
+        draw_obj = []
+
+        select_precedes = ->(issue) do
+          issue.relations_from.where(:relation_type => IssueRelation::TYPE_PRECEDES).map(&:issue_to).each do |follows|
+            next if draw_obj.include?(follows)
+
+            while follows
+              draw_obj.push(follows, follows.fixed_version, follows.project)
+              select_precedes.call(follows)
+              follows.children.each do |child|
+                draw_obj.push(child, child.fixed_version, child.project)
+                select_precedes.call(child)
+              end
+              follows = follows.parent
+            end
+          end
+        end
+
+        while issue
+          draw_obj.push(issue, issue.fixed_version, issue.project)
+          select_precedes.call(issue)
+          issue = issue.parent
+        end
+        draw_objs = draw_obj.compact.uniq
+        draw_objs.reject!{|obj| ![Project, Version, Issue].include?(obj.class)}
+
+        return_values = []
+        draw_objs.each do |obj|
+          @number_of_rows = 0
+          @lines = +''
+          render_object_row(obj, {format: :html, only: :lines, zoom: 2 ** @zoom, top: 0, top_increment: 20})
+          todo_content = Nokogiri::HTML.parse(@lines)
+          todo_context = todo_content.xpath(
+            "//div[contains(@class, 'task') and contains(@class, 'line')]/*"
+          ).to_s.tr("\n", '').gsub("'", "\\\\'")
+
+          klass_name = obj.class.name.underscore
+          elm_todo = "[id=task-todo-#{klass_name}-#{obj.id}]"
+          css_subject = 'span:not(.expander)'
+          elm_subject = "[id=#{klass_name}-#{obj.id}] > #{css_subject}"
+
+          subject_content = Nokogiri::HTML.parse(html_subject_content(obj))
+          subject_content = subject_content.css(css_subject).to_s.tr("\n", '').gsub("'", "\\\\'")
+
+          columns = []
+          case obj
+          when Issue
+            columns = query.columns
+          end
+          return_values << {:elm_subject => elm_subject,
+                            :elm_todo => elm_todo,
+                            :todo_context => todo_context,
+                            :subject_content => subject_content,
+                            :columns => columns,
+                            :obj => obj}
+        end
+        return_values
+      end
+
       private
 
       def coordinates(start_date, end_date, progress, zoom=nil)
@@ -797,6 +859,7 @@ module Redmine
           tag_options[:class] = "version-name"
           has_children = object.fixed_issues.exists?
         when Project
+          tag_options[:id] = "project-#{object.id}"
           tag_options[:class] = "project-name"
           has_children = object.issues.exists? || object.versions.exists?
         end
@@ -879,15 +942,21 @@ module Redmine
           end
         # Renders the task bar, with progress and late
         if coords[:bar_start] && coords[:bar_end]
-          width = coords[:bar_end] - coords[:bar_start] - 2
+          width = coords[:bar_end] - coords[:bar_start]
           style = +""
-          style << "top:#{params[:top]}px;"
           style << "left:#{coords[:bar_start]}px;"
           style << "width:#{width}px;"
-          html_id = "task-todo-issue-#{object.id}" if object.is_a?(Issue)
-          html_id = "task-todo-version-#{object.id}" if object.is_a?(Version)
+          html_id =
+            case object
+            when Project
+              "task-todo-project-#{object.id}"
+            when Version
+              "task-todo-version-#{object.id}"
+            when Issue
+              "task-todo-issue-#{object.id}"
+            end
           content_opt = {:style => style,
-                         :class => "#{css} task_todo",
+                         :class => "task_todo",
                          :id => html_id,
                          :data => {}}
           if object.is_a?(Issue)
@@ -895,32 +964,80 @@ module Redmine
             if rels.present?
               content_opt[:data] = {"rels" => rels.to_json}
             end
+            content_opt[:data].merge!({
+                                        :url_change_duration => Rails.application.routes.url_helpers.gantt_change_duration_path(
+                                          object
+                                        ),
+                                        :object => {
+                                          :start_date => object.start_date,
+                                          :due_date => object.due_date,
+                                          :lock_version => object.lock_version,
+                                        }.to_json,
+                                      })
           end
           content_opt[:data].merge!(data_options)
-          output << view.content_tag(:div, '&nbsp;'.html_safe, content_opt)
+          bar_contents = []
           if coords[:bar_late_end]
-            width = coords[:bar_late_end] - coords[:bar_start] - 2
+            width = coords[:bar_late_end] - coords[:bar_start]
             style = +""
-            style << "top:#{params[:top]}px;"
-            style << "left:#{coords[:bar_start]}px;"
             style << "width:#{width}px;"
-            output << view.content_tag(:div, '&nbsp;'.html_safe,
-                                       :style => style,
-                                       :class => "#{css} task_late",
-                                       :data => data_options)
+            bar_contents << view.content_tag(:div, '&nbsp;'.html_safe,
+                                             :style => style,
+                                             :class => "#{css} task_late",
+                                             :data => data_options)
           end
           if coords[:bar_progress_end]
-            width = coords[:bar_progress_end] - coords[:bar_start] - 2
+            width = coords[:bar_progress_end] - coords[:bar_start]
             style = +""
-            style << "top:#{params[:top]}px;"
-            style << "left:#{coords[:bar_start]}px;"
             style << "width:#{width}px;"
             html_id = "task-done-issue-#{object.id}" if object.is_a?(Issue)
             html_id = "task-done-version-#{object.id}" if object.is_a?(Version)
-            output << view.content_tag(:div, '&nbsp;'.html_safe,
+            bar_contents << view.content_tag(:div, '&nbsp;'.html_safe,
+                                             :style => style,
+                                             :class => "task_done",
+                                             :id => html_id,
+                                             :data => data_options)
+          end
+
+          # Renders the tooltip
+          if object.is_a?(Issue)
+            s = view.content_tag(:span,
+                                 view.render_issue_tooltip(object).html_safe,
+                                 :class => "tip")
+            s += view.content_tag(:input, nil, :type => 'checkbox', :name => 'ids[]', :value => object.id, :style => 'display:none;', :class => 'toggle-selection')
+            style = +""
+            style << "width:#{coords[:bar_end] - coords[:bar_start]}px;"
+            style << "height:12px;"
+            bar_contents << view.content_tag(:div, s.html_safe,
+                                             :style => style,
+                                             :class => "tooltip hascontextmenu",
+                                             :data => data_options)
+          end
+
+          # Renders the label on the right
+          if label
+            style = +""
+            style << "top:0px;"
+            style << "left:#{coords[:bar_end] - coords[:bar_start] + 8}px;"
+            style << "height:12px;"
+            bar_contents << view.content_tag(:div, label,
+                                             :style => style,
+                                             :class => "label",
+                                             :data => data_options)
+          end
+
+          bar_contents = bar_contents.join.presence
+          output << view.content_tag(:div, (bar_contents || '&nbsp;').html_safe, content_opt)
+        else
+          # Renders the label on the right
+          if label
+            style = +""
+            style << "top:1px;"
+            style << "left:#{(coords[:bar_end] || 0) + 8}px;"
+            output << view.content_tag(:div, label,
                                        :style => style,
-                                       :class => "#{css} task_done",
                                        :id => html_id,
+                                       :class => "label",
                                        :data => data_options)
           end
         end
@@ -928,55 +1045,26 @@ module Redmine
         if markers
           if coords[:start]
             style = +""
-            style << "top:#{params[:top]}px;"
             style << "left:#{coords[:start]}px;"
-            style << "width:15px;"
             output << view.content_tag(:div, '&nbsp;'.html_safe,
                                        :style => style,
-                                       :class => "#{css} marker starting",
+                                       :class => "marker starting",
                                        :data => data_options)
           end
           if coords[:end]
             style = +""
-            style << "top:#{params[:top]}px;"
             style << "left:#{coords[:end]}px;"
-            style << "width:15px;"
             output << view.content_tag(:div, '&nbsp;'.html_safe,
                                        :style => style,
-                                       :class => "#{css} marker ending",
+                                       :class => "marker ending",
                                        :data => data_options)
           end
         end
-        # Renders the label on the right
-        if label
-          style = +""
-          style << "top:#{params[:top]}px;"
-          style << "left:#{(coords[:bar_end] || 0) + 8}px;"
-          style << "width:15px;"
-          output << view.content_tag(:div, label,
-                                     :style => style,
-                                     :class => "#{css} label",
-                                     :data => data_options)
-        end
-        # Renders the tooltip
-        if object.is_a?(Issue) && coords[:bar_start] && coords[:bar_end]
-          s = view.content_tag(:span,
-                               view.render_issue_tooltip(object).html_safe,
-                               :class => "tip")
-          s += view.content_tag(:input, nil, :type => 'checkbox', :name => 'ids[]',
-                                :value => object.id, :style => 'display:none;',
-                                :class => 'toggle-selection')
-          style = +""
-          style << "position: absolute;"
-          style << "top:#{params[:top]}px;"
-          style << "left:#{coords[:bar_start]}px;"
-          style << "width:#{coords[:bar_end] - coords[:bar_start]}px;"
-          style << "height:12px;"
-          output << view.content_tag(:div, s.html_safe,
-                                     :style => style,
-                                     :class => "tooltip hascontextmenu",
-                                     :data => data_options)
-        end
+        output = view.content_tag(:div, output.html_safe,
+          :class => "#{css} line",
+          :style => "top:#{params[:top]}px;width:#{params[:g_width] - 1}px;",
+          :data => data_options
+        )
         @lines << output
         output
       end
