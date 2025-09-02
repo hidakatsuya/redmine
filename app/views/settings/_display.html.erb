@@ -17,6 +17,8 @@
 
 <p><%= setting_select :timespan_format, [["%.2f" % 0.75, 'decimal'], ['0:45 h', 'minutes']], :blank => false %></p>
 
+<p><%= setting_select :timestamp_format, timestamp_format_setting_options %></p>
+
 <p><%= setting_select :user_format, @options[:user_format] %></p>
 
 <p><%= setting_check_box :gravatar_enabled, :data => {:enables => '#settings_gravatar_default'} %>

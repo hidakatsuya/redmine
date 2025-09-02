@@ -49,7 +49,7 @@
         <p class="author">
         <%= authoring @issue.created_on, @issue.author %>.
         <% if @issue.created_on != @issue.updated_on %>
-        <%= l(:label_updated_time, time_tag(@issue.updated_on)).html_safe %>.
+        <%= l(label_by_timestamp_format(:label_updated_time), time_tag(@issue.updated_on)).html_safe %>.
         <% end %>
         </p>
 

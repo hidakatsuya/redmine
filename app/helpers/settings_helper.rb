@@ -238,6 +238,14 @@ module SettingsHelper
     end
   end
 
+  # Returns the options for the timestamp_format setting
+  #   Convert the date and time three days ago into each format and use it as an example
+  def timestamp_format_setting_options
+    %w[relative_time relative_time_with_exact_time exact_time].map do |f|
+      ["#{format_timestamp(Time.now.ago(3.days), f)} (#{l('label_' + f)})", f]
+    end
+  end
+
   def gravatar_default_setting_options
     [['Identicons', 'identicon'],
      ['Monster ids', 'monsterid'],

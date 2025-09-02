@@ -174,6 +174,8 @@ time_format:
   default: ''
 timespan_format:
   default: 'minutes'
+timestamp_format:
+  default: 'relative_time'
 user_format:
   default: :firstname_lastname
   format: symbol

@@ -89,6 +89,23 @@ module Redmine
       (include_date ? "#{format_date(local)} " : "") + ::I18n.l(local, **options)
     end
 
+    def format_timestamp(time, timestamp_format=nil)
+      case (timestamp_format || Setting.timestamp_format)
+      when 'relative_time'
+        distance_of_time_in_words(Time.now, time)
+      when 'relative_time_with_exact_time'
+        "#{distance_of_time_in_words(Time.now, time)} (#{format_time(time)})"
+      when 'exact_time'
+        format_time(time)
+      end
+    end
+
+    def label_by_timestamp_format(label_name)
+      return label_name unless Setting.timestamp_format == 'exact_time'
+
+      label_name.to_s.gsub('_time', '_exact_time').to_sym
+    end
+
     def format_hours(hours)
       return "" if hours.blank?
 

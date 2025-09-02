@@ -22,6 +22,7 @@ require_relative '../../../test_helper'
 class Redmine::I18nTest < ActiveSupport::TestCase
   include Redmine::I18n
   include ActionView::Helpers::NumberHelper
+  include ActionView::Helpers::DateHelper
 
   def setup
     User.current = nil
@@ -122,6 +123,48 @@ class Redmine::I18nTest < ActiveSupport::TestCase
     with_settings :date_format => '%d %m %Y', :time_format => '%H %M' do
       assert_equal now.localtime.strftime('%d %m %Y %H %M'), format_time(now.utc), "User time zone was #{User.current.time_zone}"
       assert_equal now.localtime.strftime('%H %M'), format_time(now.utc, false)
+    end
+  end
+
+  def test_format_timestamp
+    User.current = User.find(1)
+    User.current.pref.time_zone = 'UTC'
+    User.current.pref.save!
+
+    travel_to Time.utc(2023, 5, 31, 23, 59, 59) # Time.now => 2023/5/31 23:59:59
+    sample_time = Time.utc(2022, 1, 1, 0, 0, 0)
+
+    with_settings :timestamp_format => 'relative_time' do
+      assert_equal 'over 1 year', format_timestamp(sample_time)
+    end
+    with_settings :timestamp_format => 'relative_time_with_exact_time', :date_format => '%d/%m/%Y', :time_format => '%H:%M' do
+      assert_equal 'over 1 year (01/01/2022 00:00)', format_timestamp(sample_time)
+    end
+    with_settings :timestamp_format => 'exact_time', :date_format => '%d/%m/%Y', :time_format => '%H:%M' do
+      assert_equal '01/01/2022 00:00', format_timestamp(sample_time)
+    end
+
+    # If there is an argument, it takes precedence over the set value
+    with_settings :timestamp_format => 'exact_time', :date_format => '%d/%m/%Y', :time_format => '%H:%M' do
+      assert_equal 'over 1 year', format_timestamp(sample_time, 'relative_time')
+    end
+  end
+
+  def test_label_by_timestamp_format
+    with_settings :timestamp_format => 'relative_time' do
+      assert_equal :label_added_time_by, label_by_timestamp_format(:label_added_time_by)
+      assert_equal :label_updated_time_by, label_by_timestamp_format(:label_updated_time_by)
+      assert_equal :label_updated_time, label_by_timestamp_format(:label_updated_time)
+    end
+    with_settings :timestamp_format => 'relative_time_with_exact_time' do
+      assert_equal :label_added_time_by, label_by_timestamp_format(:label_added_time_by)
+      assert_equal :label_updated_time_by, label_by_timestamp_format(:label_updated_time_by)
+      assert_equal :label_updated_time, label_by_timestamp_format(:label_updated_time)
+    end
+    with_settings :timestamp_format => 'exact_time' do
+      assert_equal :label_added_exact_time_by, label_by_timestamp_format(:label_added_time_by)
+      assert_equal :label_updated_exact_time_by, label_by_timestamp_format(:label_updated_time_by)
+      assert_equal :label_updated_exact_time, label_by_timestamp_format(:label_updated_time)
     end
   end
 

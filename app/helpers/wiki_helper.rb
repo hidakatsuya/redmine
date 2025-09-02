@@ -73,6 +73,6 @@ module WikiHelper
   end
 
   def wiki_content_update_info(content)
-    l(:label_updated_time_by, :author => link_to_user(content.author), :age => time_tag(content.updated_on)).html_safe
+    authoring(content.updated_on, content.author, label: :label_updated_time_by)
   end
 end

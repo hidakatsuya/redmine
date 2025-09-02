@@ -453,6 +453,7 @@ en:
   setting_date_format: Date format
   setting_time_format: Time format
   setting_timespan_format: Time span format
+  setting_timestamp_format: Timestamp format
   setting_cross_project_issue_relations: Allow cross-project issue relations
   setting_cross_project_subtasks: Allow cross-project subtasks
   setting_issue_list_default_columns: Issues list defaults
@@ -893,6 +894,9 @@ en:
   label_f_hour: "%{value} hour"
   label_f_hour_plural: "%{value} hours"
   label_f_hour_short: "%{value} h"
+  label_relative_time: Relative time
+  label_relative_time_with_exact_time: Relative time with exact time
+  label_exact_time: Exact time
   label_time_tracking: Time tracking
   label_change_plural: Changes
   label_statistics: Statistics
@@ -954,6 +958,9 @@ en:
   label_added_time_by: "Added by %{author} %{age} ago"
   label_updated_time_by: "Updated by %{author} %{age} ago"
   label_updated_time: "Updated %{value} ago"
+  label_added_exact_time_by: "Added by %{author} on %{age}"
+  label_updated_exact_time_by: "Updated by %{author} on %{age}"
+  label_updated_exact_time: "Updated on %{value}"
   label_jump_to_a_project: Jump to a project...
   label_file_plural: Files
   label_changeset_plural: Changesets

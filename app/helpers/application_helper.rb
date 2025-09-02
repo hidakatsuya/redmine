@@ -501,7 +501,7 @@ module ApplicationHelper
             h(page.pretty_title),
             href,
             :title => (if options[:timestamp] && page.updated_on
-                         l(:label_updated_time, distance_of_time_in_words(Time.now, page.updated_on))
+                         l(label_by_timestamp_format(:label_updated_time), format_timestamp(page.updated_on))
                        else
                          nil
                        end)
@@ -745,13 +745,13 @@ module ApplicationHelper
   end
 
   def authoring(created, author, options={})
-    l(options[:label] || :label_added_time_by, :author => link_to_user(author), :age => time_tag(created)).html_safe
+    l(label_by_timestamp_format(options[:label] || :label_added_time_by), :author => link_to_user(author), :age => time_tag(created)).html_safe
   end
 
   def time_tag(time)
     return if time.nil?
 
-    text = distance_of_time_in_words(Time.now, time)
+    text = format_timestamp(time)
     if @project
       link_to(text,
               project_activity_path(@project, :from => User.current.time_to_date(time)),

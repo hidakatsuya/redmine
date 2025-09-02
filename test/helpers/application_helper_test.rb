@@ -1838,12 +1838,10 @@ class ApplicationHelperTest < Redmine::HelperTest
     result = render_page_hierarchy(pages_by_parent_id, nil, :timestamp => true)
     assert_select_in(
       result, 'ul.pages-hierarchy li a[title=?]',
-      l(:label_updated_time,
-        distance_of_time_in_words(Time.now, parent_page.updated_on)))
+      l(:label_updated_time, format_timestamp(parent_page.updated_on)))
     assert_select_in(
       result, 'ul.pages-hierarchy li ul.pages-hierarchy a[title=?]',
-      l(:label_updated_time,
-        distance_of_time_in_words(Time.now, child_page.updated_on)))
+      l(:label_updated_time, format_timestamp(child_page.updated_on)))
   end
 
   def test_render_page_hierarchy_when_action_is_export
