@@ -92,9 +92,9 @@ module Redmine
     def format_timestamp(time, timestamp_format=nil)
       case (timestamp_format || Setting.timestamp_format)
       when 'relative_time'
-        distance_of_time_in_words(Time.now, time)
+        l('datetime.relative.ago', count: distance_of_time_in_words(Time.now, time))
       when 'relative_time_with_exact_time'
-        "#{distance_of_time_in_words(Time.now, time)} (#{format_time(time)})"
+        "#{l('datetime.relative.ago', count: distance_of_time_in_words(Time.now, time))} (#{format_time(time)})"
       when 'exact_time'
         format_time(time)
       end
