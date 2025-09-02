@@ -70,6 +70,7 @@ Rails.application.routes.draw do
 
   get '/projects/:project_id/issues/gantt', :to => 'gantts#show', :as => 'project_gantt'
   get '/issues/gantt', :to => 'gantts#show'
+  put '/issues/gantt/:id/change_duration', :to => 'gantts#change_duration', :as => 'gantt_change_duration'
 
   get '/projects/:project_id/issues/calendar', :to => 'calendars#show', :as => 'project_calendar'
   get '/issues/calendar', :to => 'calendars#show'

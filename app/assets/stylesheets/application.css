@@ -1831,7 +1831,7 @@ td.gantt_watcher_users_column div.issue_watcher_users ul li:not(:last-child)::af
 
 .task {
   position: absolute;
-  height:8px;
+  height:10px;
   font-size:0.8em;
   color:#888;
   padding:0;
@@ -1840,27 +1840,76 @@ td.gantt_watcher_users_column div.issue_watcher_users ul li:not(:last-child)::af
   white-space:nowrap;
 }
 
-.task.label {width:100%;}
-.task.label.project, .task.label.version { font-weight: bold; }
+.task.line { left: 0; }
+.task div.tooltip:hover span.tip { font-size: inherit; }
+.task .task_todo .label { font-size: inherit; }
+.task.project .task_todo .label { margin-top: -4px; }
+.task.version .task_todo .label { margin-top: -3px; }
 
-.task_late { background:#f66 url(/task_late.png); border: 1px solid #f66; }
-.task_done { background:#00c600 url(/task_done.png); border: 1px solid #00c600; }
-.task_todo { background:#aaa url(/task_todo.png); border: 1px solid #aaa; }
+.task .label { position: absolute; width: auto; }
+.task.project .label, .task.version .label { font-weight: bold; }
 
-.task_todo.parent { background: #888; border: 1px solid #888; height: 3px;}
-.task_late.parent, .task_done.parent { height: 3px;}
-.task.parent.marker.starting  { position: absolute; background: url(/task_parent_end.png) no-repeat 0 0; width: 8px; height: 16px; margin-left: -4px; left: 0px; top: -1px;}
-.task.parent.marker.ending { position: absolute; background: url(/task_parent_end.png) no-repeat 0 0; width: 8px; height: 16px; margin-left: -4px; right: 0px; top: -1px;}
+.task_late { position: absolute; height: inherit; background:#f66; }
+.task_done { position: absolute; height: inherit; background:#00c600; }
+.task_todo { position: absolute; height: inherit; background:#aaa; }
 
-.version.task_late { background:#f66 url(/milestone_late.png); border: 1px solid #f66; height: 2px; margin-top: 3px;}
-.version.task_done { background:#00c600 url(/milestone_done.png); border: 1px solid #00c600; height: 2px; margin-top: 3px;}
-.version.task_todo { background:#fff url(/milestone_todo.png); border: 1px solid #fff; height: 2px; margin-top: 3px;}
-.version.marker { background-image:url(/version_marker.png); background-repeat: no-repeat; border: 0; margin-left: -4px; margin-top: 1px; }
+.parent .task_todo { background: #888; height: 5px; }
+.parent .task_late, .parent .task_done { height: 5px; }
+.parent .marker {
+  background: #888;
+  display: inline-block;
+  position: absolute;
+  width: 8px;
+  height: 6px;
+  margin-left: -5px;
+  margin-bottom: -4px;
+}
 
-.project.task_late { background:#f66 url(/milestone_late.png); border: 1px solid #f66; height: 2px; margin-top: 3px;}
-.project.task_done { background:#00c600 url(/milestone_done.png); border: 1px solid #00c600; height: 2px; margin-top: 3px;}
-.project.task_todo { background:#fff url(/milestone_todo.png); border: 1px solid #fff; height: 2px; margin-top: 3px;}
-.project.marker { background-image:url(/project_marker.png); background-repeat: no-repeat; border: 0; margin-left: -4px; margin-top: 1px; }
+.version .task_late { background:#f66; height: 4px; }
+.version .task_done { background:#00c600; height: 4px; }
+.version .task_todo { background:#aaa; height: 4px; margin-top: 3px; }
+.verison .marker {
+  width: 0;
+  height: 0;
+  border: 5px solid trasnparent;
+  border-bottom-color: black;
+  position: absolute;
+  margin-top: -5px;
+  margin-left: -6px;
+}
+.version .marker:after {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: 5px;
+  width: 0;
+  height: 0;
+  border: 5px solid transparent;
+  border-top-color: black;
+}
+
+.project .task_late { background:#f66; height: 2px; }
+.project .task_done { background:#00c600; height: 2px; }
+.project .task_todo { background:#aaa; height: 2px; margin-top: 4px; }
+.project .marker {
+  width: 0;
+  height: 0;
+  border: 5px solid transparent;
+  border-bottom-color: blue;
+  position: absolute;
+  margin-top: -5px;
+  margin-left: -6px;
+}
+.project .marker:after {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: 5px;
+  width: 0;
+  height: 0;
+  border: 5px solid transparent;
+  border-top-color: blue;
+}
 
 .version-behind-schedule a, .issue-behind-schedule a {color: #f66914;}
 .version-overdue a, .issue-overdue a, .project-overdue a {color: #f00;}
