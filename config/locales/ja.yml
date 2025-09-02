@@ -73,8 +73,6 @@ ja:
       almost_x_years:
         one:   "ほぼ1年"
         other: "ほぼ%{count}年"
-    relative:
-      ago: "%{count}前"
 
   number:
     format:
@@ -744,9 +742,9 @@ ja:
   label_missing_feeds_access_key: Atomアクセスキーが見つかりません
   label_feeds_access_key_created_on: "Atomアクセスキーは%{value}前に作成されました"
   label_module_plural: モジュール
-  label_added_time_by: "%{author} さんが%{age}に追加"
-  label_updated_time_by: "%{author} さんが%{age}に更新"
-  label_updated_time: "%{value}に更新"
+  label_added_time_by: "%{author} さんが%{age}前に追加"
+  label_updated_time_by: "%{author} さんが%{age}前に更新"
+  label_updated_time: "%{value}前に更新"
   label_added_exact_time_by: "%{author} さんが%{age}に追加"
   label_updated_exact_time_by: "%{author} さんが%{age}に更新"
   label_updated_exact_time: "%{value}に更新"

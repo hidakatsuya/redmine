@@ -70,8 +70,6 @@ en:
       almost_x_years:
         one:   "almost 1 year"
         other: "almost %{count} years"
-    relative:
-      ago: "%{count} ago"
 
   number:
     format:
@@ -957,9 +955,9 @@ en:
   label_missing_feeds_access_key: Missing a Atom access key
   label_feeds_access_key_created_on: "Atom access key created %{value} ago"
   label_module_plural: Modules
-  label_added_time_by: "Added by %{author} %{age}"
-  label_updated_time_by: "Updated by %{author} %{age}"
-  label_updated_time: "Updated %{value}"
+  label_added_time_by: "Added by %{author} %{age} ago"
+  label_updated_time_by: "Updated by %{author} %{age} ago"
+  label_updated_time: "Updated %{value} ago"
   label_added_exact_time_by: "Added by %{author} on %{age}"
   label_updated_exact_time_by: "Updated by %{author} on %{age}"
   label_updated_exact_time: "Updated on %{value}"
