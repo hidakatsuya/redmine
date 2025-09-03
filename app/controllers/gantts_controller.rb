@@ -69,12 +69,19 @@ class GanttsController < ApplicationController
         render_403(:message => @obj.errors.full_messages.join)
         raise ActiveRecord::Rollback
       end
-      retrieve_query
     rescue ActiveRecord::StaleObjectError
-      render_403(:message => :notice_issue_update_conflict)
+      return render_403(:message => :notice_issue_update_conflict)
     rescue ActiveRecord::RecordNotFound
-      render_404
+      return render_404
     end
+
+    @project = Project.find(params[:project_id]) if params[:project_id]
+
+    retrieve_query
+
+    @gantt = Redmine::Helpers::Gantt.new(params)
+    @gantt.project = @project
+    @gantt.query = @query if @query
   end
 
   private
