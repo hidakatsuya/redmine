@@ -202,10 +202,10 @@ function drawSelectedColumns(){
 
 function drawGanttHandler() {
   var folder = document.getElementById('gantt_draw_area');
-  if(draw_gantt != null)
-    draw_gantt.clear();
-  else
-    draw_gantt = Raphael(folder);
+
+  draw_gantt?.clear();
+  draw_gantt = Raphael(folder);
+
   setDrawArea();
   drawSelectedColumns();
   if ($("#draw_progress_line").prop('checked'))
