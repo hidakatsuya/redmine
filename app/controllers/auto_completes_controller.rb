@@ -21,6 +21,9 @@ class AutoCompletesController < ApplicationController
   before_action :find_project
 
   def issues
+    l = Logger.new(Rails.root.join('log', 'auto_complete_issues.log'))
+    l.debug('auto_complete executed')
+
     issues = []
     q = (params[:q] || params[:term]).to_s.strip
     status = params[:status].to_s

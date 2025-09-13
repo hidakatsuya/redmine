@@ -101,3 +101,11 @@ jobs:
           name: system-test-screenshots
           path: tmp/screenshots
           if-no-files-found: ignore
+
+      - name: Upload log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: autocomplte-log
+          path: log/auto_complete_issues.log
+          if-no-files-found: ignore
