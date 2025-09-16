@@ -1282,7 +1282,7 @@ function inlineAutoComplete(element) {
       };
       xhr.open("GET", url, true);
       xhr.send();
-    }, 300);
+    }, 200);
 
     const tribute = new Tribute({
       collection: [
