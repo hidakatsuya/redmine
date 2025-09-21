@@ -109,6 +109,10 @@
       <%= render :partial => 'watchers/watchers', :locals => {:watched => @page} %>
     </div>
   <% end %>
+  <div class="wiki-toc" data-controller="wiki--toc">
+    <h3>Table of contents</h3>
+    <div data-wiki--toc-target="content" class="wiki-toc-content"></div>
+  </div>
 <% end %>
 
 <% content_for :header_tags do %>
