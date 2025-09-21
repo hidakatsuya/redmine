@@ -389,7 +389,7 @@ class ApplicationController < ActionController::Base
     render_404
   end
 
-  def self.model_object(model)
+  def self.set_model_object(model)
     self.model_object = model
   end
 

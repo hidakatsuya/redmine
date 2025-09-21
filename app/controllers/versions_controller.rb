@@ -19,7 +19,7 @@
 
 class VersionsController < ApplicationController
   menu_item :roadmap
-  model_object Version
+  set_model_object Version
   before_action :find_model_object, :except => [:index, :new, :create, :close_completed]
   before_action :find_project_from_association, :except => [:index, :new, :create, :close_completed]
   before_action :find_project_by_project_id, :only => [:index, :new, :create, :close_completed]
