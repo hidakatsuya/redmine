@@ -19,7 +19,7 @@
 
 class IssueCategoriesController < ApplicationController
   menu_item :settings
-  set_model_object IssueCategory
+  model_object IssueCategory
   before_action :find_model_object, :except => [:index, :new, :create]
   before_action :find_project_from_association, :except => [:index, :new, :create]
   before_action :find_project_by_project_id, :only => [:index, :new, :create]

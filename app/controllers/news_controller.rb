@@ -19,7 +19,7 @@
 
 class NewsController < ApplicationController
   default_search_scope :news
-  set_model_object News
+  model_object News
   before_action :find_model_object, :except => [:new, :create, :index]
   before_action :find_project_from_association, :except => [:new, :create, :index]
   before_action :find_project_by_project_id, :only => :create
