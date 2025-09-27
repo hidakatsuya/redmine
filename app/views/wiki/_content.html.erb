@@ -1,4 +1,8 @@
-<div class="wiki wiki-page">
+<div
+  class="wiki wiki-page"
+  data-controller="wiki--content"
+  data-wiki--content-wiki--toc-outlet="[data-controller='wiki--toc']"
+>
   <%= textilizable content, :text, :attachments => content.page.attachments,
         :edit_section_links => (@sections_editable && {:controller => 'wiki', :action => 'edit', :project_id => @page.project, :id => @page.title}) %>
 </div>
