@@ -32,35 +32,37 @@
 <% end %>
 
 <% if @trackers && @roles && @statuses.any? %>
-  <%= form_tag workflows_path, method: :patch, id: 'workflow_form' do %>
-    <%= @trackers.map {|tracker| hidden_field_tag 'tracker_id[]', tracker.id, :id => nil}.join.html_safe %>
-    <%= @roles.map {|role| hidden_field_tag 'role_id[]', role.id, :id => nil}.join.html_safe %>
-    <%= hidden_field_tag 'used_statuses_only', params[:used_statuses_only], :id => nil %>
-    <div class="autoscroll">
-      <%= render :partial => 'form', :locals => {:name => 'always', :workflows => @workflows['always']} %>
+  <div data-controller="workflow">
+    <%= form_tag workflows_path, method: :patch, id: 'workflow_form', data: { workflow_target: 'form' } do %>
+      <%= @trackers.map {|tracker| hidden_field_tag 'tracker_id[]', tracker.id, :id => nil}.join.html_safe %>
+      <%= @roles.map {|role| hidden_field_tag 'role_id[]', role.id, :id => nil}.join.html_safe %>
+      <%= hidden_field_tag 'used_statuses_only', params[:used_statuses_only], :id => nil %>
+      <div class="autoscroll">
+        <%= render :partial => 'form', :locals => {:name => 'always', :workflows => @workflows['always']} %>
 
-      <fieldset class="collapsible" style="padding: 0; margin-top: 0.5em;">
-        <legend onclick="toggleFieldset(this);" class="icon icon-<%= @workflows['author'].present? ? "expanded" : "collapsed" %>">
-          <%= sprite_icon(@workflows['author'].present? ? "angle-down" : "angle-right", rtl: !@workflows['author'].present?) %>
-          <%= l(:label_additional_workflow_transitions_for_author) %>
-        </legend>
-        <div id="author_workflows" style="margin: 0.5em 0 0.5em 0;">
-          <%= render :partial => 'form', :locals => {:name => 'author', :workflows => @workflows['author']} %>
-        </div>
-      </fieldset>
-      <%= javascript_tag "hideFieldset($('#author_workflows'))" unless @workflows['author'].present? %>
+        <fieldset class="collapsible" style="padding: 0; margin-top: 0.5em;">
+          <legend onclick="toggleFieldset(this);" class="icon icon-<%= @workflows['author'].present? ? "expanded" : "collapsed" %>">
+            <%= sprite_icon(@workflows['author'].present? ? "angle-down" : "angle-right", rtl: !@workflows['author'].present?) %>
+            <%= l(:label_additional_workflow_transitions_for_author) %>
+          </legend>
+          <div id="author_workflows" style="margin: 0.5em 0 0.5em 0;">
+            <%= render :partial => 'form', :locals => {:name => 'author', :workflows => @workflows['author']} %>
+          </div>
+        </fieldset>
+        <%= javascript_tag "hideFieldset($('#author_workflows'))" unless @workflows['author'].present? %>
 
-      <fieldset class="collapsible" style="padding: 0;">
-        <legend onclick="toggleFieldset(this);" class="icon icon-<%= @workflows['assignee'].present? ? "expanded" : "collapsed" %>">
-          <%= sprite_icon(@workflows['assignee'].present? ? "angle-down" : "angle-right", rtl: !@workflows['assignee'].present?) %>
-          <%= l(:label_additional_workflow_transitions_for_assignee) %>
-        </legend>
-        <div id="assignee_workflows" style="margin: 0.5em 0 0.5em 0;">
-      <%= render :partial => 'form', :locals => {:name => 'assignee', :workflows => @workflows['assignee']} %>
-        </div>
-      </fieldset>
-      <%= javascript_tag "hideFieldset($('#assignee_workflows'))" unless @workflows['assignee'].present? %>
-    </div>
-    <%= submit_tag l(:button_save) %>
-  <% end %>
+        <fieldset class="collapsible" style="padding: 0;">
+          <legend onclick="toggleFieldset(this);" class="icon icon-<%= @workflows['assignee'].present? ? "expanded" : "collapsed" %>">
+            <%= sprite_icon(@workflows['assignee'].present? ? "angle-down" : "angle-right", rtl: !@workflows['assignee'].present?) %>
+            <%= l(:label_additional_workflow_transitions_for_assignee) %>
+          </legend>
+          <div id="assignee_workflows" style="margin: 0.5em 0 0.5em 0;">
+        <%= render :partial => 'form', :locals => {:name => 'assignee', :workflows => @workflows['assignee']} %>
+          </div>
+        </fieldset>
+        <%= javascript_tag "hideFieldset($('#assignee_workflows'))" unless @workflows['assignee'].present? %>
+      </div>
+      <%= submit_tag l(:button_save), data: { action: 'click->workflow#submitChanges' } %>
+    <% end %>
+  </div>
 <% end %>
