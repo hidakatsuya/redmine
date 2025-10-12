@@ -19,7 +19,9 @@
         </div>
       </fieldset>
 
-      <fieldset id="options" class="collapsible collapsed">
+      <fieldset id="options" class="collapsible collapsed"
+                data-controller="gantt--options"
+                data-gantt--options-unavailable-columns-value="<%= html_escape(Redmine::Helpers::Gantt::UNAVAILABLE_COLUMNS.map(&:to_s).to_json) %>">
         <legend onclick="toggleFieldset(this);" class="icon icon-collapsed">
           <%= sprite_icon('angle-right', rtl: true) %>
           <%= l(:label_options) %>
@@ -34,8 +36,11 @@
                     <%= check_box 'query',
                       'draw_selected_columns',
                       id: 'draw_selected_columns',
-                      :'data-enables' => '#list-definition .query-columns select, #list-definition .query-columns input',
-                      data: {gantt_target: 'selectedColumnsToggle', action: 'change->gantt#toggleChanged'} %>
+                      data: {
+                        enables: '#list-definition .query-columns select, #list-definition .query-columns input',
+                        action: 'change->gantt--options#toggleDisplay',
+                        'gantt--options-target': 'display'
+                      } %>
                     <%= l(:label_display) %>
                   </label>
                 </div>
@@ -50,7 +55,10 @@
                 <%= check_box 'query',
                   'draw_relations',
                   id: 'draw_relations',
-                  data: {gantt_target: 'relationsToggle', action: 'change->gantt#toggleChanged'} %>
+                  data: {
+                    action: 'change->gantt--options#toggleRelations',
+                    'gantt--options-target': 'relations'
+                  } %>
                 <% [IssueRelation::TYPE_BLOCKS, IssueRelation::TYPE_PRECEDES].each do |rel| %>
                   <% color = Redmine::Helpers::Gantt::DRAW_TYPES[rel][:color] %>
                   <%= content_tag(:span, '&nbsp;&nbsp;&nbsp;'.html_safe, style: "background-color: #{color}") %>
@@ -64,7 +72,10 @@
                 <%= check_box 'query',
                   'draw_progress_line',
                   id: 'draw_progress_line',
-                  data: {gantt_target: 'progressToggle', action: 'change->gantt#toggleChanged'} %>
+                  data: {
+                    action: 'change->gantt--options#toggleProgress',
+                    'gantt--options-target': 'progress'
+                  } %>
                 <%= l(:label_display) %>
               </label>
             </fieldset>

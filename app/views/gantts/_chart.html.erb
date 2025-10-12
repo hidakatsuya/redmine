@@ -38,7 +38,13 @@
   <p class="warning"><%= l(:notice_gantt_chart_truncated, max: gantt.max_rows) %></p>
 <% end %>
 
-<table class="gantt-table">
+<table class="gantt-table"
+       data-controller="gantt--chart"
+       data-gantt--chart-issue-relation-types-value="<%= html_escape(Redmine::Helpers::Gantt::DRAW_TYPES.to_json) %>"
+       data-gantt--chart-unavailable-columns-value="<%= html_escape(Redmine::Helpers::Gantt::UNAVAILABLE_COLUMNS.map(&:to_s).to_json) %>"
+       data-gantt--chart-show-selected-columns-value="<%= @query.draw_selected_columns ? 'true' : 'false' %>"
+       data-gantt--chart-show-relations-value="<%= @query.draw_relations ? 'true' : 'false' %>"
+       data-gantt--chart-show-progress-value="<%= @query.draw_progress_line ? 'true' : 'false' %>">
   <tr>
     <td style="width:<%= query.draw_selected_columns ? subject_width + 1 : subject_width + 2 %>px;" class="gantt_subjects_column">
       <%
@@ -51,7 +57,7 @@
       <%= content_tag(:div,
                       style: subjects_container_style,
                       class: subjects_container_classes,
-                      data: {gantt_target: 'subjectsContainer'}) do %>
+                      data: {'gantt--chart-target': 'subjectsContainer'}) do %>
         <%
           header_bg_style = +"width: #{subject_width + 1}px;"
           header_bg_style << "height: #{headers_height}px;"
@@ -65,7 +71,7 @@
           header_overlay_style << 'overflow: hidden;'
         %>
         <%= content_tag(:div, "", style: header_overlay_style, class: "gantt_hdr") %>
-        <%= content_tag(:div, class: "gantt_subjects") do %>
+        <%= content_tag(:div, class: "gantt_subjects", data: {controller: 'gantt--tree'}) do %>
           <%= form_tag({}, data: {cm_url: issues_context_menu_path}) do %>
             <%= hidden_field_tag 'back_url', url_for(params: request.query_parameters), id: nil %>
             <%= gantt.subjects.html_safe %>
@@ -104,7 +110,7 @@
       </td>
     <% end %>
     <td>
-      <div style="position:relative;height:<%= t_height + 24 %>px;overflow:auto;" id="gantt_area" data-gantt-target="ganttArea">
+      <div style="position:relative;height:<%= t_height + 24 %>px;overflow:auto;" id="gantt_area" data-gantt--chart-target="ganttArea">
         <%
           months_header_style = +"width: #{g_width - 1}px;"
           months_header_style << "height: #{headers_height}px;"
@@ -227,7 +233,7 @@
           draw_area_style << 'left: 0px;'
           draw_area_style << "width: #{g_width - 1}px;"
         %>
-        <%= content_tag(:div, '', style: draw_area_style, id: "gantt_draw_area", data: {gantt_target: 'drawArea'}) %>
+        <%= content_tag(:div, '', style: draw_area_style, id: "gantt_draw_area", data: {'gantt--chart-target': 'drawArea'}) %>
       </div>
     </td>
   </tr>

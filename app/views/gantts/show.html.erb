@@ -4,8 +4,8 @@
 
 <div class="gantt-page"
      data-controller="gantt"
-     data-gantt-issue-relation-type="<%= issue_relation_types.to_json %>"
-     data-gantt-unavailable-columns="<%= unavailable_columns.to_json %>">
+     data-gantt-issue-relation-types-value="<%= html_escape(issue_relation_types.to_json) %>"
+     data-gantt-unavailable-columns-value="<%= html_escape(unavailable_columns.to_json) %>">
   <div class="contextual">
   </div>
 
