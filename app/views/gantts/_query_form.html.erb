@@ -91,17 +91,14 @@
       <%= select_year(gantt.year_from, prefix: 'year', discard_type: true) %>
       <%= hidden_field_tag 'zoom', gantt.zoom %>
 
-      <%= button_tag sprite_icon('checked', l(:button_apply)),
-                     type: :submit,
-                     class: 'icon icon-checked' %>
+      <%= link_to_function sprite_icon('checked', l(:button_apply)), '$("#query_form").submit()',
+                           class: 'icon icon-checked' %>
       <%= link_to sprite_icon('reload', l(:button_clear)), {project_id: project, set_filter: 1},
                   class: 'icon icon-reload' %>
       <% if query.new_record? && User.current.allowed_to?(:save_queries, project, global: true) %>
-        <%= button_tag sprite_icon('save', l(:button_save_object, object_name: l(:label_query)).capitalize),
-                       class: 'icon icon-save',
-                       type: :submit,
-                       formaction: (project ? new_project_query_path(project) : new_query_path),
-                       formmethod: :get %>
+        <%= link_to_function sprite_icon('save', l(:button_save_object, object_name: l(:label_query)).capitalize),
+                             "$('#query_form').attr('action', '#{ project ? new_project_query_path(project) : new_query_path }').submit();",
+                             class: 'icon icon-save' %>
       <% end %>
       <% if !query.new_record? && query.editable_by?(User.current) %>
         <%= link_to sprite_icon('edit', l(:button_edit_object, object_name: l(:label_query)).capitalize),

@@ -23,14 +23,16 @@ export default class extends Controller {
     this.issueRelationType = this.readJSONValue("issueRelationType", {})
     this.unavailableColumns = this.readJSONValue("unavailableColumns", [])
 
-    this.handleResize = this.handleResize.bind(this)
     this.handleEntryClick = this.handleEntryClick.bind(this)
 
     this.initializeWhenReady()
   }
 
   disconnect() {
-    window.removeEventListener("resize", this.handleResize)
+    if (this.resizeHandler) {
+      window.removeEventListener("resize", this.resizeHandler)
+      this.resizeHandler = null
+    }
     this.detachExpanderListeners()
     if (this.drawPaper) {
       this.drawPaper.remove()
@@ -64,16 +66,15 @@ export default class extends Controller {
     this.resizableSubjectColumn()
     this.drawSelectedColumns()
     this.attachExpanderListeners()
-    window.addEventListener("resize", this.handleResize)
+    this.resizeHandler = () => {
+      this.drawGanttHandler()
+      this.resizableSubjectColumn()
+    }
+    window.addEventListener("resize", this.resizeHandler)
     this.initialized = true
   }
 
   toggleChanged() {
-    this.drawGanttHandler()
-    this.resizableSubjectColumn()
-  }
-
-  handleResize() {
     this.drawGanttHandler()
     this.resizableSubjectColumn()
   }
@@ -428,7 +429,8 @@ export default class extends Controller {
     }
     const iconExpander = event.currentTarget
     const $subject = this.$(iconExpander.parentElement)
-    const subjectLeft = parseInt($subject.css("left"), 10) + iconExpander.offsetWidth
+    const subjectLeft =
+      parseInt($subject.css("left"), 10) + parseInt(iconExpander.offsetWidth, 10)
     let targetShown = null
     let targetTop = 0
     let totalHeight = 0
@@ -456,20 +458,20 @@ export default class extends Controller {
 
     $subject.nextAll("div").each((_, element) => {
       const $element = this.$(element)
-      const collapseData = $element.data("collapse-expand")
+      const json = $element.data("collapse-expand")
       const numberOfRows = $element.data("number-of-rows")
-      const barsSelector = `#gantt_area form > div[data-collapse-expand='${collapseData.obj_id}'][data-number-of-rows='${numberOfRows}']`
-      const selectedColumnsSelector = `td.gantt_selected_column div[data-collapse-expand='${collapseData.obj_id}'][data-number-of-rows='${numberOfRows}']`
-
+      const barsSelector = `#gantt_area form > div[data-collapse-expand='${json.obj_id}'][data-number-of-rows='${numberOfRows}']`
+      const selectedColumnsSelector = `td.gantt_selected_column div[data-collapse-expand='${json.obj_id}'][data-number-of-rows='${numberOfRows}']`
       if (outOfHierarchy || parseInt($element.css("left"), 10) <= subjectLeft) {
         outOfHierarchy = true
         if (targetShown === null) {
           return false
         }
-        const newTop = parseInt($element.css("top"), 10) + totalHeight * (targetShown ? -1 : 1)
-        $element.css("top", newTop)
+        const newTopVal =
+          parseInt($element.css("top"), 10) + totalHeight * (targetShown ? -1 : 1)
+        $element.css("top", newTopVal)
         this.$([barsSelector, selectedColumnsSelector].join()).each((__, el) => {
-          this.$(el).css("top", newTop)
+          this.$(el).css("top", newTopVal)
         })
         return true
       }
@@ -480,7 +482,6 @@ export default class extends Controller {
         targetTop = parseInt($element.css("top"), 10)
         totalHeight = 0
       }
-
       if (isShown === targetShown) {
         this.$(barsSelector).each((__, task) => {
           const $task = this.$(task)
@@ -491,7 +492,6 @@ export default class extends Controller {
             $task.toggle(!isShown)
           }
         })
-
         this.$(selectedColumnsSelector).each((__, attr) => {
           const $attr = this.$(attr)
           if (!isShown) {
@@ -499,13 +499,12 @@ export default class extends Controller {
           }
           $attr.toggle(!isShown)
         })
-
         if (!isShown) {
           $element.css("top", targetTop + totalHeight)
         }
         toggleIcon($element)
         $element.toggle(!isShown)
-        totalHeight += parseInt($element.data("top-increment"), 10)
+        totalHeight += parseInt(json.top_increment, 10)
       }
     })
     this.drawGanttHandler()
