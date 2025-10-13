@@ -24,23 +24,13 @@ export default class extends Controller {
     this.issueRelationTypes = this.issueRelationTypesValue || {}
     this.unavailableColumns = this.unavailableColumnsValue || []
 
-    this.handleOptionsDisplay = this.handleOptionsDisplay.bind(this)
-    this.handleOptionsRelations = this.handleOptionsRelations.bind(this)
-    this.handleOptionsProgress = this.handleOptionsProgress.bind(this)
     this.handleTreeChanged = this.handleTreeChanged.bind(this)
-
-    this.element.addEventListener("gantt--options:toggle-display", this.handleOptionsDisplay)
-    this.element.addEventListener("gantt--options:toggle-relations", this.handleOptionsRelations)
-    this.element.addEventListener("gantt--options:toggle-progress", this.handleOptionsProgress)
     this.element.addEventListener("gantt--tree:changed", this.handleTreeChanged)
 
     this.initializeWhenReady()
   }
 
   disconnect() {
-    this.element.removeEventListener("gantt--options:toggle-display", this.handleOptionsDisplay)
-    this.element.removeEventListener("gantt--options:toggle-relations", this.handleOptionsRelations)
-    this.element.removeEventListener("gantt--options:toggle-progress", this.handleOptionsProgress)
     this.element.removeEventListener("gantt--tree:changed", this.handleTreeChanged)
 
     if (this.resizeHandler) {

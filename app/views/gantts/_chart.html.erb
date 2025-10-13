@@ -40,6 +40,9 @@
 
 <table class="gantt-table"
        data-controller="gantt--chart"
+       data-action="gantt--options:toggle-display@window->gantt--chart#handleOptionsDisplay \
+                    gantt--options:toggle-relations@window->gantt--chart#handleOptionsRelations \
+                    gantt--options:toggle-progress@window->gantt--chart#handleOptionsProgress"
        data-gantt--chart-issue-relation-types-value="<%= html_escape(Redmine::Helpers::Gantt::DRAW_TYPES.to_json) %>"
        data-gantt--chart-unavailable-columns-value="<%= html_escape(Redmine::Helpers::Gantt::UNAVAILABLE_COLUMNS.map(&:to_s).to_json) %>"
        data-gantt--chart-show-selected-columns-value="<%= @query.draw_selected_columns ? 'true' : 'false' %>"
