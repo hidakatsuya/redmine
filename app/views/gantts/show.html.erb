@@ -1,11 +1,5 @@
 <% @gantt.view = self %>
-<% issue_relation_types = Redmine::Helpers::Gantt::DRAW_TYPES %>
-<% unavailable_columns = Redmine::Helpers::Gantt::UNAVAILABLE_COLUMNS.map(&:to_s) %>
-
-<div class="gantt-page"
-     data-controller="gantt"
-     data-gantt-issue-relation-types-value="<%= html_escape(issue_relation_types.to_json) %>"
-     data-gantt-unavailable-columns-value="<%= html_escape(unavailable_columns.to_json) %>">
+<div class="gantt-page">
   <div class="contextual">
   </div>
 
