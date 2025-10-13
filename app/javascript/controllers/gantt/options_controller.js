@@ -9,50 +9,57 @@ export default class extends Controller {
 
   connect() {
     this.$ = window.jQuery
+    this.chartElement = document.querySelector('.gantt-table[data-controller*="gantt--chart"]')
     this.dispatchInitialStates()
     this.disableUnavailableColumns()
   }
 
   toggleDisplay(event) {
-    this.dispatch("toggle-display", {
+    this.dispatchFromChart("toggle-display", {
       detail: { enabled: event.currentTarget.checked },
-      bubbles: true
     })
   }
 
   toggleRelations(event) {
-    this.dispatch("toggle-relations", {
+    this.dispatchFromChart("toggle-relations", {
       detail: { enabled: event.currentTarget.checked },
-      bubbles: true
     })
   }
 
   toggleProgress(event) {
-    this.dispatch("toggle-progress", {
+    this.dispatchFromChart("toggle-progress", {
       detail: { enabled: event.currentTarget.checked },
-      bubbles: true
     })
   }
 
   dispatchInitialStates() {
     if (this.hasDisplayTarget) {
-      this.dispatch("toggle-display", {
+      this.dispatchFromChart("toggle-display", {
         detail: { enabled: this.displayTarget.checked },
-        bubbles: true
       })
     }
     if (this.hasRelationsTarget) {
-      this.dispatch("toggle-relations", {
+      this.dispatchFromChart("toggle-relations", {
         detail: { enabled: this.relationsTarget.checked },
-        bubbles: true
       })
     }
     if (this.hasProgressTarget) {
-      this.dispatch("toggle-progress", {
+      this.dispatchFromChart("toggle-progress", {
         detail: { enabled: this.progressTarget.checked },
-        bubbles: true
       })
     }
+  }
+
+  dispatchFromChart(eventName, options = {}) {
+    if (!this.chartElement) return
+
+    const detail = options.detail || {}
+    const event = new CustomEvent(`gantt--options:${eventName}`, {
+      bubbles: true,
+      cancelable: true,
+      detail
+    })
+    this.chartElement.dispatchEvent(event)
   }
 
   disableUnavailableColumns() {
