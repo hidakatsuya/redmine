@@ -57,6 +57,10 @@ export default class extends Controller {
     }
   }
 
+  handleTreeChanged() {
+    this.drawGanttHandler()
+  }
+
   handleOptionsDisplay(event) {
     this.showSelectedColumnsValue = !!(event.detail && event.detail.enabled)
   }
