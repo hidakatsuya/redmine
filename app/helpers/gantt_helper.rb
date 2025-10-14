@@ -51,8 +51,8 @@ module GanttHelper
         gantt--options:toggle-progress@window->gantt--chart#handleOptionsProgress
         gantt--tree:changed->gantt--chart#handleTreeChanged
       ).join(' '),
-      'gantt--chart-issue-relation-types-value': h(Redmine::Helpers::Gantt::DRAW_TYPES.to_json),
-      'gantt--chart-unavailable-columns-value': h(Redmine::Helpers::Gantt::UNAVAILABLE_COLUMNS.map(&:to_s).to_json),
+      'gantt--chart-issue-relation-types-value': Redmine::Helpers::Gantt::DRAW_TYPES.to_json,
+      'gantt--chart-unavailable-columns-value': Redmine::Helpers::Gantt::UNAVAILABLE_COLUMNS.map(&:to_s).to_json,
       'gantt--chart-show-selected-columns-value': query.draw_selected_columns ? 'true' : 'false',
       'gantt--chart-show-relations-value': query.draw_relations ? 'true' : 'false',
       'gantt--chart-show-progress-value': query.draw_progress_line ? 'true' : 'false'
