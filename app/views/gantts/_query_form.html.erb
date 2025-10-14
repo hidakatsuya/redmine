@@ -21,7 +21,7 @@
 
       <fieldset id="options" class="collapsible collapsed"
                 data-controller="gantt--options"
-                data-gantt--options-unavailable-columns-value="<%= html_escape(Redmine::Helpers::Gantt::UNAVAILABLE_COLUMNS.map(&:to_s).to_json) %>">
+                data-gantt--options-unavailable-columns-value="<%= Redmine::Helpers::Gantt::UNAVAILABLE_COLUMNS.map(&:to_s).to_json %>">
         <legend onclick="toggleFieldset(this);" class="icon icon-collapsed">
           <%= sprite_icon('angle-right', rtl: true) %>
           <%= l(:label_options) %>
