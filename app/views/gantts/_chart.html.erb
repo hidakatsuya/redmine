@@ -74,7 +74,7 @@
           header_overlay_style << 'overflow: hidden;'
         %>
         <%= content_tag(:div, "", style: header_overlay_style, class: "gantt_hdr") %>
-        <%= content_tag(:div, class: "gantt_subjects", data: {controller: 'gantt--tree'}) do %>
+        <%= content_tag(:div, class: "gantt_subjects", data: {controller: 'gantt--tree', action: 'gantt--tree:changed@window->gantt--chart#drawGanttHandler'}) do %>
           <%= form_tag({}, data: {cm_url: issues_context_menu_path}) do %>
             <%= hidden_field_tag 'back_url', url_for(params: request.query_parameters), id: nil %>
             <%= gantt.subjects.html_safe %>
