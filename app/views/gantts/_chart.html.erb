@@ -42,7 +42,8 @@
        data-controller="gantt--chart"
        data-action="gantt--options:toggle-display@window->gantt--chart#handleOptionsDisplay \
                     gantt--options:toggle-relations@window->gantt--chart#handleOptionsRelations \
-                    gantt--options:toggle-progress@window->gantt--chart#handleOptionsProgress"
+                    gantt--options:toggle-progress@window->gantt--chart#handleOptionsProgress \
+                    gantt--tree:changed@window->gantt--chart#drawGanttHandler"
        data-gantt--chart-issue-relation-types-value="<%= html_escape(Redmine::Helpers::Gantt::DRAW_TYPES.to_json) %>"
        data-gantt--chart-unavailable-columns-value="<%= html_escape(Redmine::Helpers::Gantt::UNAVAILABLE_COLUMNS.map(&:to_s).to_json) %>"
        data-gantt--chart-show-selected-columns-value="<%= @query.draw_selected_columns ? 'true' : 'false' %>"
@@ -74,7 +75,7 @@
           header_overlay_style << 'overflow: hidden;'
         %>
         <%= content_tag(:div, "", style: header_overlay_style, class: "gantt_hdr") %>
-        <%= content_tag(:div, class: "gantt_subjects", data: {controller: 'gantt--tree', action: 'gantt--tree:changed@window->gantt--chart#drawGanttHandler'}) do %>
+        <%= content_tag(:div, class: "gantt_subjects", data: {controller: 'gantt--tree'}) do %>
           <%= form_tag({}, data: {cm_url: issues_context_menu_path}) do %>
             <%= hidden_field_tag 'back_url', url_for(params: request.query_parameters), id: nil %>
             <%= gantt.subjects.html_safe %>
