@@ -3,16 +3,6 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   connect() {
     this.$ = window.jQuery
-    this.handleEntryClick = this.handleEntryClick.bind(this)
-    this.expanderElements().on("click", this.handleEntryClick)
-  }
-
-  disconnect() {
-    this.expanderElements().off("click", this.handleEntryClick)
-  }
-
-  expanderElements() {
-    return this.$(".expander", this.element)
   }
 
   handleEntryClick(event) {
