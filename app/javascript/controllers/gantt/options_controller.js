@@ -14,39 +14,35 @@ export default class extends Controller {
   }
 
   toggleDisplay(event) {
-    this.dispatch("toggle-display", {
-      detail: { enabled: event.currentTarget.checked }
-    })
+    this.dispatchToWindow("toggle-display", { enabled: event.currentTarget.checked })
   }
 
   toggleRelations(event) {
-    this.dispatch("toggle-relations", {
-      detail: { enabled: event.currentTarget.checked }
-    })
+    this.dispatchToWindow("toggle-relations", { enabled: event.currentTarget.checked })
   }
 
   toggleProgress(event) {
-    this.dispatch("toggle-progress", {
-      detail: { enabled: event.currentTarget.checked }
-    })
+    this.dispatchToWindow("toggle-progress", { enabled: event.currentTarget.checked })
   }
 
   dispatchInitialStates() {
     if (this.hasDisplayTarget) {
-      this.dispatch("toggle-display", {
-        detail: { enabled: this.displayTarget.checked }
-      })
+      this.dispatchToWindow("toggle-display", { enabled: this.displayTarget.checked })
     }
     if (this.hasRelationsTarget) {
-      this.dispatch("toggle-relations", {
-        detail: { enabled: this.relationsTarget.checked }
-      })
+      this.dispatchToWindow("toggle-relations", { enabled: this.relationsTarget.checked })
     }
     if (this.hasProgressTarget) {
-      this.dispatch("toggle-progress", {
-        detail: { enabled: this.progressTarget.checked }
-      })
+      this.dispatchToWindow("toggle-progress", { enabled: this.progressTarget.checked })
     }
+  }
+
+  dispatchToWindow(eventName, detail = {}) {
+    window.dispatchEvent(
+      new CustomEvent(`gantt--options:${eventName}`, {
+        detail
+      })
+    )
   }
 
   disableUnavailableColumns() {
