@@ -24,15 +24,10 @@ export default class extends Controller {
     this.issueRelationTypes = this.issueRelationTypesValue || {}
     this.unavailableColumns = this.unavailableColumnsValue || []
 
-    this.handleTreeChanged = this.handleTreeChanged.bind(this)
-    this.element.addEventListener("gantt--tree:changed", this.handleTreeChanged)
-
     this.initializeWhenReady()
   }
 
   disconnect() {
-    this.element.removeEventListener("gantt--tree:changed", this.handleTreeChanged)
-
     if (this.resizeHandler) {
       window.removeEventListener("resize", this.resizeHandler)
       this.resizeHandler = null
@@ -72,10 +67,6 @@ export default class extends Controller {
 
   handleOptionsProgress(event) {
     this.showProgressValue = !!(event.detail && event.detail.enabled)
-  }
-
-  handleTreeChanged() {
-    this.drawGanttHandler()
   }
 
   initializeWhenReady() {
