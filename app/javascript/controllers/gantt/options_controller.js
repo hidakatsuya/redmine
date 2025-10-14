@@ -15,24 +15,18 @@ export default class extends Controller {
 
   toggleDisplay(event) {
     this.dispatch("toggle-display", {
-      bubbles: true,
-      cancelable: true,
       detail: { enabled: event.currentTarget.checked }
     })
   }
 
   toggleRelations(event) {
     this.dispatch("toggle-relations", {
-      bubbles: true,
-      cancelable: true,
       detail: { enabled: event.currentTarget.checked }
     })
   }
 
   toggleProgress(event) {
     this.dispatch("toggle-progress", {
-      bubbles: true,
-      cancelable: true,
       detail: { enabled: event.currentTarget.checked }
     })
   }
@@ -40,22 +34,16 @@ export default class extends Controller {
   dispatchInitialStates() {
     if (this.hasDisplayTarget) {
       this.dispatch("toggle-display", {
-        bubbles: true,
-        cancelable: true,
         detail: { enabled: this.displayTarget.checked }
       })
     }
     if (this.hasRelationsTarget) {
       this.dispatch("toggle-relations", {
-        bubbles: true,
-        cancelable: true,
         detail: { enabled: this.relationsTarget.checked }
       })
     }
     if (this.hasProgressTarget) {
       this.dispatch("toggle-progress", {
-        bubbles: true,
-        cancelable: true,
         detail: { enabled: this.progressTarget.checked }
       })
     }
