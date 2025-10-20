@@ -50,6 +50,7 @@ module GanttHelper
         gantt--options:toggle-relations@window->gantt--chart#handleOptionsRelations
         gantt--options:toggle-progress@window->gantt--chart#handleOptionsProgress
         gantt--tree:changed->gantt--chart#handleTreeChanged
+        resize@window->gantt--chart#handleWindowResize
       ).join(' '),
       'gantt--chart-issue-relation-types-value': Redmine::Helpers::Gantt::DRAW_TYPES.to_json,
       'gantt--chart-unavailable-columns-value': Redmine::Helpers::Gantt::UNAVAILABLE_COLUMNS.map(&:to_s).to_json,
