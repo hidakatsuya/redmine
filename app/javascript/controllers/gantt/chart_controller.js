@@ -13,19 +13,20 @@ export default class extends Controller {
     showProgress: Boolean
   }
 
-  connect() {
+  initialize() {
     this.$ = window.jQuery
-    this.drawPaper = null
+    this.Raphael = window.Raphael
+  }
+
+  connect() {
     this.drawTop = 0
     this.drawRight = 0
     this.drawLeft = 0
-    this.initialized = false
 
     this.issueRelationTypes = this.issueRelationTypesValue || {}
     this.unavailableColumns = this.unavailableColumnsValue || []
 
     this.renderChart()
-    this.initialized = true
   }
 
   disconnect() {
@@ -37,21 +38,15 @@ export default class extends Controller {
 
   // Stimulus value change callbacks
   showSelectedColumnsValueChanged() {
-    if (this.initialized) {
-      this.drawSelectedColumns()
-    }
+    this.drawSelectedColumns()
   }
 
   showRelationsValueChanged() {
-    if (this.initialized) {
-      this.drawGanttHandler()
-    }
+    this.drawGanttHandler()
   }
 
   showProgressValueChanged() {
-    if (this.initialized) {
-      this.drawGanttHandler()
-    }
+    this.drawGanttHandler()
   }
 
   handleWindowResize() {
@@ -75,27 +70,23 @@ export default class extends Controller {
   }
 
   drawGanttHandler() {
-    if (!this.$ || !this.hasDrawAreaTarget || !window.Raphael) {
-      return
-    }
-    const folder = this.drawAreaTarget
     if (this.drawPaper) {
       this.drawPaper.clear()
     } else {
-      this.drawPaper = window.Raphael(folder)
+      this.drawPaper = this.Raphael(this.drawAreaTarget)
     }
+
     this.setDrawArea()
     this.drawSelectedColumns()
+
     if (this.showProgressValue) {
-      try {
-        this.drawGanttProgressLines()
-      } catch (error) {
-        console.error("drawGanttProgressLines failed", error)
-      }
+      this.drawGanttProgressLines()
     }
+
     if (this.showRelationsValue) {
       this.drawRelations()
     }
+
     const content = document.getElementById("content")
     if (content) {
       content.classList.add("gantt_content")
@@ -111,9 +102,6 @@ export default class extends Controller {
   }
 
   drawSelectedColumns() {
-    if (!this.$) {
-      return
-    }
     const $selectedColumns = this.$("td.gantt_selected_column")
     const $subjectsContainer = this.$(".gantt_subjects_container")
 
@@ -159,9 +147,6 @@ export default class extends Controller {
   }
 
   resizableSubjectColumn() {
-    if (!this.$) {
-      return
-    }
     const $subjectsColumn = this.$("td.gantt_subjects_column")
     this.$(".issue-subject, .project-name, .version-name").each((_, element) => {
       const $element = this.$(element)
@@ -191,15 +176,13 @@ export default class extends Controller {
   }
 
   renderChart() {
-    if (!window.Raphael) {
-      return
-    }
     this.drawGanttHandler()
     this.resizableSubjectColumn()
   }
 
   getRelationsArray() {
     const relations = []
+
     this.$("div.task_todo[data-rels]").each((_, element) => {
       const $element = this.$(element)
       if (!$element.is(":visible")) {
@@ -221,10 +204,8 @@ export default class extends Controller {
   }
 
   drawRelations() {
-    if (!this.$ || !this.drawPaper || !this.showRelationsValue) {
-      return
-    }
     const relations = this.getRelationsArray()
+
     relations.forEach((relation) => {
       const issueFrom = this.$(`#task-todo-issue-${relation.issue_from}`)
       const issueTo = this.$(`#task-todo-issue-${relation.issue_to}`)
@@ -342,7 +323,9 @@ export default class extends Controller {
   getProgressLinesArray() {
     const lines = []
     const todayLeft = this.$("#today_line").position().left
+
     lines.push({ left: todayLeft, top: 0 })
+
     this.$("div.issue-subject, div.version-name").each((_, element) => {
       const $element = this.$(element)
       if (!$element.is(":visible")) {
@@ -394,11 +377,9 @@ export default class extends Controller {
   }
 
   drawGanttProgressLines() {
-    if (!this.drawPaper) {
-      return
-    }
     const progressLines = this.getProgressLinesArray()
     const color = this.$("#today_line").css("border-left-color") || "#ff0000"
+
     for (let index = 1; index < progressLines.length; index += 1) {
       const current = progressLines[index]
       const previous = progressLines[index - 1]
