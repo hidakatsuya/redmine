@@ -24,14 +24,11 @@ export default class extends Controller {
     this.issueRelationTypes = this.issueRelationTypesValue || {}
     this.unavailableColumns = this.unavailableColumnsValue || []
 
-    this.initializeWhenReady()
+    this.renderChart()
+    this.initialized = true
   }
 
   disconnect() {
-    if (this.resizeHandler) {
-      window.removeEventListener("resize", this.resizeHandler)
-      this.resizeHandler = null
-    }
     if (this.drawPaper) {
       this.drawPaper.remove()
       this.drawPaper = null
@@ -57,8 +54,12 @@ export default class extends Controller {
     }
   }
 
+  handleWindowResize() {
+    this.renderChart()
+  }
+
   handleTreeChanged() {
-    this.drawGanttHandler()
+    this.renderChart()
   }
 
   handleOptionsDisplay(event) {
@@ -71,38 +72,6 @@ export default class extends Controller {
 
   handleOptionsProgress(event) {
     this.showProgressValue = !!(event.detail && event.detail.enabled)
-  }
-
-  initializeWhenReady() {
-    if (!this.$) {
-      return
-    }
-
-    const start = () => this.initialize()
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", start, { once: true })
-    } else {
-      start()
-    }
-  }
-
-  initialize() {
-    if (this.initialized) {
-      return
-    }
-    if (!window.Raphael) {
-      window.setTimeout(() => this.initialize(), 50)
-      return
-    }
-    this.drawGanttHandler()
-    this.resizableSubjectColumn()
-    this.drawSelectedColumns()
-    this.resizeHandler = () => {
-      this.drawGanttHandler()
-      this.resizableSubjectColumn()
-    }
-    window.addEventListener("resize", this.resizeHandler)
-    this.initialized = true
   }
 
   drawGanttHandler() {
@@ -219,6 +188,14 @@ export default class extends Controller {
     } else {
       $subjectsColumn.resizable("enable")
     }
+  }
+
+  renderChart() {
+    if (!window.Raphael) {
+      return
+    }
+    this.drawGanttHandler()
+    this.resizableSubjectColumn()
   }
 
   getRelationsArray() {
