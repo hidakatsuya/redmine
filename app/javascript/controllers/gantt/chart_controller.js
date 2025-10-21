@@ -26,7 +26,7 @@ export default class extends Controller {
     this.issueRelationTypes = this.issueRelationTypesValue || {}
     this.unavailableColumns = this.unavailableColumnsValue || []
 
-    this.renderChart()
+    this.#renderChart()
   }
 
   disconnect() {
@@ -36,25 +36,24 @@ export default class extends Controller {
     }
   }
 
-  // Stimulus value change callbacks
   showSelectedColumnsValueChanged() {
-    this.drawSelectedColumns()
+    this.#drawSelectedColumns()
   }
 
   showRelationsValueChanged() {
-    this.drawGanttHandler()
+    this.#drawGanttHandler()
   }
 
   showProgressValueChanged() {
-    this.drawGanttHandler()
+    this.#drawGanttHandler()
   }
 
   handleWindowResize() {
-    this.renderChart()
+    this.#renderChart()
   }
 
   handleTreeChanged() {
-    this.renderChart()
+    this.#renderChart()
   }
 
   handleOptionsDisplay(event) {
@@ -69,22 +68,27 @@ export default class extends Controller {
     this.showProgressValue = !!(event.detail && event.detail.enabled)
   }
 
-  drawGanttHandler() {
+  #renderChart() {
+    this.#drawGanttHandler()
+    this.#resizableSubjectColumn()
+  }
+
+  #drawGanttHandler() {
     if (this.drawPaper) {
       this.drawPaper.clear()
     } else {
       this.drawPaper = this.Raphael(this.drawAreaTarget)
     }
 
-    this.setDrawArea()
-    this.drawSelectedColumns()
+    this.#setDrawArea()
+    this.#drawSelectedColumns()
 
     if (this.showProgressValue) {
-      this.drawGanttProgressLines()
+      this.#drawGanttProgressLines()
     }
 
     if (this.showRelationsValue) {
-      this.drawRelations()
+      this.#drawRelations()
     }
 
     const content = document.getElementById("content")
@@ -93,7 +97,7 @@ export default class extends Controller {
     }
   }
 
-  setDrawArea() {
+  #setDrawArea() {
     const $drawArea = this.$(this.drawAreaTarget)
     const $ganttArea = this.hasGanttAreaTarget ? this.$(this.ganttAreaTarget) : null
     this.drawTop = $drawArea.position().top
@@ -101,7 +105,7 @@ export default class extends Controller {
     this.drawLeft = $ganttArea ? $ganttArea.scrollLeft() : 0
   }
 
-  drawSelectedColumns() {
+  #drawSelectedColumns() {
     const $selectedColumns = this.$("td.gantt_selected_column")
     const $subjectsContainer = this.$(".gantt_subjects_container")
 
@@ -146,7 +150,7 @@ export default class extends Controller {
     }
   }
 
-  resizableSubjectColumn() {
+  #resizableSubjectColumn() {
     const $subjectsColumn = this.$("td.gantt_subjects_column")
     this.$(".issue-subject, .project-name, .version-name").each((_, element) => {
       const $element = this.$(element)
@@ -175,12 +179,7 @@ export default class extends Controller {
     }
   }
 
-  renderChart() {
-    this.drawGanttHandler()
-    this.resizableSubjectColumn()
-  }
-
-  getRelationsArray() {
+  #getRelationsArray() {
     const relations = []
 
     this.$("div.task_todo[data-rels]").each((_, element) => {
@@ -203,8 +202,8 @@ export default class extends Controller {
     return relations
   }
 
-  drawRelations() {
-    const relations = this.getRelationsArray()
+  #drawRelations() {
+    const relations = this.#getRelationsArray()
 
     relations.forEach((relation) => {
       const issueFrom = this.$(`#task-todo-issue-${relation.issue_from}`)
@@ -320,7 +319,7 @@ export default class extends Controller {
     })
   }
 
-  getProgressLinesArray() {
+  #getProgressLinesArray() {
     const lines = []
     const todayLeft = this.$("#today_line").position().left
 
@@ -376,8 +375,8 @@ export default class extends Controller {
     return lines
   }
 
-  drawGanttProgressLines() {
-    const progressLines = this.getProgressLinesArray()
+  #drawGanttProgressLines() {
+    const progressLines = this.#getProgressLinesArray()
     const color = this.$("#today_line").css("border-left-color") || "#ff0000"
 
     for (let index = 1; index < progressLines.length; index += 1) {
