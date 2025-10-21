@@ -2,7 +2,7 @@
 
 require_relative '../application_system_test_case'
 
-class GanttSystemTest < ApplicationSystemTestCase
+class GanttsTest < ApplicationSystemTestCase
   setup do
     log_user('jsmith', 'jsmith')
   end
