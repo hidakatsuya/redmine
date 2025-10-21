@@ -15,25 +15,7 @@ export default class extends Controller {
     let totalHeight = 0
     let outOfHierarchy = false
 
-    const toggleIcon = (element) => {
-      const $element = this.$(element)
-      const expander = $element.find(".expander")
-      if ($element.hasClass("open")) {
-        expander.switchClass("icon-expanded", "icon-collapsed")
-        $element.removeClass("open")
-        if (expander.find("svg").length === 1) {
-          window.updateSVGIcon(expander[0], "angle-right")
-        }
-      } else {
-        expander.switchClass("icon-collapsed", "icon-expanded")
-        $element.addClass("open")
-        if (expander.find("svg").length === 1) {
-          window.updateSVGIcon(expander[0], "angle-down")
-        }
-      }
-    }
-
-    toggleIcon($subject)
+    this.#toggleIcon($subject)
 
     $subject.nextAll("div").each((_, element) => {
       const $element = this.$(element)
@@ -81,11 +63,29 @@ export default class extends Controller {
         if (!isShown) {
           $element.css("top", targetTop + totalHeight)
         }
-        toggleIcon($element)
+        this.#toggleIcon($element)
         $element.toggle(!isShown)
         totalHeight += parseInt(json.top_increment, 10)
       }
     })
     this.dispatch("changed", { bubbles: true })
+  }
+
+  #toggleIcon(element) {
+    const $element = this.$(element)
+    const expander = $element.find(".expander")
+    if ($element.hasClass("open")) {
+      expander.switchClass("icon-expanded", "icon-collapsed")
+      $element.removeClass("open")
+      if (expander.find("svg").length === 1) {
+        window.updateSVGIcon(expander[0], "angle-right")
+      }
+    } else {
+      expander.switchClass("icon-collapsed", "icon-expanded")
+      $element.addClass("open")
+      if (expander.find("svg").length === 1) {
+        window.updateSVGIcon(expander[0], "angle-down")
+      }
+    }
   }
 }

@@ -12,8 +12,8 @@ export default class extends Controller {
   }
 
   connect() {
-    this.dispatchInitialStates()
-    this.disableUnavailableColumns()
+    this.#dispatchInitialStates()
+    this.#disableUnavailableColumns()
   }
 
   toggleDisplay(event) {
@@ -34,7 +34,7 @@ export default class extends Controller {
     })
   }
 
-  dispatchInitialStates() {
+  #dispatchInitialStates() {
     if (this.hasDisplayTarget) {
       this.dispatch("toggle-display", {
         detail: { enabled: this.displayTarget.checked }
@@ -52,7 +52,7 @@ export default class extends Controller {
     }
   }
 
-  disableUnavailableColumns() {
+  #disableUnavailableColumns() {
     if (!Array.isArray(this.unavailableColumnsValue)) {
       return
     }
