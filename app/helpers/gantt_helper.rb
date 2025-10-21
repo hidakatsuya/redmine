@@ -53,7 +53,6 @@ module GanttHelper
         resize@window->gantt--chart#handleWindowResize
       ).join(' '),
       'gantt--chart-issue-relation-types-value': Redmine::Helpers::Gantt::DRAW_TYPES.to_json,
-      'gantt--chart-unavailable-columns-value': Redmine::Helpers::Gantt::UNAVAILABLE_COLUMNS.map(&:to_s).to_json,
       'gantt--chart-show-selected-columns-value': query.draw_selected_columns ? 'true' : 'false',
       'gantt--chart-show-relations-value': query.draw_relations ? 'true' : 'false',
       'gantt--chart-show-progress-value': query.draw_progress_line ? 'true' : 'false'

@@ -7,11 +7,15 @@ export default class extends Controller {
 
   static values = {
     issueRelationTypes: Object,
-    unavailableColumns: Array,
     showSelectedColumns: Boolean,
     showRelations: Boolean,
     showProgress: Boolean
   }
+
+  #drawTop = 0
+  #drawRight = 0
+  #drawLeft = 0
+  #drawPaper = null
 
   initialize() {
     this.$ = window.jQuery
@@ -19,20 +23,17 @@ export default class extends Controller {
   }
 
   connect() {
-    this.drawTop = 0
-    this.drawRight = 0
-    this.drawLeft = 0
-
-    this.issueRelationTypes = this.issueRelationTypesValue || {}
-    this.unavailableColumns = this.unavailableColumnsValue || []
+    this.#drawTop = 0
+    this.#drawRight = 0
+    this.#drawLeft = 0
 
     this.#renderChart()
   }
 
   disconnect() {
-    if (this.drawPaper) {
-      this.drawPaper.remove()
-      this.drawPaper = null
+    if (this.#drawPaper) {
+      this.#drawPaper.remove()
+      this.#drawPaper = null
     }
   }
 
@@ -74,10 +75,10 @@ export default class extends Controller {
   }
 
   #drawGanttHandler() {
-    if (this.drawPaper) {
-      this.drawPaper.clear()
+    if (this.#drawPaper) {
+      this.#drawPaper.clear()
     } else {
-      this.drawPaper = this.Raphael(this.drawAreaTarget)
+      this.#drawPaper = this.Raphael(this.drawAreaTarget)
     }
 
     this.#setDrawArea()
@@ -100,9 +101,9 @@ export default class extends Controller {
   #setDrawArea() {
     const $drawArea = this.$(this.drawAreaTarget)
     const $ganttArea = this.hasGanttAreaTarget ? this.$(this.ganttAreaTarget) : null
-    this.drawTop = $drawArea.position().top
-    this.drawRight = $drawArea.width()
-    this.drawLeft = $ganttArea ? $ganttArea.scrollLeft() : 0
+    this.#drawTop = $drawArea.position().top
+    this.#drawRight = $drawArea.width()
+    this.#drawLeft = $ganttArea ? $ganttArea.scrollLeft() : 0
   }
 
   #drawSelectedColumns() {
@@ -212,95 +213,95 @@ export default class extends Controller {
         return
       }
       const issueHeight = issueFrom.height()
-      const issueFromTop = issueFrom.position().top + issueHeight / 2 - this.drawTop
+      const issueFromTop = issueFrom.position().top + issueHeight / 2 - this.#drawTop
       const issueFromRight = issueFrom.position().left + issueFrom.width()
-      const issueToTop = issueTo.position().top + issueHeight / 2 - this.drawTop
+      const issueToTop = issueTo.position().top + issueHeight / 2 - this.#drawTop
       const issueToLeft = issueTo.position().left
-      const relationConfig = this.issueRelationTypes?.[relation.rel_type] || {}
+      const relationConfig = this.issueRelationTypesValue[relation.rel_type] || {}
       const color = relationConfig.color || "#000"
       const landscapeMargin = relationConfig.landscape_margin || 0
       const issueFromRightRel = issueFromRight + landscapeMargin
       const issueToLeftRel = issueToLeft - landscapeMargin
 
-      this.drawPaper
+      this.#drawPaper
         .path([
           "M",
-          issueFromRight + this.drawLeft,
+          issueFromRight + this.#drawLeft,
           issueFromTop,
           "L",
-          issueFromRightRel + this.drawLeft,
+          issueFromRightRel + this.#drawLeft,
           issueFromTop
         ])
         .attr({ stroke: color, "stroke-width": RELATION_STROKE_WIDTH })
 
       if (issueFromRightRel < issueToLeftRel) {
-        this.drawPaper
+        this.#drawPaper
           .path([
             "M",
-            issueFromRightRel + this.drawLeft,
+            issueFromRightRel + this.#drawLeft,
             issueFromTop,
             "L",
-            issueFromRightRel + this.drawLeft,
+            issueFromRightRel + this.#drawLeft,
             issueToTop
           ])
           .attr({ stroke: color, "stroke-width": RELATION_STROKE_WIDTH })
-        this.drawPaper
+        this.#drawPaper
           .path([
             "M",
-            issueFromRightRel + this.drawLeft,
+            issueFromRightRel + this.#drawLeft,
             issueToTop,
             "L",
-            issueToLeft + this.drawLeft,
+            issueToLeft + this.#drawLeft,
             issueToTop
           ])
           .attr({ stroke: color, "stroke-width": RELATION_STROKE_WIDTH })
       } else {
         const issueMiddleTop = issueToTop + issueHeight * (issueFromTop > issueToTop ? 1 : -1)
-        this.drawPaper
+        this.#drawPaper
           .path([
             "M",
-            issueFromRightRel + this.drawLeft,
+            issueFromRightRel + this.#drawLeft,
             issueFromTop,
             "L",
-            issueFromRightRel + this.drawLeft,
+            issueFromRightRel + this.#drawLeft,
             issueMiddleTop
           ])
           .attr({ stroke: color, "stroke-width": RELATION_STROKE_WIDTH })
-        this.drawPaper
+        this.#drawPaper
           .path([
             "M",
-            issueFromRightRel + this.drawLeft,
+            issueFromRightRel + this.#drawLeft,
             issueMiddleTop,
             "L",
-            issueToLeftRel + this.drawLeft,
+            issueToLeftRel + this.#drawLeft,
             issueMiddleTop
           ])
           .attr({ stroke: color, "stroke-width": RELATION_STROKE_WIDTH })
-        this.drawPaper
+        this.#drawPaper
           .path([
             "M",
-            issueToLeftRel + this.drawLeft,
+            issueToLeftRel + this.#drawLeft,
             issueMiddleTop,
             "L",
-            issueToLeftRel + this.drawLeft,
+            issueToLeftRel + this.#drawLeft,
             issueToTop
           ])
           .attr({ stroke: color, "stroke-width": RELATION_STROKE_WIDTH })
-        this.drawPaper
+        this.#drawPaper
           .path([
             "M",
-            issueToLeftRel + this.drawLeft,
+            issueToLeftRel + this.#drawLeft,
             issueToTop,
             "L",
-            issueToLeft + this.drawLeft,
+            issueToLeft + this.#drawLeft,
             issueToTop
           ])
           .attr({ stroke: color, "stroke-width": RELATION_STROKE_WIDTH })
       }
-      this.drawPaper
+      this.#drawPaper
         .path([
           "M",
-          issueToLeft + this.drawLeft,
+          issueToLeft + this.#drawLeft,
           issueToTop,
           "l",
           -4 * RELATION_STROKE_WIDTH,
@@ -330,7 +331,7 @@ export default class extends Controller {
       if (!$element.is(":visible")) {
         return true
       }
-      const topPosition = $element.position().top - this.drawTop
+      const topPosition = $element.position().top - this.#drawTop
       const elementHeight = $element.height() / 9
       const elementTopUpper = topPosition - elementHeight
       const elementTopCenter = topPosition + elementHeight * 3
@@ -344,9 +345,9 @@ export default class extends Controller {
         const isBehindStart = $element.children("span").hasClass("behind-start-date")
         const isOverEnd = $element.children("span").hasClass("over-end-date")
         if (isOverEnd) {
-          lines.push({ left: this.drawRight, top: elementTopUpper, is_right_edge: true })
+          lines.push({ left: this.#drawRight, top: elementTopUpper, is_right_edge: true })
           lines.push({
-            left: this.drawRight,
+            left: this.#drawRight,
             top: elementTopLower,
             is_right_edge: true,
             none_stroke: true
@@ -389,9 +390,9 @@ export default class extends Controller {
           (previous.is_left_edge && current.is_left_edge)
         )
       ) {
-        const x1 = previous.left === 0 ? 0 : previous.left + this.drawLeft
-        const x2 = current.left === 0 ? 0 : current.left + this.drawLeft
-        this.drawPaper
+        const x1 = previous.left === 0 ? 0 : previous.left + this.#drawLeft
+        const x2 = current.left === 0 ? 0 : current.left + this.#drawLeft
+        this.#drawPaper
           .path(["M", x1, previous.top, "L", x2, current.top])
           .attr({ stroke: color, "stroke-width": 2 })
       }
