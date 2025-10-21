@@ -15,7 +15,8 @@ export default class extends Controller {
     let totalHeight = 0
     let outOfHierarchy = false
 
-    this.#toggleIcon($subject)
+    const willOpen = !$subject.hasClass("open")
+    this.#setIconState($subject, willOpen)
 
     $subject.nextAll("div").each((_, element) => {
       const $element = this.$(element)
@@ -46,45 +47,49 @@ export default class extends Controller {
       if (isShown === targetShown) {
         this.$(barsSelector).each((__, task) => {
           const $task = this.$(task)
-          if (!isShown) {
+          if (!isShown && willOpen) {
             $task.css("top", targetTop + totalHeight)
           }
           if (!$task.hasClass("tooltip")) {
-            $task.toggle(!isShown)
+            $task.toggle(willOpen)
           }
         })
         this.$(selectedColumnsSelector).each((__, attr) => {
           const $attr = this.$(attr)
-          if (!isShown) {
+          if (!isShown && willOpen) {
             $attr.css("top", targetTop + totalHeight)
           }
-          $attr.toggle(!isShown)
+          $attr.toggle(willOpen)
         })
-        if (!isShown) {
+        if (!isShown && willOpen) {
           $element.css("top", targetTop + totalHeight)
         }
-        this.#toggleIcon($element)
-        $element.toggle(!isShown)
+        this.#setIconState($element, willOpen)
+        $element.toggle(willOpen)
         totalHeight += parseInt(json.top_increment, 10)
       }
     })
     this.dispatch("changed", { bubbles: true })
   }
 
-  #toggleIcon(element) {
-    const $element = this.$(element)
+  #setIconState(element, open) {
+    const $element = element.jquery ? element : this.$(element)
     const expander = $element.find(".expander")
-    if ($element.hasClass("open")) {
-      expander.switchClass("icon-expanded", "icon-collapsed")
-      $element.removeClass("open")
-      if (expander.find("svg").length === 1) {
-        window.updateSVGIcon(expander[0], "angle-right")
+    if (open) {
+      $element.addClass("open")
+      if (expander.length > 0) {
+        expander.removeClass("icon-collapsed").addClass("icon-expanded")
+        if (expander.find("svg").length === 1) {
+          window.updateSVGIcon(expander[0], "angle-down")
+        }
       }
     } else {
-      expander.switchClass("icon-collapsed", "icon-expanded")
-      $element.addClass("open")
-      if (expander.find("svg").length === 1) {
-        window.updateSVGIcon(expander[0], "angle-down")
+      $element.removeClass("open")
+      if (expander.length > 0) {
+        expander.removeClass("icon-expanded").addClass("icon-collapsed")
+        if (expander.find("svg").length === 1) {
+          window.updateSVGIcon(expander[0], "angle-right")
+        }
       }
     }
   }
