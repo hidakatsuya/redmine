@@ -11,18 +11,18 @@ class GanttsTest < ApplicationSystemTestCase
     visit_gantt
     expand_options
 
-    assert_no_selector 'td#status', visible: :visible
-    assert_no_selector 'td#priority', visible: :visible
-    assert_no_selector 'td#assigned_to', visible: :visible
-    assert_no_selector 'td#updated_on', visible: :visible
+    assert_no_selector 'td#status'
+    assert_no_selector 'td#priority'
+    assert_no_selector 'td#assigned_to'
+    assert_no_selector 'td#updated_on'
 
     find('#draw_selected_columns').check
 
     assert_selector 'div.gantt_subjects_container.draw_selected_columns'
-    assert_selector 'td#status', visible: :visible
-    assert_selector 'td#priority', visible: :visible
-    assert_selector 'td#assigned_to', visible: :visible
-    assert_selector 'td#updated_on', visible: :visible
+    assert_selector 'td#status'
+    assert_selector 'td#priority'
+    assert_selector 'td#assigned_to'
+    assert_selector 'td#updated_on'
   end
 
   test 'related issues toggle displays and hides relation arrows' do
@@ -73,20 +73,20 @@ class GanttsTest < ApplicationSystemTestCase
     task_area = find('div.tooltip.hascontextmenu', match: :first, visible: :all)
 
     task_area.hover
-    assert_selector 'div.tooltip span.tip', text: issue_reference, visible: :visible
+    assert_selector 'div.tooltip span.tip', text: issue_reference
 
     issue_subject.right_click
 
-    assert_selector '#context-menu', visible: :visible
-    assert_selector '#context-menu a.icon-edit', visible: :visible
+    assert_selector '#context-menu'
+    assert_selector '#context-menu a.icon-edit'
 
     page.send_keys(:escape)
 
     task_area = find('div.tooltip.hascontextmenu', match: :first, visible: :all)
     task_area.right_click
 
-    assert_selector '#context-menu', visible: :visible
-    assert_selector '#context-menu a.icon-edit', visible: :visible
+    assert_selector '#context-menu'
+    assert_selector '#context-menu a.icon-edit'
 
     page.send_keys(:escape)
   end
@@ -107,7 +107,7 @@ class GanttsTest < ApplicationSystemTestCase
   end
 
   def drag_column_resizer(column_id, distance)
-    handle = find("td##{column_id} .ui-resizable-e", visible: :visible)
+    handle = find("td##{column_id} .ui-resizable-e")
     page.driver.browser.action.click_and_hold(handle.native).move_by(distance, 0).release.perform
   end
 end
