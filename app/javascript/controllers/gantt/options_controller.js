@@ -7,8 +7,11 @@ export default class extends Controller {
     unavailableColumns: Array
   }
 
-  connect() {
+  initialize() {
     this.$ = window.jQuery
+  }
+
+  connect() {
     this.dispatchInitialStates()
     this.disableUnavailableColumns()
   }
@@ -50,7 +53,7 @@ export default class extends Controller {
   }
 
   disableUnavailableColumns() {
-    if (!this.$ || !Array.isArray(this.unavailableColumnsValue)) {
+    if (!Array.isArray(this.unavailableColumnsValue)) {
       return
     }
     this.unavailableColumnsValue.forEach((column) => {
