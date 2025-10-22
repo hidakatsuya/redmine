@@ -135,7 +135,7 @@ export default class extends Controller {
               minWidth: 20,
               handles: "e",
               create() {
-                window.jQuery(".ui-resizable-e").css("cursor", "ew-resize")
+                this.$(".ui-resizable-e").css("cursor", "ew-resize")
               }
             })
             .on("resize", (event) => {
@@ -165,7 +165,7 @@ export default class extends Controller {
         handles: "e",
         zIndex: 30,
         create() {
-          window.jQuery(".ui-resizable-e").css("cursor", "ew-resize")
+          this.$(".ui-resizable-e").css("cursor", "ew-resize")
         }
       })
       .on("resize", (event) => {
