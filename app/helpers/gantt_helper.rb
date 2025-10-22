@@ -46,9 +46,9 @@ module GanttHelper
     data_attributes = {
       controller: 'gantt--chart',
       action: %w(
-        gantt--options:toggle-display@window->gantt--chart#handleOptionsDisplay
-        gantt--options:toggle-relations@window->gantt--chart#handleOptionsRelations
-        gantt--options:toggle-progress@window->gantt--chart#handleOptionsProgress
+        gantt--options:toggle-display@document->gantt--chart#handleOptionsDisplay
+        gantt--options:toggle-relations@document->gantt--chart#handleOptionsRelations
+        gantt--options:toggle-progress@document->gantt--chart#handleOptionsProgress
         gantt--tree:changed->gantt--chart#handleTreeChanged
         resize@window->gantt--chart#handleWindowResize
       ).join(' '),
