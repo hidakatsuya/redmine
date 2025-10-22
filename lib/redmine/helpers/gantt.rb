@@ -59,6 +59,12 @@ module Redmine
       attr_accessor :project
       attr_accessor :view
 
+      GridRow = Struct.new(:object, :type, :level, :label_html, :bar,
+                           :key, :parent_key, :has_children,
+                           :issue_status, :issue_priority, :issue_assignee,
+                           :relations,
+                           keyword_init: true)
+
       def initialize(options={})
         options = options.dup
         if options[:year] && options[:year].to_i >0
@@ -90,11 +96,67 @@ module Redmine
         @columns ||= {}
         @number_of_rows = nil
         @truncated = false
+        @grid_rows = nil
         if options.has_key?(:max_rows)
           @max_rows = options[:max_rows]
         else
           @max_rows = Setting.gantt_items_limit.blank? ? nil : Setting.gantt_items_limit.to_i
         end
+      end
+
+      def total_days
+        (@date_to - @date_from + 1).to_i
+      end
+
+      def grid_rows
+        return @grid_rows if @grid_rows
+
+        @grid_rows = []
+        Project.project_tree(projects) do |project, level|
+          append_grid_rows_for_project(project, level, nil)
+        end
+        @grid_rows
+      end
+
+      def grid_headers
+        total = total_days
+        months = []
+        current = date_from
+        while current <= date_to
+          month_end = [(current >> 1) - 1, date_to].min
+          month_start_index = (current - date_from).to_i
+          start_pct = (month_start_index * 100.0) / total
+          width_pct = ((month_end - current + 1) * 100.0) / total
+          days = []
+          day_cursor = current
+          while day_cursor <= month_end
+            day_index = (day_cursor - date_from).to_i
+            day_start_pct = (day_index * 100.0) / total
+            day_width_pct = 100.0 / total
+            days << {
+              date: day_cursor,
+              start_pct: day_start_pct.round(3),
+              width_pct: day_width_pct.round(3),
+              weekend: non_working_week_days.include?(day_cursor.cwday)
+            }
+            day_cursor += 1
+          end
+          months << {
+            year: current.year,
+            month: current.month,
+            start_pct: start_pct.round(3),
+            width_pct: width_pct.round(3),
+            days: days
+          }
+          current = month_end + 1
+        end
+        { months: months }
+      end
+
+      def grid_today_offset_pct
+        today = User.current.today
+        return nil unless today >= date_from && today <= date_to
+        ((today - date_from) * 100.0 / total_days).round(3)
       end
 
       def common_params
@@ -381,6 +443,191 @@ module Redmine
         options[:g_width] ||= (self.date_to - self.date_from + 1) * options[:zoom]
         coords = coordinates(start_date, end_date, done_ratio, options[:zoom])
         send :"#{options[:format]}_task", options, coords, markers, label, object
+      end
+
+      def append_grid_rows_for_project(project, level, parent_key=nil)
+        row = build_grid_row(project, level, parent_key: parent_key)
+        add_grid_row(row)
+
+        child_parent_key = row.key
+        child_level = level + 1
+
+        issues = project_issues(project).select {|i| i.fixed_version_id.nil?}
+        append_grid_rows_for_issues(issues, child_level, parent_key: child_parent_key)
+
+        versions = project_versions(project)
+        self.class.sort_versions!(versions)
+        versions.each do |version|
+          version_row = build_grid_row(version, level + 1, parent_key: child_parent_key)
+          add_grid_row(version_row)
+          append_grid_rows_for_issues(version_issues(project, version), level + 2, parent_key: version_row.key)
+        end
+      end
+
+      def append_grid_rows_for_issues(issues, level, parent_key: nil)
+        self.class.sort_issues!(issues)
+        ancestors = []
+        base_level = level
+
+        issues.each do |issue|
+          while ancestors.any? && !issue.is_descendant_of?(ancestors.last)
+            ancestors.pop
+          end
+
+          issue_parent_key = if ancestors.any?
+                                grid_row_key(ancestors.last)
+                              else
+                                parent_key
+                              end
+
+          issue_level = base_level + ancestors.size
+          row = build_grid_row(issue, issue_level, parent_key: issue_parent_key)
+          add_grid_row(row)
+
+          unless issue.leaf?
+            ancestors << issue
+          end
+        end
+      end
+
+      def add_grid_row(row)
+        row.relations ||= []
+        row.issue_status ||= nil
+        row.issue_priority ||= nil
+        row.issue_assignee ||= nil
+        row.label_html ||= ''
+        @grid_rows << row
+      end
+
+      def build_grid_row(object, level, parent_key: nil)
+        GridRow.new(
+          object: object,
+          type: object.class.name.downcase.to_sym,
+          level: level,
+          label_html: grid_label_for(object),
+          bar: grid_bar_for(object),
+          key: grid_row_key(object),
+          parent_key: parent_key,
+          has_children: grid_has_children?(object),
+          issue_status: object.is_a?(Issue) ? object.status&.name : nil,
+          issue_priority: object.is_a?(Issue) ? object.priority&.name : nil,
+          issue_assignee: object.is_a?(Issue) ? object.assigned_to&.name : nil,
+          relations: object.is_a?(Issue) ? grid_relations_for(object) : []
+        )
+      end
+
+      def grid_label_for(object)
+        case object
+        when Project
+          view.content_tag(:span, view.sprite_icon('projects').html_safe, class: 'gantt-grid__icon') +
+            view.link_to_project(object)
+        when Version
+          view.content_tag(:span, view.sprite_icon('package').html_safe, class: 'gantt-grid__icon') +
+            view.link_to_version(object)
+        when Issue
+          view.link_to_issue(object, subject: object.subject)
+        else
+          view.h(object.to_s)
+        end
+      end
+
+      def grid_bar_for(object)
+        start_date, end_date, progress = case object
+        when Project
+          [object.start_date, object.due_date, nil]
+        when Version
+          [object.start_date, object.due_date, object.visible_fixed_issues.completed_percent]
+        when Issue
+          [object.start_date || object.due_before, object.due_before, object.done_ratio]
+        else
+          [nil, nil, nil]
+        end
+
+        return nil unless start_date && end_date
+
+        total = total_days
+        return nil if total <= 0
+
+        start_offset = (start_date - date_from).to_i
+        end_offset = (end_date - date_from).to_i
+
+        return nil if end_offset < 0
+        return nil if start_offset > total
+
+        start_offset = [[start_offset, 0].max, total].min
+        end_offset = [[end_offset, 0].max, total].min
+
+        duration = (end_offset - start_offset + 1)
+        return nil if duration <= 0
+
+        start_pct = (start_offset * 100.0) / total
+        width_pct = (duration * 100.0) / total
+        progress_pct = progress ? [[progress.to_f, 0].max, 100].min : nil
+
+        {
+          start_pct: start_pct.round(3),
+          width_pct: width_pct.round(3),
+          progress_pct: progress_pct,
+          label: grid_bar_label_for(object)
+        }
+      end
+
+      def grid_bar_label_for(object)
+        case object
+        when Issue
+          label = object.status.name.dup
+          label << " #{object.done_ratio}%" unless object.disabled_core_fields.include?('done_ratio')
+          label
+        when Version
+          "#{object} #{object.visible_fixed_issues.completed_percent.to_f.round}%"
+        when Project
+          object.name
+        else
+          object.to_s
+        end
+      end
+
+      def grid_has_children?(object)
+        case object
+        when Project
+          project_issues(object).any? || project_versions(object).any?
+        when Version
+          version_issues(object.project, object).any?
+        when Issue
+          !object.leaf?
+        else
+          false
+        end
+      end
+
+      def grid_row_key(object)
+        case object
+        when Project
+          "project-#{object.id}"
+        when Version
+          "version-#{object.id}"
+        when Issue
+          grid_row_key_for_issue_id(object.id)
+        else
+          "obj-#{object.object_id}"
+        end
+      end
+
+      def grid_row_key_for_issue_id(issue_id)
+        "issue-#{issue_id}"
+      end
+
+      def grid_relations_for(issue)
+        relations = []
+        issue_relations(issue).each do |type, ids|
+          ids.each do |target_id|
+            relations << {
+              type: type,
+              to_key: grid_row_key_for_issue_id(target_id)
+            }
+          end
+        end
+        relations
       end
 
       # Generates a gantt image

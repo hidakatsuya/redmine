@@ -75,6 +75,8 @@ export default class extends Controller {
   }
 
   #drawGanttHandler() {
+    if (!this.Raphael || !this.drawAreaTarget) return
+
     if (this.#drawPaper) {
       this.#drawPaper.clear()
     } else {
@@ -134,7 +136,7 @@ export default class extends Controller {
               alsoResize: `.gantt_${columnName}_container, .gantt_${columnName}_container > .gantt_hdr`,
               minWidth: 20,
               handles: "e",
-              create() {
+              create: () => {
                 this.$(".ui-resizable-e").css("cursor", "ew-resize")
               }
             })
@@ -164,7 +166,7 @@ export default class extends Controller {
         minWidth: 100,
         handles: "e",
         zIndex: 30,
-        create() {
+        create: () => {
           this.$(".ui-resizable-e").css("cursor", "ew-resize")
         }
       })
