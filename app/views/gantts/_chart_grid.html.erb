@@ -1,84 +1,91 @@
 <% rows = @gantt.grid_rows %>
 <% headers = @gantt.grid_headers %>
-<% today_pct = @gantt.grid_today_offset_pct %>
-<div class="gantt-grid<%= ' gantt-grid--hide-meta' unless @query.draw_selected_columns %><%= ' gantt-grid--hide-progress' unless @query.draw_progress_line %><%= ' gantt-grid--hide-relations' unless @query.draw_relations %>"
-     data-controller="gantt--grid"
-     data-action="resize@window->gantt--grid#handleWindowResize gantt--options:toggle-display@window->gantt--grid#toggleDisplay gantt--options:toggle-relations@window->gantt--grid#toggleRelations gantt--options:toggle-progress@window->gantt--grid#toggleProgress"
-     data-gantt--grid-subject-width-value="320"
-     data-gantt--grid-min-width-value="200"
-     data-gantt--grid-max-width-value="640"
-     style="--total-days:<%= @gantt.total_days %>;">
-  <div class="gantt-grid__header">
-    <div class="gantt-grid__header-row">
-      <div class="gantt-grid__subject-header">Subject</div>
-      <div class="gantt-grid__meta-header">Status</div>
-      <div class="gantt-grid__meta-header">Priority</div>
-      <div class="gantt-grid__meta-header">Assignee</div>
+<% total_days = @gantt.total_days %>
+<% timeline_width = @gantt.grid_total_width_px %>
+<% day_width = @gantt.grid_day_width_px %>
+<% today_offset_px = @gantt.grid_today_offset_px %>
+<% subject_width = 320 %>
+<% status_width = 120 %>
+<% priority_width = 120 %>
+<% assignee_width = 160 %>
+
+<div class="gantt-grid-wrapper">
+  <div class="gantt-grid"
+       data-controller="gantt--grid"
+       data-action="resize@window->gantt--grid#handleWindowResize gantt--options:toggle-display@window->gantt--grid#toggleDisplay gantt--options:toggle-relations@window->gantt--grid#toggleRelations gantt--options:toggle-progress@window->gantt--grid#toggleProgress"
+       data-gantt--grid-subject-width-value="<%= subject_width %>"
+       data-gantt--grid-min-width-value="200"
+       data-gantt--grid-max-width-value="640"
+       style="--subject-width:<%= subject_width %>px;--status-width:<%= status_width %>px;--priority-width:<%= priority_width %>px;--assignee-width:<%= assignee_width %>px;--timeline-width:<%= timeline_width %>px;--day-width:<%= day_width %>px;--total-days:<%= total_days %>;">
+    <div class="gantt-grid__header">
+      <div class="gantt-grid__subject-header"><%= l(:field_subject) %></div>
+      <div class="gantt-grid__meta-header gantt-grid__meta-header--status"><%= l(:field_status) %></div>
+      <div class="gantt-grid__meta-header gantt-grid__meta-header--priority"><%= l(:field_priority) %></div>
+      <div class="gantt-grid__meta-header gantt-grid__meta-header--assignee"><%= l(:field_assigned_to) %></div>
       <div class="gantt-grid__timeline-header">
-        <div class="gantt-grid__months">
+        <div class="gantt-grid__timeline-track gantt-grid__timeline-track--months">
           <% headers[:months].each do |month| %>
-            <div class="gantt-grid__month"
-                 style="left:<%= month[:start_pct] %>%;width:<%= month[:width_pct] %>%">
+            <div class="gantt-grid__timeline-month"
+                 style="grid-column:<%= month[:start_index] + 1 %> / span <%= month[:days_count] %>;">
               <%= "#{month[:year]}-#{format('%02d', month[:month])}" %>
             </div>
           <% end %>
         </div>
-        <div class="gantt-grid__days">
-          <% headers[:months].each do |month| %>
-            <% month[:days].each do |day| %>
-              <div class="gantt-grid__day <%= 'is-weekend' if day[:weekend] %>"
-                   style="left:<%= day[:start_pct] %>%;width:<%= day[:width_pct] %>%">
-                <span><%= day[:date].day %></span>
-              </div>
-            <% end %>
+        <div class="gantt-grid__timeline-track gantt-grid__timeline-track--days">
+          <% headers[:days].each do |day| %>
+            <div class="gantt-grid__timeline-day <%= 'is-weekend' if day[:weekend] %>"
+                 style="grid-column:<%= day[:index] + 1 %>;">
+              <span><%= day[:date].day %></span>
+            </div>
           <% end %>
         </div>
-        <% if today_pct %>
-          <div class="gantt-grid__today" style="left:<%= today_pct %>%"></div>
+        <% if today_offset_px %>
+          <div class="gantt-grid__today-marker" style="left:<%= today_offset_px %>px"></div>
         <% end %>
       </div>
     </div>
-  </div>
-  <% rows.each do |row| %>
-    <div class="gantt-grid__row"
-         data-row-type="<%= row.type %>"
-         data-grid-key="<%= row.key %>"
-         data-grid-parent="<%= row.parent_key %>"
-         data-grid-has-children="<%= row.has_children %>"
-         data-grid-bar-start="<%= row.bar ? row.bar[:start_pct] : '' %>"
-         data-grid-bar-width="<%= row.bar ? row.bar[:width_pct] : '' %>"
-         data-grid-bar-progress="<%= row.bar && row.bar[:progress_pct] ? row.bar[:progress_pct] : '' %>"
-         data-grid-relations="<%= h(row.relations.to_json) %>"
-         style="--indent:<%= row.level %>;">
-      <div class="gantt-grid__subject">
-        <% if row.has_children %>
-          <button type="button"
-                  class="gantt-grid__expander gantt-grid__expander--expanded"
-                  data-grid-key="<%= row.key %>"
-                  data-action="click->gantt--grid#toggleRow"></button>
-        <% else %>
-          <span class="gantt-grid__expander gantt-grid__expander--placeholder"></span>
-        <% end %>
-        <span class="gantt-grid__subject-label"><%= row.label_html.html_safe %></span>
-      </div>
-      <div class="gantt-grid__meta gantt-grid__meta--status"><%= row.issue_status %></div>
-      <div class="gantt-grid__meta gantt-grid__meta--priority"><%= row.issue_priority %></div>
-      <div class="gantt-grid__meta gantt-grid__meta--assignee"><%= row.issue_assignee %></div>
-      <div class="gantt-grid__chart">
-        <% if row.bar %>
-          <div class="gantt-grid__bar" style="left:<%= row.bar[:start_pct] %>%;width:<%= row.bar[:width_pct] %>%" title="<%= row.bar[:label] %>">
-            <% if row.bar[:progress_pct] %>
-              <span class="gantt-grid__bar-progress" style="width:<%= row.bar[:progress_pct] %>%"></span>
+
+    <div class="gantt-grid__body" data-gantt--grid-target="body">
+      <% rows.each do |row| %>
+        <div class="gantt-grid__row"
+             data-row-type="<%= row.type %>"
+             data-grid-key="<%= row.key %>"
+             data-grid-parent="<%= row.parent_key %>"
+             data-grid-has-children="<%= row.has_children %>"
+             data-grid-bar-start-px="<%= row.bar ? row.bar[:start_px] : '' %>"
+             data-grid-bar-width-px="<%= row.bar ? row.bar[:width_px] : '' %>"
+             data-grid-bar-progress="<%= row.bar && row.bar[:progress_pct] ? row.bar[:progress_pct] : '' %>"
+             data-grid-relations="<%= h(row.relations.to_json) %>">
+          <div class="gantt-grid__subject" style="--indent:<%= row.level %>">
+            <% if row.has_children %>
+              <button type="button" class="gantt-grid__expander gantt-grid__expander--expanded" data-grid-key="<%= row.key %>" data-action="click->gantt--grid#toggleRow"></button>
+            <% else %>
+              <span class="gantt-grid__expander gantt-grid__expander--placeholder"></span>
             <% end %>
+            <span class="gantt-grid__subject-label"><%= row.label_html.html_safe %></span>
           </div>
-        <% end %>
-        <% if today_pct %>
-          <div class="gantt-grid__chart-today" style="left:<%= today_pct %>%"></div>
-        <% end %>
-      </div>
+          <div class="gantt-grid__meta gantt-grid__meta--status"><%= row.issue_status %></div>
+          <div class="gantt-grid__meta gantt-grid__meta--priority"><%= row.issue_priority %></div>
+          <div class="gantt-grid__meta gantt-grid__meta--assignee"><%= row.issue_assignee %></div>
+          <div class="gantt-grid__chart">
+            <div class="gantt-grid__chart-inner">
+              <% if row.bar %>
+                <div class="gantt-grid__bar" style="left:<%= row.bar[:start_px] %>px;width:<%= row.bar[:width_px] %>px" title="<%= row.bar[:label] %>">
+                  <% if row.bar[:progress_pct] %>
+                    <span class="gantt-grid__bar-progress" style="width:<%= row.bar[:progress_pct] %>%"></span>
+                  <% end %>
+                </div>
+              <% end %>
+              <% if today_offset_px %>
+                <div class="gantt-grid__chart-today" style="left:<%= today_offset_px %>px"></div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
     </div>
-  <% end %>
-  <div class="gantt-grid__resizer"
-       data-gantt--grid-target="resizer"
-       data-action="mousedown->gantt--grid#startResize touchstart->gantt--grid#startResize"></div>
+    <div class="gantt-grid__resizer"
+         data-gantt--grid-target="resizer"
+         data-action="mousedown->gantt--grid#startResize touchstart->gantt--grid#startResize"></div>
+  </div>
 </div>

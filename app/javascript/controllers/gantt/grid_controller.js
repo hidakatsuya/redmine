@@ -1,12 +1,12 @@
 import { Controller } from "@hotwired/stimulus"
 
-const RELATION_COLORS = {
-  blocks: "#fa5252",
-  precedes: "#228be6"
+const RELATION_CONFIG = {
+  blocks: { color: "#fa5252", margin: 16 },
+  precedes: { color: "#228be6", margin: 20 }
 }
 
 export default class extends Controller {
-  static targets = ["resizer"]
+  static targets = ["body", "resizer"]
 
   static values = {
     subjectWidth: { type: Number, default: 320 },
@@ -15,9 +15,10 @@ export default class extends Controller {
   }
 
   connect() {
-    this.$ = window.jQuery
     this.collapsedKeys = new Set()
-    this.rows = Array.from(this.element.querySelectorAll(".gantt-grid__row"))
+    this.header = this.element.querySelector(".gantt-grid__header")
+    this.body = this.hasBodyTarget ? this.bodyTarget : this.element.querySelector(".gantt-grid__body")
+    this.rows = Array.from(this.body.querySelectorAll(".gantt-grid__row"))
     this.rowMap = new Map()
 
     this.rows.forEach((row) => {
@@ -27,9 +28,9 @@ export default class extends Controller {
       }
     })
 
-    this.updateWidth(this.subjectWidthValue)
     this.createRelationsLayer()
     this.applyVisibility()
+    this.updateWidth(this.subjectWidthValue || this.currentSubjectWidth())
     requestAnimationFrame(() => this.drawRelations())
   }
 
@@ -57,7 +58,7 @@ export default class extends Controller {
     }
 
     this.applyVisibility()
-    this.drawRelations()
+    requestAnimationFrame(() => this.drawRelations())
   }
 
   applyVisibility() {
@@ -81,41 +82,30 @@ export default class extends Controller {
     })
   }
 
-  createRelationsLayer() {
-    const svgNS = "http://www.w3.org/2000/svg"
-    this.relationsLayer = document.createElementNS(svgNS, "svg")
-    this.relationsLayer.classList.add("gantt-grid__relations")
-
-    const defs = document.createElementNS(svgNS, "defs")
-    Object.entries(RELATION_COLORS).forEach(([type, color]) => {
-      const marker = document.createElementNS(svgNS, "marker")
-      marker.setAttribute("id", `gantt-arrow-${type}`)
-      marker.setAttribute("markerWidth", "6")
-      marker.setAttribute("markerHeight", "6")
-      marker.setAttribute("refX", "5")
-      marker.setAttribute("refY", "3")
-      marker.setAttribute("orient", "auto")
-      const markerPath = document.createElementNS(svgNS, "path")
-      markerPath.setAttribute("d", "M0,0 L6,3 L0,6 z")
-      markerPath.setAttribute("fill", color)
-      marker.appendChild(markerPath)
-      defs.appendChild(marker)
-    })
-    this.relationsLayer.appendChild(defs)
-    this.element.appendChild(this.relationsLayer)
-  }
-
   drawRelations() {
     if (!this.relationsLayer) return
 
-    const chartWidth = this.chartWidth()
-    const gridHeight = this.element.offsetHeight
-    this.relationsLayer.setAttribute("width", chartWidth)
-    this.relationsLayer.setAttribute("height", gridHeight)
-    this.relationsLayer.setAttribute("viewBox", `0 0 ${chartWidth} ${gridHeight}`)
+    const timelineWidth = this.timelineWidth()
+    if (!timelineWidth) return
+
+    const headerHeight = this.header ? this.header.offsetHeight : 0
+    const bodyHeight = this.body ? this.body.offsetHeight : 0
+    const chartOffset = this.chartOffset()
+
+    this.relationsLayer.setAttribute("width", timelineWidth)
+    this.relationsLayer.setAttribute("height", bodyHeight)
+    this.relationsLayer.setAttribute("viewBox", `0 0 ${timelineWidth} ${bodyHeight}`)
+    this.relationsLayer.style.width = `${timelineWidth}px`
+    this.relationsLayer.style.height = `${bodyHeight}px`
+    this.relationsLayer.style.left = `${chartOffset}px`
+    this.relationsLayer.style.top = `${headerHeight}px`
 
     const existingPaths = Array.from(this.relationsLayer.querySelectorAll("path.relation-path"))
     existingPaths.forEach((path) => path.remove())
+
+    if (this.element.classList.contains("gantt-grid--hide-relations")) {
+      return
+    }
 
     const svgNS = "http://www.w3.org/2000/svg"
     const visibleRows = this.rows.filter((row) => !row.classList.contains("is-hidden"))
@@ -132,45 +122,96 @@ export default class extends Controller {
       }
       if (!relations || !relations.length) return
 
-      const barStart = parseFloat(row.dataset.gridBarStart || "0")
-      const barWidth = parseFloat(row.dataset.gridBarWidth || "0")
-      const startX = chartWidth * ((barStart + barWidth) / 100)
-      const startY = row.offsetTop + row.offsetHeight / 2
+      const barElement = row.querySelector(".gantt-grid__bar")
+      if (!barElement) return
+      const barStart = parseFloat(row.dataset.gridBarStartPx || "0")
+      const barWidth = parseFloat(row.dataset.gridBarWidthPx || "0")
+      if (barWidth <= 0) return
+      const startX = barStart + barWidth
+      const startY = row.offsetTop - headerHeight + row.offsetHeight / 2
+      const barHeight = barElement.offsetHeight || row.offsetHeight / 2
 
       relations.forEach((relation) => {
         const targetRow = this.rowMap.get(relation.to_key || relation.toKey)
         if (!targetRow || targetRow.classList.contains("is-hidden")) return
 
-        const targetStart = parseFloat(targetRow.dataset.gridBarStart || "0")
-        const targetX = chartWidth * (targetStart / 100)
-        const targetY = targetRow.offsetTop + targetRow.offsetHeight / 2
+        const targetBar = targetRow.querySelector(".gantt-grid__bar")
+        if (!targetBar) return
+        const targetStart = parseFloat(targetRow.dataset.gridBarStartPx || "0")
+        const targetWidth = parseFloat(targetRow.dataset.gridBarWidthPx || "0")
+        const targetX = targetStart
+        const targetY = targetRow.offsetTop - headerHeight + targetRow.offsetHeight / 2
 
-        const midX = Math.max(startX + 16, (startX + targetX) / 2)
+        const relationConfig = RELATION_CONFIG[relation.type] || { color: "#888", margin: 16 }
+        const margin = relationConfig.margin || 0
+        const color = relationConfig.color || "#888"
+
+        const startOffsetX = Math.min(startX + margin, timelineWidth)
+        const targetOffsetX = Math.max(targetX - margin, 0)
+
+        const pathSegments = ["M", startX, startY, "L", startOffsetX, startY]
+
+        if (startOffsetX < targetOffsetX) {
+          pathSegments.push("L", startOffsetX, targetY, "L", targetX, targetY)
+        } else {
+          const direction = startY > targetY ? 1 : -1
+          const middleY = targetY + barHeight * direction
+          pathSegments.push(
+            "L",
+            startOffsetX,
+            middleY,
+            "L",
+            targetOffsetX,
+            middleY,
+            "L",
+            targetOffsetX,
+            targetY,
+            "L",
+            targetX,
+            targetY
+          )
+        }
+
         const path = document.createElementNS(svgNS, "path")
         path.classList.add("relation-path")
-        path.setAttribute("d", `M ${startX} ${startY} L ${midX} ${startY} L ${midX} ${targetY} L ${targetX} ${targetY}`)
-        const color = RELATION_COLORS[relation.type] || "#888"
+        path.setAttribute("d", pathSegments.join(" "))
         path.setAttribute("stroke", color)
         path.setAttribute("stroke-width", "1.6")
         path.setAttribute("fill", "none")
-        const markerId = RELATION_COLORS[relation.type] ? `url(#gantt-arrow-${relation.type})` : ""
-        if (markerId) {
-          path.setAttribute("marker-end", markerId)
+        if (RELATION_CONFIG[relation.type]) {
+          path.setAttribute("marker-end", `url(#gantt-arrow-${relation.type})`)
         }
         this.relationsLayer.appendChild(path)
       })
     })
   }
 
-  chartWidth() {
-    const chart = this.element.querySelector(".gantt-grid__row:not(.is-hidden) .gantt-grid__chart")
-    return chart ? chart.offsetWidth : 0
+  handleWindowResize() {
+    requestAnimationFrame(() => this.drawRelations())
+  }
+
+  toggleDisplay(event) {
+    const enabled = event.detail ? event.detail.enabled !== false : true
+    this.element.classList.toggle("gantt-grid--hide-meta", !enabled)
+    requestAnimationFrame(() => this.drawRelations())
+  }
+
+  toggleRelations(event) {
+    const enabled = event.detail ? event.detail.enabled !== false : true
+    this.element.classList.toggle("gantt-grid--hide-relations", !enabled)
+    requestAnimationFrame(() => this.drawRelations())
+  }
+
+  toggleProgress(event) {
+    const enabled = event.detail ? event.detail.enabled !== false : true
+    this.element.classList.toggle("gantt-grid--hide-progress", !enabled)
   }
 
   startResize(event) {
+    if (!this.hasResizerTarget) return
     event.preventDefault()
     this.startX = this.pointerX(event)
-    this.startWidth = this.subjectWidthValue
+    this.startWidth = this.subjectWidthValue || this.currentSubjectWidth()
 
     this.boundResize = this.handlePointerMove.bind(this)
     this.boundStop = this.stopResize.bind(this)
@@ -196,7 +237,7 @@ export default class extends Controller {
     window.removeEventListener("touchend", this.boundStop)
     this.boundResize = null
     this.boundStop = null
-    this.drawRelations()
+    requestAnimationFrame(() => this.drawRelations())
   }
 
   pointerX(event) {
@@ -212,30 +253,52 @@ export default class extends Controller {
     const clamped = Math.max(min, Math.min(max, width))
     this.subjectWidthValue = clamped
     this.element.style.setProperty("--subject-width", `${clamped}px`)
-    if (this.hasResizerTarget) {
-      this.resizerTarget.style.left = `${clamped}px`
+    requestAnimationFrame(() => this.drawRelations())
+  }
+
+  createRelationsLayer() {
+    if (this.relationsLayer) return
+
+    const svgNS = "http://www.w3.org/2000/svg"
+    this.relationsLayer = document.createElementNS(svgNS, "svg")
+    this.relationsLayer.classList.add("gantt-grid__relations")
+
+    const defs = document.createElementNS(svgNS, "defs")
+    Object.entries(RELATION_CONFIG).forEach(([type, config]) => {
+      const color = config.color
+      const marker = document.createElementNS(svgNS, "marker")
+      marker.setAttribute("id", `gantt-arrow-${type}`)
+      marker.setAttribute("markerWidth", "6")
+      marker.setAttribute("markerHeight", "6")
+      marker.setAttribute("refX", "5")
+      marker.setAttribute("refY", "3")
+      marker.setAttribute("orient", "auto")
+      const markerPath = document.createElementNS(svgNS, "path")
+      markerPath.setAttribute("d", "M0,0 L6,3 L0,6 z")
+      markerPath.setAttribute("fill", color)
+      marker.appendChild(markerPath)
+      defs.appendChild(marker)
+    })
+    this.relationsLayer.appendChild(defs)
+    this.element.appendChild(this.relationsLayer)
+  }
+
+  timelineWidth() {
+    const value = getComputedStyle(this.element).getPropertyValue("--timeline-width")
+    return parseFloat(value) || 0
+  }
+
+  chartOffset() {
+    const style = getComputedStyle(this.element)
+    const widths = ["--subject-width"]
+    if (!this.element.classList.contains("gantt-grid--hide-meta")) {
+      widths.push("--status-width", "--priority-width", "--assignee-width")
     }
-    requestAnimationFrame(() => this.drawRelations())
+    return widths.reduce((total, name) => total + (parseFloat(style.getPropertyValue(name)) || 0), 0)
   }
 
-  handleWindowResize() {
-    requestAnimationFrame(() => this.drawRelations())
-  }
-
-  toggleDisplay(event) {
-    const enabled = event.detail ? event.detail.enabled !== false : true
-    this.element.classList.toggle("gantt-grid--hide-meta", !enabled)
-    requestAnimationFrame(() => this.drawRelations())
-  }
-
-  toggleRelations(event) {
-    const enabled = event.detail ? event.detail.enabled !== false : true
-    this.element.classList.toggle("gantt-grid--hide-relations", !enabled)
-    requestAnimationFrame(() => this.drawRelations())
-  }
-
-  toggleProgress(event) {
-    const enabled = event.detail ? event.detail.enabled !== false : true
-    this.element.classList.toggle("gantt-grid--hide-progress", !enabled)
+  currentSubjectWidth() {
+    const style = getComputedStyle(this.element)
+    return parseFloat(style.getPropertyValue("--subject-width")) || this.subjectWidthValue
   }
 }

@@ -59,6 +59,8 @@ module Redmine
       attr_accessor :project
       attr_accessor :view
 
+      GRID_DAY_WIDTH_PX = 20
+
       GridRow = Struct.new(:object, :type, :level, :label_html, :bar,
                            :key, :parent_key, :has_children,
                            :issue_status, :issue_priority, :issue_assignee,
@@ -119,44 +121,59 @@ module Redmine
       end
 
       def grid_headers
-        total = total_days
+        return @grid_headers if @grid_headers
+
+        day_width = grid_day_width_px
         months = []
+        all_days = []
         current = date_from
         while current <= date_to
           month_end = [(current >> 1) - 1, date_to].min
           month_start_index = (current - date_from).to_i
-          start_pct = (month_start_index * 100.0) / total
-          width_pct = ((month_end - current + 1) * 100.0) / total
+          days_count = (month_end - current + 1).to_i
+          width_px = days_count * day_width
           days = []
           day_cursor = current
           while day_cursor <= month_end
             day_index = (day_cursor - date_from).to_i
-            day_start_pct = (day_index * 100.0) / total
-            day_width_pct = 100.0 / total
-            days << {
+            day_data = {
               date: day_cursor,
-              start_pct: day_start_pct.round(3),
-              width_pct: day_width_pct.round(3),
+              index: day_index,
+              start_px: day_index * day_width,
+              width_px: day_width,
               weekend: non_working_week_days.include?(day_cursor.cwday)
             }
+            days << day_data
+            all_days << day_data
             day_cursor += 1
           end
           months << {
             year: current.year,
             month: current.month,
-            start_pct: start_pct.round(3),
-            width_pct: width_pct.round(3),
+            start_index: month_start_index,
+            start_px: month_start_index * day_width,
+            width_px: width_px,
+            days_count: days_count,
             days: days
           }
           current = month_end + 1
         end
-        { months: months }
+
+        @grid_headers = { months: months, days: all_days }
       end
 
-      def grid_today_offset_pct
+      def grid_today_offset_px
         today = User.current.today
         return nil unless today >= date_from && today <= date_to
-        ((today - date_from) * 100.0 / total_days).round(3)
+        (grid_day_width_px * (today - date_from)).to_i
+      end
+
+      def grid_total_width_px
+        total_days * grid_day_width_px
+      end
+
+      def grid_day_width_px
+        GRID_DAY_WIDTH_PX
       end
 
       def common_params
@@ -562,11 +579,17 @@ module Redmine
 
         start_pct = (start_offset * 100.0) / total
         width_pct = (duration * 100.0) / total
+        start_px = start_offset * grid_day_width_px
+        width_px = duration * grid_day_width_px
         progress_pct = progress ? [[progress.to_f, 0].max, 100].min : nil
 
         {
           start_pct: start_pct.round(3),
           width_pct: width_pct.round(3),
+          start_px: start_px,
+          width_px: width_px,
+          start_index: start_offset,
+          duration_days: duration,
           progress_pct: progress_pct,
           label: grid_bar_label_for(object)
         }
