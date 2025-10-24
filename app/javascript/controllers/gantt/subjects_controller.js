@@ -5,6 +5,15 @@ export default class extends Controller {
     this.$ = window.jQuery
   }
 
+  handleResizeColumn(event) {
+    const columnWidth = event.detail.width;
+
+    this.$(".issue-subject, .project-name, .version-name").each((_, element) => {
+      const $element = this.$(element)
+      $element.width(columnWidth - $element.position().left)
+    })
+  }
+
   handleEntryClick(event) {
     const iconExpander = event.currentTarget
     const $subject = this.$(iconExpander.parentElement)

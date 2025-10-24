@@ -40,7 +40,8 @@
 
 <%= gantt_chart_table_tag(@query) do %>
   <tr>
-    <td style="width:<%= query.draw_selected_columns ? subject_width + 1 : subject_width + 2 %>px;" class="gantt_subjects_column">
+    <%= gantt_column_tag('subjects', min_width: 100,
+                         style: "width:#{query.draw_selected_columns ? subject_width + 1 : subject_width + 2}px;") do %>
       <%
         subjects_container_classes = "gantt_subjects_container"
         subjects_container_classes << " draw_selected_columns" if query.draw_selected_columns
@@ -65,20 +66,21 @@
           header_overlay_style << 'overflow: hidden;'
         %>
         <%= content_tag(:div, "", style: header_overlay_style, class: "gantt_hdr") %>
-        <%= content_tag(:div, class: "gantt_subjects", data: {controller: 'gantt--tree'}) do %>
+        <%= gantt_subjects_tag do %>
           <%= form_tag({}, data: {cm_url: issues_context_menu_path}) do %>
             <%= hidden_field_tag 'back_url', url_for(params: request.query_parameters), id: nil %>
             <%= gantt.subjects.html_safe %>
           <% end %>
         <% end %>
       <% end %>
-    </td>
+    <% end %>
     <%
       query.columns.each do |column|
         next if Redmine::Helpers::Gantt::UNAVAILABLE_COLUMNS.include?(column.name)
         column_name = column.name.to_s.tr('.', '_')
     %>
-      <td class="gantt_<%= column_name %>_column gantt_selected_column <%= 'last_gantt_selected_column' if query.columns.last == column %>" id="<%= column_name %>">
+      <%= gantt_column_tag(column_name, min_width: 20, id: column_name,
+                           class: ['gantt_selected_column', { 'last_gantt_selected_column': query.columns.last == column }]) do %>
         <%
           column_container_style = +"position: relative;"
           column_container_style << "height: #{t_height + 24}px;"
@@ -101,7 +103,7 @@
             <%= gantt.selected_column_content({column: column, top: headers_height + 8, zoom: zoom, g_width: g_width}).html_safe %>
           <% end %>
         <% end %>
-      </td>
+      <% end %>
     <% end %>
     <td>
       <div style="position:relative;height:<%= t_height + 24 %>px;overflow:auto;" id="gantt_area" data-gantt--chart-target="ganttArea">

@@ -53,7 +53,7 @@ export default class extends Controller {
     this.#renderChart()
   }
 
-  handleTreeChanged() {
+  handleSubjectTreeChanged() {
     this.#renderChart()
   }
 
@@ -71,7 +71,6 @@ export default class extends Controller {
 
   #renderChart() {
     this.#drawGanttHandler()
-    this.#resizableSubjectColumn()
   }
 
   #drawGanttHandler() {
@@ -119,64 +118,13 @@ export default class extends Controller {
         })
       } else {
         $subjectsContainer.addClass("draw_selected_columns")
-        $selectedColumns.each((_, element) => {
-          const $element = this.$(element)
-          $element.show()
-          const columnName = $element.attr("id")
-          try {
-            $element.resizable("destroy")
-          } catch (error) {
-            // resizable was not initialised yet
-          }
-          $element
-            .resizable({
-              zIndex: 30,
-              alsoResize: `.gantt_${columnName}_container, .gantt_${columnName}_container > .gantt_hdr`,
-              minWidth: 20,
-              handles: "e",
-              create() {
-                window.jQuery(".ui-resizable-e").css("cursor", "ew-resize")
-              }
-            })
-            .on("resize", (event) => {
-              event.stopPropagation()
-            })
-        })
+        $selectedColumns.show()
       }
     } else {
       $selectedColumns.each((_, element) => {
         this.$(element).hide()
       })
       $subjectsContainer.removeClass("draw_selected_columns")
-    }
-  }
-
-  #resizableSubjectColumn() {
-    const $subjectsColumn = this.$("td.gantt_subjects_column")
-    this.$(".issue-subject, .project-name, .version-name").each((_, element) => {
-      const $element = this.$(element)
-      $element.width($subjectsColumn.width() - $element.position().left)
-    })
-
-    $subjectsColumn
-      .resizable({
-        alsoResize: ".gantt_subjects_container, .gantt_subjects_container>.gantt_hdr, .project-name, .issue-subject, .version-name",
-        minWidth: 100,
-        handles: "e",
-        zIndex: 30,
-        create() {
-          window.jQuery(".ui-resizable-e").css("cursor", "ew-resize")
-        }
-      })
-      .on("resize", (event) => {
-        event.stopPropagation()
-      })
-
-    const isMobileDevice = typeof window.isMobile === "function" && window.isMobile()
-    if (isMobileDevice) {
-      $subjectsColumn.resizable("disable")
-    } else {
-      $subjectsColumn.resizable("enable")
     }
   }
 

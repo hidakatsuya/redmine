@@ -819,7 +819,7 @@ module Redmine
           content = view.content_tag(:span,
                                      view.sprite_icon('angle-down').html_safe,
                                      :class => 'icon icon-expanded expander',
-                                     :data => {:action => 'click->gantt--tree#handleEntryClick'}) + content
+                                     :data => {:action => 'click->gantt--subjects#handleEntryClick'}) + content
           tag_options[:class] += ' open'
         else
           if params[:indent]

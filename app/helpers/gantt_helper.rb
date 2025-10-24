@@ -49,7 +49,7 @@ module GanttHelper
         gantt--options:toggle-display@document->gantt--chart#handleOptionsDisplay
         gantt--options:toggle-relations@document->gantt--chart#handleOptionsRelations
         gantt--options:toggle-progress@document->gantt--chart#handleOptionsProgress
-        gantt--tree:changed->gantt--chart#handleTreeChanged
+        gantt--subjects:changed->gantt--chart#handleSubjectTreeChanged
         resize@window->gantt--chart#handleWindowResize
       ).join(' '),
       'gantt--chart-issue-relation-types-value': Redmine::Helpers::Gantt::DRAW_TYPES.to_json,
@@ -59,5 +59,25 @@ module GanttHelper
     }
 
     tag.table(class: 'gantt-table', data: data_attributes, &)
+  end
+
+  def gantt_column_tag(column_name, min_width: nil, **options, &)
+    options[:data] = {
+      controller: 'gantt--column',
+      action: 'resize@window->gantt--column#handleWindowResize',
+      'gantt--column-min-width-value': min_width,
+      'gantt--column-column-value': column_name
+    }
+    options[:class] = ["gantt_#{column_name}_column", options[:class]]
+
+    tag.td(**options, &)
+  end
+
+  def gantt_subjects_tag(&)
+    data_attributes = {
+      controller: 'gantt--subjects',
+      action: 'gantt--column:resize-column-subjects@document->gantt--subjects#handleResizeColumn'
+    }
+    tag.div(class: "gantt_subjects", data: data_attributes, &)
   end
 end
