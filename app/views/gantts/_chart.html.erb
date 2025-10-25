@@ -241,8 +241,7 @@
       <%= link_to("\xc2\xab " + l(:label_previous),
                   {params: request.query_parameters.merge(gantt.params_previous)},
                   accesskey: accesskey(:previous)) %>
-    </li>
-    <li class="next page">
+    </li><li class="next page">
       <%= link_to(l(:label_next) + " \xc2\xbb",
                   {params: request.query_parameters.merge(gantt.params_next)},
                   accesskey: accesskey(:next)) %>
