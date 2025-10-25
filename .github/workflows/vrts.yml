@@ -1,0 +1,43 @@
+name: VRT
+
+on:
+  push:
+
+jobs:
+  vrt:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - uses: ./.github/actions/setup-redmine
+        with:
+          db-type: sqlite3
+          ruby-version: '3.4'
+
+      - run: bin/rails test test/vrt/gantts_vrt.rb
+        env:
+          GOOGLE_CHROME_OPTS_ARGS: headless,disable-gpu,no-sandbox,disable-dev-shm-usage
+
+      - run: |
+          npx reg-cli test/vrt/actual test/vrt/baseline test/vrt/diff \
+            -R test/vrt/report.html \
+            -J test/vrt/reg.json \
+            --thresholdPixel 2000
+        continue-on-error: true
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vrt-report
+          path: |
+            test/vrt/report.html
+            test/vrt/diff/
+            test/vrt/actual/
+            test/vrt/baseline/
+            test/vrt/reg.json
+          if-no-files-found: ignore
