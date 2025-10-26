@@ -45,6 +45,10 @@ module GanttHelper
   def gantt_chart_tag(query, &)
     data_attributes = {
       controller: 'gantt--chart',
+      # Events emitted by child controllers the chart listens to.
+      # - `gantt--options` toggles checkboxes under Options.
+      # - `gantt--subjects` reports tree expand/collapse.
+      # - Window resize triggers a redraw of progress lines and relations.
       action: %w(
         gantt--options:toggle-display@document->gantt--chart#handleOptionsDisplay
         gantt--options:toggle-relations@document->gantt--chart#handleOptionsRelations
