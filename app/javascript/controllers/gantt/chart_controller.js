@@ -27,7 +27,8 @@ export default class extends Controller {
     this.#drawRight = 0
     this.#drawLeft = 0
 
-    this.#drawGanttHandler()
+    this.#drawProgressLineAndRelations()
+    this.#drawSelectedColumns()
   }
 
   disconnect() {
@@ -42,19 +43,21 @@ export default class extends Controller {
   }
 
   showRelationsValueChanged() {
-    this.#drawGanttHandler()
+    this.#drawProgressLineAndRelations()
   }
 
   showProgressValueChanged() {
-    this.#drawGanttHandler()
+    this.#drawProgressLineAndRelations()
   }
 
   handleWindowResize() {
-    this.#drawGanttHandler()
+    this.#drawProgressLineAndRelations()
+    this.#drawSelectedColumns()
   }
 
   handleSubjectTreeChanged() {
-    this.#drawGanttHandler()
+    this.#drawProgressLineAndRelations()
+    this.#drawSelectedColumns()
   }
 
   handleOptionsDisplay(event) {
@@ -69,15 +72,14 @@ export default class extends Controller {
     this.showProgressValue = !!(event.detail && event.detail.enabled)
   }
 
-  #drawGanttHandler() {
+  #drawProgressLineAndRelations() {
     if (this.#drawPaper) {
       this.#drawPaper.clear()
     } else {
       this.#drawPaper = this.Raphael(this.drawAreaTarget)
     }
 
-    this.#setDrawArea()
-    this.#drawSelectedColumns()
+    this.#setupDrawArea()
 
     if (this.showProgressValue) {
       this.#drawGanttProgressLines()
@@ -93,7 +95,7 @@ export default class extends Controller {
     }
   }
 
-  #setDrawArea() {
+  #setupDrawArea() {
     const $drawArea = this.$(this.drawAreaTarget)
     const $ganttArea = this.hasGanttAreaTarget ? this.$(this.ganttAreaTarget) : null
 
