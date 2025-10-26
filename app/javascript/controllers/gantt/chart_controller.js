@@ -325,6 +325,8 @@ export default class extends Controller {
   }
 
   #drawGanttProgressLines() {
+    if (this.$("#today_line").length === 0) return
+
     const progressLines = this.#progressLinesArray
     const color = this.$("#today_line").css("border-left-color") || "#ff0000"
 
