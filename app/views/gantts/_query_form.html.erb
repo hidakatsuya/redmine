@@ -22,10 +22,12 @@
       <fieldset id="options" class="collapsible collapsed"
                 data-controller="gantt--options"
                 data-gantt--options-unavailable-columns-value="<%= Redmine::Helpers::Gantt::UNAVAILABLE_COLUMNS.map(&:to_s).to_json %>">
+
         <legend onclick="toggleFieldset(this);" class="icon icon-collapsed">
           <%= sprite_icon('angle-right', rtl: true) %>
           <%= l(:label_options) %>
         </legend>
+
         <div style="display: none;">
           <div>
             <fieldset>
@@ -49,6 +51,7 @@
                 </div>
               </div>
             </fieldset>
+
             <fieldset>
               <legend><%= l(:label_related_issues) %></legend>
               <label for="draw_relations">
@@ -66,6 +69,7 @@
                 <% end %>
               </label>
             </fieldset>
+
             <fieldset>
               <legend><%= l(:label_gantt_progress_line) %></legend>
               <label for="draw_progress_line">

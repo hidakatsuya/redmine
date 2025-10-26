@@ -38,7 +38,7 @@
   <p class="warning"><%= l(:notice_gantt_chart_truncated, max: gantt.max_rows) %></p>
 <% end %>
 
-<%= gantt_chart_table_tag(@query) do %>
+<%= gantt_chart_tag(@query) do %>
   <tr>
     <%= gantt_column_tag('subjects', min_width: 100,
                          style: "width:#{query.draw_selected_columns ? subject_width + 1 : subject_width + 2}px;") do %>

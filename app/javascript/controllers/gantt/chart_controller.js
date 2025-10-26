@@ -27,7 +27,7 @@ export default class extends Controller {
     this.#drawRight = 0
     this.#drawLeft = 0
 
-    this.#renderChart()
+    this.#drawGanttHandler()
   }
 
   disconnect() {
@@ -50,11 +50,11 @@ export default class extends Controller {
   }
 
   handleWindowResize() {
-    this.#renderChart()
+    this.#drawGanttHandler()
   }
 
   handleSubjectTreeChanged() {
-    this.#renderChart()
+    this.#drawGanttHandler()
   }
 
   handleOptionsDisplay(event) {
@@ -67,10 +67,6 @@ export default class extends Controller {
 
   handleOptionsProgress(event) {
     this.showProgressValue = !!(event.detail && event.detail.enabled)
-  }
-
-  #renderChart() {
-    this.#drawGanttHandler()
   }
 
   #drawGanttHandler() {
@@ -100,6 +96,7 @@ export default class extends Controller {
   #setDrawArea() {
     const $drawArea = this.$(this.drawAreaTarget)
     const $ganttArea = this.hasGanttAreaTarget ? this.$(this.ganttAreaTarget) : null
+
     this.#drawTop = $drawArea.position().top
     this.#drawRight = $drawArea.width()
     this.#drawLeft = $ganttArea ? $ganttArea.scrollLeft() : 0
@@ -128,38 +125,40 @@ export default class extends Controller {
     }
   }
 
-  #getRelationsArray() {
+  get #relationsArray() {
     const relations = []
 
     this.$("div.task_todo[data-rels]").each((_, element) => {
       const $element = this.$(element)
-      if (!$element.is(":visible")) {
-        return true
-      }
+
+      if (!$element.is(":visible")) return
+
       const elementId = $element.attr("id")
-      if (!elementId) {
-        return
-      }
+
+      if (!elementId) return
+
       const issueId = elementId.replace("task-todo-issue-", "")
       const dataRels = $element.data("rels") || {}
+
       Object.keys(dataRels).forEach((relTypeKey) => {
         this.$.each(dataRels[relTypeKey], (_, relatedIssue) => {
           relations.push({ issue_from: issueId, issue_to: relatedIssue, rel_type: relTypeKey })
         })
       })
     })
+
     return relations
   }
 
   #drawRelations() {
-    const relations = this.#getRelationsArray()
+    const relations = this.#relationsArray
 
     relations.forEach((relation) => {
       const issueFrom = this.$(`#task-todo-issue-${relation.issue_from}`)
       const issueTo = this.$(`#task-todo-issue-${relation.issue_to}`)
-      if (issueFrom.length === 0 || issueTo.length === 0) {
-        return
-      }
+
+      if (issueFrom.length === 0 || issueTo.length === 0) return
+
       const issueHeight = issueFrom.height()
       const issueFromTop = issueFrom.position().top + issueHeight / 2 - this.#drawTop
       const issueFromRight = issueFrom.position().left + issueFrom.width()
@@ -268,7 +267,7 @@ export default class extends Controller {
     })
   }
 
-  #getProgressLinesArray() {
+  get #progressLinesArray() {
     const lines = []
     const todayLeft = this.$("#today_line").position().left
 
@@ -276,9 +275,9 @@ export default class extends Controller {
 
     this.$("div.issue-subject, div.version-name").each((_, element) => {
       const $element = this.$(element)
-      if (!$element.is(":visible")) {
-        return true
-      }
+
+      if (!$element.is(":visible")) return true
+
       const topPosition = $element.position().top - this.#drawTop
       const elementHeight = $element.height() / 9
       const elementTopUpper = topPosition - elementHeight
@@ -286,12 +285,14 @@ export default class extends Controller {
       const elementTopLower = topPosition + elementHeight * 8
       const issueClosed = $element.children("span").hasClass("issue-closed")
       const versionClosed = $element.children("span").hasClass("version-closed")
+
       if (issueClosed || versionClosed) {
         lines.push({ left: todayLeft, top: elementTopCenter })
       } else {
         const issueDone = this.$(`#task-done-${$element.attr("id")}`)
         const isBehindStart = $element.children("span").hasClass("behind-start-date")
         const isOverEnd = $element.children("span").hasClass("over-end-date")
+
         if (isOverEnd) {
           lines.push({ left: this.#drawRight, top: elementTopUpper, is_right_edge: true })
           lines.push({
@@ -321,16 +322,18 @@ export default class extends Controller {
         }
       }
     })
+
     return lines
   }
 
   #drawGanttProgressLines() {
-    const progressLines = this.#getProgressLinesArray()
+    const progressLines = this.#progressLinesArray
     const color = this.$("#today_line").css("border-left-color") || "#ff0000"
 
     for (let index = 1; index < progressLines.length; index += 1) {
       const current = progressLines[index]
       const previous = progressLines[index - 1]
+
       if (
         !current.none_stroke &&
         !(
@@ -340,6 +343,7 @@ export default class extends Controller {
       ) {
         const x1 = previous.left === 0 ? 0 : previous.left + this.#drawLeft
         const x2 = current.left === 0 ? 0 : current.left + this.#drawLeft
+
         this.#drawPaper
           .path(["M", x1, previous.top, "L", x2, current.top])
           .attr({ stroke: color, "stroke-width": 2 })
