@@ -1,0 +1,5 @@
+actual/*
+!actual/.gitkeep
+diff/
+report.html
+reg.json
