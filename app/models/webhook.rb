@@ -29,7 +29,6 @@ class Webhook < ApplicationRecord
   end
 
   belongs_to :user
-  # TODO: Confirm if we should keep this as it is or we should move to has_many :through
   has_and_belongs_to_many :projects # rubocop:disable Rails/HasAndBelongsToMany
 
   validates :url, presence: true, webhook_endpoint: true, length: { maximum: 2000 }
@@ -42,9 +41,15 @@ class Webhook < ApplicationRecord
 
   before_validation ->(hook){ hook.projects = hook.projects.to_a & hook.setable_projects }
 
+  def self.enabled?
+    Setting.webhooks_enabled?
+  end
+
   # Triggers the given event for the given object, scheduling qualifying hooks
   # to be called.
   def self.trigger(event, object)
+    return unless enabled?
+
     hooks_for(event, object).each do |hook|
       payload = hook.payload(event, object)
       WebhookJob.perform_later(hook.id, payload.to_json)
