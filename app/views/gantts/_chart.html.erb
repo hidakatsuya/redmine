@@ -54,14 +54,12 @@
                       class: subjects_container_classes,
                       data: {'gantt--chart-target': 'subjectsContainer'}) do %>
         <%
-          header_bg_style = +"width: #{subject_width + 1}px;"
-          header_bg_style << "height: #{headers_height}px;"
+          header_bg_style = +"height: #{headers_height}px;"
           header_bg_style << 'background: #f1f3f5;' # oc-gray-1
         %>
         <%= content_tag(:div, "", style: header_bg_style, class: "gantt_hdr") %>
         <%
           header_overlay_style = +"z-index: 1;"
-          header_overlay_style << "width: #{subject_width + 1}px;"
           header_overlay_style << "height: #{t_height}px;"
           header_overlay_style << 'overflow: hidden;'
         %>

@@ -16,7 +16,9 @@ export default class extends Controller {
 
   connect() {
     this.#$element = this.$(this.element)
+
     this.#setupResizable()
+    this.#initColumnWidthFromLocalStorage()
     this.#dispatchResizeColumn()
   }
 
@@ -58,15 +60,38 @@ export default class extends Controller {
 
     this.#$element
       .resizable(options)
-      .on("resize", (event) => {
-        event.stopPropagation()
-        this.#dispatchResizeColumn()
-      })
+      .on("resize", this.#onResize.bind(this))
+  }
+
+  #onResize(event) {
+    event.stopPropagation()
+    this.#saveColumnWidth()
+    this.#dispatchResizeColumn()
+  }
+
+  #saveColumnWidth() {
+    const width = this.#$element.width()
+    localStorage.setItem(this.#columnWidthStorageKey, width)
+  }
+
+  #initColumnWidthFromLocalStorage() {
+    if (this.#isMobile()) return
+
+    const width = localStorage.getItem(this.#columnWidthStorageKey)
+    if (width) {
+      console.log(width)
+      this.#$element.width(width)
+    }
+  }
+
+  get #columnWidthStorageKey() {
+    return `redmine-state-gantt-column-${this.columnValue}-width`
   }
 
   #dispatchResizeColumn() {
     if (!this.#$element) return
 
+    console.log("aa", this.#$element.width())
     this.dispatch(`resize-column-${this.columnValue}`, { detail: { width: this.#$element.width() } })
   }
 

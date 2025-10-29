@@ -828,7 +828,6 @@ module Redmine
           end
         end
         style = "position: absolute;top:#{params[:top]}px;left:#{params[:indent]}px;"
-        style += "width:#{params[:subject_width] - params[:indent]}px;" if params[:subject_width]
         tag_options[:style] = style
         output = view.content_tag(:div, content, tag_options)
         @subjects << output
