@@ -90,17 +90,14 @@ jobs:
           CHROMEDRIVER_OUTPUT=$(npx --yes @puppeteer/browsers install "chromedriver@${CHROME_VERSION}" --platform=linux --path "$INSTALL_DIR")
           CHROMEDRIVER_PATH=${CHROMEDRIVER_OUTPUT#* }
           chmod +x "$CHROME_PATH" "$CHROMEDRIVER_PATH"
-          BIN_DIR="$RUNNER_TEMP/chrome-for-testing-bin"
-          mkdir -p "$BIN_DIR"
-          ln -sf "$CHROME_PATH" "$BIN_DIR/google-chrome"
-          ln -sf "$CHROME_PATH" "$BIN_DIR/chrome"
-          ln -sf "$CHROMEDRIVER_PATH" "$BIN_DIR/chromedriver"
-          echo "$BIN_DIR" >> "$GITHUB_PATH"
+          echo "GOOGLE_CHROME_BIN=$CHROME_PATH" >> "$GITHUB_ENV"
+          echo "GOOGLE_CHROMEDRIVER_PATH=$CHROMEDRIVER_PATH" >> "$GITHUB_ENV"
+          echo "SE_CHROMEDRIVER=$CHROMEDRIVER_PATH" >> "$GITHUB_ENV"
 
       - name: Display Chrome versions
         run: |
-          google-chrome --version
-          chromedriver --version
+          "${GOOGLE_CHROME_BIN}" --version
+          "${GOOGLE_CHROMEDRIVER_PATH}" --version
 
       - name: Run system tests
         run: |
