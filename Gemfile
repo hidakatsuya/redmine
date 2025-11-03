@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 ruby '>= 3.2.0', '< 3.5.0'
 
-gem 'rails', '8.0.3'
+gem 'rails', '8.0.4'
 gem 'rouge', '~> 4.5'
 gem 'mini_mime', '~> 1.1.0'
 gem "actionpack-xml_parser"
@@ -37,9 +37,8 @@ gem 'tzinfo-data', platforms: [:mingw, :x64_mingw, :mswin]
 gem 'rotp', '>= 5.0.0'
 gem 'rqrcode'
 
-# HTML pipeline and sanitization
-gem "html-pipeline", "~> 2.13.2"
-gem "sanitize", "~> 6.0"
+# HTML sanitization
+gem "sanitize", "~> 7.0"
 
 # Triggering of Webhooks
 gem "rest-client", "~> 2.1"

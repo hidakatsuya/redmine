@@ -17,40 +17,30 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require 'uri'
-
 module Redmine
   module WikiFormatting
     module CommonMark
-      # adds class="external" to external links, and class="email" to mailto
-      # links
-      class ExternalLinksFilter < HTML::Pipeline::Filter
-        def call
-          doc.search("a").each do |node|
-            url = node["href"]
-            next unless url
-            next if url.starts_with?("/") || url.starts_with?("#") || !url.include?(':')
+      # fixes:
+      # - autolinked email addresses that are actually references to users:
+      #   user:<a href="mailto:user@example.org">user@example.org</a>
+      #   @<a href="mailto:user@example.org">user@example.org</a>
+      # - autolinked hi res image names that look like email addresses:
+      #   <a href="mailto:printscreen@2x.png">printscreen@2x.png</a>
+      class FixupAutoLinksScrubber < Loofah::Scrubber
+        USER_LINK_PREFIX = /(@|user:)\z/
+        HIRES_IMAGE = /.+@\dx\.(bmp|gif|jpg|jpe|jpeg|png)\z/
 
-            scheme = begin
-              URI.parse(url).scheme
-            rescue
-              nil
-            end
-            next if scheme.blank?
+        def scrub(node)
+          if node.name == 'a'
+            return unless (url = node['href']) && url.starts_with?('mailto:')
 
-            klass = node["class"].presence
-            node["class"] = [
-              klass,
-              (scheme == "mailto" ? "email" : "external")
-            ].compact.join " "
+            if ((p = node.previous) && p.text? &&
+                p.text =~(USER_LINK_PREFIX)) ||
+               (node.text =~ HIRES_IMAGE)
 
-            if node["target"].present? && scheme != "mailto"
-              rel = node["rel"]&.split || []
-              rel << "noopener"
-              node["rel"] = rel.join(" ")
+              node.replace node.text
             end
           end
-          doc
         end
       end
     end

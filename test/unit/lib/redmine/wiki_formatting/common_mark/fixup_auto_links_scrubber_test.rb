@@ -20,37 +20,29 @@
 require_relative '../../../../../test_helper'
 
 if Object.const_defined?(:Commonmarker)
-  require 'redmine/wiki_formatting/common_mark/alerts_icons_filter'
 
-  class Redmine::WikiFormatting::CommonMark::AlertsIconsFilterTest < ActiveSupport::TestCase
-    include Redmine::I18n
+  class Redmine::WikiFormatting::CommonMark::FixupAutoLinksScrubberTest < ActiveSupport::TestCase
+    def filter(html)
+      fragment = Redmine::WikiFormatting::HtmlParser.parse(html)
+      scrubber = Redmine::WikiFormatting::CommonMark::FixupAutoLinksScrubber.new
+      fragment.scrub!(scrubber)
+      fragment.to_s
+    end
 
     def format(markdown)
-      Redmine::WikiFormatting::CommonMark::MarkdownFilter.to_html(markdown, Redmine::WikiFormatting::CommonMark::PIPELINE_CONFIG)
+      Redmine::WikiFormatting::CommonMark::MarkdownFilter.new(markdown, Redmine::WikiFormatting::CommonMark::PIPELINE_CONFIG).call
     end
 
-    def filter(html)
-      Redmine::WikiFormatting::CommonMark::AlertsIconsFilter.to_html(html, @options)
+    def test_should_fixup_autolinked_user_references
+      text = "user:user@example.org"
+      assert_equal "<p>#{text}</p>", filter(format(text))
+      text = "@user@example.org"
+      assert_equal "<p>#{text}</p>", filter(format(text))
     end
 
-    def setup
-      @options = { }
-    end
-
-    def teardown
-      set_language_if_valid 'en'
-    end
-
-    def test_should_render_alert_blocks_with_localized_labels
-      set_language_if_valid 'de'
-      text = <<~MD
-        > [!note]
-        > This is a note.
-      MD
-
-      html = filter(format(text))
-      expected = %r{<span class="icon-label">#{I18n.t('label_alert_note')}</span>}
-      assert_match expected, html
+    def test_should_fixup_autolinked_hires_files
+      text = "printscreen@2x.png"
+      assert_equal "<p>#{text}</p>", filter(format(text))
     end
   end
 end

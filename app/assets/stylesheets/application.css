@@ -1312,13 +1312,13 @@ div.flash.warning svg.icon-svg, .conflict svg.icon-svg {
 .markdown-alert-important .markdown-alert-title { color: var(--oc-grape-9); }
 .markdown-alert-important .markdown-alert-title svg { stroke: var(--oc-grape-9); }
 
-.markdown-alert-caution { border-color: var(--oc-red-7); }
-.markdown-alert-caution .markdown-alert-title { color: var(--oc-red-9); }
-.markdown-alert-caution .markdown-alert-title svg { stroke: var(--oc-red-9); }
+.markdown-alert-caution { border-color: var(--oc-yellow-7); }
+.markdown-alert-caution .markdown-alert-title { color: var(--oc-yellow-9); }
+.markdown-alert-caution .markdown-alert-title svg { stroke: var(--oc-yellow-9); }
 
-.markdown-alert-warning { border-color: var(--oc-yellow-7); }
-.markdown-alert-warning .markdown-alert-title { color: var(--oc-yellow-9); }
-.markdown-alert-warning .markdown-alert-title svg { stroke: var(--oc-yellow-9); }
+.markdown-alert-warning { border-color: var(--oc-orange-7); }
+.markdown-alert-warning .markdown-alert-title { color: var(--oc-orange-9); }
+.markdown-alert-warning .markdown-alert-title svg { stroke: var(--oc-orange-9); }
 
 /* Indigo is used instead of blue to avoid confusion with links */
 .markdown-alert-note { border-color: var(--oc-indigo-7); }
@@ -1903,6 +1903,10 @@ svg.s12 {
 
 span.icon-label {
   margin-left: 4px;
+}
+
+span.icon-checked:has(:not(a svg.icon-svg)) svg.icon-svg {
+  stroke: var(--oc-green-8);
 }
 
 .sort-handle.ajax-loading { background-image: url(/loading.gif); }
