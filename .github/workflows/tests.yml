@@ -90,18 +90,21 @@ jobs:
           CHROMEDRIVER_OUTPUT=$(npx --yes @puppeteer/browsers install "chromedriver@${CHROME_VERSION}" --platform=linux --path "$INSTALL_DIR")
           CHROMEDRIVER_PATH=${CHROMEDRIVER_OUTPUT#* }
           chmod +x "$CHROME_PATH" "$CHROMEDRIVER_PATH"
-          echo "GOOGLE_CHROME_BIN=$CHROME_PATH" >> "$GITHUB_ENV"
-          echo "GOOGLE_CHROMEDRIVER_PATH=$CHROMEDRIVER_PATH" >> "$GITHUB_ENV"
-          echo "SE_CHROMEDRIVER=$CHROMEDRIVER_PATH" >> "$GITHUB_ENV"
-          dirname "$CHROMEDRIVER_PATH" >> "$GITHUB_PATH"
+          BIN_DIR="$RUNNER_TEMP/chrome-for-testing-bin"
+          mkdir -p "$BIN_DIR"
+          ln -sf "$CHROME_PATH" "$BIN_DIR/google-chrome"
+          ln -sf "$CHROME_PATH" "$BIN_DIR/chrome"
+          ln -sf "$CHROMEDRIVER_PATH" "$BIN_DIR/chromedriver"
+          echo "$BIN_DIR" >> "$GITHUB_PATH"
 
       - name: Display Chrome versions
         run: |
-          "${GOOGLE_CHROME_BIN}" --version
-          "${GOOGLE_CHROMEDRIVER_PATH}" --version
+          google-chrome --version
+          chromedriver --version
 
       - name: Run system tests
-        run: bin/rails test --seed 64121 test/system
+        run: |
+          bin/rails test --seed 64121 test/system
         env:
           GOOGLE_CHROME_OPTS_ARGS: headless=new,disable-gpu,no-sandbox,disable-dev-shm-usage
 
