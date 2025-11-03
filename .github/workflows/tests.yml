@@ -81,23 +81,16 @@ jobs:
           db-type: sqlite3
           ruby-version: '3.4'
 
-      - name: Install Chrome for Testing 141
-        run: |
-          INSTALL_DIR="$RUNNER_TEMP/chrome-for-testing"
-          CHROME_VERSION=141.0.7390.122
-          CHROME_OUTPUT=$(npx --yes @puppeteer/browsers install "chrome@${CHROME_VERSION}" --platform=linux --path "$INSTALL_DIR")
-          CHROME_PATH=${CHROME_OUTPUT#* }
-          CHROMEDRIVER_OUTPUT=$(npx --yes @puppeteer/browsers install "chromedriver@${CHROME_VERSION}" --platform=linux --path "$INSTALL_DIR")
-          CHROMEDRIVER_PATH=${CHROMEDRIVER_OUTPUT#* }
-          chmod +x "$CHROME_PATH" "$CHROMEDRIVER_PATH"
-          echo "GOOGLE_CHROME_BIN=$CHROME_PATH" >> "$GITHUB_ENV"
-          echo "GOOGLE_CHROMEDRIVER_PATH=$CHROMEDRIVER_PATH" >> "$GITHUB_ENV"
-          echo "SE_CHROMEDRIVER=$CHROMEDRIVER_PATH" >> "$GITHUB_ENV"
+      - name: Set up Chrome for Testing
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: 141
+          install-chromedriver: true
 
       - name: Display Chrome versions
         run: |
-          "${GOOGLE_CHROME_BIN}" --version
-          "${GOOGLE_CHROMEDRIVER_PATH}" --version
+          chrome --version
+          chromedriver --version
 
       - name: Run system tests
         run: |

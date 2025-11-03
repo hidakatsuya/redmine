@@ -37,9 +37,6 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
 
   # Allow running tests using a remote Selenium hub
   driven_by :selenium, using: :chrome, screen_size: [1024, 900], options: options do |driver_option|
-    driver_path = ENV['SE_CHROMEDRIVER'].presence || ENV['GOOGLE_CHROMEDRIVER_PATH'].presence
-    Selenium::WebDriver::Chrome::Service.driver_path = driver_path if driver_path
-    driver_option.binary = ENV['GOOGLE_CHROME_BIN'] if ENV['GOOGLE_CHROME_BIN'].present?
     GOOGLE_CHROME_OPTS_ARGS.each do |arg|
       driver_option.add_argument arg
     end
