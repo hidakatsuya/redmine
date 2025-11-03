@@ -65,14 +65,16 @@ module GanttHelper
     tag.table(class: 'gantt-table', data: data_attributes, &)
   end
 
-  def gantt_column_tag(column_name, min_width: nil, **options, &)
+  def gantt_column_tag(column_name, default_width:, min_width:, **options, &)
     options[:data] = {
       controller: 'gantt--column',
       action: 'resize@window->gantt--column#handleWindowResize',
+      'gantt--column-default-width-value': default_width,
       'gantt--column-min-width-value': min_width,
       'gantt--column-column-value': column_name
     }
     options[:class] = ["gantt_#{column_name}_column", options[:class]]
+    options[:style] = "width:#{default_width}px;"
 
     tag.td(**options, &)
   end

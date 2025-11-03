@@ -1,7 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
+import { uiStates } from "lib/ui_states"
 
 export default class extends Controller {
   static values = {
+    defaultWidth: Number,
     minWidth: Number,
     column: String,
     // Local value
@@ -16,8 +18,9 @@ export default class extends Controller {
 
   connect() {
     this.#$element = this.$(this.element)
+
     this.#setupResizable()
-    this.#dispatchResizeColumn()
+    this.#initWidth()
   }
 
   disconnect() {
@@ -41,18 +44,21 @@ export default class extends Controller {
     }
   }
 
+  #resetWidth() {
+    this.#width = this.defaultWidthValue
+    this.#clearWidthState()
+    this.#dispatchResizeColumn()
+  }
+
   #setupResizable() {
-    const alsoResize = [
-      `.gantt_${this.columnValue}_container`,
-      `.gantt_${this.columnValue}_container > .gantt_hdr`
-    ]
     const options = {
       handles: "e",
       minWidth: this.minWidthValue,
       zIndex: 30,
-      alsoResize: alsoResize.join(","),
+      alsoResize: this.#resizeTargets.join(","),
       create: () => {
-        this.$(".ui-resizable-e").css("cursor", "ew-resize")
+        this.#$element.find(".ui-resizable-e").css("cursor", "ew-resize")
+        this.#$element.find(".ui-resizable-handle").on("dblclick", this.#resetWidth.bind(this))
       }
     }
 
@@ -60,8 +66,29 @@ export default class extends Controller {
       .resizable(options)
       .on("resize", (event) => {
         event.stopPropagation()
+
+        this.#saveWidthState()
         this.#dispatchResizeColumn()
       })
+  }
+
+  get #resizeTargets() {
+    return [
+      `.gantt_${this.columnValue}_container`,
+      `.gantt_${this.columnValue}_container > .gantt_hdr`
+    ]
+  }
+
+  #initWidth() {
+    const width = this.#columnWidthState.value
+    if (width) {
+      this.#width = width
+    }
+  }
+
+  set #width(width) {
+    this.$(this.#$element).width(width)
+    this.#resizeTargets.forEach(target => this.$(target).width(width))
   }
 
   #dispatchResizeColumn() {
@@ -72,5 +99,18 @@ export default class extends Controller {
 
   #isMobile() {
     return !!(typeof window.isMobile === "function" && window.isMobile())
+  }
+
+  #saveWidthState() {
+    const width = this.#$element.width()
+    this.#columnWidthState.value = width
+  }
+
+  #clearWidthState() {
+    this.#columnWidthState.clear()
+  }
+
+  get #columnWidthState() {
+    return uiStates[`gantt_state_${this.columnValue}_width`]
   }
 }

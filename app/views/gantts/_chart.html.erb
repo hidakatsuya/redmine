@@ -41,7 +41,7 @@
 <%= gantt_chart_tag(@query) do %>
   <tr>
     <%= gantt_column_tag('subjects', min_width: 100,
-                         style: "width:#{query.draw_selected_columns ? subject_width + 1 : subject_width + 2}px;") do %>
+                         default_width: query.draw_selected_columns ? subject_width + 1 : subject_width + 2) do %>
       <%
         subjects_container_classes = "gantt_subjects_container"
         subjects_container_classes << " draw_selected_columns" if query.draw_selected_columns
@@ -79,7 +79,7 @@
         next if Redmine::Helpers::Gantt::UNAVAILABLE_COLUMNS.include?(column.name)
         column_name = column.name.to_s.tr('.', '_')
     %>
-      <%= gantt_column_tag(column_name, min_width: 20, id: column_name,
+      <%= gantt_column_tag(column_name, min_width: 20, default_width: 50, id: column_name,
                            class: ['gantt_selected_column', { 'last_gantt_selected_column': query.columns.last == column }]) do %>
         <%
           column_container_style = +"position: relative;"
