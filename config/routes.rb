@@ -297,7 +297,7 @@ Rails.application.routes.draw do
         :controller => 'repositories',
         :action => action,
         :format => 'html',
-        :constraints => {:rev => /[a-z0-9\.\-_]+/, :path => /.*/}
+        :constraints => {:rev => /[a-z0-9.\-_]+/, :path => /.*/}
   end
 
   %w(browse entry raw changes annotate).each do |action|
@@ -311,7 +311,7 @@ Rails.application.routes.draw do
   get "projects/:id/repository/:repository_id/revisions/:rev/diff(/*path)",
       :to => 'repositories#diff',
       :format => 'html',
-      :constraints => {:rev => /[a-z0-9\.\-_]+/, :path => /.*/, :format => /(html|diff)/ }
+      :constraints => {:rev => /[a-z0-9.\-_]+/, :path => /.*/, :format => /(html|diff)/ }
 
   get "projects/:id/repository/:repository_id/diff(/*path)",
       :to => 'repositories#diff',
@@ -372,7 +372,6 @@ Rails.application.routes.draw do
   match 'enumerations/:type', :to => 'enumerations#index', :via => :get
 
   get '(projects/:id)/search', :controller => 'search', :action => 'index', :as => 'search'
-
 
   get  'mail_handler', :to => 'mail_handler#new'
   post 'mail_handler', :to => 'mail_handler#index'

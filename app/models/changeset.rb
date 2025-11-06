@@ -117,7 +117,7 @@ class Changeset < ApplicationRecord
     |
     (\d+):(\d+)
     |
-    (\d+([\.,]\d+)?)h?
+    (\d+([.,]\d+)?)h?
     )
     /x
 
@@ -135,7 +135,7 @@ class Changeset < ApplicationRecord
     referenced_issues = []
     regexp =
       %r{
-        ([\s\(\[,-]|^)((#{kw_regexp})[\s:]+)?
+        ([\s(\[,-]|^)((#{kw_regexp})[\s:]+)?
         (\#\d+(\s+@#{TIMELOG_RE})?([\s,;&]+\#\d+(\s+@#{TIMELOG_RE})?)*)
         (?=[[:punct:]]|\s|<|$)
       }xi
@@ -191,12 +191,12 @@ class Changeset < ApplicationRecord
 
   # Returns the previous changeset
   def previous
-    @previous ||= Changeset.where(["id < ? AND repository_id = ?", id, repository_id]).order('id DESC').first
+    @previous ||= Changeset.where(["id < ? AND repository_id = ?", id, repository_id]).order(id: :desc).first
   end
 
   # Returns the next changeset
   def next
-    @next ||= Changeset.where(["id > ? AND repository_id = ?", id, repository_id]).order('id ASC').first
+    @next ||= Changeset.where(["id > ? AND repository_id = ?", id, repository_id]).order(:id).first
   end
 
   # Creates a new Change from it's common parameters

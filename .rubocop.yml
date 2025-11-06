@@ -2,7 +2,7 @@ inherit_from: .rubocop_todo.yml
 
 AllCops:
   TargetRubyVersion: 3.2
-  TargetRailsVersion: 7.2
+  TargetRailsVersion: 8.0
 
   NewCops: enable
 
@@ -33,6 +33,9 @@ Layout/CaseIndentation:
 Layout/ClosingParenthesisIndentation:
   Exclude:
     - 'lib/redmine/wiki_formatting/textile/redcloth3.rb'
+
+Layout/EmptyLinesAfterModuleInclusion:
+  Enabled: false
 
 Layout/EmptyLinesAroundAccessModifier:
   Exclude:
@@ -223,6 +226,9 @@ Style/BlockDelimiters:
     - 'db/migrate/007_create_journals.rb'
     - 'lib/redmine/string_array_diff/diff.rb'
     - 'lib/redmine/string_array_diff/diffable.rb'
+
+Style/CollectionQuerying:
+  Enabled: false
 
 Style/EmptyStringInsideInterpolation:
   Enabled: false
