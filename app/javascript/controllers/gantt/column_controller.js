@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { UiStates } from "lib/ui_states"
 
 export default class extends Controller {
   static values = {
@@ -8,15 +9,19 @@ export default class extends Controller {
     mobileMode: { type: Boolean, default: false }
   }
 
+  #widthState
   #$element = null
 
   initialize() {
     this.$ = window.jQuery
+    this.#widthState = UiStates.ganttColumnWidth(this.columnValue)
   }
 
   connect() {
     this.#$element = this.$(this.element)
+
     this.#setupResizable()
+    this.#initWidth()
     this.#dispatchResizeColumn()
   }
 
@@ -42,17 +47,13 @@ export default class extends Controller {
   }
 
   #setupResizable() {
-    const alsoResize = [
-      `.gantt_${this.columnValue}_container`,
-      `.gantt_${this.columnValue}_container > .gantt_hdr`
-    ]
     const options = {
       handles: "e",
       minWidth: this.minWidthValue,
       zIndex: 30,
-      alsoResize: alsoResize.join(","),
+      alsoResize: this.#resizeTargets.join(","),
       create: () => {
-        this.$(".ui-resizable-e").css("cursor", "ew-resize")
+        this.#$element.find(".ui-resizable-e").css("cursor", "ew-resize")
       }
     }
 
@@ -62,6 +63,28 @@ export default class extends Controller {
         event.stopPropagation()
         this.#dispatchResizeColumn()
       })
+      .on("resizestop", () => {
+        this.#saveWidthState()
+      })
+  }
+
+  get #resizeTargets() {
+    return [
+      `.gantt_${this.columnValue}_container`,
+      `.gantt_${this.columnValue}_container > .gantt_hdr`
+    ]
+  }
+
+  #initWidth() {
+    const width = this.#widthState.value
+    if (width) {
+      this.#width = width
+    }
+  }
+
+  set #width(width) {
+    this.$(this.#$element).width(width)
+    this.#resizeTargets.forEach(target => this.$(target).width(width))
   }
 
   #dispatchResizeColumn() {
@@ -72,5 +95,10 @@ export default class extends Controller {
 
   #isMobile() {
     return !!(typeof window.isMobile === "function" && window.isMobile())
+  }
+
+  #saveWidthState() {
+    const width = this.#$element.width()
+    this.#widthState.value = width
   }
 }
