@@ -56,9 +56,8 @@ module Redmine
       SCRUBBERS = [
         SyntaxHighlightScrubber.new,
         FixupAutoLinksScrubber.new,
-        ExternalLinksScrubber.new,
-        AlertsIconsScrubber.new
-      ]
+        ExternalLinksScrubber.new
+      ].freeze
 
       class Formatter
         include Redmine::WikiFormatting::SectionHelper
@@ -74,6 +73,7 @@ module Redmine
           SCRUBBERS.each do |scrubber|
             fragment.scrub!(scrubber)
           end
+          AlertsIconsScrubber.apply(fragment)
           fragment.to_s
         end
       end

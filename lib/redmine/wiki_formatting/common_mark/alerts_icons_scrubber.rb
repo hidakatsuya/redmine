@@ -30,23 +30,32 @@ module Redmine
         'important' => 'message-report',
       }.freeze
 
-      class AlertsIconsScrubber < Loofah::Scrubber
-        def scrub(doc)
-          doc.search("p.markdown-alert-title").each do |node|
+      class AlertsIconsScrubber
+        class << self
+          def apply(fragment)
+            fragment.css("p.markdown-alert-title").each do |node|
+              decorate(node)
+            end
+            fragment
+          end
+
+          private
+
+          def decorate(node)
             parent_node = node.parent
             parent_class_attr = parent_node['class'] # e.g., "markdown-alert markdown-alert-note"
-            next unless parent_class_attr
+            return unless parent_class_attr
 
             # Extract the specific alert type (e.g., "note", "tip", "warning")
             # from the parent div's classes.
             match_data = parent_class_attr.match(/markdown-alert-(\w+)/)
-            next unless match_data && match_data[1] # Ensure a type is found
+            return unless match_data && match_data[1] # Ensure a type is found
 
             alert_type = match_data[1]
 
             # Get the corresponding icon name from our map.
             icon_name = ALERT_TYPE_TO_ICON_NAME[alert_type]
-            next unless icon_name # Skip if no specific icon is defined for this alert type
+            return unless icon_name # Skip if no specific icon is defined for this alert type
 
             # Translate the alert title only if it matches a known alert type
             # (i.e., the title has not been overridden)
@@ -54,14 +63,25 @@ module Redmine
               node.content = ::I18n.t("label_alert_#{alert_type}", default: node.content)
             end
 
-            icon_html = ApplicationController.helpers.sprite_icon(icon_name, node.text)
+            icon_fragment = build_icon_fragment(icon_name, node.text)
 
-            if icon_html
+            if icon_fragment && node.children.first
               # Replace the existing text node with the icon HTML and label (text).
-              node.children.first.replace(icon_html)
+              node.children.first.replace(icon_fragment)
             end
           end
-          doc
+
+          def build_icon_fragment(icon_name, label)
+            sprite_path = cached_sprite_path
+            escaped_label = ERB::Util.html_escape(label)
+            html =
+              %(<svg class="s18 icon-svg" aria-hidden="true"><use href="#{sprite_path}#icon--#{icon_name}"></use></svg><span class="icon-label">#{escaped_label}</span>)
+            Nokogiri::HTML::DocumentFragment.parse(html)
+          end
+
+          def cached_sprite_path
+            @cached_sprite_path ||= ApplicationController.helpers.asset_path("icons.svg")
+          end
         end
       end
     end

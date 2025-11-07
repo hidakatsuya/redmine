@@ -31,8 +31,7 @@ if Object.const_defined?(:Commonmarker)
 
     def filter(html)
       fragment = Redmine::WikiFormatting::HtmlParser.parse(html)
-      scrubber = Redmine::WikiFormatting::CommonMark::AlertsIconsScrubber.new
-      fragment.scrub!(scrubber)
+      Redmine::WikiFormatting::CommonMark::AlertsIconsScrubber.apply(fragment)
       fragment.to_s
     end
 
