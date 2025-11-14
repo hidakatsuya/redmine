@@ -8,7 +8,7 @@ gem 'mini_mime', '~> 1.1.0'
 gem "actionpack-xml_parser"
 gem 'roadie-rails', '~> 3.4.0'
 gem 'marcel'
-gem 'mail', '~> 2.8.1'
+gem 'mail', '~> 2.9.0'
 gem 'nokogiri', '~> 1.18.3'
 gem 'i18n', '~> 1.14.1'
 gem 'rbpdf', '~> 1.21.4'
@@ -79,7 +79,7 @@ if File.exist?(database_file)
         gem 'trilogy', '~> 2.9.0'
         gem "with_advisory_lock"
       when /postgresql/
-        gem 'pg', '~> 1.5.3'
+        gem 'pg', '~> 1.6.2'
       when /sqlite3/
         gem 'sqlite3', '~> 2.7.4'
       when /sqlserver/
