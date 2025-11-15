@@ -1,17 +1,22 @@
 import { Controller } from "@hotwired/stimulus"
+import { UiStates } from "lib/ui_states"
 
 export default class extends Controller {
+  #$element = null
+  #widthState
+
   initialize() {
     this.$ = window.jQuery
+    this.#widthState = UiStates.ganttColumnWidth("subjects")
+  }
+
+  connect() {
+    this.#$element = this.$(this.element)
+    this.#initWidth()
   }
 
   handleResizeColumn(event) {
-    const columnWidth = event.detail.width;
-
-    this.$(".issue-subject, .project-name, .version-name").each((_, element) => {
-      const $element = this.$(element)
-      $element.width(columnWidth - $element.position().left)
-    })
+    this.#width = event.detail.width
   }
 
   handleEntryClick(event) {
@@ -118,5 +123,19 @@ export default class extends Controller {
         }
       }
     }
+  }
+
+  #initWidth() {
+    const width = this.#widthState.value
+    if (width) {
+      this.#width = width
+    }
+  }
+
+  set #width(width) {
+    this.#$element.find(".issue-subject, .project-name, .version-name").each((_, element) => {
+      const $element = this.$(element)
+      $element.width(width - $element.position().left)
+    })
   }
 }

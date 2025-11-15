@@ -65,6 +65,37 @@ class GanttsTest < ApplicationSystemTestCase
     assert width_after > width_before
   end
 
+  test 'columns keep resized widths after reload' do
+    visit_gantt
+    expand_options
+
+    find('#draw_selected_columns').check
+
+    original_subject_width = column_width('subjects')
+    original_status_width = column_width('status')
+
+    drag_column_resizer('subjects', 80)
+    drag_column_resizer('status', 80)
+
+    resized_subject_width = column_width('subjects')
+    resized_status_width = column_width('status')
+
+    assert resized_subject_width > original_subject_width
+    assert resized_status_width > original_status_width
+
+    # Reload the page to ensure persisted widths are restored
+    visit_gantt
+    expand_options
+
+    find('#draw_selected_columns').check
+
+    reloaded_subject_width = column_width('subjects')
+    reloaded_status_width = column_width('status')
+
+    assert_in_delta resized_subject_width, reloaded_subject_width, 1
+    assert_in_delta resized_status_width, reloaded_status_width, 1
+  end
+
   test 'context menu and tooltip interactions' do
     visit_gantt
 
@@ -106,12 +137,23 @@ class GanttsTest < ApplicationSystemTestCase
     legend.click if legend[:class].to_s.include?('collapsed')
   end
 
-  def column_width(id)
-    page.evaluate_script("document.querySelector('td##{id}').offsetWidth")
+  def drag_column_resizer(column_id, distance)
+    drag_resizer(column_selector(column_id), distance)
   end
 
-  def drag_column_resizer(column_id, distance)
-    handle = find("td##{column_id} .ui-resizable-e")
+  def drag_resizer(selector, distance)
+    handle = find("#{selector} .ui-resizable-e")
     page.driver.browser.action.click_and_hold(handle.native).move_by(distance, 0).release.perform
+  end
+
+  def column_width(id)
+    page.evaluate_script("document.querySelector('#{column_selector(id)}').offsetWidth")
+  end
+
+  def column_selector(id)
+    case id
+    when 'subjects' then 'td.gantt_subjects_column'
+    else "td##{id}"
+    end
   end
 end
