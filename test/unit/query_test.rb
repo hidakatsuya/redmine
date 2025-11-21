@@ -1587,13 +1587,14 @@ class QueryTest < ActiveSupport::TestCase
     query = IssueQuery.new(:name => '_')
     filter_name = "fixed_version.due_date"
     assert_include filter_name, query.available_filters.keys
-    query.filters = {filter_name => {:operator => '=', :values => [20.day.from_now.to_date.to_fs(:db)]}}
+    effective_date = Version.find(2).effective_date
+    query.filters = {filter_name => {:operator => '=', :values => [effective_date.to_s]}}
     issues = find_issues_with_query(query)
     assert_equal [2], issues.map(&:fixed_version_id).uniq.sort
     assert_equal [2, 12], issues.map(&:id).sort
 
     query = IssueQuery.new(:name => '_')
-    query.filters = {filter_name => {:operator => '>=', :values => [21.day.from_now.to_date.to_fs(:db)]}}
+    query.filters = {filter_name => {:operator => '>=', :values => [(effective_date + 1).to_s]}}
     assert_equal 0, find_issues_with_query(query).size
   end
 
@@ -2338,8 +2339,10 @@ class QueryTest < ActiveSupport::TestCase
   def test_sort_with_group_by_timestamp_query_column_should_sort_after_date_value
     User.current = User.find(1)
 
-    # Touch Issue#10 in order to be the last updated issue
-    Issue.find(10).update_attribute(:updated_on, Issue.find(10).updated_on + 1)
+    now = Time.current.change(:usec => 0)
+    Issue.find(6).update_column(:updated_on, now)
+    Issue.find(9).update_column(:updated_on, now + 1.second)
+    Issue.find(10).update_column(:updated_on, now + 2.seconds)
 
     q = IssueQuery.new(
       :name => '_',

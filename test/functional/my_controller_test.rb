@@ -236,7 +236,7 @@ class MyControllerTest < Redmine::ControllerTest
     assert_select 'div#block-activity' do
       assert_select 'h3' do
         assert_select(
-          'a[href=?]', activity_path(from: User.current.today, user_id: user.id),
+          'a[href=?]', activity_path(from: my_page_activity_from(user), user_id: user.id),
           :text => 'Activity'
         )
       end
@@ -246,6 +246,14 @@ class MyControllerTest < Redmine::ControllerTest
     end
   end
 
+  private def my_page_activity_from(user)
+    fetcher = Redmine::Activity::Fetcher.new(user, :author => user)
+    events_by_day = fetcher.events(nil, nil, :limit => 10).group_by do |event|
+      user.time_to_date(event.event_datetime)
+    end
+    events_by_day.keys.first || user.today
+  end
+ 
   def test_page_with_updated_issues_block
     preferences = User.find(2).pref
     preferences.my_page_layout = {'top' => ['issuesupdatedbyme']}

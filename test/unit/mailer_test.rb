@@ -822,13 +822,18 @@ class MailerTest < ActiveSupport::TestCase
   end
 
   def test_reminders
-    users(:users_003).pref.update_attribute :time_zone, 'UTC' # dlopper
+    user = users(:users_003) # dlopper
+    user.pref.update_attribute :time_zone, 'UTC'
     days = 42
     Mailer.reminders(:days => days)
     assert_equal 1, ActionMailer::Base.deliveries.size
     mail = last_email
     assert mail.to.include?('dlopper@somenet.foo')
-    assert_mail_body_match 'Bug #3: Error 281 when updating a recipe (5 days late)', mail
+    issue = Issue.find(3)
+    assert_mail_body_match(
+      "Bug #3: Error 281 when updating a recipe (#{reminder_due_date_distance(issue, user)})",
+      mail
+    )
     assert_mail_body_match 'View all issues (2 open)', mail
     url =
       "http://localhost:3000/issues?f%5B%5D=status_id&f%5B%5D=assigned_to_id" \
@@ -857,7 +862,7 @@ class MailerTest < ActiveSupport::TestCase
       mail = last_email
       assert mail.to.include?('dlopper@somenet.foo')
       assert_mail_body_match(
-        'Bug #3: Error 281 when updating a recipe (En retard de 5 jours)',
+        "Bug #3: Error 281 when updating a recipe (#{reminder_due_date_distance(Issue.find(3), user)})",
         mail
       )
       assert_equal "1 demande(s) arrivent à échéance (42)", mail.subject
@@ -881,15 +886,32 @@ class MailerTest < ActiveSupport::TestCase
   end
 
   def test_reminders_for_users
-    users(:users_003).pref.update_attribute :time_zone, 'UTC' # dlopper
+    user = users(:users_003) # dlopper
+    user.pref.update_attribute :time_zone, 'UTC'
     Mailer.reminders(:days => 42, :users => ['5'])
     assert_equal 0, ActionMailer::Base.deliveries.size # No mail for dlopper
     Mailer.reminders(:days => 42, :users => ['3'])
     assert_equal 1, ActionMailer::Base.deliveries.size # No mail for dlopper
     mail = last_email
     assert mail.to.include?('dlopper@somenet.foo')
-    assert_mail_body_match 'Bug #3: Error 281 when updating a recipe (5 days late)', mail
+    assert_mail_body_match(
+      "Bug #3: Error 281 when updating a recipe (#{reminder_due_date_distance(Issue.find(3), user)})",
+      mail
+    )
   end
+
+  private
+
+  def reminder_due_date_distance(issue, user)
+    locale = user.language.presence || Setting.default_language
+    with_locale(locale) do
+      with_current_user(user) do
+        ApplicationController.helpers.due_date_distance_in_words(issue.due_date)
+      end
+    end
+  end
+
+  public
 
   def test_reminder_should_include_issues_assigned_to_groups
     with_settings :default_language => 'en', :issue_group_assignment => '1' do
