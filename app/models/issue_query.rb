@@ -317,7 +317,7 @@ class IssueQuery < Query
       @available_columns.insert(
         index,
         QueryColumn.new(:spent_hours,
-                        :sortable => "COALESCE((#{subselect}), 0)",
+                        :sortable => ["COALESCE((#{subselect}), 0)", "#{Issue.table_name}.id"],
                         :default_order => 'desc',
                         :caption => :label_spent_time,
                         :totalable => true)
@@ -332,7 +332,7 @@ class IssueQuery < Query
       @available_columns.insert(
         index + 1,
         QueryColumn.new(:total_spent_hours,
-                        :sortable => "COALESCE((#{subselect}), 0)",
+                        :sortable => ["COALESCE((#{subselect}), 0)", "#{Issue.table_name}.id"],
                         :default_order => 'desc',
                         :caption => :label_total_spent_time)
       )
