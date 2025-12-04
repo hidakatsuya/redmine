@@ -212,7 +212,7 @@ pre, code {font-family: Consolas, Menlo, "Liberation Mono", Courier, monospace;}
 #login-form input {height: 29px;}
 #login-form input[type=text], #login-form input[type=password], #login-form input[type=submit] {display: block; width: 100%;}
 #login-form input[type=text], #login-form input[type=password] {margin-bottom: 15px;}
-#login-form a.lost_password {float:right; font-weight:normal;}
+#login-form a.lost_password {float:inline-end; font-weight:normal;}
 #login-form h3 {text-align: center;}
 
 div.modal { border-radius:5px; background:var(--oc-white); z-index:50; padding:4px;}
@@ -370,9 +370,9 @@ table.list td.icon {width: 100%;} /* Prevents border from disappearing due to in
 table.list td.id { width: 2%; text-align: center;}
 table.list td.name, table.list td.description, table.list td.subject, table.list td.parent-subject, table.list td.comments, table.list td.roles, table.list td.attachments, table.list td.text,  table.list td.short_description {text-align: left;}
 
-table.list td.attachments span {display: block; height: 16px;}
-table.list td.attachments span a.icon-download {display: inline-block; visibility: hidden;}
-table.list td.attachments span:hover a.icon-download {visibility: visible;}
+table.list td.attachments span.attachment-filename {display: block; height: 16px;}
+table.list td.attachments span.attachment-filename a.icon-download {visibility: hidden;}
+table.list td.attachments span.attachment-filename:hover a.icon-download {visibility: visible;}
 table.list td.tick {width:15%}
 table.list td.checkbox { width: 15px; padding: 2px 0 0 0; }
 table.list .checkbox input {padding:0px; height: initial;}
@@ -462,9 +462,8 @@ tr.version td.date, tr.version td.status, tr.version td.sharing { text-align: ce
 #principals_for_new_member .icon-user, #users_for_watcher .icon-user {background:transparent;}
 #principals_for_new_member svg, #principals_for_new_member .avatar  {margin-right: 4px;}
 
-tr.user td {width:13%;white-space: nowrap;}
-td.username, td.firstname, td.lastname, td.email {text-align:left !important;}
-tr.user td.email { width:18%; }
+tr.user td {white-space: nowrap;}
+td.login, td.firstname, td.lastname, td.mail {text-align:start !important;}
 tr.user.locked, tr.user.registered { color: var(--oc-gray-5); }
 tr.user.locked a, tr.user.registered a { color: var(--oc-gray-5); }
 
@@ -612,8 +611,8 @@ div.square {
 .contextual input, .contextual select {font-size:0.9em;}
 
 .splitcontent {overflow: auto; display: flex; flex-wrap: wrap;}
-.splitcontentleft {flex: 1; margin-right: 5px;}
-.splitcontentright {flex: 1; margin-left: 5px;}
+.splitcontentleft {flex: 1; margin-inline-end: 5px;}
+.splitcontentright {flex: 1; margin-inline-start: 5px;}
 .splitcontenttop {flex: 2; flex-basis: 100%;}
 
 form {display: inline;}
@@ -692,8 +691,8 @@ div.issue p.author {margin-top:0.5em; font-size: 93%}
 div.issue span.private, div.journal span.private {font-size: 60%;}
 div.issue .next-prev-links {color:var(--oc-gray-6);}
 div.issue .attributes {margin-top: 2em;}
-div.issue .attributes .attribute {padding-left:180px; clear:left; min-height: 1.8em;}
-div.issue .attributes .attribute .label {width: 170px; margin-left:-180px; font-weight:bold; float:left;  overflow: clip visible; text-overflow: ellipsis;}
+div.issue .attributes .attribute {padding-inline-start: 180px; clear: inline-start; min-height: 1.8em;}
+div.issue .attributes .attribute .label {width: 170px; margin-inline-start: -180px; font-weight: bold; float: inline-start; overflow: clip visible; text-overflow: ellipsis;}
 div.issue .attribute .value {overflow:auto; text-overflow: ellipsis;}
 div.issue .attribute.string_cf .value .wiki p {margin-top: 0; margin-bottom: 0;}
 div.issue .attribute.text_cf .value .wiki p:first-of-type {margin-top: 0;}
@@ -946,7 +945,7 @@ table.projects td.name .my-project svg {
 #notified-projects>ul, #tracker_project_ids>ul, #custom_field_project_ids>ul {max-height:250px; overflow-y:auto;}
 
 ul.subprojects {list-style: none; display: inline-block; padding: 0; margin: 0;}
-ul.subprojects li {float: left;}
+ul.subprojects li {float: inline-start;}
 ul.subprojects li:not(:last-child)::after {content: ', '; white-space: pre;}
 
 #related-issues li img {vertical-align:middle;}
@@ -1295,8 +1294,8 @@ div.flash.warning svg.icon-svg, .conflict svg.icon-svg {
 
 /***** CommonMark Alerts *****/
 .markdown-alert {
-  border-left: 4px solid;
-  padding-left: 0.6em;
+  border-inline-start: 4px solid;
+  padding-inline-start: 0.6em;
   margin: 1em 0;
 }
 
@@ -1619,13 +1618,14 @@ div.wiki *:not(pre)>code, div.wiki>code {
 div.pre-wrapper a.copy-pre-content-link {
   position: absolute;
   top: 3px;
-  right: calc(1em + 3px);
+  inset-inline-end: calc(1em + 3px);
   cursor: pointer;
   display: none;
   border-radius: 3px;
   background: var(--oc-white);
   border: 1px solid var(--oc-gray-4);
-  padding: 0px 3px 3px 3px;
+  padding-block: 0 3px;
+  padding-inline: 3px;
 }
 
 div.pre-wrapper:hover a.copy-pre-content-link {
@@ -1928,8 +1928,11 @@ svg.svg-loader {
 .contextual>*:not(:first-child), .buttons>.icon:not(:first-child), .contextual .journal-actions>*:not(:first-child) { margin-left: 5px; }
 
 div.issue .avatar {
-  float: left;
-  margin: 0 12px 6px 0;
+  float: inline-start;
+  margin-top: 0;
+  margin-bottom: 6px;
+  margin-inline-start: 0;
+  margin-inline-end: 12px;
 }
 
 div.avatar-with-child {
@@ -1939,7 +1942,7 @@ div.avatar-with-child {
 div.avatar-with-child > .avatar:nth-child(2) {
   position: absolute;
   top: 30px;
-  left: 30px;
+  inset-inline-start: 30px;
   border-radius: 20%;
   border: 2px solid rgba(var(--oc-white-rgb), 0.9);
 }
@@ -1980,6 +1983,7 @@ img.filecontent.image {background-image: url(/transparent.png);}
   border-radius: 20%;
   display: inline-flex;
   vertical-align: middle;
+  flex-shrink: 0;
 }
 
 span[role="img"].avatar {
@@ -2072,7 +2076,7 @@ span[role="img"].avatar.s50  {
   text-decoration: none;
 }
 .reaction-button .icon-label {
-  margin-left: 3px;
+  margin-inline-start: 3px;
   margin-bottom: -1px;
   font-weight: bold;
 }
@@ -2089,21 +2093,21 @@ span[role="img"].avatar.s50  {
   color: var(--oc-gray-6);
 }
 div.issue.details .reaction {
-  float: right;
+  float: inline-end;
   font-size: 0.9em;
   margin-top: 0.5em;
-  margin-left: 10px;
-  clear: right;
+  margin-inline-start: 10px;
+  clear: inline-end;
 }
 div.message .reaction {
-  float: right;
+  float: inline-end;
   font-size: 0.9em;
-  margin-left: 10px;
+  margin-inline-start: 10px;
 }
 div.news .reaction {
-  float: right;
+  float: inline-end;
   font-size: 0.9em;
-  margin-left: 10px;
+  margin-inline-start: 10px;
 }
 
 /* Custom JQuery styles */
