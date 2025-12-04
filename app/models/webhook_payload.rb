@@ -100,12 +100,19 @@ class WebhookPayload
          else
            wiki_page.updated_on
          end
+    wiki_data = ApiRenderer.new(
+      "app/views/wiki/show.api.rsb",
+      user
+    ).to_h(page: wiki_page, content: wiki_page.content)
+    if (project = wiki_page.project)
+      wiki_data[:project] = {id: project.id, name: project.name}
+    end
 
     {
       type: event,
       timestamp: ts.iso8601,
       data: {
-        wiki_page: ApiRenderer.new("app/views/wiki/show.api.rsb", user).to_h(page: wiki_page, content: wiki_page.content)
+        wiki_page: wiki_data
       }
     }
   end
