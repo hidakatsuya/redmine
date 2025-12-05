@@ -163,7 +163,9 @@ class TablePasteHandler {
 
 export default class extends Controller {
   handlePaste(event) {
-    const format = event.params.textFormatting
+    // Get format from action params, or fall back to data attribute
+    const format = event.params?.textFormatting || 
+                   event.currentTarget.dataset.tablePasteTextFormattingParam
     if (!format) return
 
     new TablePasteHandler(event.currentTarget, format).run(event)
