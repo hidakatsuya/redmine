@@ -459,10 +459,7 @@ module ApplicationHelper
     s = +''
     if projects.any?
       ancestors = []
-      original_project = @project
       projects.sort_by(&:lft).each do |project|
-        # set the project environment to please macros.
-        @project = project
         if ancestors.empty? || project.is_descendant_of?(ancestors.last)
           s << "<ul class='projects #{ancestors.empty? ? 'root' : nil}'>\n"
         else
@@ -481,7 +478,6 @@ module ApplicationHelper
         ancestors << project
       end
       s << ("</li></ul>\n" * ancestors.size)
-      @project = original_project
     end
     s.html_safe
   end
@@ -1569,13 +1565,6 @@ module ApplicationHelper
     options = args.last
     options[:builder] = Redmine::Views::LabelledFormBuilder
     fields_for(*args, &)
-  end
-
-  def form_tag_html(html_options)
-    # Set a randomized name attribute on all form fields by default
-    # as a workaround to https://bugzilla.mozilla.org/show_bug.cgi?id=1279253
-    html_options['name'] ||= "#{html_options['id'] || 'form'}-#{SecureRandom.hex(4)}"
-    super
   end
 
   # Render the error messages for the given objects

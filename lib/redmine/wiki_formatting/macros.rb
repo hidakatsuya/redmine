@@ -65,6 +65,10 @@ module Redmine
           end
           return [args, options]
         end
+
+        def current_project(obj)
+          @project || (obj.is_a?(Project) && obj) || (obj.respond_to?(:project) && obj.project)
+        end
       end
 
       @@available_macros = {}
@@ -220,20 +224,28 @@ module Redmine
              "{{recent_pages}} -- displays pages updated within the last 7 days\n" +
              "{{recent_pages(days=3)}} -- displays pages updated within the last 3 days\n" +
              "{{recent_pages(limit=5)}} -- limits the maximum number of pages to display to 5\n" +
-             "{{recent_pages(time=true)}} -- displays pages updated within the last 7 days with updated time"
+             "{{recent_pages(time=true)}} -- displays pages updated within the last 7 days with updated time\n" +
+             "{{recent_pages(project=identifier)}} -- displays pages updated within the last 7 days from a specific project"
 
       macro :recent_pages do |obj, args|
-        return '' if @project.nil?
-        return '' unless User.current.allowed_to?(:view_wiki_pages, @project)
+        args, options = extract_macro_options(args, :days, :limit, :time, :project)
 
-        args, options = extract_macro_options(args, :days, :limit, :time)
+        if options[:project].presence
+          project = Project.find_by_identifier(options[:project].to_s) if options[:project].present?
+        else
+          project = current_project(obj)
+        end
+
+        return '' if project.nil?
+        return '' unless User.current.allowed_to?(:view_wiki_pages, project)
+
         days_to_list = (options[:days].presence || 7).to_i
         limit = options[:limit].to_i if options[:limit].present?
         is_show_time = options[:time].to_s == 'true'
 
         pages = WikiPage.
           joins(:content, :wiki).
-          where(["#{Wiki.table_name}.project_id = ? AND #{WikiContent.table_name}.updated_on >= ?", @project.id, days_to_list.days.ago]).
+          where(["#{Wiki.table_name}.project_id = ? AND #{WikiContent.table_name}.updated_on >= ?", project.id, days_to_list.days.ago]).
           order("#{WikiContent.table_name}.updated_on desc, id").
           limit(limit)
 
@@ -241,7 +253,7 @@ module Redmine
           pages.each do |page|
             concat(
               tag.li do
-                html = link_to(h(page.pretty_title), project_wiki_page_path(@project, page.title))
+                html = link_to(h(page.pretty_title), project_wiki_page_path(project, page.title))
                 html << " (#{time_ago_in_words(page.content.updated_on)})" if is_show_time
                 html
               end
@@ -254,7 +266,8 @@ module Redmine
              "{{include(Foo)}}\n" +
              "{{include(projectname:Foo)}} -- to include a page of a specific project wiki"
       macro :include do |obj, args|
-        page = Wiki.find_page(args.first.to_s, :project => @project)
+        project = current_project(obj)
+        page = Wiki.find_page(args.first.to_s, :project => project)
         raise t(:error_page_not_found) if page.nil? || !User.current.allowed_to?(:view_wiki_pages, page.wiki.project)
 
         @included_wiki_pages ||= []

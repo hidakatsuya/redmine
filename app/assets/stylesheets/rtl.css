@@ -6,50 +6,11 @@
 
 h1, h2, h3, h4 {padding:2px 00px 1px 10px;}
 /***** Layout *****/
-#top-menu {padding:2px 6px 0px 2px;}
-#top-menu li {float:right;}
-#top-menu a {margin-right:0;margin-left:8px;}
-#top-menu #loggedas {float:left;margin-right:0;margin-left:0.5em;}
-
-#account {float:left;}
-
-#header {padding:4px 6px 20px 8px;}
-
-#quick-search {float:left;}
-
 #main-menu {left:auto;right:6px;margin-right:0;margin-left:-500px;}
 #main-menu li {float:right;margin:0px 0px 0px 2px;}
 
-#sidebar {float:left; padding-right: 20px; padding-left: 8px; border-left: 0; border-right: 1px solid var(--oc-gray-4);}
-
-#main.collapsedsidebar #sidebar {
-  padding-left: 0;
-  padding-right: 20px;
-}
-
-#sidebar .contextual { margin-right: 0;  margin-left: 1em;}
-#sidebar ul li {margin: 0 0 0 2px;}
-#sidebar #sidebar-switch-panel {
-  margin-left: 0;
-  margin-right: -20px;
-  padding-left: 28px;
-  padding-right: 0;
-}
-
-#sidebar #sidebar-switch-panel #sidebar-switch-button {
-  padding-right: 0;
-  padding-left: 28px;
-}
-
-#content {border-right:0 solid var(--oc-gray-4); border-left:1px solid var(--oc-gray-4);}
-#main.nosidebar #content{border-left:0;}
-
 #login-form table {margin-left:auto; margin-right:auto;}
 div.modal p.buttons {text-align:left;}
-
-/***** Links *****/
-
-#sidebar a.selected {padding:1px 2px 2px 3px; margin-left:0px; margin-right:-2px;}
 
 /***** Tables *****/
 table.list td {padding-left:0px; padding-right:10px;}
@@ -125,11 +86,7 @@ h3.version {padding-left:0px; padding-right:20px;}
 #watchers li {margin: 0px 0px 0px 2px; padding: 0px 0px 0px 0px;}
 #watchers img.gravatar {margin: 0 0 2px 4px;}
 
-div.square {float:right;}
 .contextual {float:left; padding-left:0px; padding-right:10px;}
-
-blockquote {border-left:0px solid var(--oc-gray-3); padding-left:0em; margin-left:2em;  border-right:3px solid var(--oc-gray-3); padding-right:0.6em; margin-right:0;}
-blockquote blockquote { margin-right:0;}
 
 div.issue div.subject div div {padding-left:0px; padding-right:16px;}
 
