@@ -298,14 +298,27 @@ module RepositoriesHelper
       }
     end
     heads.sort_by!(&:to_s)
-    space = nil
+    # Process commits starting from the latest
+    space = index_head(0, commits.first, commits_by_scmid)
+    # Process commits from heads
     heads.each do |head|
-      if commits_by_scmid.include? head.scmid
-        space = index_head((space || -1) + 1, head, commits_by_scmid)
+      if commits_by_scmid.include?(head.scmid) && commits_by_scmid[head.scmid][:space].nil?
+        space = index_head(space + 1, head, commits_by_scmid)
       end
     end
-    # when no head matched anything use first commit
-    space ||= index_head(0, commits.first, commits_by_scmid)
+    # Process orphan commits
+    while (commit = commits.find { |commit| commits_by_scmid[commit.scmid][:space].nil? })
+      space = index_head(space + 1, commit, commits_by_scmid)
+    end
+    # Set vertical_children flag for commits that have children in the same column
+    # for S-style connections between commits
+    commits_by_scmid.each_value do |commit|
+      commit[:parent_scmids].each do |scmid|
+        if (parent = commits_by_scmid[scmid]) && parent[:space] == commit[:space]
+          parent[:vertical_children] = true
+        end
+      end
+    end
     return commits_by_scmid, space
   end
 

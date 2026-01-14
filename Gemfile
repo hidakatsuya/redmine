@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 ruby '>= 3.2.0', '< 3.5.0'
 
-gem 'rails', '8.1.1'
+gem 'rails', '8.1.2'
 gem 'rouge', '~> 4.5'
 gem 'mini_mime', '~> 1.1.0'
 gem "actionpack-xml_parser"
@@ -83,8 +83,8 @@ if File.exist?(database_file)
       when /sqlite3/
         gem 'sqlite3', '~> 2.7.4'
       when /sqlserver/
-        gem 'tiny_tds', '~> 2.1.2'
-        gem 'activerecord-sqlserver-adapter', '~> 8.0.8'
+        gem 'tiny_tds', '~> 3.4'
+        gem 'activerecord-sqlserver-adapter', '~> 8.1.2'
       else
         warn("Unknown database adapter `#{adapter}` found in config/database.yml, use Gemfile.local to load your own database gems")
       end
@@ -123,8 +123,6 @@ group :test do
   gem 'bundle-audit', require: false
   # for testing oauth provider capabilities
   gem 'oauth2'
-  # Lock minitest to 5.x until a Rails release includes support for minitest 6.0
-  gem 'minitest', '~> 5.27'
 end
 
 local_gemfile = File.join(File.dirname(__FILE__), "Gemfile.local")
