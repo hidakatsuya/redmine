@@ -1558,9 +1558,6 @@ fi:
   label_webhook_new: New webhook
   label_webhook_edit: Edit webhook
   label_webhook_events: Events
-  webhook_events_issue_created: Issue created
-  webhook_events_issue_updated: Issue updated
-  webhook_events_issue_deleted: Issue deleted
   webhook_url_info: Redmine will send a POST request to this URL whenever one of the
     selected events occurs in one of the selected projects.
   webhook_secret_info_html: If provided, Redmine will use this to create a hash signature
@@ -1573,3 +1570,7 @@ fi:
   label_alert_caution: Caution
   label_alert_important: Important
   field_ratio_interval: Ratio interval
+  webhook_event_created: "%{object_name} created"
+  webhook_event_updated: "%{object_name} updated"
+  webhook_event_deleted: "%{object_name} deleted"
+  label_auto_watch_on_issue_assigned_to_me: Issues assigned to me
