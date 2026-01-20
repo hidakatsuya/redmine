@@ -1020,11 +1020,10 @@ class Query < ApplicationRecord
 
       if field == 'fixed_version_id'
         if v.delete('open')
-          versions = []
-          if project
-            versions = project.shared_versions.where(status: 'open').to_a
+          versions = if project
+            project.shared_versions.where(status: 'open')
           else
-            versions = Version.visible.where(status: 'open').to_a
+            Version.visible.where(status: 'open')
           end
           v += versions.pluck(:id).map(&:to_s)
         end
