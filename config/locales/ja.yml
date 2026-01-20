@@ -574,6 +574,7 @@ ja:
   label_version: バージョン
   label_version_new: 新しいバージョン
   label_version_plural: バージョン
+  label_open_versions: 進行中のバージョン
   label_confirmation: 確認
   label_close_versions: 完了したバージョンを終了にする
   label_export_to: '他の形式にエクスポート:'

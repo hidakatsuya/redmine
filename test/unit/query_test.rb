@@ -1628,6 +1628,32 @@ class QueryTest < ActiveSupport::TestCase
     assert_not_includes find_issues_with_query(query), issue
   end
 
+  def test_filter_on_fixed_version_id_with_open
+    # Create an issue with an open version
+    issue = Issue.generate!(:project_id => 1, :fixed_version_id => 3)
+    
+    query = IssueQuery.new(:name => '_', :project => Project.find(1))
+    filter_name = "fixed_version_id"
+    assert_include filter_name, query.available_filters.keys
+    
+    # Verify that "open" is available in the filter values
+    filter = query.available_filters[filter_name]
+    assert filter[:values].any? {|v| v[1] == 'open'}
+    
+    # Test filtering for open versions only
+    query.filters = {filter_name => {:operator => '=', :values => ['open']}}
+    issues = find_issues_with_query(query)
+    
+    # Check that the created issue with open version is included
+    assert_include issue, issues
+    
+    # Check that only issues with open versions are returned
+    issues.each do |i|
+      next if i.fixed_version.nil?
+      assert_equal 'open', i.fixed_version.status
+    end
+  end
+
   def test_filter_on_version_custom_field
     field = IssueCustomField.generate!(:field_format => 'version', :is_filter => true)
     issue = Issue.generate!(:project_id => 1, :tracker_id => 1, :custom_field_values => {field.id.to_s => '2'})

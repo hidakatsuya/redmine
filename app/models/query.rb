@@ -646,14 +646,17 @@ class Query < ApplicationRecord
   end
 
   def fixed_version_values
+    values = []
+    values << ["<< #{l(:label_open_versions)} >>", "open"]
     versions = []
     if project
       versions = project.shared_versions.to_a
     else
       versions = Version.visible.to_a
     end
-    Version.sort_by_status(versions).
+    values += Version.sort_by_status(versions).
       collect{|s| ["#{s.project.name} - #{s.name}", s.id.to_s, l("version_status_#{s.status}")]}
+    values
   end
 
   # Returns a scope of issue statuses that are available as columns for filters
@@ -1012,6 +1015,17 @@ class Query < ApplicationRecord
         end
         if v.delete('bookmarks')
           v += User.current.bookmarked_project_ids
+        end
+      end
+
+      if field == 'fixed_version_id'
+        if v.delete('open')
+          versions = if project
+            project.shared_versions.where(status: 'open')
+          else
+            Version.visible.where(status: 'open')
+          end
+          v += versions.pluck(:id).map(&:to_s)
         end
       end
 
