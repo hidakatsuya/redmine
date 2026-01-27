@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-ruby '>= 3.2.0', '< 3.5.0'
+ruby '>= 3.2.0', '< 4.1.0'
 
 gem 'rails', '8.1.2'
 gem 'rouge', '~> 4.5'
@@ -25,10 +25,11 @@ gem "doorkeeper-i18n", "~> 5.2"
 gem "requestjs-rails", "~> 0.0.13"
 
 #  Ruby Standard Gems
-gem 'csv', '~> 3.3.2'
-gem 'net-imap', '~> 0.5.7'
+gem 'csv', '~> 3.3.5'
+gem 'net-imap', '~> 0.6.1'
 gem 'net-pop', '~> 0.1.2'
-gem 'net-smtp', '~> 0.5.0'
+gem 'net-smtp', '~> 0.5.1'
+gem 'ostruct'
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :x64_mingw, :mswin]

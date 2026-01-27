@@ -20,8 +20,9 @@
 
 require_relative '../../../../test_helper'
 
-class Redmine::WikiFormatting::TextileFormatterTest < ActionView::TestCase
+class Redmine::WikiFormatting::TextileFormatterTest < Redmine::HelperTest
   def setup
+    super
     @formatter = Redmine::WikiFormatting::Textile::Formatter
   end
 
@@ -252,7 +253,7 @@ class Redmine::WikiFormatting::TextileFormatterTest < ActionView::TestCase
     expected = <<~EXPECTED
       <p>John said:</p>
       <blockquote>
-      Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas sed libero.<br />
+      Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas sed libero.<br>
       Nullam commodo metus accumsan nulla. Curabitur lobortis dui id dolor.
       <ul>
         <li>Donec odio lorem,</li>
@@ -282,9 +283,11 @@ class Redmine::WikiFormatting::TextileFormatterTest < ActionView::TestCase
       <p>This is a table with empty cells:</p>
 
       <table>
+        <tbody>
         <tr><td>cell11</td><td>cell12</td><td></td></tr>
         <tr><td>cell21</td><td></td><td>cell23</td></tr>
         <tr><td>cell31</td><td>cell32</td><td>cell33</td></tr>
+        </tbody>
       </table>
     EXPECTED
     assert_equal expected.gsub(%r{\s+}, ''), to_html(raw).gsub(%r{\s+}, '')
@@ -298,9 +301,11 @@ class Redmine::WikiFormatting::TextileFormatterTest < ActionView::TestCase
     RAW
     expected = <<~EXPECTED
       <table>
+        <tbody>
         <tr><td style="text-align:right;">right</td></tr>
         <tr><td style="text-align:left;">left</td></tr>
         <tr><td style="text-align:justify;">justify</td></tr>
+        </tbody>
       </table>
     EXPECTED
     assert_equal expected.gsub(%r{\s+}, ''), to_html(raw).gsub(%r{\s+}, '')
@@ -318,9 +323,11 @@ class Redmine::WikiFormatting::TextileFormatterTest < ActionView::TestCase
       <p>This is a table with trailing whitespace in one row:</p>
 
       <table>
+        <tbody>
         <tr><td>cell11</td><td>cell12</td></tr>
         <tr><td>cell21</td><td>cell22</td></tr>
         <tr><td>cell31</td><td>cell32</td></tr>
+        </tbody>
       </table>
     EXPECTED
     assert_equal expected.gsub(%r{\s+}, ''), to_html(raw).gsub(%r{\s+}, '')
@@ -343,21 +350,23 @@ class Redmine::WikiFormatting::TextileFormatterTest < ActionView::TestCase
       <p>This is a table with line breaks:</p>
 
       <table>
+        <tbody>
         <tr>
-          <td>cell11<br />continued</td>
+          <td>cell11<br>continued</td>
           <td>cell12</td>
           <td></td>
         </tr>
         <tr>
           <td><del>cell21</del></td>
           <td></td>
-          <td>cell23<br/>cell23 line2<br/>cell23 <strong>line3</strong></td>
+          <td>cell23<br>cell23 line2<br>cell23 <strong>line3</strong></td>
         </tr>
         <tr>
           <td>cell31</td>
-          <td>cell32<br/>cell32 line2</td>
+          <td>cell32<br>cell32 line2</td>
           <td>cell33</td>
         </tr>
+        </tbody>
       </table>
     EXPECTED
     assert_equal expected.gsub(%r{\s+}, ''), to_html(raw).gsub(%r{\s+}, '')
@@ -380,18 +389,20 @@ class Redmine::WikiFormatting::TextileFormatterTest < ActionView::TestCase
       <p>This is a table with lists:</p>
 
       <table>
+        <tbody>
         <tr>
           <td>cell11</td>
           <td>cell12</td>
         </tr>
         <tr>
           <td>cell21</td>
-          <td>ordered list<br /># item<br /># item 2</td>
+          <td>ordered list<br># item<br># item 2</td>
         </tr>
         <tr>
           <td>cell31</td>
-          <td>unordered list<br />* item<br />* item 2</td>
+          <td>unordered list<br>* item<br>* item 2</td>
         </tr>
+        </tbody>
       </table>
     EXPECTED
     assert_equal expected.gsub(%r{\s+}, ''), to_html(raw).gsub(%r{\s+}, '')
@@ -408,7 +419,7 @@ class Redmine::WikiFormatting::TextileFormatterTest < ActionView::TestCase
     expected =
       '<p><img src="/images/comment.png&quot;onclick=' \
         '&amp;#x61;&amp;#x6c;&amp;#x65;&amp;#x72;&amp;#x74;&amp;#x28;' \
-        '&amp;#x27;&amp;#x58;&amp;#x53;&amp;#x53;&amp;#x27;&amp;#x29;;&amp;#x22;" alt="" /></p>'
+        '&amp;#x27;&amp;#x58;&amp;#x53;&amp;#x53;&amp;#x27;&amp;#x29;;&amp;#x22;" alt=""></p>'
     assert_equal expected.gsub(%r{\s+}, ''), to_html(raw).gsub(%r{\s+}, '')
   end
 
@@ -603,7 +614,7 @@ class Redmine::WikiFormatting::TextileFormatterTest < ActionView::TestCase
       "class=\"ruby \"foo\" bar\"" => "data-language=\"ruby \"",
     }.each do |classattr, codeattr|
       assert_html_output({"<code #{classattr}>test</code>" => "<code #{codeattr}>test</code>"}, false)
-      assert_html_output({"<pre #{classattr}>test</pre>" => "<pre>test</pre>"}, false)
+      assert_html_output({"<pre #{classattr}>test</pre>" => pre_wrapper('<pre data-clipboard-target="pre">test</pre>')}, false)
       assert_html_output({"<kbd #{classattr}>test</kbd>" => "<kbd>test</kbd>"}, false)
     end
 
@@ -635,16 +646,15 @@ class Redmine::WikiFormatting::TextileFormatterTest < ActionView::TestCase
         "<code class=\"foolang\">unsupported language</code>" =>
           "<code data-language=\"foolang\">unsupported language</code>",
         "<code class=\"c-k&r\">special-char language</code>" =>
-          "<code data-language=\"c-k&#38;r\">special-char language</code>",
+          "<code data-language=\"c-k&amp;r\">special-char language</code>",
       },
       false
     )
   end
 
   def test_should_not_allow_valid_language_class_attribute_on_non_code_offtags
-    %w(pre kbd).each do |tag|
-      assert_html_output({"<#{tag} class=\"ruby\">test</#{tag}>" => "<#{tag}>test</#{tag}>"}, false)
-    end
+    assert_html_output({"<pre class=\"ruby\">test</pre>" => pre_wrapper('<pre data-clipboard-target="pre">test</pre>')}, false)
+    assert_html_output({"<kbd class=\"ruby\">test</kbd>" => "<kbd>test</kbd>"}, false)
 
     assert_html_output({"<notextile class=\"ruby\">test</notextile>" => "test"}, false)
   end
@@ -652,11 +662,11 @@ class Redmine::WikiFormatting::TextileFormatterTest < ActionView::TestCase
   def test_should_prefix_class_attribute_on_tags
     assert_html_output(
       {
-        '!(foo)test.png!' => "<p><img src=\"test.png\" class=\"wiki-class-foo\" alt=\"\" /></p>",
+        '!(foo)test.png!' => "<p><img src=\"test.png\" class=\"wiki-class-foo\" alt=\"\"></p>",
         '%(foo)test%'     => "<p><span class=\"wiki-class-foo\">test</span></p>",
         'p(foo). test'    => "<p class=\"wiki-class-foo\">test</p>",
         '|(foo). test|'   =>
-           "<table>\n\t\t<tr>\n\t\t\t<td class=\"wiki-class-foo\">test</td>\n\t\t</tr>\n\t</table>",
+           "<table>\n\t\t<tbody><tr>\n\t\t\t<td class=\"wiki-class-foo\">test</td>\n\t\t</tr>\n\t</tbody></table>",
       },
       false
     )
@@ -665,11 +675,11 @@ class Redmine::WikiFormatting::TextileFormatterTest < ActionView::TestCase
   def test_should_prefix_id_attribute_on_tags
     assert_html_output(
       {
-        '!(#foo)test.png!' => "<p><img src=\"test.png\" id=\"wiki-id-foo\" alt=\"\" /></p>",
+        '!(#foo)test.png!' => "<p><img src=\"test.png\" id=\"wiki-id-foo\" alt=\"\"></p>",
         '%(#foo)test%'     => "<p><span id=\"wiki-id-foo\">test</span></p>",
         'p(#foo). test'    => "<p id=\"wiki-id-foo\">test</p>",
         '|(#foo). test|'   =>
-           "<table>\n\t\t<tr>\n\t\t\t<td id=\"wiki-id-foo\">test</td>\n\t\t</tr>\n\t</table>",
+           "<table>\n\t\t<tbody><tr>\n\t\t\t<td id=\"wiki-id-foo\">test</td>\n\t\t</tr>\n\t</tbody></table>",
       },
       false
     )
@@ -679,7 +689,7 @@ class Redmine::WikiFormatting::TextileFormatterTest < ActionView::TestCase
     assert_html_output(
       {
         '!(wiki-class-foo#wiki-id-bar)test.png!' =>
-           "<p><img src=\"test.png\" class=\"wiki-class-foo\" id=\"wiki-id-bar\" alt=\"\" /></p>",
+           "<p><img src=\"test.png\" class=\"wiki-class-foo\" id=\"wiki-id-bar\" alt=\"\"></p>",
       },
       false
     )
@@ -711,8 +721,8 @@ class Redmine::WikiFormatting::TextileFormatterTest < ActionView::TestCase
       </pree>
     STR
     expected = <<~EXPECTED
-      <p>&lt;pree&gt;<br />
-        This is some text<br />
+      <p>&lt;pree&gt;<br>
+        This is some text<br>
       &lt;/pree&gt;</p>
     EXPECTED
     assert_equal expected.gsub(%r{[\r\n\t]}, ''), to_html(text).gsub(%r{[\r\n\t]}, '')
@@ -745,17 +755,20 @@ class Redmine::WikiFormatting::TextileFormatterTest < ActionView::TestCase
       </p>
       </pre>
     STR
-    expected = <<~EXPECTED
-      <p>Hello world.</p>
-
-      <p>Foo</p>
-
-      <pre>
+    pre = <<~PRE
+      <pre data-clipboard-target="pre">
       This is a code block.
       &lt;p&gt;
       &lt;!-- comments in a code block should be preserved --&gt;
       &lt;/p&gt;
       </pre>
+    PRE
+    expected = <<~EXPECTED
+      <p>Hello world.</p>
+
+      <p>Foo</p>
+
+      #{pre_wrapper(pre)}
 
     EXPECTED
     assert_equal expected.gsub(%r{[\r\n\t]}, ''), to_html(text).gsub(%r{[\r\n\t]}, '')

@@ -207,7 +207,7 @@ function buildFilterRow(field, operator, values) {
   var select;
 
   var tr = $('<div class="filter">').attr('id', 'tr_'+fieldId).html(
-    '<div class="field"><input checked="checked" id="cb_'+fieldId+'" name="f[]" value="'+field+'" type="checkbox"><label for="cb_'+fieldId+'"> '+filterOptions['name']+'</label></div>' +
+    '<div class="field"><input checked="checked" id="cb_'+fieldId+'" name="f[]" value="'+field+'" type="checkbox"><label for="cb_'+fieldId+'"> '+sanitizeHTML(filterOptions['name'])+'</label></div>' +
     '<div class="operator"><select id="operators_'+fieldId+'" name="op['+field+']"></select></div>' +
     '<div class="values"></div>'
   );
@@ -1170,7 +1170,6 @@ $(document).ready(function(){
       data: "text=" + element + '&' + attachments,
       success: function(data){
         jstBlock.find('.wiki-preview').html(data);
-        setupWikiTableSortableHeader();
       }
     });
   });
@@ -1348,7 +1347,7 @@ function inlineAutoComplete(element) {
             }
           },
           menuItemTemplate: function (user) {
-            return user.original.name;
+            return sanitizeHTML(user.original.name);
           },
           selectTemplate: function (user) {
             return '@' + user.original.login;
@@ -1439,8 +1438,6 @@ $(document).ready(defaultFocus);
 $(document).ready(setupAttachmentDetail);
 $(document).ready(setupTabs);
 $(document).ready(setupFilePreviewNavigation);
-$(document).ready(setupWikiTableSortableHeader);
 $(document).on('focus', '[data-auto-complete=true]', function(event) {
   inlineAutoComplete(event.target);
 });
-document.addEventListener("DOMContentLoaded", () => { setupCopyButtonsToPreElements(); });
