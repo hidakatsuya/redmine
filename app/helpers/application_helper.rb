@@ -155,12 +155,9 @@ module ApplicationHelper
       repository = repository.repository
     end
     text = options.delete(:text) || format_revision(revision)
-    rev = revision.respond_to?(:identifier) ? revision.identifier : revision
     link_to(
       h(text),
-      {:controller => 'repositories', :action => 'revision',
-       :id => repository.project,
-       :repository_id => repository.identifier_param, :rev => rev},
+      repository.revision_url_options(revision),
       :title => l(:label_revision_id, format_revision(revision)),
       :accesskey => options[:accesskey]
     )
@@ -1185,10 +1182,10 @@ module ApplicationHelper
                    (changeset = Changeset.visible.
                                     find_by_repository_id_and_revision(repository.id, identifier))
                 link = link_to(h("#{project_prefix}#{repo_prefix}r#{identifier}"),
-                               {:only_path => only_path, :controller => 'repositories',
-                                :action => 'revision', :id => project,
-                                :repository_id => repository.identifier_param,
-                                :rev => changeset.revision},
+                               repository.revision_url_options(
+                                 changeset.revision,
+                                 :only_path => only_path
+                               ),
                                :class => 'changeset',
                                :title => truncate_single_line_raw(changeset.comments, 100))
               end
@@ -1291,10 +1288,10 @@ module ApplicationHelper
                     link =
                       link_to(
                         h("#{project_prefix}#{repo_prefix}#{name}"),
-                        {:only_path => only_path, :controller => 'repositories',
-                         :action => 'revision', :id => project,
-                         :repository_id => repository.identifier_param,
-                        :rev => changeset.identifier},
+                        repository.revision_url_options(
+                          changeset.identifier,
+                          :only_path => only_path
+                        ),
                         :class => 'changeset',
                         :title => truncate_single_line_raw(changeset.comments, 100)
                       )

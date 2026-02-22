@@ -140,6 +140,19 @@ class Repository < ApplicationRecord
     end
   end
 
+  # Returns url options for a revision changeset page.
+  # Accepts a Changeset-like object or a revision identifier string.
+  def revision_url_options(revision, options={})
+    rev = revision.respond_to?(:identifier) ? revision.identifier : revision
+    {
+      :controller => 'repositories',
+      :action => 'revision',
+      :id => project,
+      :repository_id => identifier_param,
+      :rev => rev
+    }.merge(options)
+  end
+
   def <=>(repository)
     return nil unless repository.is_a?(Repository)
 
