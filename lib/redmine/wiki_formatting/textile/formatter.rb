@@ -21,9 +21,9 @@ module Redmine
   module WikiFormatting
     module Textile
       SCRUBBERS = [
+        Redmine::WikiFormatting::CopypreScrubber.new,
         SyntaxHighlightScrubber.new,
-        Redmine::WikiFormatting::TablesortScrubber.new,
-        Redmine::WikiFormatting::CopypreScrubber.new
+        Redmine::WikiFormatting::TablesortScrubber.new
       ]
 
       class Formatter
@@ -32,17 +32,34 @@ module Redmine
         extend Forwardable
         def_delegators :@filter, :extract_sections, :rip_offtags
 
-        def initialize(args)
-          @filter = Filter.new(args)
+        def initialize(text, options = {})
+          @filter = Filter.new(text)
+          @options = options
         end
 
         def to_html(*rules)
           html = @filter.to_html(rules)
           fragment = Loofah.html5_fragment(html)
-          SCRUBBERS.each do |scrubber|
-            fragment.scrub!(scrubber)
+
+          scrubber = Loofah::Scrubber.new do |node|
+            (SCRUBBERS + post_processor_scrubbers).each do |s|
+              result = s.scrub(node)
+              break result if result == Loofah::Scrubber::STOP
+              break if node.parent.nil?
+            end
           end
+
+          fragment.scrub!(scrubber)
           fragment.to_s
+        end
+
+        private
+
+        def post_processor_scrubbers
+          [
+            Redmine::WikiFormatting::InlineAttachmentsScrubber.new(@options),
+            Redmine::WikiFormatting::HiresImagesScrubber.new
+          ]
         end
       end
 

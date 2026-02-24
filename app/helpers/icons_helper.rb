@@ -18,11 +18,23 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 module IconsHelper
+  include Redmine::Themes::Helper
+
   DEFAULT_ICON_SIZE = "18"
   DEFAULT_SPRITE = "icons"
 
+  def sprite_source(icon_name, sprite: DEFAULT_SPRITE, plugin: nil)
+    if plugin
+      "plugin_assets/#{plugin}/#{sprite}.svg"
+    elsif current_theme && current_theme.icons(sprite).include?(icon_name)
+      current_theme.image_path("#{sprite}.svg")
+    else
+      "#{sprite}.svg"
+    end
+  end
+
   def sprite_icon(icon_name, label = nil, icon_only: false, size: DEFAULT_ICON_SIZE, style: :outline, css_class: nil, sprite: DEFAULT_SPRITE, plugin: nil, rtl: false)
-    sprite = plugin ? "plugin_assets/#{plugin}/#{sprite}.svg" : "#{sprite}.svg"
+    sprite = sprite_source(icon_name, sprite: sprite, plugin: plugin)
 
     svg_icon = svg_sprite_icon(icon_name, size: size, style: style, css_class: css_class, sprite: sprite, rtl: rtl)
 
@@ -40,7 +52,7 @@ module IconsHelper
     if entry.is_dir?
       sprite_icon("folder", name, **)
     else
-      icon_name = icon_for_mime_type(Redmine::MimeType.css_class_of(name))
+      icon_name = icon_for_mime_type(Redmine::MimeType.of(name))
       sprite_icon(icon_name, name, **)
     end
   end
@@ -90,6 +102,11 @@ module IconsHelper
     sprite_icon(icon_name, **)
   end
 
+  def file_type_icon(mime_type, ...)
+    icon_name = icon_for_mime_type(mime_type)
+    sprite_icon(icon_name, ...)
+  end
+
   private
 
   def svg_sprite_icon(icon_name, size: DEFAULT_ICON_SIZE, style: :outline, sprite: DEFAULT_SPRITE, css_class: nil, rtl: false)
@@ -109,13 +126,21 @@ module IconsHelper
   end
 
   def icon_for_mime_type(mime)
-    if %w(text-plain text-x-c text-x-csharp text-x-java text-x-php
-          text-x-ruby text-xml text-css text-html text-css text-html
-          image-gif image-jpeg image-png image-tiff
-          application-pdf application-zip application-gzip application-javascript).include?(mime)
-      mime
+    if %w(text/x-c text/x-csharp text/x-java text/x-php
+          text/x-ruby text/xml text/css text/html text/css text/html
+          application/pdf application/zip application/gzip application/javascript).include?(mime)
+      icon_name = mime.tr('/', '-')
     else
-      "file"
+      top_level_type, subtype = mime.to_s.split('/')
+      icon_name =
+        case top_level_type
+        when 'audio' then 'file-music'
+        when 'image' then 'photo'
+        when 'text'
+          %w(markdown plain x-textile).include?(subtype) ? 'text-plain' : nil
+        when 'video' then 'movie'
+        end
     end
+    icon_name || 'file'
   end
 end

@@ -72,6 +72,7 @@ pre, code {font-family: Consolas, Menlo, "Liberation Mono", Courier, monospace;}
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 #top-menu {
@@ -79,7 +80,7 @@ pre, code {font-family: Consolas, Menlo, "Liberation Mono", Courier, monospace;}
   color: var(--oc-white);
   font-size: 0.8em;
   padding-block: 2px;
-  padding-inline: 12px 10px;
+  padding-inline: 16px 14px;
 }
 #top-menu ul {margin: 0;  padding: 0;}
 #top-menu li {
@@ -100,7 +101,7 @@ pre, code {font-family: Consolas, Menlo, "Liberation Mono", Courier, monospace;}
   background: linear-gradient(180deg, #628DB6 30%, #356D92); /* no match in Open Color, using hex code */
   color: var(--oc-gray-0);
   padding-block: 4px 20px;
-  padding-inline: 16px;
+  padding-inline: 20px;
   position: relative;
 }
 #header a {color: var(--oc-gray-0);}
@@ -123,7 +124,7 @@ pre, code {font-family: Consolas, Menlo, "Liberation Mono", Courier, monospace;}
 #main-menu {
   position: absolute;
   inset-block-end: 0px;
-  inset-inline-start: 10px;
+  inset-inline-start: 14px;
   margin-inline-end: -500px;
   inline-size: 100%;
 }
@@ -229,7 +230,7 @@ pre, code {font-family: Consolas, Menlo, "Liberation Mono", Courier, monospace;}
   background-color: var(--oc-white);
   margin: 0;
   padding-block: 18px 10px;
-  padding-inline: 16px;
+  padding-inline: 20px;
   overflow-x: auto;
 }
 
@@ -633,6 +634,8 @@ div.table-list.boards .table-list-cell.name {inline-size: 30%;}
 .query-totals>span:not(:first-child) {margin-inline-start: 0.6em;}
 .query-totals .value {font-weight:bold;}
 body.controller-timelog .query-totals {margin-block-start: initial;}
+/* Spent time report does not use options, hide the options section */
+body.controller-timelog.action-report fieldset#options {display: none;}
 
 body.controller-gantts fieldset#options > div > div {
   display: flex;
@@ -780,7 +783,6 @@ div.issue .attribute .value {overflow:auto; text-overflow: ellipsis;}
 div.issue .attribute.string_cf .value .wiki p {margin-block: 0;}
 div.issue .attribute.text_cf .value .wiki p:first-of-type {margin-block-start: 0;}
 div.issue.overdue .due-date .value { color: var(--oc-red-9); }
-body.controller-issues h2.inline-flex {padding-inline-end: 0}
 div#sticky-issue-header {
   display: none;
   position: fixed;
@@ -946,6 +948,11 @@ div#roadmap .wiki h1:first-child { display: none; }
 div#roadmap .wiki h1 { font-size: 120%; }
 div#roadmap .wiki h2 { font-size: 110%; }
 div#roadmap h2, div#roadmap h3 {padding-inline-end: 0;}
+div#roadmap .version-article > header {padding-block: 4px;}
+div#roadmap .version-article > header h3 {margin-block: 0;}
+div#roadmap .version-article > header .badge {inset-block-end: 0;}
+div#roadmap .version-article > header .contextual {margin-block: 0;}
+div#roadmap header:target {background-color: var(--oc-blue-0);}
 div#roadmap h3 svg {margin-inline-end: 4px;}
 body.controller-versions.action-show div#roadmap .related-issues {inline-size: 70%;}
 
@@ -1507,13 +1514,31 @@ ul.cal {
 }
 
 .cal .calbody p.day-num {font-size: 1.1em; text-align: end;}
+.cal .calbody .day-value {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5em;
+  height: 1.5em;
+}
 .cal .calbody .abbr-day {display:none}
 .cal .calbody.this-month {background-color:var(--oc-white);}
 .cal .calbody.other-month {background-color:var(--oc-gray-1);}
 .cal .calbody.other-month p.day-num {color: var(--oc-gray-5);}
-.cal .calbody.today {background:var(--oc-yellow-0);}
 .cal .calbody.today p.day-num {font-weight: bold;}
-
+.cal .calbody.today .day-value {
+  color: var(--oc-white);
+  isolation: isolate;
+}
+.cal .calbody.today .day-value::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--oc-blue-5);
+  border-radius: 50%;
+  z-index: -1;
+}
 .cal .calbody .icon {padding-block-start: 2px; padding-block-end: 3px;}
 .cal .calbody.nwday:not(.other-month) {background-color:var(--oc-gray-1);}
 

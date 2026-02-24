@@ -27,9 +27,16 @@ module Redmine
       def self.call(html)
         fragment = HtmlParser.parse(html)
         SANITIZER.call(fragment)
-        SCRUBBERS.each do |scrubber|
-          fragment.scrub!(scrubber)
+
+        scrubber = Loofah::Scrubber.new do |node|
+          SCRUBBERS.each do |s|
+            result = s.scrub(node)
+            break result if result == Loofah::Scrubber::STOP
+            break if node.parent.nil?
+          end
         end
+
+        fragment.scrub!(scrubber)
         fragment.to_s
       end
     end

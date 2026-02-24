@@ -79,6 +79,10 @@ module ApplicationHelper
     url ? link_to(principal_icon(principal).to_s + name, url, :class => css_classes) : h(name)
   end
 
+  def link_to_mention(user, object, options={})
+    link_to_user(user, only_path: options[:only_path], class: 'user-mention', mention: true)
+  end
+
   # Displays a link to edit group page if current user is admin
   # Otherwise display only the group name
   def link_to_group(group, options={})
@@ -126,6 +130,7 @@ module ApplicationHelper
   # Options:
   # * :text - Link text (default to attachment filename)
   # * :download - Force download (default: false)
+  # * :icon - Sprite icon name
   def link_to_attachment(attachment, options={})
     text = options.delete(:text) || attachment.filename
     icon = options.delete(:icon)
@@ -898,7 +903,7 @@ module ApplicationHelper
   # * with a String: textilizable(text, options)
   # * with an object and one of its attribute: textilizable(issue, :description, options)
   def textilizable(*args)
-    options = args.last.is_a?(Hash) ? args.pop : {}
+    options = args.extract_options!
     case args.size
     when 1
       obj = options[:object]
@@ -912,8 +917,8 @@ module ApplicationHelper
     end
     return '' if text.blank?
 
-    project = options[:project] || @project || (obj && obj.respond_to?(:project) ? obj.project : nil)
-    @only_path = only_path = options.delete(:only_path) == false ? false : true
+    project = options[:project] || @project || obj.try(:project)
+    @only_path = only_path = options[:only_path] = (options[:only_path] != false)
 
     text = text.dup
     macros = catch_macros(text)
@@ -922,7 +927,7 @@ module ApplicationHelper
       text = h(text)
     else
       formatting = Setting.text_formatting
-      text = Redmine::WikiFormatting.to_html(formatting, text, :object => obj, :attribute => attr)
+      text = Redmine::WikiFormatting.to_html(formatting, text, options.merge(:object => obj, :attribute => attr, :view => self))
     end
 
     @parsed_headings = []
@@ -931,7 +936,7 @@ module ApplicationHelper
 
     parse_sections(text, project, obj, attr, only_path, options)
     text = parse_non_pre_blocks(text, obj, macros, options) do |txt|
-      [:parse_inline_attachments, :parse_hires_images, :parse_wiki_links, :parse_redmine_links].each do |method_name|
+      [:parse_wiki_links, :parse_redmine_links].each do |method_name|
         send method_name, txt, project, obj, attr, only_path, options
       end
     end
@@ -974,54 +979,6 @@ module ApplicationHelper
       parsed << "</#{tag}>"
     end
     parsed
-  end
-
-  # add srcset attribute to img tags if filename includes @2x, @3x, etc.
-  # to support hires displays
-  def parse_hires_images(text, project, obj, attr, only_path, options)
-    text.gsub!(/src="([^"]+@(\dx)\.(bmp|gif|jpg|jpe|jpeg|png))"/i) do |m|
-      filename, dpr = $1, $2
-      m + " srcset=\"#{filename} #{dpr}\""
-    end
-  end
-
-  def parse_inline_attachments(text, project, obj, attr, only_path, options)
-    return if options[:inline_attachments] == false
-
-    # when using an image link, try to use an attachment, if possible
-    attachments = options[:attachments] || []
-    if obj.is_a?(Journal)
-      attachments += obj.journalized.attachments if obj.journalized.respond_to?(:attachments)
-    else
-      attachments += obj.attachments if obj.respond_to?(:attachments)
-    end
-    if attachments.present?
-      title_and_alt_re = /\s+(title|alt)="([^"]*)"/i
-
-      text.gsub!(/src="([^\/"]+\.(bmp|gif|jpg|jpe|jpeg|png|webp))"([^>]*)/i) do |m|
-        filename, ext, other_attrs = $1, $2, $3
-
-        # search for the picture in attachments
-        if found = Attachment.latest_attach(attachments, CGI.unescape(filename))
-          image_url = download_named_attachment_url(found, found.filename, :only_path => only_path)
-          desc = found.description.to_s.delete('"')
-
-          # remove title and alt attributes after extracting them
-          title_and_alt = other_attrs.scan(title_and_alt_re).to_h
-          other_attrs.gsub!(title_and_alt_re, '')
-
-          title_and_alt_attrs = if !desc.blank? && title_and_alt['alt'].blank?
-                                  " title=\"#{desc}\" alt=\"#{desc}\""
-                                else
-                                  # restore original title and alt attributes
-                                  " #{title_and_alt.map { |k, v| %[#{k}="#{v}"] }.join(' ')}"
-                                end
-          "src=\"#{image_url}\"#{title_and_alt_attrs} loading=\"lazy\"#{other_attrs}"
-        else
-          m
-        end
-      end
-    end
   end
 
   # Wiki links
@@ -1338,7 +1295,7 @@ module ApplicationHelper
           elsif sep == "@"
             name = remove_double_quotes(identifier)
             u = User.visible.find_by("LOWER(login) = :s AND type = 'User'", :s => name.downcase)
-            link = link_to_user(u, :only_path => only_path, :class => 'user-mention', :mention => true) if u
+            link = link_to_mention(u, obj, only_path: only_path) if u
           end
         end
         (leading + (link || "#{project_prefix}#{prefix}#{repo_prefix}#{sep}#{identifier}#{comment_suffix}"))

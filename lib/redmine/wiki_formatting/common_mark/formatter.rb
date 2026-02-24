@@ -54,9 +54,9 @@ module Redmine
 
       SANITIZER = SanitizationFilter.new
       SCRUBBERS = [
+        Redmine::WikiFormatting::CopypreScrubber.new,
         SyntaxHighlightScrubber.new,
         Redmine::WikiFormatting::TablesortScrubber.new,
-        Redmine::WikiFormatting::CopypreScrubber.new,
         FixupAutoLinksScrubber.new,
         ExternalLinksScrubber.new,
         AlertsIconsScrubber.new
@@ -65,18 +65,35 @@ module Redmine
       class Formatter
         include Redmine::WikiFormatting::SectionHelper
 
-        def initialize(text)
+        def initialize(text, options = {})
           @text = text
+          @options = options
         end
 
         def to_html(*args)
           html = MarkdownFilter.new(@text, PIPELINE_CONFIG).call
           fragment = Redmine::WikiFormatting::HtmlParser.parse(html)
           SANITIZER.call(fragment)
-          SCRUBBERS.each do |scrubber|
-            fragment.scrub!(scrubber)
+
+          scrubber = Loofah::Scrubber.new do |node|
+            (SCRUBBERS + post_processor_scrubbers).each do |s|
+              result = s.scrub(node)
+              break result if result == Loofah::Scrubber::STOP
+              break if node.parent.nil?
+            end
           end
+
+          fragment.scrub!(scrubber)
           fragment.to_s
+        end
+
+        private
+
+        def post_processor_scrubbers
+          [
+            Redmine::WikiFormatting::InlineAttachmentsScrubber.new(@options),
+            Redmine::WikiFormatting::HiresImagesScrubber.new
+          ]
         end
       end
     end

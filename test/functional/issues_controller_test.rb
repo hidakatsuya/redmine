@@ -2007,6 +2007,29 @@ class IssuesControllerTest < Redmine::ControllerTest
     end
   end
 
+  def test_index_with_group_by_and_nil_group_count_should_not_render_empty_badge
+    @request.session[:user_id] = 1 # Admin
+    Issue.generate!
+
+    # Mock IssueQuery#result_count_by_group to return nil
+    # to simulate cases where group count is not available
+    IssueQuery.any_instance.stubs(:result_count_by_group).returns(nil)
+
+    get(
+      :index,
+      :params => {
+        :set_filter => 1,
+        :group_by => 'tracker'
+      }
+    )
+    assert_response :success
+
+    assert_select 'tr.group' do
+      assert_select 'span.name'
+      assert_select 'span.badge-count.count', 0
+    end
+  end
+
   def test_index_with_int_custom_field_total
     field = IssueCustomField.generate!(:field_format => 'int', :is_for_all => true)
     CustomValue.create!(:customized => Issue.find(1), :custom_field => field, :value => '9800')
@@ -2249,6 +2272,21 @@ class IssuesControllerTest < Redmine::ControllerTest
       assert_select 'fieldset' do
         assert_select 'legend', :text => 'Notes'
         assert_select 'textarea[name=?]', 'issue[notes]'
+      end
+    end
+  end
+
+  def test_show_should_display_attachment_icons_by_mime_type
+    @request.session[:user_id] = 2
+    get(:show, :params => {:id => 3})
+
+    assert_response :success
+    assert_select 'div.attachments' do
+      assert_select 'a.icon-attachment[href=?]', '/attachments/1' do
+        assert_select "svg.icon-svg use:match('href', ?)", /assets\/icons-\w+.svg#icon--text-plain/
+      end
+      assert_select 'a.icon-attachment[href=?]', '/attachments/6' do
+        assert_select "svg.icon-svg use:match('href', ?)", /assets\/icons-\w+.svg#icon--application-zip/
       end
     end
   end
