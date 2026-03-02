@@ -777,7 +777,6 @@ sv:
   label_applied_status: Tilldelad status
   label_loading: Laddar...
   label_relation_new: Ny relation
-  label_relation_delete: Ta bort relation
   label_relates_to: Relaterar till
   label_duplicates: Kopierar
   label_duplicated_by: Kopierad av
@@ -1262,7 +1261,6 @@ sv:
   error_token_expired: Lösenordslänken gäller inte längre, var god försök igen.
   error_spent_on_future_date: Kan inte stämpla tid på framtida datum
   setting_timelog_accept_future_dates: Acceptera tidsstämplingar på framtida datum
-  label_delete_link_to_subtask: Ta bort relation
   error_not_allowed_to_log_time_for_other_users: Du får inte stämpla tid för andra användare
   permission_log_time_for_other_users: Stämpla spenderad tid för andra användare
   label_tomorrow: imorgon
@@ -1520,3 +1518,7 @@ sv:
   webhook_event_updated: "%{object_name} updated"
   webhook_event_deleted: "%{object_name} deleted"
   label_auto_watch_on_issue_assigned_to_me: Issues assigned to me
+  label_relation_remove: Remove relation
+  label_subtask_remove: Remove subtask
+  button_remove: Remove
+  label_open_in_full_view: Open in full view

@@ -859,9 +859,7 @@ sq:
   label_applied_status: Gjendje e aplikuar
   label_loading: Po ngarkohet…
   label_relation_new: Marrëdhënie e re
-  label_relation_delete: Fshije marrëdhënien
   label_relates_to: E lidhur me
-  label_delete_link_to_subtask: Fshije lidhjen te nënpunë
   label_duplicates: Është përsëdytje e
   label_duplicated_by: Ka përsëdytje
   label_blocks: Bllokon
@@ -1518,3 +1516,7 @@ sq:
   webhook_event_updated: "%{object_name} updated"
   webhook_event_deleted: "%{object_name} deleted"
   label_auto_watch_on_issue_assigned_to_me: Issues assigned to me
+  label_relation_remove: Remove relation
+  label_subtask_remove: Remove subtask
+  button_remove: Remove
+  label_open_in_full_view: Open in full view

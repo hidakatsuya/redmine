@@ -631,7 +631,6 @@ hr:
   label_applied_status: Primijenjen status
   label_loading: Učitavam...
   label_relation_new: Nova relacija
-  label_relation_delete: Brisanje relacije
   label_relates_to: u relaciji sa
   label_duplicates: Duplira
   label_duplicated_by: ponovljen kao
@@ -1243,7 +1242,6 @@ hr:
   error_token_expired: This password recovery link has expired, please try again.
   error_spent_on_future_date: Cannot log time on a future date
   setting_timelog_accept_future_dates: Accept time logs on future dates
-  label_delete_link_to_subtask: Brisanje relacije
   error_not_allowed_to_log_time_for_other_users: You are not allowed to log time
     for other users
   permission_log_time_for_other_users: Log spent time for other users
@@ -1553,3 +1551,7 @@ hr:
   webhook_event_updated: "%{object_name} updated"
   webhook_event_deleted: "%{object_name} deleted"
   label_auto_watch_on_issue_assigned_to_me: Issues assigned to me
+  label_relation_remove: Remove relation
+  label_subtask_remove: Remove subtask
+  button_remove: Remove
+  label_open_in_full_view: Open in full view

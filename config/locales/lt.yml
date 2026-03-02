@@ -787,7 +787,6 @@ lt:
   label_applied_status: Taikomoji būsena
   label_loading: Kraunama...
   label_relation_new: Naujas ryšys
-  label_relation_delete: Pašalinti ryšį
   label_relates_to: Susietas su
   label_duplicates: Dubliuoja
   label_duplicated_by: Dubliuojasi su
@@ -1231,7 +1230,6 @@ lt:
   error_token_expired: Slaptažodio atstatymo nuoroda nebegalioja. Pakartokite procesą iš naujo..
   error_spent_on_future_date: Negalima registruoti laiko pasirenkant ateities datas
   setting_timelog_accept_future_dates: Leisti registruoti laiką pasirenkant ateities datas
-  label_delete_link_to_subtask: Pašalinti ryšį
   error_not_allowed_to_log_time_for_other_users: Jūs negalite nurodyti kitų naudotojų darbo trukmes
   permission_log_time_for_other_users: Galima nurodyti kitų naudotojų darbo trukmes
   label_tomorrow: rytoj
@@ -1517,3 +1515,7 @@ lt:
   webhook_event_updated: "%{object_name} updated"
   webhook_event_deleted: "%{object_name} deleted"
   label_auto_watch_on_issue_assigned_to_me: Issues assigned to me
+  label_relation_remove: Remove relation
+  label_subtask_remove: Remove subtask
+  button_remove: Remove
+  label_open_in_full_view: Open in full view

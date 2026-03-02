@@ -628,7 +628,6 @@ ru:
   label_registration_manual_activation: активировать учётные записи вручную
   label_related_issues: Связанные задачи
   label_relates_to: связана с
-  label_relation_delete: Удалить связь
   label_relation_new: Новая связь
   label_renamed: переименовано
   label_reply_plural: Ответы
@@ -1333,7 +1332,6 @@ ru:
   error_token_expired: Срок действия этой ссылки восстановления пароля истёк. Пожалуйста, попробуйте снова.
   error_spent_on_future_date: Нельзя учитывать время в будущие даты
   setting_timelog_accept_future_dates: Принимать трудозатраты на будущие даты
-  label_delete_link_to_subtask: Удалить связь
   error_not_allowed_to_log_time_for_other_users: Вам не разрешено учитывать время для других пользователей
   permission_log_time_for_other_users: Учитывать время других пользователей
   label_tomorrow: завтра
@@ -1623,3 +1621,7 @@ ru:
   webhook_event_updated: "%{object_name} updated"
   webhook_event_deleted: "%{object_name} deleted"
   label_auto_watch_on_issue_assigned_to_me: Issues assigned to me
+  label_relation_remove: Remove relation
+  label_subtask_remove: Remove subtask
+  button_remove: Remove
+  label_open_in_full_view: Open in full view
