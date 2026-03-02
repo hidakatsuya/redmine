@@ -44,27 +44,26 @@ export default class extends Controller {
   }
 
   get selectedQuoteReplyController() {
-    const range = this.selectedRange;
-    if (!range) {
+    if (!this.hasSelectedRange()) {
       return null;
     }
 
     return this.quoteReplyOutlets.find(controller => {
-      return controller.hasButtonTarget && controller.selectedBy(range);
+      return controller.hasButtonTarget && controller.hasSelectedRange();
     });
   }
 
-  get selectedRange() {
+  hasSelectedRange() {
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) {
-      return null;
+      return false;
     }
 
     const range = selection.getRangeAt(0);
     if (range.collapsed) {
-      return null;
+      return false;
     }
 
-    return range;
+    return true;
   }
 }

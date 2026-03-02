@@ -232,11 +232,7 @@ export default class extends Controller {
     }
   }
 
-  selectedBy(range) {
-    if (!range) {
-      return false;
-    }
-
+  hasSelectedRange() {
     return QuoteExtractor.retriveSelectedRange(this.contentTarget) !== null;
   }
 }
