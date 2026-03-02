@@ -16,6 +16,10 @@ class QuoteExtractor {
     return new QuoteExtractor(targetElement).extract();
   }
 
+  static retriveSelectedRange(targetElement) {
+    return new QuoteExtractor(targetElement).retriveSelectedRange();
+  }
+
   extract() {
     const range = this.retriveSelectedRange();
 
@@ -226,5 +230,13 @@ export default class extends Controller {
     if (this.hasButtonTarget) {
       this.buttonTarget.click();
     }
+  }
+
+  selectedBy(range) {
+    if (!range) {
+      return false;
+    }
+
+    return QuoteExtractor.retriveSelectedRange(this.contentTarget) !== null;
   }
 }

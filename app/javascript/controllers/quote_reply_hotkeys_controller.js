@@ -49,24 +49,8 @@ export default class extends Controller {
       return null;
     }
 
-    const startContainer = range.startContainer;
-    const fromStartContainer = this.quoteReplyOutlets.find(controller => {
-      return controller.hasButtonTarget && controller.contentTarget.contains(startContainer);
-    });
-    if (fromStartContainer) {
-      return fromStartContainer;
-    }
-
     return this.quoteReplyOutlets.find(controller => {
-      if (!controller.hasButtonTarget) {
-        return false;
-      }
-
-      try {
-        return range.intersectsNode(controller.contentTarget);
-      } catch (_error) {
-        return false;
-      }
+      return controller.hasButtonTarget && controller.selectedBy(range);
     });
   }
 
