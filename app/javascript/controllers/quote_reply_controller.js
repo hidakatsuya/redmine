@@ -201,7 +201,7 @@ class QuoteCommonMarkFormatter {
 }
 
 export default class extends Controller {
-  static targets = [ 'content' ];
+  static targets = [ 'button', 'content' ];
 
   quote(event) {
     const { url, textFormatting } = event.params;
@@ -220,5 +220,11 @@ export default class extends Controller {
       contentType: 'application/json',
       responseKind: 'script'
     });
+  }
+
+  triggerQuote() {
+    if (this.hasButtonTarget) {
+      this.buttonTarget.click();
+    }
   }
 }
