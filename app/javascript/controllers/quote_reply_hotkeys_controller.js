@@ -4,11 +4,11 @@ export default class extends Controller {
   static outlets = [ 'quote-reply' ];
 
   quote(event) {
-    if (this.shouldIgnore(event)) {
+    if (this.#shouldIgnore(event)) {
       return;
     }
 
-    const selectedQuoteReply = this.selectedQuoteReplyController;
+    const selectedQuoteReply = this.#selectedQuoteReplyController;
     if (!selectedQuoteReply) {
       return;
     }
@@ -17,7 +17,7 @@ export default class extends Controller {
     selectedQuoteReply.triggerQuote();
   }
 
-  shouldIgnore(event) {
+  #shouldIgnore(event) {
     return (
       event.defaultPrevented ||
       event.isComposing ||
@@ -26,11 +26,11 @@ export default class extends Controller {
       event.metaKey ||
       event.shiftKey ||
       event.repeat ||
-      this.isEditableElement(event.target)
+      this.#isEditableElement(event.target)
     );
   }
 
-  isEditableElement(element) {
+  #isEditableElement(element) {
     if (!(element instanceof HTMLElement)) {
       return false;
     }
@@ -43,8 +43,8 @@ export default class extends Controller {
     );
   }
 
-  get selectedQuoteReplyController() {
-    if (!this.hasSelectedRange()) {
+  get #selectedQuoteReplyController() {
+    if (!this.#hasSelectedRange()) {
       return null;
     }
 
@@ -53,7 +53,7 @@ export default class extends Controller {
     });
   }
 
-  hasSelectedRange() {
+  #hasSelectedRange() {
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) {
       return false;
