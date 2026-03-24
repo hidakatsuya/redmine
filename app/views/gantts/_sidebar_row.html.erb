@@ -1,0 +1,19 @@
+<div class="gantt__row gantt__row--sidebar"
+     data-row-key="<%= row.row_key %>"
+     data-parent-row-key="<%= row.parent_row_key %>"
+     data-depth="<%= row.depth %>"
+     data-kind="<%= row.kind %>"
+     data-action="mouseenter->gantt--chart#hoverRow mouseleave->gantt--chart#unhoverRow"
+     style="<%= gantt_row_style(row) %>">
+  <div class="gantt__sidebar-grid" style="<%= gantt_sidebar_grid_style(chart) %>">
+    <div class="gantt__subject-cell">
+      <%= gantt_row_subject_tag(row) %>
+    </div>
+
+    <% chart.available_columns.each do |column| %>
+      <div class="gantt__column-cell" data-column-name="<%= column.name %>">
+        <%= gantt_row_column_content(row, column) %>
+      </div>
+    <% end %>
+  </div>
+</div>
