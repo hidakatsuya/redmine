@@ -17,6 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+require 'redmine/gantt/chart_builder'
+
 module Redmine
   module Helpers
     # Simple class to handle gantt chart data
@@ -55,8 +57,7 @@ module Redmine
       end
 
       attr_reader :year_from, :month_from, :date_from, :date_to, :zoom, :months, :truncated, :max_rows
-      attr_accessor :query
-      attr_accessor :project
+      attr_reader :query, :project
       attr_accessor :view
 
       def initialize(options={})
@@ -95,6 +96,24 @@ module Redmine
         else
           @max_rows = (Setting.gantt_items_limit.presence&.to_i)
         end
+      end
+
+      def query=(query)
+        @query = query
+        @chart = nil
+      end
+
+      def project=(project)
+        @project = project
+        @chart = nil
+      end
+
+      def truncated=(truncated)
+        @truncated = truncated
+      end
+
+      def chart
+        @chart ||= Redmine::Gantt::ChartBuilder.new(self, :query => @query).build
       end
 
       def common_params
