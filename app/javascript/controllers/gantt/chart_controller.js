@@ -4,393 +4,257 @@ const RELATION_STROKE_WIDTH = 2
 const SVG_NS = "http://www.w3.org/2000/svg"
 
 export default class extends Controller {
-  static targets = ["ganttArea", "drawArea", "subjectsContainer"]
+  static targets = ["viewport", "timelineHeader", "timelineRows", "overlay", "todayLine", "sidebar"]
 
   static values = {
+    activeColumns: Array,
     issueRelationTypes: Object,
+    relations: Array,
     showSelectedColumns: Boolean,
     showRelations: Boolean,
     showProgress: Boolean
   }
 
-  #drawTop = 0
-  #drawRight = 0
-  #drawLeft = 0
-  #drawPaper = null
-  #drawPaperGroup = null
-
-  initialize() {
-    this.$ = window.jQuery
-  }
-
   connect() {
-    this.#drawTop = 0
-    this.#drawRight = 0
-    this.#drawLeft = 0
-
-    this.#drawProgressLineAndRelations()
-    this.#drawSelectedColumns()
+    this.#applySelectedColumnsState()
+    this.#applyActiveColumnsState()
+    this.#drawOverlay()
   }
 
-  disconnect() {
-    if (this.#drawPaper) {
-      this.#drawPaper.remove()
-      this.#drawPaper = null
-      this.#drawPaperGroup = null
-    }
+  activeColumnsValueChanged() {
+    this.#applyActiveColumnsState()
+    this.#drawOverlay()
   }
 
   showSelectedColumnsValueChanged() {
-    this.#drawSelectedColumns()
+    this.#applySelectedColumnsState()
   }
 
   showRelationsValueChanged() {
-    this.#drawProgressLineAndRelations()
+    this.#drawOverlay()
   }
 
   showProgressValueChanged() {
-    this.#drawProgressLineAndRelations()
-  }
-
-  handleWindowResize() {
-    this.#drawProgressLineAndRelations()
-    this.#drawSelectedColumns()
-  }
-
-  handleSubjectTreeChanged() {
-    this.#drawProgressLineAndRelations()
-    this.#drawSelectedColumns()
+    this.#drawOverlay()
   }
 
   handleOptionsDisplay(event) {
-    this.showSelectedColumnsValue = !!(event.detail && event.detail.enabled)
+    this.showSelectedColumnsValue = !!event.detail?.enabled
+  }
+
+  handleSelectedColumnsChanged(event) {
+    this.activeColumnsValue = event.detail?.columns || []
   }
 
   handleOptionsRelations(event) {
-    this.showRelationsValue = !!(event.detail && event.detail.enabled)
+    this.showRelationsValue = !!event.detail?.enabled
+    this.#drawOverlay()
   }
 
   handleOptionsProgress(event) {
-    this.showProgressValue = !!(event.detail && event.detail.enabled)
+    this.showProgressValue = !!event.detail?.enabled
+    this.#drawOverlay()
   }
 
-  #drawProgressLineAndRelations() {
-    this.#setupDrawArea()
-    this.#setupDrawPaper()
-    this.#drawPaperGroup?.replaceChildren(); // Clear previous drawings
+  handleLayoutInvalidated() {
+    this.#drawOverlay()
+  }
+
+  handleSidebarResized() {
+    this.#drawOverlay()
+  }
+
+  handleWindowResize() {
+    this.#drawOverlay()
+  }
+
+  handleScroll() {
+    this.#drawOverlay()
+  }
+
+  hoverRow(event) {
+    this.#setHoveredRow(event.currentTarget.dataset.rowKey, true)
+  }
+
+  unhoverRow(event) {
+    this.#setHoveredRow(event.currentTarget.dataset.rowKey, false)
+  }
+
+  #applySelectedColumnsState() {
+    this.element.classList.toggle("is-showing-columns", this.showSelectedColumnsValue)
+    this.#syncColumnMetrics()
+  }
+
+  #applyActiveColumnsState() {
+    const activeColumns = new Set(this.activeColumnsValue)
+
+    this.element.querySelectorAll("[data-column-name]").forEach((element) => {
+      element.classList.toggle("is-active-column", activeColumns.has(element.dataset.columnName))
+    })
+
+    this.#syncColumnMetrics()
+  }
+
+  #syncColumnMetrics() {
+    const activeCount = this.showSelectedColumnsValue ? this.activeColumnsValue.length : 0
+    this.element.style.setProperty("--gantt-active-columns-count", String(activeCount))
+    this.element.style.setProperty("--gantt-columns-width", `${activeCount * 96}px`)
+  }
+
+  #drawOverlay() {
+    const overlay = this.overlayTarget
+    const width = Math.max(this.timelineRowsTarget.scrollWidth, 1)
+    const height = Math.max(this.timelineRowsTarget.scrollHeight, 1)
+    overlay.replaceChildren()
+
+    const svg = document.createElementNS(SVG_NS, "svg")
+    svg.setAttribute("width", String(width))
+    svg.setAttribute("height", String(height))
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`)
+    svg.setAttribute("aria-hidden", "true")
+    overlay.appendChild(svg)
 
     if (this.showProgressValue) {
-      this.#drawGanttProgressLines()
+      this.#drawProgressLine(svg, width)
     }
 
     if (this.showRelationsValue) {
-      this.#drawRelations()
-    }
-
-  }
-
-  #setupDrawPaper() {
-    const width = Math.ceil(this.$(this.drawAreaTarget).width() || 0)
-    const height = Math.ceil(this.$(this.drawAreaTarget).height() || 0)
-
-    if (!this.#drawPaper) {
-      this.#drawPaper = document.createElementNS(SVG_NS, "svg")
-      this.#drawPaper.setAttribute("aria-hidden", "true")
-      this.#drawPaper.style.position = "absolute"
-      this.#drawPaper.style.inset = "0"
-      this.#drawPaper.style.pointerEvents = "none"
-
-      this.#drawPaperGroup = document.createElementNS(SVG_NS, "g")
-      this.#drawPaper.appendChild(this.#drawPaperGroup)
-      this.drawAreaTarget.appendChild(this.#drawPaper)
-    }
-
-    const safeWidth = Math.max(width, 1)
-    const safeHeight = Math.max(height, 1)
-    this.#drawPaper.setAttribute("width", String(safeWidth))
-    this.#drawPaper.setAttribute("height", String(safeHeight))
-    this.#drawPaper.setAttribute("viewBox", `0 0 ${safeWidth} ${safeHeight}`)
-  }
-
-  #drawPath(pathData, attributes = {}) {
-    if (!this.#drawPaperGroup) return
-
-    const path = document.createElementNS(SVG_NS, "path")
-    path.setAttribute("d", pathData.map((item) => String(item)).join(" "))
-
-    Object.entries(attributes).forEach(([name, value]) => {
-      path.setAttribute(name, String(value))
-    })
-
-    this.#drawPaperGroup.appendChild(path)
-  }
-
-  #setupDrawArea() {
-    const $drawArea = this.$(this.drawAreaTarget)
-    const $ganttArea = this.hasGanttAreaTarget ? this.$(this.ganttAreaTarget) : null
-
-    this.#drawTop = $drawArea.position().top
-    this.#drawRight = $drawArea.width()
-    this.#drawLeft = $ganttArea ? $ganttArea.scrollLeft() : 0
-  }
-
-  #drawSelectedColumns() {
-    const $selectedColumns = this.$("td.gantt_selected_column")
-    const $subjectsContainer = this.$(".gantt_subjects_container")
-
-    const isMobileDevice = typeof window.isMobile === "function" && window.isMobile()
-
-    if (this.showSelectedColumnsValue) {
-      if (isMobileDevice) {
-        $selectedColumns.each((_, element) => {
-          this.$(element).hide()
-        })
-      } else {
-        $subjectsContainer.addClass("draw_selected_columns")
-        $selectedColumns.show()
-      }
-    } else {
-      $selectedColumns.each((_, element) => {
-        this.$(element).hide()
-      })
-      $subjectsContainer.removeClass("draw_selected_columns")
+      this.#drawRelations(svg)
     }
   }
 
-  get #relationsArray() {
-    const relations = []
+  #drawRelations(svg) {
+    const overlayRect = this.overlayTarget.getBoundingClientRect()
 
-    this.$("div.task_todo[data-rels]").each((_, element) => {
-      const $element = this.$(element)
+    this.relationsValue.forEach((relation) => {
+      const fromAnchor = this.#anchorForRow(relation.from_row_key, "end")
+      const toAnchor = this.#anchorForRow(relation.to_row_key, "start")
 
-      if (!$element.is(":visible")) return
+      if (!fromAnchor || !toAnchor) return
 
-      const elementId = $element.attr("id")
-
-      if (!elementId) return
-
-      const issueId = elementId.replace("task-todo-issue-", "")
-      const dataRels = $element.data("rels") || {}
-
-      Object.keys(dataRels).forEach((relTypeKey) => {
-        this.$.each(dataRels[relTypeKey], (_, relatedIssue) => {
-          relations.push({ issue_from: issueId, issue_to: relatedIssue, rel_type: relTypeKey })
-        })
-      })
-    })
-
-    return relations
-  }
-
-  #drawRelations() {
-    const relations = this.#relationsArray
-
-    relations.forEach((relation) => {
-      const issueFrom = this.$(`#task-todo-issue-${relation.issue_from}`)
-      const issueTo = this.$(`#task-todo-issue-${relation.issue_to}`)
-
-      if (issueFrom.length === 0 || issueTo.length === 0) return
-      if (!issueTo.is(":visible")) return
-
-      const issueHeight = issueFrom.height()
-      const issueFromTop = issueFrom.position().top + issueHeight / 2 - this.#drawTop
-      const issueFromRight = issueFrom.position().left + issueFrom.width()
-      const issueToTop = issueTo.position().top + issueHeight / 2 - this.#drawTop
-      const issueToLeft = issueTo.position().left
-      const relationConfig = this.issueRelationTypesValue[relation.rel_type] || {}
+      const fromRect = fromAnchor.getBoundingClientRect()
+      const toRect = toAnchor.getBoundingClientRect()
+      const fromX = fromRect.left - overlayRect.left
+      const fromY = fromRect.top - overlayRect.top
+      const toX = toRect.left - overlayRect.left
+      const toY = toRect.top - overlayRect.top
+      const relationConfig = this.issueRelationTypesValue[relation.type] || {}
+      const margin = relationConfig.landscape_margin || 0
       const color = relationConfig.color || "#000"
-      const landscapeMargin = relationConfig.landscape_margin || 0
-      const issueFromRightRel = issueFromRight + landscapeMargin
-      const issueToLeftRel = issueToLeft - landscapeMargin
+      const viaX = fromX + margin
+      const targetViaX = toX - margin
 
-      this.#drawPath(
-        [
-          "M",
-          issueFromRight + this.#drawLeft,
-          issueFromTop,
-          "L",
-          issueFromRightRel + this.#drawLeft,
-          issueFromTop
-        ],
-        { stroke: color, "stroke-width": RELATION_STROKE_WIDTH, fill: "none" }
-      )
+      this.#drawPath(svg, ["M", fromX, fromY, "L", viaX, fromY], color)
 
-      if (issueFromRightRel < issueToLeftRel) {
-        this.#drawPath(
-          [
-            "M",
-            issueFromRightRel + this.#drawLeft,
-            issueFromTop,
-            "L",
-            issueFromRightRel + this.#drawLeft,
-            issueToTop
-          ],
-          { stroke: color, "stroke-width": RELATION_STROKE_WIDTH, fill: "none" }
-        )
-        this.#drawPath(
-          [
-            "M",
-            issueFromRightRel + this.#drawLeft,
-            issueToTop,
-            "L",
-            issueToLeft + this.#drawLeft,
-            issueToTop
-          ],
-          { stroke: color, "stroke-width": RELATION_STROKE_WIDTH, fill: "none" }
-        )
+      if (viaX < targetViaX) {
+        this.#drawPath(svg, ["M", viaX, fromY, "L", viaX, toY, "L", toX, toY], color)
       } else {
-        const issueMiddleTop = issueToTop + issueHeight * (issueFromTop > issueToTop ? 1 : -1)
-        this.#drawPath(
-          [
-            "M",
-            issueFromRightRel + this.#drawLeft,
-            issueFromTop,
-            "L",
-            issueFromRightRel + this.#drawLeft,
-            issueMiddleTop
-          ],
-          { stroke: color, "stroke-width": RELATION_STROKE_WIDTH, fill: "none" }
-        )
-        this.#drawPath(
-          [
-            "M",
-            issueFromRightRel + this.#drawLeft,
-            issueMiddleTop,
-            "L",
-            issueToLeftRel + this.#drawLeft,
-            issueMiddleTop
-          ],
-          { stroke: color, "stroke-width": RELATION_STROKE_WIDTH, fill: "none" }
-        )
-        this.#drawPath(
-          [
-            "M",
-            issueToLeftRel + this.#drawLeft,
-            issueMiddleTop,
-            "L",
-            issueToLeftRel + this.#drawLeft,
-            issueToTop
-          ],
-          { stroke: color, "stroke-width": RELATION_STROKE_WIDTH, fill: "none" }
-        )
-        this.#drawPath(
-          [
-            "M",
-            issueToLeftRel + this.#drawLeft,
-            issueToTop,
-            "L",
-            issueToLeft + this.#drawLeft,
-            issueToTop
-          ],
-          { stroke: color, "stroke-width": RELATION_STROKE_WIDTH, fill: "none" }
-        )
+        const midY = toY + (fromY > toY ? 10 : -10)
+        this.#drawPath(svg, ["M", viaX, fromY, "L", viaX, midY, "L", targetViaX, midY, "L", targetViaX, toY, "L", toX, toY], color)
       }
-      this.#drawPath(
-        [
-          "M",
-          issueToLeft + this.#drawLeft,
-          issueToTop,
-          "l",
-          -4 * RELATION_STROKE_WIDTH,
-          -2 * RELATION_STROKE_WIDTH,
-          "l",
-          0,
-          4 * RELATION_STROKE_WIDTH,
-          "z"
-        ],
-        {
-          stroke: "none",
-          fill: color
-        }
-      )
+
+      const arrow = document.createElementNS(SVG_NS, "path")
+      arrow.setAttribute("d", ["M", toX, toY, "l", -8, -4, "l", 0, 8, "z"].join(" "))
+      arrow.setAttribute("fill", color)
+      arrow.setAttribute("stroke", "none")
+      svg.appendChild(arrow)
     })
   }
 
-  get #progressLinesArray() {
-    const lines = []
-    const todayLeft = this.$("#today_line").position().left
+  #drawProgressLine(svg, width) {
+    if (!this.hasTodayLineTarget) return
 
-    lines.push({ left: todayLeft, top: 0 })
+    const overlayRect = this.overlayTarget.getBoundingClientRect()
+    const todayRect = this.todayLineTarget.getBoundingClientRect()
+    const todayX = todayRect.left - overlayRect.left
+    const color = getComputedStyle(this.todayLineTarget).borderInlineStartColor || "#ff0000"
+    const points = [{ left: todayX, top: 0 }]
 
-    this.$("div.issue-subject, div.version-name").each((_, element) => {
-      const $element = this.$(element)
+    this.#visibleTimelineRows().forEach((row) => {
+      const state = row.dataset.progressState
+      if (!state || row.dataset.kind === "project") return
 
-      if (!$element.is(":visible")) return true
+      const rowRect = row.getBoundingClientRect()
+      const rowTop = rowRect.top - overlayRect.top
+      const topUpper = rowTop + 6
+      const topCenter = rowTop + rowRect.height / 2
+      const topLower = rowTop + rowRect.height - 6
 
-      const topPosition = $element.position().top - this.#drawTop
-      const elementHeight = $element.height() / 9
-      const elementTopUpper = topPosition - elementHeight
-      const elementTopCenter = topPosition + elementHeight * 3
-      const elementTopLower = topPosition + elementHeight * 8
-      const issueClosed = $element.children("span").hasClass("issue-closed")
-      const versionClosed = $element.children("span").hasClass("version-closed")
-
-      if (issueClosed || versionClosed) {
-        lines.push({ left: todayLeft, top: elementTopCenter })
-      } else {
-        const issueDone = this.$(`#task-done-${$element.attr("id")}`)
-        const isBehindStart = $element.children("span").hasClass("behind-start-date")
-        const isOverEnd = $element.children("span").hasClass("over-end-date")
-
-        if (isOverEnd) {
-          lines.push({ left: this.#drawRight, top: elementTopUpper, is_right_edge: true })
-          lines.push({
-            left: this.#drawRight,
-            top: elementTopLower,
-            is_right_edge: true,
-            none_stroke: true
-          })
-        } else if (issueDone.length > 0) {
-          const doneLeft = issueDone.first().position().left + issueDone.first().width()
-          lines.push({ left: doneLeft, top: elementTopCenter })
-        } else if (isBehindStart) {
-          lines.push({ left: 0, top: elementTopUpper, is_left_edge: true })
-          lines.push({
-            left: 0,
-            top: elementTopLower,
-            is_left_edge: true,
-            none_stroke: true
-          })
-        } else {
-          let todoLeft = todayLeft
-          const issueTodo = this.$(`#task-todo-${$element.attr("id")}`)
-          if (issueTodo.length > 0) {
-            todoLeft = issueTodo.first().position().left
-          }
-          lines.push({ left: Math.min(todayLeft, todoLeft), top: elementTopCenter })
-        }
+      if (state === "closed") {
+        points.push({ left: todayX, top: topCenter })
+        return
       }
+
+      if (state === "over-end") {
+        points.push({ left: width, top: topUpper, rightEdge: true })
+        points.push({ left: width, top: topLower, rightEdge: true, skipStroke: true })
+        return
+      }
+
+      if (state === "behind-start") {
+        points.push({ left: 0, top: topUpper, leftEdge: true })
+        points.push({ left: 0, top: topLower, leftEdge: true, skipStroke: true })
+        return
+      }
+
+      const doneBar = row.querySelector(".task_done")
+      if (doneBar) {
+        const doneRect = doneBar.getBoundingClientRect()
+        points.push({ left: doneRect.right - overlayRect.left, top: topCenter })
+        return
+      }
+
+      const todoBar = row.querySelector(".task_todo")
+      const todoLeft = todoBar ? todoBar.getBoundingClientRect().left - overlayRect.left : todayX
+      points.push({ left: Math.min(todayX, todoLeft), top: topCenter })
     })
 
-    return lines
-  }
-
-  #drawGanttProgressLines() {
-    if (this.$("#today_line").length === 0) return
-
-    const progressLines = this.#progressLinesArray
-    const color = this.$("#today_line").css("border-inline-start-color") || "#ff0000"
-
-    for (let index = 1; index < progressLines.length; index += 1) {
-      const current = progressLines[index]
-      const previous = progressLines[index - 1]
+    for (let index = 1; index < points.length; index += 1) {
+      const previous = points[index - 1]
+      const current = points[index]
 
       if (
-        !current.none_stroke &&
-        !(
-          (previous.is_right_edge && current.is_right_edge) ||
-          (previous.is_left_edge && current.is_left_edge)
-        )
+        current.skipStroke ||
+        (previous.rightEdge && current.rightEdge) ||
+        (previous.leftEdge && current.leftEdge)
       ) {
-        const x1 = previous.left === 0 ? 0 : previous.left + this.#drawLeft
-        const x2 = current.left === 0 ? 0 : current.left + this.#drawLeft
-
-        this.#drawPath(["M", x1, previous.top, "L", x2, current.top], {
-          stroke: color,
-          "stroke-width": 2,
-          fill: "none"
-        })
+        continue
       }
+
+      this.#drawPath(svg, ["M", previous.left, previous.top, "L", current.left, current.top], color)
     }
+  }
+
+  #drawPath(svg, parts, color) {
+    const path = document.createElementNS(SVG_NS, "path")
+    path.setAttribute("d", parts.join(" "))
+    path.setAttribute("stroke", color)
+    path.setAttribute("stroke-width", String(RELATION_STROKE_WIDTH))
+    path.setAttribute("fill", "none")
+    svg.appendChild(path)
+  }
+
+  #anchorForRow(rowKey, side) {
+    const selector = `[data-row-key="${rowKey}"] [data-gantt-role="${side}-anchor"]`
+    const anchor = this.timelineRowsTarget.querySelector(selector)
+
+    if (!anchor) return null
+
+    const row = anchor.closest(".gantt__timeline-row")
+    return row && row.classList.contains("is-hidden") ? null : anchor
+  }
+
+  #visibleTimelineRows() {
+    return Array.from(this.timelineRowsTarget.querySelectorAll(".gantt__timeline-row")).filter((row) => !row.classList.contains("is-hidden"))
+  }
+
+  #setHoveredRow(rowKey, hovered) {
+    if (!rowKey) return
+
+    this.element.querySelectorAll(`[data-row-key="${rowKey}"]`).forEach((element) => {
+      if (element.classList.contains("gantt__row") || element.classList.contains("gantt__timeline-row")) {
+        element.classList.toggle("is-hovered", hovered)
+      }
+    })
   }
 }
