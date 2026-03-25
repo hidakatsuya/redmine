@@ -128,6 +128,14 @@ Rails.application.routes.draw do
     resources :email_addresses, :only => [:index, :create, :update, :destroy]
   end
 
+  get 'project_templates', :to => 'project_templates#index', :as => 'project_templates'
+  get 'project_templates/new', :to => 'project_templates#new', :as => 'new_project_template'
+  post 'project_templates', :to => 'project_templates#create'
+  get 'project_templates/:id/projects/new', :to => 'project_templates#new_project',
+      :as => 'new_project_from_template'
+  post 'project_templates/:id/projects', :to => 'project_templates#create_project',
+       :as => 'project_template_projects'
+
   post 'watchers/watch', :to => 'watchers#watch', :as => 'watch'
   delete 'watchers/watch', :to => 'watchers#unwatch'
   get 'watchers/new', :to => 'watchers#new', :as => 'new_watchers'

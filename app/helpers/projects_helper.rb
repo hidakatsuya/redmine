@@ -65,6 +65,13 @@ module ProjectsHelper
     if User.current.allowed_to?(:add_project, nil, :global => true)
       links << link_to(sprite_icon('add', l(:label_project_new)), new_project_path, :class => 'icon icon-add')
     end
+    if User.current.allowed_to?(:use_project_templates, nil, :global => true) ||
+         User.current.allowed_to?(:create_project_templates, nil, :global => true)
+      links << link_to(sprite_icon('copy', l(:label_project_template_plural)), project_templates_path, :class => 'icon icon-copy')
+    end
+    if User.current.allowed_to?(:create_project_templates, nil, :global => true)
+      links << link_to(sprite_icon('add', l(:label_project_template_new)), new_project_template_path, :class => 'icon icon-add')
+    end
     if User.current.admin?
       links << link_to(sprite_icon('settings', l(:label_administration)), admin_projects_path, :class => 'icon icon-settings')
     end

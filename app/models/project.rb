@@ -26,6 +26,7 @@ class Project < ApplicationRecord
   STATUS_CLOSED     = 5
   STATUS_ARCHIVED   = 9
   STATUS_SCHEDULED_FOR_DELETION = 10
+  TEMPLATE_COPY_ASSOCIATIONS = %w(wiki versions issue_categories issues queries).freeze
 
   # Maximum length for project identifiers
   IDENTIFIER_MAX_LENGTH = 100
@@ -88,6 +89,7 @@ class Project < ApplicationRecord
   # reserved words
   validates_exclusion_of :identifier, :in => %w(new)
   validate :validate_parent
+  validate :validate_template_parenting
 
   after_update :update_versions_from_hierarchy_change,
                :if => proc {|project| project.saved_change_to_parent_id?}
@@ -101,7 +103,9 @@ class Project < ApplicationRecord
     where("#{Project.table_name}.id IN (SELECT em.project_id FROM #{EnabledModule.table_name} em WHERE em.name=?)", mod.to_s)
   end)
   scope :active, lambda {where(:status => STATUS_ACTIVE)}
+  scope :regular, lambda {where(:is_template => false)}
   scope :status, lambda {|arg| where(arg.blank? ? nil : {:status => arg.to_i})}
+  scope :templates, lambda {where(:is_template => true)}
   scope :all_public, lambda {where(:is_public => true)}
   scope :visible, lambda {|*args| where(Project.visible_condition(args.shift || User.current, *args))}
   scope :allowed_to, (lambda do |*args|
@@ -453,7 +457,12 @@ class Project < ApplicationRecord
   def allowed_parents(user=User.current)
     return @allowed_parents if @allowed_parents
 
-    @allowed_parents = Project.allowed_to(user, :add_subprojects).to_a
+    if is_template?
+      @allowed_parents = [nil]
+      return @allowed_parents
+    end
+
+    @allowed_parents = Project.regular.allowed_to(user, :add_subprojects).to_a
     @allowed_parents = @allowed_parents - self_and_descendants
     if user.allowed_to?(:add_project, nil, :global => true) || (!new_record? && parent.nil?)
       @allowed_parents << nil
@@ -963,13 +972,17 @@ class Project < ApplicationRecord
     # clear unique attributes
     attributes =
       project.attributes.dup.except('id', 'name', 'identifier',
-                                    'status', 'parent_id', 'lft', 'rgt')
+                                    'status', 'parent_id', 'lft', 'rgt', 'is_template')
     copy = Project.new(attributes)
     copy.enabled_module_names = project.enabled_module_names
     copy.trackers = project.trackers
     copy.custom_values = project.custom_values.collect {|v| v.clone}
     copy.issue_custom_fields = project.issue_custom_fields
     copy
+  end
+
+  def template?
+    is_template?
   end
 
   # Yields the given block for each project with its level in the tree
@@ -1074,6 +1087,12 @@ class Project < ApplicationRecord
       unless parent.nil? || (parent.active? && move_possible?(parent))
         errors.add(:parent_id, :invalid)
       end
+    end
+  end
+
+  def validate_template_parenting
+    if (is_template? && parent_id.present?) || parent&.is_template?
+      errors.add(:parent_id, :invalid)
     end
   end
 

@@ -113,8 +113,12 @@ class ProjectQuery < Query
     [[]]
   end
 
+  def all_projects
+    @all_projects ||= Project.regular.visible.to_a
+  end
+
   def base_scope
-    Project.visible.where(statement)
+    Project.regular.visible.where(statement)
   end
 
   # Returns the project count

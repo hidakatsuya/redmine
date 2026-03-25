@@ -1,0 +1,6 @@
+<%= title l(:label_project_new_from_template, :name => @template.name) %>
+
+<%= labelled_form_for @project, :url => project_template_projects_path(@template), :html => {:multipart => true} do |f| %>
+<%= render :partial => 'projects/form', :locals => { :f => f } %>
+<%= submit_tag l(:button_create_from_template) %>
+<% end %>

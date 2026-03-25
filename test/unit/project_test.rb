@@ -337,6 +337,36 @@ class ProjectTest < ActiveSupport::TestCase
     assert_equal parent.children.sort_by(&:name), parent.children.to_a
   end
 
+  def test_template_should_not_allow_parent
+    project = Project.new(:name => 'Template', :identifier => 'template', :is_template => true)
+    project.parent = @ecookbook
+
+    assert_not project.valid?
+    assert project.errors[:parent_id].present?
+  end
+
+  def test_project_should_not_allow_template_parent
+    template = Project.generate!(:is_template => true)
+    project = Project.new(:name => 'Child', :identifier => 'child')
+    project.parent = template
+
+    assert_not project.valid?
+    assert project.errors[:parent_id].present?
+  end
+
+  def test_template_allowed_parents_should_only_allow_root
+    project = Project.new(:name => 'Template', :identifier => 'template', :is_template => true)
+
+    assert_equal [nil], project.allowed_parents(User.find(1))
+  end
+
+  def test_allowed_parents_should_not_include_templates
+    template = Project.generate!(:is_template => true)
+    project = Project.new(:name => 'Child', :identifier => 'child')
+
+    assert_not_includes project.allowed_parents(User.find(1)), template
+  end
+
   def test_validate_custom_field_values_of_project
     User.current = User.find(3)
     ProjectCustomField.generate!(:name => 'CustomFieldTest', :field_format => 'int', :is_required => true, :visible => false, :role_ids => [1])

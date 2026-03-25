@@ -2,7 +2,10 @@
   <%= bookmark_link @project %>
 
   <%= actions_dropdown do %>
-  <% if User.current.allowed_to?(:add_subprojects, @project) %>
+  <% if @project.template? && User.current.allowed_to?(:use_project_templates, nil, :global => true) %>
+    <%= link_to sprite_icon('copy', l(:button_create_from_template)), new_project_from_template_path(@project), :class => 'icon icon-copy' %>
+  <% end %>
+  <% if !@project.template? && User.current.allowed_to?(:add_subprojects, @project) %>
     <%= link_to sprite_icon('add', l(:label_subproject_new)), new_project_path(:parent_id => @project), :class => 'icon icon-add' %>
   <% end %>
   <% if User.current.allowed_to?(:close_project, @project) %>

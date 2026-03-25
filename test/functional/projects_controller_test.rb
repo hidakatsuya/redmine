@@ -373,6 +373,14 @@ class ProjectsControllerTest < Redmine::ControllerTest
     assert_select 'a[href=?]', '/projects/new'
   end
 
+  test "#index should not show templates" do
+    Project.generate!(:name => 'Template', :identifier => 'template', :is_template => true)
+
+    get :index
+    assert_response :success
+    assert_select 'a', :text => 'Template', :count => 0
+  end
+
   test "#new by admin user should accept get" do
     @request.session[:user_id] = 1
 

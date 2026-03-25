@@ -1,0 +1,15 @@
+<div class="contextual">
+  <%= render_project_action_links %>
+</div>
+
+<h2><%= l(:label_project_template_plural) %></h2>
+
+<% if @templates.empty? %>
+  <p class="nodata"><%= l(:label_no_data) %></p>
+<% else %>
+  <div id="project-templates-index">
+    <%= render_project_hierarchy(@templates) %>
+  </div>
+<% end %>
+
+<% html_title(l(:label_project_template_plural)) -%>

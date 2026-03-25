@@ -86,9 +86,9 @@ class ProjectsController < ApplicationController
     respond_to do |format|
       format.js do
         if params[:q].present?
-          @projects = Project.visible.like(params[:q]).to_a
+          @projects = Project.regular.visible.like(params[:q]).to_a
         else
-          @projects = User.current.projects.to_a
+          @projects = User.current.projects.regular.to_a
         end
       end
     end
@@ -176,7 +176,7 @@ class ProjectsController < ApplicationController
     respond_to do |format|
       format.html do
         @principals_by_role = @project.principals_by_role
-        @subprojects = @project.leaf? ? [] : @project.children.visible.to_a
+        @subprojects = @project.template? || @project.leaf? ? [] : @project.children.visible.to_a
         @news = @project.news.limit(5).includes(:author, :project).reorder("#{News.table_name}.created_on DESC").to_a
         with_subprojects = Setting.display_subprojects_issues?
         @trackers = @project.rolled_up_trackers(with_subprojects).visible

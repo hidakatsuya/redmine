@@ -281,6 +281,7 @@ ja:
   field_homepage: ホームページ
   field_is_public: 公開
   field_parent: 親プロジェクト名
+  field_is_template: テンプレート
   field_is_in_roadmap: チケットをロードマップに表示する
   field_login: ログインID
   field_mail_notification: メール通知
@@ -482,6 +483,9 @@ ja:
     other: "%{count}プロジェクト"
   label_project_all: 全プロジェクト
   label_project_latest: 最近のプロジェクト
+  label_project_template_new: テンプレートプロジェクトの作成
+  label_project_template_plural: プロジェクトテンプレート
+  label_project_new_from_template: "%{name} から新しいプロジェクトを作成"
   label_issue: チケット
   label_issue_new: 新しいチケット
   label_issue_plural: チケット
@@ -824,6 +828,7 @@ ja:
   button_collapse_all: 折りたたみ
   button_delete: 削除
   button_create: 作成
+  button_create_from_template: テンプレートから作成
   button_create_and_continue: 連続作成
   button_test: テスト
   button_edit: 編集

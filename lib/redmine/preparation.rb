@@ -37,6 +37,8 @@ module Redmine
         map.permission :view_project, {:projects => [:show, :bookmark], :activities => [:index]}, :public => true, :read => true
         map.permission :search_project, {:search => :index}, :public => true, :read => true
         map.permission :add_project, {:projects => [:new, :create]}, :require => :loggedin
+        map.permission :create_project_templates, {:project_templates => [:new, :create]}, :require => :loggedin
+        map.permission :use_project_templates, {:project_templates => [:new_project, :create_project]}, :require => :loggedin
         map.permission :edit_project, {:projects => [:settings, :edit, :update]}, :require => :member
         map.permission :close_project, {:projects => [:close, :reopen]}, :require => :member, :read => true
         map.permission :delete_project, {:projects => :destroy}, :require => :member, :read => true

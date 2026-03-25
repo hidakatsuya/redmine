@@ -325,6 +325,7 @@ en:
   field_homepage: Homepage
   field_is_public: Public
   field_parent: Subproject of
+  field_is_template: Template
   field_is_in_roadmap: Issues displayed in roadmap
   field_login: Login
   field_mail_notification: Email notifications
@@ -640,6 +641,9 @@ en:
     other: "%{count} projects"
   label_project_all: All Projects
   label_project_latest: Latest projects
+  label_project_template_new: New project template
+  label_project_template_plural: Project templates
+  label_project_new_from_template: "New project from template: %{name}"
   label_issue: Issue
   label_issue_new: New issue
   label_issue_plural: Issues
@@ -1204,6 +1208,7 @@ en:
   button_delete: Delete
   button_remove: Remove
   button_create: Create
+  button_create_from_template: Create from template
   button_create_and_continue: Create and add another
   button_test: Test
   button_edit: Edit
