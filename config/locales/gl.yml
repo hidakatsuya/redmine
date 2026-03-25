@@ -1564,3 +1564,5 @@ gl:
   label_subtask_remove: Remove subtask
   button_remove: Remove
   label_open_in_full_view: Open in full view
+  text_pandoc_available: Pandoc available (optional)
+  label_user_mail_option_only_my_watches: Only for things I watch

@@ -89,6 +89,7 @@ class User < Principal
     ['only_my_events', :label_user_mail_option_only_my_events],
     ['only_assigned', :label_user_mail_option_only_assigned],
     ['only_owner', :label_user_mail_option_only_owner],
+    ['only_my_watches', :label_user_mail_option_only_my_watches],
     ['none', :label_user_mail_option_none]
   ]
 
@@ -546,11 +547,17 @@ class User < Principal
   def self.find_by_login(login)
     login = Redmine::CodesetUtil.replace_invalid_utf8(login.to_s)
     if login.present?
+      users = where(:login => login)
       # First look for an exact match
-      user = where(:login => login).detect {|u| u.login == login}
+      user = users.detect {|u| u.login == login}
       unless user
         # Fail over to case-insensitive if none was found
-        user = find_by("LOWER(login) = ?", login.downcase)
+        if Redmine::Database.mysql? || Redmine::Database.sqlserver?
+          # MySQL and SQLServer are case-insensitive by default, we can search in the existing results
+          user = users.detect {|u| u.login.casecmp?(login)}
+        else
+          user = find_by("LOWER(login) = ?", login.downcase)
+        end
       end
       user
     end
@@ -870,6 +877,8 @@ class User < Principal
           is_or_belongs_to?(object.assigned_to) || is_or_belongs_to?(object.previous_assignee)
         when 'only_owner'
           object.author == self
+        when 'only_my_watches'
+          object.watched_by?(self)
         end
       when News
         # always send to project members except when mail_notification is set to 'none'
