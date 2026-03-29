@@ -33,7 +33,7 @@ class WebhookEndpointValidator < ActiveModel::EachValidator
     return false if uri.nil?
 
     return false unless valid_scheme?(uri.scheme)
-    return false unless valid_host?(uri.host)
+    return false unless valid_host?(uri.hostname)
     return false unless valid_port?(uri.port)
 
     true
@@ -43,7 +43,7 @@ class WebhookEndpointValidator < ActiveModel::EachValidator
   end
 
   def self.valid_port?(port)
-    !BAD_PORTS.include?(port)
+    port.between?(1, 65535) && !BAD_PORTS.include?(port)
   end
 
   def self.valid_scheme?(scheme)
@@ -84,8 +84,10 @@ class WebhookEndpointValidator < ActiveModel::EachValidator
 
     return false if blocked_hosts[:host]&.match?(host)
 
-    Resolv.each_address(host) do |ip|
-      ipaddr = IPAddr.new(ip)
+    Addrinfo.foreach(host, nil, nil, :STREAM) do |addrinfo|
+      return false unless addrinfo.ip?
+      ipaddr = IPAddr.new(addrinfo.ip_address)
+      return false if ipaddr.to_i.zero? # 0.0.0.0 and ::
       return false if ipaddr.link_local? || ipaddr.loopback?
       return false if IPAddr.new('224.0.0.0/24').include?(ipaddr) # multicast
       return false if blocked_hosts[:ips].any? { |net| net.include?(ipaddr) }
