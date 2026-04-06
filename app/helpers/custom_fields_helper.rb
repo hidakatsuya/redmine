@@ -85,9 +85,7 @@ module CustomFieldsHelper
     data = nil
     if cf.full_text_formatting?
       css += ' wiki-edit'
-      data = {
-        :auto_complete => true
-      }.merge(list_autofill_data_attributes)
+      data = wiki_textarea_stimulus_attributes.merge(:auto_complete => true)
     end
     cf.format.edit_tag(
       self,
@@ -135,9 +133,7 @@ module CustomFieldsHelper
     data = nil
     if custom_field.full_text_formatting?
       css += ' wiki-edit'
-      data = {
-        :auto_complete => true
-      }.merge(list_autofill_data_attributes)
+      data = wiki_textarea_stimulus_attributes.merge(:auto_complete => true)
     end
     custom_field.format.bulk_edit_tag(
       self,
