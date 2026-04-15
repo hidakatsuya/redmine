@@ -814,6 +814,8 @@ ja:
   label_parent_revision: 親
   label_child_revision: 子
   label_gantt_progress_line: イナズマ線
+  label_last_used_on: "最終使用：%{value}前"
+  label_never_used: 未使用
 
   button_login: ログイン
   button_submit: 送信

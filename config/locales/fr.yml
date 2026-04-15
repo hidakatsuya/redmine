@@ -1023,6 +1023,8 @@ fr:
   label_trackers_description: Description des trackers
   label_open_trackers_description: Afficher la description des trackers
   label_progressbar: Barre de progression
+  label_last_used_on: "Dernier usage : il y a %{value}"
+  label_never_used: Jamais utilisée
 
   button_login: Connexion
   button_submit: Soumettre

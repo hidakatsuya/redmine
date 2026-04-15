@@ -1187,6 +1187,8 @@ en:
   label_alert_warning: Warning
   label_alert_caution: Caution
   label_alert_important: Important
+  label_last_used_on: "Last used: %{value} ago"
+  label_never_used: Never used
 
   webhook_event_created: "%{object_name} created"
   webhook_event_updated: "%{object_name} updated"
