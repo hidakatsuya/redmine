@@ -45,11 +45,7 @@
 <%
 tabs = []
 tabs << { name: 'revision', label: :label_change_plural,
-          url: { :action => 'revision',
-                 :id     => @project,
-                 :repository_id => @repository.identifier_param,
-                 :path   => nil,
-                 :rev    => @changeset.identifier}
+          url: @repository.revision_url_options(@changeset.identifier, :path => nil)
         }
 
 tabs << { name: 'diff', label: :label_view_diff,
