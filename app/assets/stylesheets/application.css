@@ -40,6 +40,7 @@
 
 :root {
   --fonts-main: "Noto Sans", sans-serif;
+  --color-current-marker: var(--oc-indigo-5);
 }
 
 html, body { min-block-size: 100vh; }
@@ -218,21 +219,21 @@ body.has-main-menu #header {
   margin: 0;
   padding-block: 7px 5px;
   padding-inline: 11px;
-  background: transparent;
+  background-color: transparent;
   font-weight: normal;
   line-height: 1.2;
   transition: background-color 0.18s ease, color 0.18s ease;
 }
 #main-menu li a:hover {
-  background: var(--oc-indigo-1);
+  background-color: var(--oc-indigo-1);
   color: var(--oc-gray-9);
 }
 #main-menu li:hover ul.menu-children, #main-menu li ul.menu-children.visible {display: block;}
 #main-menu li a.selected, #main-menu li a.selected:hover {
-  background: var(--oc-white);
+  background-color: var(--oc-white);
   color: var(--oc-gray-9);
   font-weight: bold;
-  box-shadow: inset 0 -2px 0 var(--oc-indigo-5);
+  box-shadow: inset 0 -2px 0 var(--color-current-marker);
 }
 #main-menu li a.new-object {
   background-color: var(--oc-indigo-1);
@@ -1206,7 +1207,7 @@ span.pagination {margin-inline-start: 3px; color: var(--oc-gray-6); display: blo
   display: inline-block;
   padding: 0;
   border: 1px solid var(--oc-gray-4);
-  margin-inline-start: -1px;
+  border-inline-start-width: 0;
   line-height: 2em;
   margin-block-end: 1em;
   white-space: nowrap;
@@ -1220,6 +1221,7 @@ span.pagination {margin-inline-start: 3px; color: var(--oc-gray-6); display: blo
 .pagination ul.pages li:first-child {
   border-start-start-radius: 4px;
   border-end-start-radius: 4px;
+  border-inline-start-width: 1px;
 }
 .pagination ul.pages li:last-child {
   border-start-end-radius: 4px;
@@ -1228,7 +1230,6 @@ span.pagination {margin-inline-start: 3px; color: var(--oc-gray-6); display: blo
 .pagination ul.pages li.current {
   color: white;
   background-color: var(--oc-blue-7);
-  border-color: var(--oc-blue-7);
 }
 .pagination ul.pages li.page:hover {
   background-color: var(--oc-gray-2);
@@ -1643,7 +1644,7 @@ ul.cal {
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--oc-blue-5);
+  background: var(--color-current-marker);
   border-radius: 50%;
   z-index: -1;
 }
