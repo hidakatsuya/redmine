@@ -97,9 +97,24 @@ Rails.application.config.to_prepare do
     klass.instance.reset_target_class
   end
 
+  importmap = Rails.application.importmap
+  importmap.directories.delete_if do |_directory, mapping|
+    mapping.under.to_s.start_with?('controllers/') &&
+      mapping.path.to_s.start_with?('plugin_assets/')
+  end
+
   Redmine::Plugin.all.each do |plugin|
     paths = plugin.asset_paths
     Rails.application.config.assets.redmine_extension_paths << paths if paths.present?
+
+    stimulus_controllers = Pathname.new(plugin.assets_directory).join('javascripts/controllers')
+    next unless stimulus_controllers.directory?
+
+    importmap.pin_all_from(
+      stimulus_controllers,
+      under: "controllers/#{plugin.id}",
+      to: "#{plugin.asset_prefix}/javascripts/controllers"
+    )
   end
 
   Redmine::Themes.themes.each do |theme|
