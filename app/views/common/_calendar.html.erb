@@ -1,7 +1,7 @@
 <%= form_tag({}, :data => {:cm_url => issues_context_menu_path}) do -%>
 <%= hidden_field_tag 'back_url', url_for(:params => request.query_parameters), :id => nil %>
 <ul class="cal">
-  <li scope="col" title="<%= l(:label_week) %>" class="calhead week-number"></li>
+  <li scope="col" class="calhead week-number" <%= tag.attributes(data: tooltip_stimulus_attributes(text: l(:label_week))) %>></li>
   <% 7.times do |i| %>
     <li scope="col" class="calhead"><%= day_name((calendar.first_wday + i) % 7) %></li>
   <% end %>

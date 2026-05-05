@@ -19,7 +19,7 @@
     <header id="version-<%= version.id %>">
       <% if User.current.allowed_to?(:manage_versions, version.project) %>
         <div class="contextual">
-          <%= link_to sprite_icon('edit', l(:button_edit)), edit_version_path(version), :title => l(:button_edit), :class => 'icon-only icon-edit' %>
+          <%= link_to sprite_icon('edit', l(:button_edit)), edit_version_path(version), :data => tooltip_stimulus_attributes(text: l(:button_edit)), :class => 'icon-only icon-edit' %>
         </div>
       <% end %>
       <h3 class="icon icon-package version inline-flex">

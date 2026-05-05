@@ -48,7 +48,7 @@ class ReactionsHelperTest < ActionView::TestCase
 
     result = reaction_button(journals(:journals_001))
 
-    assert_select_in result, 'span.reaction-button.readonly[title=?]', 'John Smith'
+    assert_select_in result, 'span.reaction-button.readonly[data-controller=?][data-tooltip-text-value=?]', 'tooltip', 'John Smith'
     assert_select_in result, 'a.reaction-button', false
   end
 
@@ -58,7 +58,7 @@ class ReactionsHelperTest < ActionView::TestCase
 
     result = reaction_button(issue6)
 
-    assert_select_in result, 'span.reaction-button.readonly[title=?]', 'John Smith'
+    assert_select_in result, 'span.reaction-button.readonly[data-controller=?][data-tooltip-text-value=?]', 'tooltip', 'John Smith'
     assert_select_in result, 'a.reaction-button', false
   end
 
@@ -83,7 +83,7 @@ class ReactionsHelperTest < ActionView::TestCase
     expected_tooltip = 'Bob9 Doe, Bob8 Doe, Bob7 Doe, Bob6 Doe, Bob5 Doe, ' \
                        'Bob4 Doe, Bob3 Doe, Bob2 Doe, Bob1 Doe, and Bob0 Doe'
 
-    assert_select_in result, 'a.reaction-button[title=?]', expected_tooltip
+    assert_select_in result, 'a.reaction-button[data-controller=?][data-tooltip-text-value=?]', 'tooltip', expected_tooltip
   end
 
   test 'reaction_button includes tooltip with 10 usernames and others count when reactions exceed 10' do
@@ -99,7 +99,7 @@ class ReactionsHelperTest < ActionView::TestCase
     expected_tooltip = 'Bob10 Doe, Bob9 Doe, Bob8 Doe, Bob7 Doe, Bob6 Doe, ' \
                        'Bob5 Doe, Bob4 Doe, Bob3 Doe, Bob2 Doe, Bob1 Doe, and 1 other'
 
-    assert_select_in result, 'a.reaction-button[title=?]', expected_tooltip
+    assert_select_in result, 'a.reaction-button[data-controller=?][data-tooltip-text-value=?]', 'tooltip', expected_tooltip
   end
 
   test 'reaction_button should be label less when no reactions' do
@@ -133,7 +133,7 @@ class ReactionsHelperTest < ActionView::TestCase
       reaction_button(issue2)
     end
 
-    assert_select_in result, 'a.reaction-button[title=?]', 'John Smith and Dave Lopper'
+    assert_select_in result, 'a.reaction-button[data-controller=?][data-tooltip-text-value=?]', 'tooltip', 'John Smith and Dave Lopper'
 
     # When all users are non-visible users
     issue2.reaction_detail = Reaction::Detail.new(
@@ -144,7 +144,7 @@ class ReactionsHelperTest < ActionView::TestCase
       reaction_button(issue2)
     end
 
-    assert_select_in result, 'a.reaction-button[title]', false
+    assert_select_in result, 'a.reaction-button[data-tooltip-text-value]', false
     assert_select_in result, 'a.reaction-button' do
       assert_select 'span.icon-label', false
     end
@@ -155,7 +155,7 @@ class ReactionsHelperTest < ActionView::TestCase
       reaction_button(issues(:issues_001))
     end
 
-    assert_select_in result, 'a.reaction-button[title=?]', 'Dave Lopper、John Smith、Redmine Admin'
+    assert_select_in result, 'a.reaction-button[data-controller=?][data-tooltip-text-value=?]', 'tooltip', 'Dave Lopper、John Smith、Redmine Admin'
   end
 
   test 'reaction_button for reacted object' do

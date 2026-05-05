@@ -125,7 +125,7 @@
           <%= content_tag(:div, style: month_style, class: "gantt_hdr") do %>
             <%= link_to "#{month_f.year}-#{month_f.month}",
                         gantt.params.merge(year: month_f.year, month: month_f.month),
-                        title: "#{month_name(month_f.month)} #{month_f.year}" %>
+                        data: tooltip_stimulus_attributes(text: "#{month_name(month_f.month)} #{month_f.year}") %>
           <% end %>
           <% left += width + 1 %>
           <% month_f = month_f >> 1 %>

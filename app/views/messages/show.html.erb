@@ -60,15 +60,14 @@
             <%= link_to(
                   sprite_icon('edit', l(:button_edit), icon_only: true),
                   { :action => 'edit', :id => message },
-                  :title => l(:button_edit),
+                  :data => tooltip_stimulus_attributes(text: l(:button_edit)),
                   :class => 'icon icon-edit'
                 ) if message.editable_by?(User.current) %>
             <%= link_to(
                   sprite_icon('del', l(:button_delete), icon_only: true),
                   { :action => 'destroy', :id => message },
                   :method => :post,
-                  :data => { :confirm => l(:text_are_you_sure) },
-                  :title => l(:button_delete),
+                  :data => { :confirm => l(:text_are_you_sure) }.merge(tooltip_stimulus_attributes(text: l(:button_delete))),
                   :class => 'icon icon-del'
                 ) if message.destroyable_by?(User.current) %>
           </span>

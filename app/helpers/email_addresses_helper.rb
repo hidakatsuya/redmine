@@ -25,14 +25,14 @@ module EmailAddressesHelper
         sprite_icon('email', l(:label_disable_notifications)),
         user_email_address_path(address.user, address, :notify => '0'),
         :method => :put, :remote => true,
-        :title => l(:label_disable_notifications),
+        :data => tooltip_stimulus_attributes(text: l(:label_disable_notifications)),
         :class => 'icon-only icon-email')
     else
       link_to(
         sprite_icon('email-disabled', l(:label_enable_notifications)),
         user_email_address_path(address.user, address, :notify => '1'),
         :method => :put, :remote => true,
-        :title => l(:label_enable_notifications),
+        :data => tooltip_stimulus_attributes(text: l(:label_enable_notifications)),
         :class => 'icon-only icon-email-disabled')
     end
   end

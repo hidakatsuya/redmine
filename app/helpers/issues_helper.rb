@@ -128,8 +128,7 @@ module IssuesHelper
                :back_url => issue_path(issue.id), :no_flash => '1'}
             ),
             :method => :put,
-            :data => {:confirm => l(:text_are_you_sure)},
-            :title => l(:label_subtask_remove),
+            :data => {:confirm => l(:text_are_you_sure)}.merge(tooltip_stimulus_attributes(text: l(:label_subtask_remove))),
             :class => 'icon-only icon-link-break'
           )
         else
@@ -229,8 +228,7 @@ module IssuesHelper
             relation_path(relation, issue_id: issue.id),
             :remote => true,
             :method => :delete,
-            :data => {:confirm => l(:text_are_you_sure)},
-            :title => l(:label_relation_remove),
+            :data => {:confirm => l(:text_are_you_sure)}.merge(tooltip_stimulus_attributes(text: l(:label_relation_remove))),
             :class => 'icon-only icon-link-break'
           )
         else
@@ -619,7 +617,11 @@ module IssuesHelper
         value = link_to_attachment(atta, only_path: options[:only_path])
         if options[:only_path] != false
           value += ' '
-          value += link_to_attachment atta, class: 'icon-only icon-download', title: l(:button_download), download: true, icon: 'download'
+          value += link_to_attachment atta,
+                                      class: 'icon-only icon-download',
+                                      data: tooltip_stimulus_attributes(text: l(:button_download)),
+                                      download: true,
+                                      icon: 'download'
         end
       else
         value = content_tag("i", h(value)) if value
@@ -636,7 +638,7 @@ module IssuesHelper
             l(:label_diff),
             diff_journal_url(detail.journal_id, :detail_id => detail.id,
                              :only_path => options[:only_path]),
-            :title => l(:label_view_diff))
+            :data => tooltip_stimulus_attributes(text: l(:label_view_diff)))
         s << " (#{diff_link})"
       end
       s.html_safe

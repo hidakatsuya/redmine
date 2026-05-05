@@ -1685,6 +1685,23 @@ table.cal div.tooltip:hover span.tip {
   inset-block-start: 25px;
 }
 
+.tooltip-body {
+  position: absolute;
+  z-index: 10000;
+  inline-size: max-content;
+  max-inline-size: 280px;
+  padding: 4px 8px;
+  border-radius: 3px;
+  background: var(--oc-black);
+  color: var(--oc-white);
+  font-size: 0.75rem;
+  font-weight: normal;
+  line-height: 1.4;
+  text-align: start;
+  white-space: pre-wrap;
+  pointer-events: none;
+}
+
 img.ui-datepicker-trigger {
   cursor: pointer;
   vertical-align: middle;
@@ -2091,17 +2108,6 @@ div.wiki .task-list input.task-list-item-checkbox {
 }
 .badge-issues-count {
   background: var(--oc-gray-2);
-}
-
-/***** Tooltips *****/
-.ui-tooltip {
-  background: var(--oc-black);
-  color: var(--oc-white);
-  border-radius: 3px;
-  border: 0;
-  box-shadow: none;
-  white-space: pre-wrap;
-  pointer-events: none;
 }
 
 /***** SVG Icons *****/
