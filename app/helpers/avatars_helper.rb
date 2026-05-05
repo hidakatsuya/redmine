@@ -57,7 +57,10 @@ module AvatarsHelper
   def avatar_edit_link(user, options={})
     if Setting.gravatar_enabled?
       url = Redmine::Configuration['avatar_server_url']
-      link_to avatar(user, {:title => l(:button_edit)}.merge(options)), url, :target => '_blank'
+      link_to avatar(user, options),
+              url,
+              :target => '_blank',
+              :data => tooltip_stimulus_attributes(text: l(:button_edit))
     end
   end
 
@@ -76,13 +79,15 @@ module AvatarsHelper
   def gravatar_avatar_tag(user, options)
     options[:default] = Setting.gravatar_default
     options[:class] = [GravatarHelper::DEFAULT_OPTIONS[:class], options[:class]].compact.join(' ')
+    tooltip = options.delete(:title)
 
     email = extract_email_from_user(user)
 
     if user.respond_to?(:mail)
-      options[:title] ||= user.name
+      tooltip ||= user.name
       options[:initials] = user.initials if options[:default] == "initials" && user.initials.present?
     end
+    options[:data] ||= tooltip_stimulus_attributes(text: tooltip)
 
     if email.present?
       gravatar(email.to_s.downcase, options) rescue nil
@@ -91,10 +96,17 @@ module AvatarsHelper
 
   def initials_avatar_tag(user, options)
     size = (options.delete(:size) || GravatarHelper::DEFAULT_OPTIONS[:size]).to_i
+    tooltip = options.delete(:title)
 
     css_class = ["avatar-color-#{user.id % 8}", "s#{size}", options[:class]].compact.join(' ')
 
-    content_tag('span', user.initials, role: 'img', class: css_class, title: options[:title])
+    content_tag(
+      'span',
+      user.initials,
+      role: 'img',
+      class: css_class,
+      data: tooltip_stimulus_attributes(text: tooltip)
+    )
   end
 
   def extract_email_from_user(user)

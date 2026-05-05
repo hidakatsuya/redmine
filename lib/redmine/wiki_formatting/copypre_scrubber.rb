@@ -25,7 +25,15 @@ module Redmine
       def button
         icon = ApplicationController.helpers.sprite_icon('copy-pre-content', size: 18)
         button_copy = ApplicationController.helpers.l(:button_copy)
-        html = '<a class="copy-pre-content-link icon-only" title="' + button_copy + '" data-action="clipboard#copyPre">' + icon + '</a>'
+        escaped_button_copy = ERB::Util.html_escape(button_copy)
+        html =
+          '<a class="copy-pre-content-link icon-only" ' \
+          'data-controller="tooltip" ' \
+          'data-action="clipboard#copyPre mouseenter->tooltip#show mouseleave->tooltip#hide ' \
+          'focusin->tooltip#show focusout->tooltip#hide keydown.esc->tooltip#hide" ' \
+          "data-tooltip-text-value=\"#{escaped_button_copy}\">" +
+          icon +
+          '</a>'
         Nokogiri::HTML5.fragment(html).children.first
       end
     end

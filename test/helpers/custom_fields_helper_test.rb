@@ -29,16 +29,16 @@ class CustomFieldsHelperTest < Redmine::HelperTest
     assert_equal 'No', format_value('0', CustomField.new(:field_format => 'bool'))
   end
 
-  def test_label_tag_should_include_description_as_span_title_if_present
+  def test_label_tag_should_include_description_as_stimulus_tooltip_if_present
     field = CustomField.new(:field_format => 'string', :description => 'This is the description')
     tag = custom_field_label_tag('foo', CustomValue.new(:custom_field => field))
-    assert_select_in tag, 'label span[title=?]', 'This is the description'
+    assert_select_in tag, 'label span[data-controller=?][data-tooltip-text-value=?]', 'tooltip', 'This is the description'
   end
 
-  def test_label_tag_should_not_include_title_if_description_is_blank
+  def test_label_tag_should_not_include_tooltip_if_description_is_blank
     field = CustomField.new(:field_format => 'string')
     tag = custom_field_label_tag('foo', CustomValue.new(:custom_field => field))
-    assert_select_in tag, 'label span[title]', 0
+    assert_select_in tag, 'label span[data-tooltip-text-value]', 0
   end
 
   def test_label_tag_should_include_for_attribute_for_select_tag

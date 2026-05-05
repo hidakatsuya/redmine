@@ -8,8 +8,8 @@
   <tr>
     <% if @admin_list %>
       <th class="checkbox hide-when-print">
-        <%= check_box_tag 'check_all', '', false, :class => 'toggle-selection',
-          :title => "#{l(:button_check_all)} / #{l(:button_uncheck_all)}" %>
+      <%= check_box_tag 'check_all', '', false, :class => 'toggle-selection',
+          :data => tooltip_stimulus_attributes(text: "#{l(:button_check_all)} / #{l(:button_uncheck_all)}") %>
       </th>
     <% end %>
     <% @query.inline_columns.each do |column| %>

@@ -1684,7 +1684,7 @@ class TimelogControllerTest < Redmine::ControllerTest
     get :index, :params => {:project_id => 'ecookbook', :query_id => query.id}
     assert_response :success
     assert_select 'h2', :text => query.name
-    assert_select '#sidebar a.query.selected[title=?]', query.description, :text => query.name
+    assert_select '#sidebar a.query.selected[data-controller=?][data-tooltip-text-value=?]', 'tooltip', query.description, :text => query.name
   end
 
   def test_index_atom_feed

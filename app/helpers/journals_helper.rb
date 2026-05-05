@@ -36,7 +36,7 @@ module JournalsHelper
     if journal.attachments.size > 1
       dropbown_links << link_to(sprite_icon('download', l(:label_download_all_attachments)),
                                 container_attachments_download_path(journal),
-                                :title => l(:label_download_all_attachments),
+                                :data => tooltip_stimulus_attributes(text: l(:label_download_all_attachments)),
                                 :class => 'icon icon-download'
                                )
     end
@@ -53,7 +53,7 @@ module JournalsHelper
                          edit_journal_path(journal),
                          :remote => true,
                          :method => 'get',
-                         :title => l(:button_edit),
+                         :data => tooltip_stimulus_attributes(text: l(:button_edit)),
                          :class => 'icon-only icon-edit'
                         )
         dropbown_links << link_to(sprite_icon('del', l(:button_delete)),
@@ -82,6 +82,7 @@ module JournalsHelper
   def render_journal_update_info(journal)
     return if journal.created_on == journal.updated_on
 
-    content_tag('span', "· #{l(:label_edited)}", :title => l(:label_time_by_author, :time => format_time(journal.updated_on), :author => journal.updated_by), :class => 'update-info')
+    tooltip = l(:label_time_by_author, :time => format_time(journal.updated_on), :author => journal.updated_by)
+    content_tag('span', "· #{l(:label_edited)}", :data => tooltip_stimulus_attributes(text: tooltip), :class => 'update-info')
   end
 end

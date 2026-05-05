@@ -6,7 +6,7 @@
   <tr>
     <th class="checkbox hide-when-print">
       <%= check_box_tag 'check_all', '', false, :class => 'toggle-selection',
-        :title => "#{l(:button_check_all)} / #{l(:button_uncheck_all)}" %>
+        :data => tooltip_stimulus_attributes(text: "#{l(:button_check_all)} / #{l(:button_uncheck_all)}") %>
     </th>
     <% @query.inline_columns.each do |column| %>
       <%= column_header(@query, column) %>
@@ -39,12 +39,11 @@
     <td class="buttons hide-when-print">
     <% if entry.editable_by?(User.current) -%>
         <%= link_to sprite_icon('edit', l(:button_edit)), edit_time_entry_path(entry),
-                    :title => l(:button_edit),
+                    :data => tooltip_stimulus_attributes(text: l(:button_edit)),
                     :class => 'icon-only icon-edit' %>
         <%= link_to sprite_icon('del', l(:button_delete)), time_entry_path(entry),
-                    :data => {:confirm => l(:text_are_you_sure)},
+                    :data => {:confirm => l(:text_are_you_sure)}.merge(tooltip_stimulus_attributes(text: l(:button_delete))),
                     :method => :delete,
-                    :title => l(:button_delete),
                     :class => 'icon-only icon-del' %>
     <% end -%>
         <%= link_to_context_menu %>

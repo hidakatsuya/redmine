@@ -48,7 +48,7 @@
       <%= link_to sprite_icon('zoom-in', l(:label_details)),
                   project_issues_report_details_path(@project, :detail => 'tracker'),
                   :class => 'icon-only icon-zoom-in',
-                  :title => l(:label_details) %>
+                  :data => tooltip_stimulus_attributes(text: l(:label_details)) %>
     </h3>
     <% if @trackers.present? %>
     <table class="list issue-report">
@@ -64,7 +64,7 @@
       <% @trackers.each do |tracker| %>
         <tr>
           <td class="name">
-            <%= link_to tracker.name, project_issues_path(@project, :set_filter => 1, :tracker_id => tracker.id), :title => tracker.description %>
+            <%= link_to tracker.name, project_issues_path(@project, :set_filter => 1, :tracker_id => tracker.id), :data => tooltip_stimulus_attributes(text: tracker.description) %>
           </td>
           <td>
             <%= link_to @open_issues_by_tracker[tracker].to_i, project_issues_path(@project, :set_filter => 1, :tracker_id => tracker.id) %>

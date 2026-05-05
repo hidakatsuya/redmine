@@ -331,7 +331,8 @@ class IssuesControllerTest < Redmine::ControllerTest
       assert_select 'a.query.selected', 1
       # assert link properties
       assert_select(
-        'a.query.selected[title=?][href=?]',
+        'a.query.selected[data-controller=?][data-tooltip-text-value=?][href=?]',
+        'tooltip',
         'Description for Open issues by priority and tracker',
         '/projects/ecookbook/issues?query_id=5',
         :text => "Open issues by priority and tracker"
@@ -340,7 +341,8 @@ class IssuesControllerTest < Redmine::ControllerTest
       assert_select 'a.icon-clear-query', 1
       # assert clear link properties
       assert_select(
-        'a.icon-clear-query[title=?][href=?]',
+        'a.icon-clear-query[data-controller=?][data-tooltip-text-value=?][href=?]',
+        'tooltip',
         'Clear',
         '/projects/ecookbook/issues?set_filter=1&sort=',
         1
@@ -1834,7 +1836,7 @@ class IssuesControllerTest < Redmine::ControllerTest
     child = Issue.generate!(:parent_issue_id => parent.id)
     get(:index, :params => {:c => %w(parent)})
     assert_select 'td.parent', :text => "#{parent.tracker} ##{parent.id}"
-    assert_select 'td.parent a[title=?]', parent.subject
+    assert_select 'td.parent a[data-controller=?][data-tooltip-text-value=?]', 'tooltip', parent.subject
   end
 
   def test_index_with_parent_subject_column
@@ -2881,7 +2883,7 @@ class IssuesControllerTest < Redmine::ControllerTest
 
     assert_select 'div#watchers ul' do
       assert_select 'li.user-2' do
-        assert_select '.avatar[title=?]', 'John Smith'
+        assert_select '.avatar[data-controller=?][data-tooltip-text-value=?]', 'tooltip', 'John Smith'
         assert_select 'a[href="/users/2"]'
         assert_select 'a[class*=delete]'
       end
@@ -2904,7 +2906,7 @@ class IssuesControllerTest < Redmine::ControllerTest
     assert_response :success
     assert_select 'div#watchers ul' do
       assert_select 'li.user-4' do
-        assert_select 'span.icon-warning[title=?]', l(:notice_invalid_watcher), text: l(:notice_invalid_watcher)
+        assert_select 'span.icon-warning[data-controller=?][data-tooltip-text-value=?]', 'tooltip', l(:notice_invalid_watcher), text: l(:notice_invalid_watcher)
       end
     end
   end
@@ -3084,7 +3086,7 @@ class IssuesControllerTest < Redmine::ControllerTest
 
     journal = Journal.find(1)
     journal_title = l(:label_time_by_author, :time => format_time(journal.updated_on), :author => journal.updated_by)
-    assert_select "#change-1 h4 span.update-info[title=?]", journal_title, :text => '· Edited'
+    assert_select "#change-1 h4 span.update-info[data-controller=?][data-tooltip-text-value=?]", 'tooltip', journal_title, :text => '· Edited'
     assert_select "#change-2 h4 span.update-info", 0
   end
 
@@ -3357,8 +3359,8 @@ class IssuesControllerTest < Redmine::ControllerTest
     assert_response :success
 
     assert_select 'div[id=?]', 'time-entry-3' do
-      assert_select 'a[title=?][href=?]', 'Edit', '/time_entries/3/edit'
-      assert_select 'a[title=?][href=?]', 'Delete', '/time_entries/3'
+      assert_select 'a[data-controller=?][data-tooltip-text-value=?][href=?]', 'tooltip', 'Edit', '/time_entries/3/edit'
+      assert_select 'a[data-controller=?][data-tooltip-text-value=?][href=?]', 'tooltip', 'Delete', '/time_entries/3'
 
       assert_select 'ul[class=?]', 'journal-details', :text => /1.00 h/
     end
@@ -3402,13 +3404,13 @@ class IssuesControllerTest < Redmine::ControllerTest
       # The current_user can only see members who belong to projects that the current_user has access to.
       # Since the Redmine Admin user does not belong to any projects visible to the current_user,
       # the Redmine Admin user's name is not displayed in the reaction user list. Instead, "1 other" is shown.
-      assert_select 'a.reaction-button[title=?]', 'Dave Lopper and John Smith' do
+      assert_select 'a.reaction-button[data-controller=?][data-tooltip-text-value=?]', 'tooltip', 'Dave Lopper and John Smith' do
         assert_select 'span.icon-label', '2'
       end
     end
 
     assert_select 'span[data-reaction-button-id=reaction_journal_1]' do
-      assert_select 'a.reaction-button[title=?]', 'John Smith'
+      assert_select 'a.reaction-button[data-controller=?][data-tooltip-text-value=?]', 'tooltip', 'John Smith'
     end
     assert_select 'span[data-reaction-button-id=reaction_journal_2] a.reaction-button'
   end
@@ -4077,8 +4079,8 @@ class IssuesControllerTest < Redmine::ControllerTest
     assert_response :success
 
     assert_select 'form#issue-form' do
-      assert_select 'a[title=?]', 'View all trackers description', :text => 'View all trackers description'
-      assert_select 'select[name=?][title=?]', 'issue[tracker_id]', 'Description for Bug tracker'
+      assert_select 'a[data-controller=?][data-tooltip-text-value=?]', 'tooltip', 'View all trackers description', :text => 'View all trackers description'
+      assert_select 'select[name=?][data-controller=?][data-tooltip-text-value=?]', 'issue[tracker_id]', 'tooltip', 'Description for Bug tracker'
     end
 
     assert_select 'div#trackers_description' do
@@ -4103,8 +4105,8 @@ class IssuesControllerTest < Redmine::ControllerTest
     assert_response :success
 
     assert_select 'form#issue-form' do
-      assert_select 'a[title=?]', 'View all trackers description', 0
-      assert_select 'select[name=?][title=?]', 'issue[tracker_id]', ''
+      assert_select 'a[data-tooltip-text-value=?]', 'View all trackers description', 0
+      assert_select 'select[name=?][data-tooltip-text-value]', 'issue[tracker_id]', 0
     end
 
     assert_select 'div#trackers_description', 0
@@ -4121,8 +4123,8 @@ class IssuesControllerTest < Redmine::ControllerTest
     assert_response :success
 
     assert_select 'form#issue-form' do
-      assert_select 'a[title=?]', 'View all issue statuses description', :text => 'View all issue statuses description'
-      assert_select 'select[name=?][title=?]', 'issue[status_id]', 'Description for Assigned issue status'
+      assert_select 'a[data-controller=?][data-tooltip-text-value=?]', 'tooltip', 'View all issue statuses description', :text => 'View all issue statuses description'
+      assert_select 'select[name=?][data-controller=?][data-tooltip-text-value=?]', 'issue[status_id]', 'tooltip', 'Description for Assigned issue status'
     end
 
     assert_select 'div#issue_statuses_description' do
@@ -4146,8 +4148,8 @@ class IssuesControllerTest < Redmine::ControllerTest
     assert_response :success
 
     assert_select 'form#issue-form' do
-      assert_select 'a[title=?]', 'View all issue statuses description', 0
-      assert_select 'select[name=?][title=?]', 'issue[status_id]', ''
+      assert_select 'a[data-tooltip-text-value=?]', 'View all issue statuses description', 0
+      assert_select 'select[name=?][data-tooltip-text-value]', 'issue[status_id]', 0
     end
 
     assert_select 'div#issue_statuses_description', 0
@@ -4451,8 +4453,8 @@ class IssuesControllerTest < Redmine::ControllerTest
                          :issue => {:tracker_id => 3}
     assert_not_nil flash[:notice], "flash was not set"
     assert_select_in flash[:notice],
-                     'a[href=?][title=?]', "/issues/#{issue.id}",
-                     "This is first issue", :text => "##{issue.id}"
+                     'a[href=?][data-controller=?][data-tooltip-text-value=?]', "/issues/#{issue.id}",
+                     'tooltip', "This is first issue", :text => "##{issue.id}"
   end
 
   def test_post_create_without_custom_fields_param
@@ -6177,7 +6179,7 @@ class IssuesControllerTest < Redmine::ControllerTest
 
     assert_response :success
     reason = l(:notice_issue_not_closable_by_blocking_issue)
-    assert_select 'span.icon-warning[title=?]', reason do
+    assert_select 'span.icon-warning[data-controller=?][data-tooltip-text-value=?]', 'tooltip', reason do
       assert_select "svg.icon-svg use:match('href', ?)", /assets\/icons-\w+.svg#icon--warning/
       assert_select 'span.icon-label', test: reason
     end

@@ -14,7 +14,7 @@
             <% if @prev_issue_id %>
               <%= link_to "\xc2\xab #{l(:label_previous)}",
                           issue_path(@prev_issue_id),
-                          :title => "##{@prev_issue_id}",
+                          :data => tooltip_stimulus_attributes(text: "##{@prev_issue_id}"),
                           :accesskey => accesskey(:previous) %>
             <% else %>
               <%= content_tag(:span, "\xc2\xab #{l(:label_previous)}") %>
@@ -34,7 +34,7 @@
             <% if @next_issue_id %>
               <%= link_to "#{l(:label_next)} \xc2\xbb",
                           issue_path(@next_issue_id),
-                          :title => "##{@next_issue_id}",
+                          :data => tooltip_stimulus_attributes(text: "##{@next_issue_id}"),
                           :accesskey => accesskey(:next) %>
             <% else %>
               <%= content_tag(:span, "#{l(:label_next)} \xc2\xbb") %>

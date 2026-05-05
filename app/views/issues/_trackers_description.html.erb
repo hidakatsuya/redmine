@@ -4,7 +4,7 @@
       <dl>
       <% trackers.each do |tracker| %>
         <% if tracker.description.present? %>
-          <dt><%= content_tag 'a', tracker.name, :onclick => "selectTracker('#{tracker.id}'); return false;", :href => '#', :title => l(:text_select_apply_tracker) %></dt>
+          <dt><%= content_tag 'a', tracker.name, :onclick => "selectTracker('#{tracker.id}'); return false;", :href => '#', :data => tooltip_stimulus_attributes(text: l(:text_select_apply_tracker)) %></dt>
           <dd><%= tracker.description %></dd>
         <% end %>
       <% end %>

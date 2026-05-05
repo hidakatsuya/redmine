@@ -56,7 +56,7 @@ module ReactionsHelper
         reaction_path(reaction, object_type: object.class.name, object_id: object),
         remote: true, method: :delete,
         class: ['icon', 'reaction-button', 'reacted', { 'has-reactions': count.nonzero? }],
-        title: tooltip
+        data: tooltip_stimulus_attributes(text: tooltip)
       )
     end
   end
@@ -68,14 +68,17 @@ module ReactionsHelper
         reactions_path(object_type: object.class.name, object_id: object),
         remote: true, method: :post,
         class: ['icon', 'reaction-button', { 'has-reactions': count.nonzero? }],
-        title: tooltip
+        data: tooltip_stimulus_attributes(text: tooltip)
       )
     end
   end
 
   def reaction_button_readonly(object, count, tooltip)
     reaction_button_wrapper object do
-      tag.span(class: ['icon', 'reaction-button', 'readonly', { 'has-reactions': count.nonzero? }], title: tooltip) do
+      tag.span(
+        class: ['icon', 'reaction-button', 'readonly', { 'has-reactions': count.nonzero? }],
+        data: tooltip_stimulus_attributes(text: tooltip)
+      ) do
         sprite_icon('thumb-up', count.nonzero?)
       end
     end

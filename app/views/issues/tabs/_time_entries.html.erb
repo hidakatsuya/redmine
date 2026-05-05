@@ -8,12 +8,11 @@
       <% if time_entry.editable_by?(User.current) -%>
           <span class="journal-meta">
             <%= link_to sprite_icon('edit', l(:button_edit)), edit_time_entry_path(time_entry),
-                        :title => l(:button_edit),
+                        :data => tooltip_stimulus_attributes(text: l(:button_edit)),
                         :class => 'icon-only icon-edit' %>
             <%= link_to sprite_icon('del', l(:button_delete)), time_entry_path(time_entry),
-                        :data => { :confirm => l(:text_are_you_sure) },
+                        :data => { :confirm => l(:text_are_you_sure) }.merge(tooltip_stimulus_attributes(text: l(:button_delete))),
                         :method => :delete,
-                        :title => l(:button_delete),
                         :class => 'icon-only icon-del' %>
           </span>
       <% end -%>

@@ -64,8 +64,7 @@ class AvatarsHelperTest < Redmine::HelperTest
   end
 
   def test_avatar_with_html_option
-    # Non-avatar options should be considered html options
-    assert_include 'title="John Smith"', avatar('jsmith <jsmith@somenet.foo>', :title => 'John Smith')
+    assert_include 'data-tooltip-text-value="John Smith"', avatar('jsmith <jsmith@somenet.foo>', :title => 'John Smith')
   end
 
   def test_avatar_css_class

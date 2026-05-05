@@ -80,7 +80,7 @@ class WatchersHelperTest < Redmine::HelperTest
         assert_select 'li:nth-of-type(1)>a[href=?]', '/users/3', text: 'Dave Lopper'
         assert_select 'li:nth-of-type(2)>a[href=?]', '/users/2', text: 'John Smith'
         assert_select 'li:nth-of-type(3)>a[href=?]', '/users/1', text: 'Redmine Admin'
-        assert_select 'a.delete[title=?]', 'Remove', 3
+        assert_select 'a.delete[data-controller=?][data-tooltip-text-value=?]', 'tooltip', 'Remove', 3
         assert_select 'a.delete.icon-link-break', 3
       end
     end
@@ -92,7 +92,7 @@ class WatchersHelperTest < Redmine::HelperTest
         assert_select 'li:nth-of-type(1)>a[href=?]', '/users/1', text: 'Admin Redmine'
         assert_select 'li:nth-of-type(2)>a[href=?]', '/users/3', text: 'Lopper Dave'
         assert_select 'li:nth-of-type(3)>a[href=?]', '/users/2', text: 'Smith John'
-        assert_select 'a.delete[title=?]', 'Remove', 3
+        assert_select 'a.delete[data-controller=?][data-tooltip-text-value=?]', 'tooltip', 'Remove', 3
         assert_select 'a.delete.icon-link-break', 3
       end
     end
