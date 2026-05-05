@@ -29,13 +29,14 @@
   <div class="api-key-actions">
     <%= link_to l(:button_show), my_api_key_path, :remote => true %>
     <a class="copy-api-key-link icon icon-only"
-       title="<%= l(:button_copy) %>"
        aria-label="<%= l(:button_copy) %>"
        href="#"
        role="button"
        tabindex="0"
        style="display: none;"
-       data-action="click->api-key-copy#copy">
+       data-action="click->api-key-copy#copy mouseenter->tooltip#show mouseleave->tooltip#hide focusin->tooltip#show focusout->tooltip#hide keydown.esc->tooltip#hide"
+       data-controller="tooltip"
+       data-tooltip-text-value="<%= l(:button_copy) %>">
       <%= sprite_icon('copy') %>
     </a>
   </div>

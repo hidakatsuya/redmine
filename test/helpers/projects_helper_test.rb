@@ -26,12 +26,22 @@ class ProjectsHelperTest < Redmine::HelperTest
   def test_link_to_version_within_project
     @project = Project.find(2)
     User.current = User.find(1)
-    assert_equal '<a title="07/01/2006" href="/versions/5">Alpha</a>', link_to_version(Version.find(5))
+    assert_select_in link_to_version(Version.find(5)),
+                     'a[href=?][data-controller=?][data-tooltip-text-value=?]',
+                     '/versions/5',
+                     'tooltip',
+                     '07/01/2006',
+                     :text => 'Alpha'
   end
 
   def test_link_to_version
     User.current = User.find(1)
-    assert_equal '<a title="07/01/2006" href="/versions/5">OnlineStore - Alpha</a>', link_to_version(Version.find(5))
+    assert_select_in link_to_version(Version.find(5)),
+                     'a[href=?][data-controller=?][data-tooltip-text-value=?]',
+                     '/versions/5',
+                     'tooltip',
+                     '07/01/2006',
+                     :text => 'OnlineStore - Alpha'
   end
 
   def test_link_to_version_without_effective_date

@@ -35,7 +35,7 @@
         <% if @has_previous %>
         <td class="previous">
           <% if previous_annot && revision && revision != previous_revision %>
-            <%= link_to '', {:action => 'annotate', :id => @project, :repository_id => @repository.identifier_param, :path => to_path_param(previous_annot.split[1] || @path), :rev => previous_annot.split[0] }, :title => l(:label_view_previous_annotation), :class => 'icon icon-history' %>
+            <%= link_to '', {:action => 'annotate', :id => @project, :repository_id => @repository.identifier_param, :path => to_path_param(previous_annot.split[1] || @path), :rev => previous_annot.split[0] }, :data => tooltip_stimulus_attributes(text: l(:label_view_previous_annotation)), :class => 'icon icon-history' %>
           <% end %>
         </td>
         <% end %>

@@ -64,9 +64,9 @@
           <%= name %> <%= content_tag('span', '*', :class => 'required') if field_required?(field) %>
         </td>
         <% for status in @statuses -%>
-        <td class="<%= @permissions[status.id][field].try(:join, ' ') %>" title="<%= name %> (<%= status.name %>)">
+        <td class="<%= @permissions[status.id][field].try(:join, ' ') %>" <%= tag.attributes(data: tooltip_stimulus_attributes(text: "#{name} (#{status.name})")) %>>
           <%= field_permission_tag(@permissions, status, field, @roles) %>
-          <% unless status == @statuses.last %><a href="#" class="repeat-value" title="<%= l(:button_copy) %>">&#187;</a><% end %>
+          <% unless status == @statuses.last %><a href="#" class="repeat-value" <%= tag.attributes(data: tooltip_stimulus_attributes(text: l(:button_copy))) %>>&#187;</a><% end %>
         </td>
         <% end -%>
       </tr>
@@ -84,7 +84,7 @@
             <%= field.name %> <%= content_tag('span', '*', :class => 'required') if field_required?(field) %>
           </td>
           <% for status in @statuses -%>
-          <td class="<%= @permissions[status.id][field.id.to_s].try(:join, ' ') %>" title="<%= field.name %> (<%= status.name %>)">
+          <td class="<%= @permissions[status.id][field.id.to_s].try(:join, ' ') %>" <%= tag.attributes(data: tooltip_stimulus_attributes(text: "#{field.name} (#{status.name})")) %>>
             <%= field_permission_tag(@permissions, status, field, @roles) %>
             <% unless status == @statuses.last %><a href="#" class="repeat-value">&#187;</a><% end %>
           </td>

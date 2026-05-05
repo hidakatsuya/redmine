@@ -122,7 +122,7 @@
       <td class="buttons">
         <%= link_to(sprite_icon('del', l(:button_delete)), '#',
                     :class => 'delete-commit-keywords icon-only icon-del',
-                    :title => l(:button_delete)) %>
+                    :data => tooltip_stimulus_attributes(text: l(:button_delete))) %>
       </td>
     </tr>
     <% end %>
@@ -134,7 +134,7 @@
       <td class="buttons">
         <%= link_to(sprite_icon('add', l(:button_add)), '#',
                     :class => 'add-commit-keywords icon-only icon-add',
-                    :title => l(:button_add)) %>
+                    :data => tooltip_stimulus_attributes(text: l(:button_add))) %>
       </td>
     </tr>
   </tbody>

@@ -250,13 +250,13 @@ class ApplicationHelperTest < Redmine::HelperTest
     issue_link = link_to('#3',
                          {:controller => 'issues', :action => 'show', :id => 3},
                          :class => Issue.find(3).css_classes,
-                         :title => 'Bug: Error 281 when updating a recipe (New)')
+                         :data => tooltip_stimulus_attributes(text: 'Bug: Error 281 when updating a recipe (New)'))
     ext_issue_link =
       link_to(
         'Bug #3: Error 281 when updating a recipe',
         {:controller => 'issues', :action => 'show', :id => 3},
         :class => Issue.find(3).css_classes,
-        :title => 'Status: New'
+        :data => tooltip_stimulus_attributes(text: 'Status: New')
       )
     note_link =
       link_to(
@@ -264,7 +264,7 @@ class ApplicationHelperTest < Redmine::HelperTest
         {:controller => 'issues', :action => 'show',
          :id => 3, :anchor => 'note-14'},
         :class => Issue.find(3).css_classes,
-        :title => 'Bug: Error 281 when updating a recipe (New)'
+        :data => tooltip_stimulus_attributes(text: 'Bug: Error 281 when updating a recipe (New)')
       )
     ext_note_link =
       link_to(
@@ -272,7 +272,7 @@ class ApplicationHelperTest < Redmine::HelperTest
         {:controller => 'issues', :action => 'show',
          :id => 3, :anchor => 'note-14'},
         :class => Issue.find(3).css_classes,
-        :title => 'Status: New'
+        :data => tooltip_stimulus_attributes(text: 'Status: New')
       )
     note_link2 =
       link_to(
@@ -280,7 +280,7 @@ class ApplicationHelperTest < Redmine::HelperTest
         {:controller => 'issues', :action => 'show',
          :id => 3, :anchor => 'note-14'},
         :class => Issue.find(3).css_classes,
-        :title => 'Bug: Error 281 when updating a recipe (New)'
+        :data => tooltip_stimulus_attributes(text: 'Bug: Error 281 when updating a recipe (New)')
       )
     ext_note_link2 =
       link_to(
@@ -288,7 +288,7 @@ class ApplicationHelperTest < Redmine::HelperTest
         {:controller => 'issues', :action => 'show',
          :id => 3, :anchor => 'note-14'},
         :class => Issue.find(3).css_classes,
-        :title => 'Status: New'
+        :data => tooltip_stimulus_attributes(text: 'Status: New')
       )
     revision_link =
       link_to(
@@ -296,7 +296,7 @@ class ApplicationHelperTest < Redmine::HelperTest
         {:controller => 'repositories', :action => 'revision',
          :id => 'ecookbook', :repository_id => 10, :rev => 1},
         :class => 'changeset',
-        :title => 'My very first commit do not escaping #<>&'
+        :data => tooltip_stimulus_attributes(text: 'My very first commit do not escaping #<>&')
       )
     revision_link2 =
       link_to(
@@ -304,14 +304,15 @@ class ApplicationHelperTest < Redmine::HelperTest
         {:controller => 'repositories', :action => 'revision',
          :id => 'ecookbook', :repository_id => 10, :rev => 2},
         :class => 'changeset',
-        :title => 'This commit fixes #1, #2 and references #1 & #3'
+        :data => tooltip_stimulus_attributes(text: 'This commit fixes #1, #2 and references #1 & #3')
       )
     changeset_link2 =
       link_to(
         '691322a8eb01e11fd7',
         {:controller => 'repositories', :action => 'revision',
          :id => 'ecookbook', :repository_id => 10, :rev => 1},
-        :class => 'changeset', :title => 'My very first commit do not escaping #<>&'
+        :class => 'changeset',
+        :data => tooltip_stimulus_attributes(text: 'My very first commit do not escaping #<>&')
       )
     document_link =
       link_to(
@@ -534,7 +535,7 @@ class ApplicationHelperTest < Redmine::HelperTest
                              {:controller => 'repositories', :action => 'revision',
                               :id => 'ecookbook', :repository_id => 10, :rev => 2},
                              :class => 'changeset',
-                             :title => 'This commit fixes #1, #2 and references #1 & #3')
+                             :data => tooltip_stimulus_attributes(text: 'This commit fixes #1, #2 and references #1 & #3'))
     to_test = {
       # documents
       'document:"Test document"'              => 'document:"Test document"',
@@ -597,14 +598,14 @@ class ApplicationHelperTest < Redmine::HelperTest
     str = link_to_issue(issue, :subject => false)
     result = link_to("Bug ##{issue.id}", "/issues/#{issue.id}",
                      :class => issue.css_classes,
-                     :title => "#{long_str}0123456...")
+                     :data => tooltip_stimulus_attributes(text: "#{long_str}0123456..."))
     assert_equal result, str
 
     issue = Issue.generate!(:subject => "<&>#{long_str}01234567890123456789")
     str = link_to_issue(issue, :subject => false)
     result = link_to("Bug ##{issue.id}", "/issues/#{issue.id}",
                      :class => issue.css_classes,
-                     :title => "<&>#{long_str}0123...")
+                     :data => tooltip_stimulus_attributes(text: "<&>#{long_str}0123..."))
     assert_equal result, str
   end
 
@@ -620,21 +621,21 @@ class ApplicationHelperTest < Redmine::HelperTest
         {:controller => 'repositories', :action => 'revision',
          :id => 'ecookbook', :repository_id => 10, :rev => 2},
         :class => 'changeset',
-        :title => 'This commit fixes #1, #2 and references #1 & #3'
+        :data => tooltip_stimulus_attributes(text: 'This commit fixes #1, #2 and references #1 & #3')
       )
     svn_changeset_link =
       link_to(
         'svn_repo-1|r123',
         {:controller => 'repositories', :action => 'revision',
          :id => 'ecookbook', :repository_id => 'svn_repo-1', :rev => 123},
-        :class => 'changeset', :title => ''
+        :class => 'changeset'
       )
     hg_changeset_link =
       link_to(
         'hg1|abcd',
         {:controller => 'repositories', :action => 'revision',
          :id => 'ecookbook', :repository_id => 'hg1', :rev => 'abcd'},
-        :class => 'changeset', :title => ''
+        :class => 'changeset'
       )
     source_link = link_to('source:some/file',
                           {:controller => 'repositories', :action => 'entry',
@@ -677,21 +678,21 @@ class ApplicationHelperTest < Redmine::HelperTest
         {:controller => 'repositories', :action => 'revision',
          :id => 'ecookbook', :repository_id => 10, :rev => 2},
         :class => 'changeset',
-        :title => 'This commit fixes #1, #2 and references #1 & #3'
+        :data => tooltip_stimulus_attributes(text: 'This commit fixes #1, #2 and references #1 & #3')
       )
     svn_changeset_link =
       link_to(
         'ecookbook:svn1|r123',
         {:controller => 'repositories', :action => 'revision',
          :id => 'ecookbook', :repository_id => 'svn1', :rev => 123},
-        :class => 'changeset', :title => ''
+        :class => 'changeset'
       )
     hg_changeset_link =
       link_to(
         'ecookbook:hg1|abcd',
         {:controller => 'repositories', :action => 'revision',
          :id => 'ecookbook', :repository_id => 'hg1', :rev => 'abcd'},
-        :class => 'changeset', :title => ''
+        :class => 'changeset'
       )
     source_link =
       link_to(
@@ -745,7 +746,8 @@ class ApplicationHelperTest < Redmine::HelperTest
           :repository_id => r.id,
           :rev        => 'abcd',
         },
-        :class => 'changeset', :title => 'test commit'
+        :class => 'changeset',
+        :data => tooltip_stimulus_attributes(text: 'test commit')
       )
     to_test = {
       'commit:abcd' => changeset_link,
@@ -777,7 +779,8 @@ class ApplicationHelperTest < Redmine::HelperTest
           :repository_id => r.id,
           :rev        => '123',
         },
-        :class => 'changeset', :title => 'test commit'
+        :class => 'changeset',
+        :data => tooltip_stimulus_attributes(text: 'test commit')
       )
     changeset_link_commit =
       link_to(
@@ -789,7 +792,8 @@ class ApplicationHelperTest < Redmine::HelperTest
           :repository_id => r.id,
           :rev        => 'abcd',
         },
-        :class => 'changeset', :title => 'test commit'
+        :class => 'changeset',
+        :data => tooltip_stimulus_attributes(text: 'test commit')
       )
     to_test = {
       'r123' => changeset_link_rev,
@@ -1221,7 +1225,7 @@ class ApplicationHelperTest < Redmine::HelperTest
     result2 = link_to('#1',
                       "/issues/1",
                       :class => Issue.find(1).css_classes,
-                      :title => "Bug: Cannot print recipes (New)")
+                      :data => tooltip_stimulus_attributes(text: "Bug: Cannot print recipes (New)"))
     pre = <<~PRE
       <pre data-clipboard-target="pre">
       [[CookBook documentation]]
@@ -1555,7 +1559,7 @@ class ApplicationHelperTest < Redmine::HelperTest
       # heading that contains inline code
       assert_match(
         Regexp.new(
-          '<div class="contextual heading-2" title="Edit this section" id="section-4">' \
+          '<div class="contextual heading-2"[^>]*data-tooltip-text-value="Edit this section"[^>]*id="section-4"[^>]*>' \
           '<a class="icon-only icon-edit" href="/projects/1/wiki/Test/edit\?section=4">' \
           '<svg class="s18 icon-svg" aria-hidden="true"><use href="\/assets\/icons-.*.svg#icon--edit"></use></svg>' \
           '<span class="icon-label">Edit this section</span>' \
@@ -1570,7 +1574,7 @@ class ApplicationHelperTest < Redmine::HelperTest
       # last heading
       assert_match(
         Regexp.new(
-          '<div class="contextual heading-2" title="Edit this section" id="section-5">' \
+          '<div class="contextual heading-2"[^>]*data-tooltip-text-value="Edit this section"[^>]*id="section-5"[^>]*>' \
           '<a class="icon-only icon-edit" href="/projects/1/wiki/Test/edit\?section=5">' \
           '<svg class="s18 icon-svg" aria-hidden="true"><use href="\/assets\/icons-.*.svg#icon--edit"></use></svg>' \
           '<span class="icon-label">Edit this section</span>' \
@@ -1611,7 +1615,7 @@ class ApplicationHelperTest < Redmine::HelperTest
 
       assert_match(
         Regexp.new(
-          '<div class="contextual heading-2" title="Edit this section" id="section-2">' \
+          '<div class="contextual heading-2"[^>]*data-tooltip-text-value="Edit this section"[^>]*id="section-2"[^>]*>' \
           '<a class="icon-only icon-edit" href="/projects/1/wiki/Test/edit\?section=2">' \
           '<svg class="s18 icon-svg" aria-hidden="true"><use href="/assets/icons-.*\.svg#icon--edit"></use></svg>' \
           '<span class="icon-label">Edit this section</span>' \
@@ -1689,11 +1693,13 @@ class ApplicationHelperTest < Redmine::HelperTest
     pages_by_parent_id = {nil => [parent_page], parent_page.id => [child_page]}
     result = render_page_hierarchy(pages_by_parent_id, nil, :timestamp => true)
     assert_select_in(
-      result, 'ul.pages-hierarchy li a[title=?]',
+      result, 'ul.pages-hierarchy li a[data-controller=?][data-tooltip-text-value=?]',
+      'tooltip',
       l(:label_updated_time,
         distance_of_time_in_words(Time.now, parent_page.updated_on)))
     assert_select_in(
-      result, 'ul.pages-hierarchy li ul.pages-hierarchy a[title=?]',
+      result, 'ul.pages-hierarchy li ul.pages-hierarchy a[data-controller=?][data-tooltip-text-value=?]',
+      'tooltip',
       l(:label_updated_time,
         distance_of_time_in_words(Time.now, child_page.updated_on)))
   end
@@ -1811,7 +1817,10 @@ class ApplicationHelperTest < Redmine::HelperTest
 
   def test_thumbnail_tag
     attachment = Attachment.find(3)
-    assert_select_in thumbnail_tag(attachment), 'div.thumbnail[title=?]', 'logo.gif' do
+    assert_select_in thumbnail_tag(attachment),
+                     'div.thumbnail[data-controller=?][data-tooltip-text-value=?]',
+                     'tooltip',
+                     'logo.gif' do
       assert_select 'a[href=?]', '/attachments/3' do
         assert_select 'img[alt=?][src=?][loading="lazy"]', "logo.gif", "/attachments/thumbnail/3/200"
       end
@@ -1854,7 +1863,12 @@ class ApplicationHelperTest < Redmine::HelperTest
       [news(:news_001),                   '<a href="/news/1">eCookbook first release !</a>'],
       [projects(:projects_001),           '<a href="/projects/ecookbook">eCookbook</a>'],
       [users(:users_001),                 '<a class="user active" href="/users/1">Redmine Admin</a>'],
-      [versions(:versions_001),           '<a title="07/01/2006" href="/versions/1">eCookbook - 0.1</a>'],
+      [
+        versions(:versions_001),
+        '<a data-controller="tooltip" ' \
+        'data-action="mouseenter-&gt;tooltip#show mouseleave-&gt;tooltip#hide focusin-&gt;tooltip#show focusout-&gt;tooltip#hide keydown.esc-&gt;tooltip#hide" ' \
+        'data-tooltip-text-value="07/01/2006" href="/versions/1">eCookbook - 0.1</a>'
+      ],
       [wiki_pages(:wiki_pages_001),
        '<a href="/projects/ecookbook/wiki/CookBook_documentation">CookBook documentation</a>']
     ].each do |record, link|
@@ -2187,10 +2201,19 @@ class ApplicationHelperTest < Redmine::HelperTest
     assert_nil time_tag(nil)
     with_locale 'en' do
       travel_to Time.zone.parse('2022-12-30T01:00:00Z') do
-        assert_equal "<abbr title=\"12/28/2022 01:00 AM\">2 days</abbr>", time_tag(2.days.ago)
+        assert_select_in time_tag(2.days.ago),
+                         'abbr[data-controller=?][data-tooltip-text-value=?]',
+                         'tooltip',
+                         '12/28/2022 01:00 AM',
+                         :text => '2 days'
 
         @project = Project.find(1)
-        assert_equal "<a title=\"12/28/2022 01:00 AM\" href=\"/projects/ecookbook/activity?from=2022-12-28\">2 days</a>", time_tag(2.days.ago)
+        assert_select_in time_tag(2.days.ago),
+                         'a[href=?][data-controller=?][data-tooltip-text-value=?]',
+                         '/projects/ecookbook/activity?from=2022-12-28',
+                         'tooltip',
+                         '12/28/2022 01:00 AM',
+                         :text => '2 days'
       end
     end
   end

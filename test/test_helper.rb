@@ -350,7 +350,7 @@ module Redmine
 
     def pre_wrapper(text)
       icon = sprite_icon('copy-pre-content', size: 18)
-      '<div class="pre-wrapper" data-controller="clipboard"><a class="copy-pre-content-link icon-only" title="Copy" data-action="clipboard#copyPre">' +
+      '<div class="pre-wrapper" data-controller="clipboard"><a class="copy-pre-content-link icon-only" data-controller="tooltip" data-action="clipboard#copyPre mouseenter->tooltip#show mouseleave->tooltip#hide focusin->tooltip#show focusout->tooltip#hide keydown.esc->tooltip#hide" data-tooltip-text-value="Copy">' +
       icon + '</a>' +
       text +
       '</div>'

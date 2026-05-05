@@ -29,7 +29,11 @@ module Redmine
           },
           class: "#{icon_only ? "icon-only" : "icon"} icon-quote"
         }
-        button_params[:title] = l(:button_quote) if icon_only
+        if icon_only
+          tooltip_data = tooltip_stimulus_attributes(text: l(:button_quote))
+          button_params[:data].merge!(tooltip_data.except(:action))
+          button_params[:data][:action] = "#{button_params[:data][:action]} #{tooltip_data[:action]}"
+        end
 
         link_to sprite_icon('quote-filled', l(:button_quote), icon_only: icon_only, style: :filled), '#', button_params
       end
