@@ -1157,9 +1157,8 @@ class Project < ApplicationRecord
       new_issue.project = self
       # Changing project resets the custom field values
       # TODO: handle this in Issue#project=
-      new_issue.custom_field_values = issue.custom_field_values.inject({}) do |h, v|
-        h[v.custom_field_id] = v.value
-        h
+      new_issue.custom_field_values = issue.custom_field_values.to_h do |v|
+        [v.custom_field_id, v.value]
       end
       # Reassign fixed_versions by name, since names are unique per project
       if issue.fixed_version && issue.fixed_version.project == project
@@ -1246,9 +1245,9 @@ class Project < ApplicationRecord
   # Copies members from +project+
   def copy_members(project)
     # Copy users first, then groups to handle members with inherited and given roles
-    members_to_copy = []
-    members_to_copy += project.memberships.select {|m| m.principal.is_a?(User)}
-    members_to_copy += project.memberships.select {|m| !m.principal.is_a?(User)}
+    user_memberships, group_memberships =
+      project.memberships.partition {|m| m.principal.is_a?(User)}
+    members_to_copy = user_memberships + group_memberships
 
     members_to_copy.each do |member|
       new_member = Member.new

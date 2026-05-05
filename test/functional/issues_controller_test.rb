@@ -3863,6 +3863,21 @@ class IssuesControllerTest < Redmine::ControllerTest
     end
   end
 
+  def test_get_new_with_default_due_date_offset
+    with_settings :default_issue_due_date_offset => '7' do
+      @request.session[:user_id] = 2
+      get(
+        :new,
+        :params => {
+          :project_id => 1,
+          :tracker_id => 1
+        }
+      )
+      assert_response :success
+      assert_select 'input[name=?][value=?]', 'issue[due_date]', (Date.today + 7.days).to_s
+    end
+  end
+
   def test_get_new_form_should_allow_attachment_upload
     @request.session[:user_id] = 2
     get(
@@ -4333,6 +4348,25 @@ class IssuesControllerTest < Redmine::ControllerTest
     issue = Issue.find_by_subject('This is the test_new_with_group_assignment issue')
     assert_not_nil issue
     assert_equal group, issue.assigned_to
+  end
+
+  def test_new_should_render_groups_before_users_in_assignee_select_when_configured
+    group = Group.find(11)
+    project = Project.find(1)
+    project.members << Member.new(:principal => group, :roles => [Role.givable.first])
+
+    with_settings :issue_group_assignment => '1', :assignee_dropdown_display_format => 'groups_then_users' do
+      @request.session[:user_id] = 2
+      get :new, :params => {:project_id => project.id}
+      assert_response :success
+    end
+
+    assert_select 'select[name=?]', 'issue[assigned_to_id]' do
+      assert_select %(optgroup:nth-of-type(1)[label="#{l(:label_group_plural)}"]) do
+        assert_select 'option[value=?]', group.id.to_s
+      end
+      assert_select %(optgroup:nth-of-type(2)[label="#{l(:label_user_plural)}"])
+    end
   end
 
   def test_post_create_without_start_date_and_default_start_date_is_not_creation_date
