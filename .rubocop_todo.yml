@@ -384,12 +384,6 @@ Rails/EagerEvaluationLogMessage:
   Exclude:
     - 'app/controllers/application_controller.rb'
 
-Rails/Exit:
-  Exclude:
-    - 'config/environment.rb'
-    - 'config/initializers/10-patches.rb'
-    - 'config/routes.rb'
-
 Rails/HasAndBelongsToMany:
   Exclude:
     - 'app/models/changeset.rb'
@@ -484,16 +478,6 @@ Rails/PluralizationGrammar:
     - 'test/functional/gantts_controller_test.rb'
     - 'test/unit/mailer_test.rb'
     - 'test/unit/query_test.rb'
-
-# This cop supports safe autocorrection (--autocorrect).
-Rails/Presence:
-  Exclude:
-    - 'app/controllers/activities_controller.rb'
-    - 'app/helpers/application_helper.rb'
-    - 'app/models/repository.rb'
-    - 'lib/redmine/codeset_util.rb'
-    - 'lib/redmine/i18n.rb'
-    - 'lib/redmine/sort_criteria.rb'
 
 # This cop supports safe autocorrection (--autocorrect).
 # Configuration parameters: NotNilAndNotEmpty, NotBlank, UnlessBlank.

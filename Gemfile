@@ -13,7 +13,7 @@ gem 'nokogiri', '~> 1.19.1'
 gem 'i18n', '~> 1.14.1'
 gem 'rbpdf', '~> 1.21.4'
 gem 'addressable'
-gem 'rubyzip', '~> 3.2.2'
+gem 'rubyzip', '~> 3.3.0'
 gem 'propshaft', '~> 1.3.0'
 gem 'rack', '>= 3.1.3'
 gem "stimulus-rails", "~> 1.3"
@@ -77,12 +77,12 @@ if File.exist?(database_file)
         gem 'mysql2', '~> 0.5.0'
         gem "with_advisory_lock"
       when /trilogy/
-        gem 'trilogy', '~> 2.9.0'
+        gem 'trilogy', '~> 2.12.4'
         gem "with_advisory_lock"
       when /postgresql/
         gem 'pg', '~> 1.6.2'
       when /sqlite3/
-        gem 'sqlite3', '~> 2.7.4'
+        gem 'sqlite3', '~> 2.9.4'
       when /sqlserver/
         gem 'tiny_tds', '~> 3.4'
         gem 'activerecord-sqlserver-adapter', '~> 8.1.2'
@@ -120,7 +120,7 @@ group :test do
   # RuboCop
   gem 'rubocop', '~> 1.86.1', require: false
   gem 'rubocop-performance', '~> 1.26.0', require: false
-  gem 'rubocop-rails', '~> 2.33.4', require: false
+  gem 'rubocop-rails', '~> 2.34.3', require: false
   gem 'bundle-audit', require: false
   # for testing oauth provider capabilities
   gem 'oauth2'
