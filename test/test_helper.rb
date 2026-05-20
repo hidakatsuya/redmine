@@ -52,7 +52,7 @@ class ActionView::TestCase
 end
 
 class ActiveSupport::TestCase
-  parallelize(workers: 1)
+  parallelize(workers: :number_of_processors)
 
   include ActionDispatch::TestProcess
 
@@ -60,6 +60,18 @@ class ActiveSupport::TestCase
 
   self.use_transactional_tests = true
   self.use_instantiated_fixtures  = false
+
+  parallelize_setup do |worker|
+    # Use a separate attachment directory for each worker.
+    $redmine_tmp_attachments_directory =
+      File.join($redmine_tmp_attachments_directory, worker.to_s)
+    FileUtils.mkdir_p $redmine_tmp_attachments_directory
+
+    # Use a separate thumbnail directory for each worker.
+    Attachment.thumbnails_storage_path =
+      File.join(Attachment.thumbnails_storage_path, worker.to_s)
+    FileUtils.mkdir_p Attachment.thumbnails_storage_path
+  end
 
   # Clear Settings cache after each test to prevent test interference
   teardown do
