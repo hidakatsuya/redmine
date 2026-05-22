@@ -234,7 +234,6 @@ sq:
   error_exceeds_maximum_hours_per_day: "S’mund të regjistrohen më shumë se %{max_hours} orë në të njëjtën ditë (janë regjistruar tashmë %{logged_hours} orë)"
   error_can_not_delete_auth_source: "Kjo mënyrë mirëfilltësimesh është në përdorim dhe s’mund të fshihet."
   error_spent_on_future_date: "S’mund të regjistrohet kohë në një datë të ardhshme"
-  error_not_allowed_to_log_time_for_other_users: "S’keni leje të regjistroni kohë për përdorues të tjerë"
   error_can_not_execute_macro_html: "Gabim në ekzekutimin e makros <strong>%{name}</strong> (%{error})"
   error_macro_does_not_accept_block: "Kjo makro nuk pranon bllok teksti"
   error_childpages_macro_no_argument: "Pa argument, kjo makro mund të thirret vetëm që prej faqesh wiki"
@@ -708,7 +707,6 @@ sq:
   label_confirmation: Ripohim
   label_export_to: 'I gatshëm edhe në:'
   label_read: Lexoni…
-  label_public_projects: Projekte publike
   label_open_issues: e hapur
   label_open_issues_plural: të hapura
   label_closed_issues: e mbyllur
@@ -744,8 +742,6 @@ sq:
   label_months_from: muaj nga
   label_gantt: Gantt
   label_internal: I brendshëm
-  label_last_changes: "%{count} ndryshimet e fundit"
-  label_change_view_all: Shihni krejt ndryshimet
   label_comment: Koment
   label_comment_plural: Komente
   label_x_comments:
@@ -783,7 +779,6 @@ sq:
   label_last_month: muajin e fundit
   label_next_month: muajin e ardhshëm
   label_this_year: këtë vit
-  label_date_range: Interval datash
   label_less_than_ago: më pak se ditë më parë
   label_more_than_ago: më shumë se ditë më parë
   label_ago: ditë më parë
@@ -832,7 +827,6 @@ sq:
   label_wiki_page_new: Faqe Wiki e re
   label_index_by_title: Tregues sipas titujsh
   label_index_by_date: Tregues sipas datash
-  label_current_version: Versioni i tanishëm
   label_preview: Paraparje
   label_feed_plural: Prurje
   label_changes_details: Hollësi të krejt ndryshimeve
@@ -889,7 +883,6 @@ sq:
   label_month: Muaj
   label_week: Javë
   label_date_from: Nga
-  label_date_to: Për
   label_language_based: Bazuar në gjuhën e përdoruesit
   label_sort_by: "Renditi sipas %{value}"
   label_send_test_email: Dërgo një email provë
@@ -934,7 +927,6 @@ sq:
   label_ldaps_warning: Këshillohet të përdoret një lidhje e fshehtëzuar LDAPS me kontroll dëshmish, për të penguar çfarëdo manipulimi gjatë procesit të mirëfilltësimit.
   label_downloads_abbr: D/L
   label_optional_description: Përshkrim opsional
-  label_add_another_file: Shtoni kartelë tjetër
   label_preferences: Parapëlqime
   label_chronological_order: Në rend kohor
   label_reverse_chronological_order: Në rend kohor së prapthi
@@ -1205,10 +1197,8 @@ sq:
   text_issues_destroy_confirmation: 'Jeni i sigurt se doni të fshihet çështja(et) e përzgjedhura?'
   text_issues_destroy_descendants_confirmation: "Kjo do të fshijë edhe %{count} nënpunë."
   text_time_entries_destroy_confirmation: 'Jeni i sigurt se doni të fshihet zëri(at) kohor(ë) i përzgjedhur?'
-  text_select_project_modules: 'Përzgjidhni module që të aktivizohen për këtë projekt:'
   text_default_administrator_account_changed: U ndryshua llogaria parazgjedhje e përgjegjësit
   text_file_repository_writable: Drejtori bashkëngjitjes e shkrueshme
-  text_plugin_assets_writable: Drejtori mjetesh shtojcash e shkrueshme
   text_minimagick_available: MiniMagick gati (opsionale)
   text_convert_available: Ka mbulim për shndërrime ImageMagick (opsionale)
   text_gs_available: Ka mbulim për ImageMagick PDF (opsionale)
@@ -1278,9 +1268,7 @@ sq:
   enumeration_doc_categories: Kategori dokumentesh
   enumeration_activities: Veprimtari (ndjekje kohore)
   enumeration_system_activity: Veprimtari Sistemi
-  description_filter: Filtër
   description_search: Fushë kërkimi
-  description_choose_project: Projekte
   description_project_scope: Fokus kërkimi
   description_notes: Shënime
   description_message_content: Lëndë mesazhi
@@ -1533,3 +1521,4 @@ sq:
   button_remove_from_group: Remove from group
   button_add_to_group: Add to group
   setting_default_issue_due_date_offset: Default due date for new issues
+  field_private_by_default: Private by default

@@ -532,7 +532,6 @@ ko:
   label_confirmation: 확인
   label_export_to: 내보내기
   label_read: 읽기...
-  label_public_projects: 공개 프로젝트
   label_open_issues: 진행중
   label_open_issues_plural: 진행중
   label_closed_issues: 완료됨
@@ -561,8 +560,6 @@ ko:
   label_months_from: 개월 동안 | 다음부터
   label_gantt: Gantt 차트
   label_internal: 내부
-  label_last_changes: "최근 %{count}개의 변경사항"
-  label_change_view_all: 모든 변경 내역 보기
   label_comment: 댓글
   label_comment_plural: 댓글
   label_x_comments:
@@ -592,7 +589,6 @@ ko:
   label_this_month: 이번 달
   label_last_month: 지난 달
   label_this_year: 올해
-  label_date_range: 날짜 범위
   label_less_than_ago: 이전
   label_more_than_ago: 이후
   label_ago: 일 전
@@ -627,7 +623,6 @@ ko:
   label_wiki_page_plural: 위키 페이지
   label_index_by_title: 제목별 색인
   label_index_by_date: 날짜별 색인
-  label_current_version: 현재 버전
   label_preview: 미리보기
   label_feed_plural: 피드(Feeds)
   label_changes_details: 모든 상세 변경 내역
@@ -676,7 +671,6 @@ ko:
   label_month: 월
   label_week: 주
   label_date_from: '기간:'
-  label_date_to: ' ~ '
   label_language_based: 언어설정에 따름
   label_sort_by: "%{value}(으)로 정렬"
   label_send_test_email: 테스트 메일 보내기
@@ -709,7 +703,6 @@ ko:
   label_ldap_authentication: LDAP 인증
   label_downloads_abbr: D/L
   label_optional_description: 부가적인 설명
-  label_add_another_file: 다른 파일 추가
   label_preferences: 설정
   label_chronological_order: 시간 순으로 정렬
   label_reverse_chronological_order: 시간 역순으로 정렬
@@ -796,10 +789,8 @@ ko:
   text_load_default_configuration: 기본 설정을 읽어들이기
   text_status_changed_by_changeset: "변경묶음 %{value}에 의하여 변경됨"
   text_issues_destroy_confirmation: '선택한 일감를 정말로 삭제하시겠습니까?'
-  text_select_project_modules: '이 프로젝트에서 활성화시킬 모듈을 선택하세요:'
   text_default_administrator_account_changed: 기본 관리자 계정이 변경
   text_file_repository_writable: 파일 저장소 쓰기 가능
-  text_plugin_assets_writable: 플러그인 전용 디렉토리가 쓰기 가능
   text_minimagick_available: MiniMagick 사용 가능 (선택적)
   text_destroy_time_entries_question: 삭제하려는 일감에 %{hours} 시간이 보고되어 있습니다. 어떻게 하시겠습니까?
   text_destroy_time_entries: 보고된 시간을 삭제하기
@@ -993,14 +984,12 @@ ko:
   text_git_repository_note: "로컬의 bare 저장소 (예: /gitrepo, c:\\gitrepo)"
   description_query_sort_criteria_direction: "정렬 방향"
   description_project_scope: "검색 범위"
-  description_filter: "검색 조건"
   description_user_mail_notification: "메일 알림 설정"
   description_message_content: "메세지 내용"
   description_available_columns: "가능한 컬럼"
   description_issue_category_reassign: "일감 범주를 선택하십시오."
   description_search: "검색항목"
   description_notes: "댓글"
-  description_choose_project: "프로젝트"
   description_query_sort_criteria_attribute: "정렬 속성"
   description_wiki_subpages_reassign: "새로운 상위 페이지를 선택하십시오."
   description_selected_columns: "선택된 컬럼"
@@ -1265,7 +1254,6 @@ ko:
   error_token_expired: 암호 재발행용 링크는 무효합니다. 다시 시도해 주시기 바랍니다.
   error_spent_on_future_date: 미래일자에 소요시간을 입력할 수 없습니다.
   setting_timelog_accept_future_dates: 미래일자 소요시간 입력 허용
-  error_not_allowed_to_log_time_for_other_users: 다른 사용자의 소요시간을 입력할 수 없습니다.
   permission_log_time_for_other_users: 다른 사용자 소요시간 입력
   label_tomorrow: 내일
   label_next_week: 다음 주
@@ -1588,3 +1576,4 @@ ko:
   button_remove_from_group: Remove from group
   button_add_to_group: Add to group
   setting_default_issue_due_date_offset: Default due date for new issues
+  field_private_by_default: Private by default

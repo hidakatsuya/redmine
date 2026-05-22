@@ -519,7 +519,6 @@ mn:
   label_confirmation: Баталгаажуулах
   label_export_to: 'Өөр авч болох формат:'
   label_read: Унших...
-  label_public_projects: Олон нийтийн төслүүд
   label_open_issues: нээлттэй
   label_open_issues_plural: нээлттэй
   label_closed_issues: хаалттай
@@ -548,8 +547,6 @@ mn:
   label_months_from: Саруудыг хаанаас
   label_gantt: Гант диаграм
   label_internal: Дотоод
-  label_last_changes: "сүүлийн %{count} өөрчлөлтүүд"
-  label_change_view_all: Бүх өөрчлөлтүүдийг харах
   label_comment: Тайлбар
   label_comment_plural: Тайлбарууд
   label_x_comments:
@@ -579,7 +576,6 @@ mn:
   label_this_month: энэ сар
   label_last_month: сүүлийн сар
   label_this_year: энэ жил
-  label_date_range: Хязгаар огноо
   label_less_than_ago: бага өдрийн дотор
   label_more_than_ago: их өдрийн дотор
   label_ago: өдрийн өмнө
@@ -618,7 +614,6 @@ mn:
   label_wiki_page_plural: Вики хуудас
   label_index_by_title: Гарчгаар эрэмбэлэх
   label_index_by_date: Огноогоор эрэмбэлэх
-  label_current_version: Одоогийн хувилбар
   label_preview: Ямар харагдахыг шалгах
   label_feed_plural: Feeds
   label_changes_details: Бүх өөрчлөлтүүдийн дэлгэрэнгүй
@@ -669,7 +664,6 @@ mn:
   label_month: Сар
   label_week: Долоо хоног
   label_date_from: Хэзээнээс
-  label_date_to: Хэдий хүртэл
   label_language_based: Хэрэглэгчийн хэлнас шалтгаалан
   label_sort_by: "%{value} талбараар нь эрэмбэлэх"
   label_send_test_email: Турших мэйл илгээх
@@ -704,7 +698,6 @@ mn:
   label_ldap_authentication: LDAP нэвтрэх горим
   label_downloads_abbr: D/L
   label_optional_description: Дурын тайлбар
-  label_add_another_file: Дахин файл нэмэх
   label_preferences: Тохиргоо
   label_chronological_order: Цагаан толгойн үсгийн дарааллаар
   label_reverse_chronological_order: Урвуу цагаан толгойн үсгийн дарааллаар
@@ -822,10 +815,8 @@ mn:
   text_load_default_configuration: Стандарт өгөгдлийг ачаалах
   text_status_changed_by_changeset: "%{value} өөрчлөлтөд хийгдсэн."
   text_issues_destroy_confirmation: 'Та сонгогдсон асуудлуудыг үнэхээр устгамаар байна уу ?'
-  text_select_project_modules:  'Энэ төслийн хувьд идэвхжүүлэх модулуудаа сонгоно уу:'
   text_default_administrator_account_changed: Стандарт администраторын бүртгэл өөрчлөгдлөө
   text_file_repository_writable: Хавсралт файл хадгалах хавтас руу бичих эрхтэй
-  text_plugin_assets_writable: Плагин модулийн ассет хавтас руу бичих эрхтэй
   text_minimagick_available: MiniMagick суулгагдсан (заавал биш)
   text_destroy_time_entries_question: "Таны устгах гэж байгаа асуудлууд дээр нийт %{hours} цаг зарцуулсан юм байна, та яах вэ ?"
   text_destroy_time_entries: Мэдэгдсэн цагуудыг устгах
@@ -948,14 +939,12 @@ mn:
   text_git_repository_note: Repository is bare and local (e.g. /gitrepo, c:\gitrepo)
   description_query_sort_criteria_direction: Sort direction
   description_project_scope: Search scope
-  description_filter: Filter
   description_user_mail_notification: Mail notification settings
   description_message_content: Message content
   description_available_columns: Available Columns
   description_issue_category_reassign: Choose issue category
   description_search: Searchfield
   description_notes: Тэмдэглэл
-  description_choose_project: Projects
   description_query_sort_criteria_attribute: Sort attribute
   description_wiki_subpages_reassign: Choose new parent page
   description_selected_columns: Selected Columns
@@ -1245,7 +1234,6 @@ mn:
   error_token_expired: This password recovery link has expired, please try again.
   error_spent_on_future_date: Cannot log time on a future date
   setting_timelog_accept_future_dates: Accept time logs on future dates
-  error_not_allowed_to_log_time_for_other_users: You are not allowed to log time
     for other users
   permission_log_time_for_other_users: Log spent time for other users
   label_tomorrow: tomorrow
@@ -1571,3 +1559,4 @@ mn:
   button_remove_from_group: Remove from group
   button_add_to_group: Add to group
   setting_default_issue_due_date_offset: Default due date for new issues
+  field_private_by_default: Private by default

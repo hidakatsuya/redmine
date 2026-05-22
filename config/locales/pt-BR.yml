@@ -452,7 +452,6 @@ pt-BR:
   label_confirmation: Confirmação
   label_export_to: Exportar para
   label_read: Ler...
-  label_public_projects: Projetos públicos
   label_open_issues: Aberta
   label_open_issues_plural: Abertas
   label_closed_issues: Fechada
@@ -481,8 +480,6 @@ pt-BR:
   label_months_from: meses a partir de
   label_gantt: Gantt
   label_internal: Interno
-  label_last_changes: "últimas %{count} alterações"
-  label_change_view_all: Mostrar todas as alterações
   label_comment: Comentário
   label_comment_plural: Comentários
   label_x_comments:
@@ -510,7 +507,6 @@ pt-BR:
   label_this_month: este mês
   label_last_month: último mês
   label_this_year: este ano
-  label_date_range: Período
   label_less_than_ago: menos de
   label_more_than_ago: mais de
   label_ago: dias atrás
@@ -543,7 +539,6 @@ pt-BR:
   label_wiki_page_plural: páginas Wiki
   label_index_by_title: Índice por título
   label_index_by_date: Índice por data
-  label_current_version: Versão atual
   label_preview: Pré-visualizar
   label_feed_plural: Feeds
   label_changes_details: Detalhes de todas as alterações
@@ -592,7 +587,6 @@ pt-BR:
   label_month: Mês
   label_week: Semana
   label_date_from: De
-  label_date_to: Para
   label_language_based: Com base no idioma do usuário
   label_sort_by: "Ordenar por %{value}"
   label_send_test_email: Enviar um e-mail de teste
@@ -624,7 +618,6 @@ pt-BR:
   label_ldap_authentication: Autenticação LDAP
   label_downloads_abbr: D/L
   label_optional_description: Descrição opcional
-  label_add_another_file: Adicionar outro arquivo
   label_preferences: Preferências
   label_chronological_order: Em ordem cronológica
   label_reverse_chronological_order: Em ordem cronológica inversa
@@ -702,7 +695,6 @@ pt-BR:
   text_load_default_configuration: Carregar a configuração padrão
   text_status_changed_by_changeset: "Aplicado no conjunto de alterações %{value}."
   text_issues_destroy_confirmation: 'Você tem certeza que deseja excluir a(s) tarefa(s) selecionada(s)?'
-  text_select_project_modules: 'Selecione módulos para habilitar para este projeto:'
   text_default_administrator_account_changed: Conta padrão do administrador alterada
   text_file_repository_writable: Repositório com permissão de escrita
   text_minimagick_available: MiniMagick disponível (opcional)
@@ -798,7 +790,6 @@ pt-BR:
   label_updated_time_by: "Atualizado por %{author} há %{age}"
   text_diff_truncated: '... Este diff foi truncado porque excede o tamanho máximo que pode ser exibido.'
   setting_diff_max_lines_displayed: Número máximo de linhas exibidas no diff
-  text_plugin_assets_writable: Diretório de plugins gravável
   warning_attachments_not_saved: "%{count} arquivo(s) não puderam ser salvo(s)."
   button_create_and_continue: Criar e continuar
   text_custom_field_possible_values_info: 'Uma linha para cada valor'
@@ -972,14 +963,12 @@ pt-BR:
 
   description_query_sort_criteria_direction: Escolher ordenação
   description_project_scope: Escopo da pesquisa
-  description_filter: Filtro
   description_user_mail_notification: Configuração de notificações por e-mail
   description_message_content: Conteúdo da mensagem
   description_available_columns: Colunas disponíveis
   description_issue_category_reassign: Escolha uma categoria de tarefas
   description_search: Campo de busca
   description_notes: Notas
-  description_choose_project: Projetos
   description_query_sort_criteria_attribute: Atributo de ordenação
   description_wiki_subpages_reassign: Escolha uma nova página pai
   description_selected_columns: Colunas selecionadas
@@ -1251,7 +1240,6 @@ pt-BR:
   error_token_expired: Este link de recuperação de senha expirou. Por favor, tente novamente.
   error_spent_on_future_date: Não é possível registrar o tempo em uma data futura
   setting_timelog_accept_future_dates: Permitir registros de tempo em datas futuras
-  error_not_allowed_to_log_time_for_other_users: Você não possuí permissão para registrar o tempo
     para outros usuários
   permission_log_time_for_other_users: Tempo de registro gasto para outros usuários
   label_tomorrow: amanhã
@@ -1576,3 +1564,4 @@ pt-BR:
   button_remove_from_group: Remove from group
   button_add_to_group: Add to group
   setting_default_issue_due_date_offset: Default due date for new issues
+  field_private_by_default: Private by default

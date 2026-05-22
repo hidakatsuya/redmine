@@ -239,7 +239,6 @@ fa:
   error_exceeds_maximum_hours_per_day: "نمی‌توان بیش از %{max_hours} ساعت در یک روز زمان ثبت کرد. (%{logged_hours} ساعت تا کنون زمان ثبت شده است)"
   error_can_not_delete_auth_source: "این شیوه احراز هویت در حال استفاده است و حذف آن امکان‌‌پذیر نیست."
   error_spent_on_future_date: "ثبت زمان برای روزهای آینده امکان‌پذیر نیست"
-  error_not_allowed_to_log_time_for_other_users: "شما اجازه ثبت زمان برای سایر کاربران را ندارید"
   error_can_not_execute_macro_html: خطا در اجرای ماکروی <strong>%{name}</strong> (%{error})
   error_macro_does_not_accept_block: این ماکرو یک بلوک متنی را قبول نمی‌کند
   error_childpages_macro_no_argument: این ماکرو فقط در صفحات دانش‌نامه می‌تواند بدون ورودی، فراخوانی شود
@@ -743,7 +742,6 @@ fa:
   label_confirmation: تأیید
   label_export_to: 'قالب‌های دیگر:'
   label_read: خواندن...
-  label_public_projects: پروژه‌های عمومی
   label_open_issues: باز
   label_open_issues_plural: باز‌ها
   label_closed_issues: بسته
@@ -779,8 +777,6 @@ fa:
   label_months_from: ماه از
   label_gantt: گانت
   label_internal: درونی
-  label_last_changes: "%{count} تغییر آخر"
-  label_change_view_all: مشاهده همه تغییرات
   label_comment: نظر
   label_comment_plural: نظرات
   label_x_comments:
@@ -818,7 +814,6 @@ fa:
   label_last_month: ماه قبل
   label_next_month: ماه آینده
   label_this_year: امسال
-  label_date_range: بازه تاریخ
   label_less_than_ago: قبل از چند روز پیش
   label_more_than_ago: بعد از چند روز پیش
   label_ago: روز قبل
@@ -872,7 +867,6 @@ fa:
   label_wiki_page_new: صفحه دانش‌نامه جدید
   label_index_by_title: فهرست بر اساس عنوان
   label_index_by_date: فهرست بر اساس تاریخ
-  label_current_version: نسخه فعلی
   label_preview: پیش‌نمایش
   label_feed_plural: خوراک‌ها
   label_changes_details: جزئیات همه تغییرات
@@ -930,7 +924,6 @@ fa:
   label_month: ماه
   label_week: هفته
   label_date_from: از
-  label_date_to: تا
   label_language_based: بر اساس زبان کاربر
   label_sort_by: "مرتب‌سازی با %{value}"
   label_send_test_email: ارسال رایانامه آزمایشی
@@ -976,7 +969,6 @@ fa:
   label_ldaps_warning: پیش‌نهاد می‌شود که از یک ارتباط رمزنگاری‌شده LDAPS با بررسی گواهی‌نامه استفاده کنید تا از هر گونه دستکاری اطلاعات در زمان احراز هویت جلوگیری کنید.
   label_downloads_abbr: دریافت
   label_optional_description: توضیح اختیاری
-  label_add_another_file: افزودن پرونده دیگر
   label_auto_watch_on: ناظر خودکار
   label_auto_watch_on_issue_created: مسئله‌هایی که من ساخته‌ام
   label_auto_watch_on_issue_contributed_to: مسئله‌هایی که در آن‌ها مشارکت داشته‌ام
@@ -1295,10 +1287,8 @@ fa:
   text_issues_destroy_confirmation: 'آیا مطمئن هستید که می‌خواهید مسئله(‌های) انتخاب‌شده را حذف کنید؟'
   text_issues_destroy_descendants_confirmation: این همچنین %{count} زیرکار را حذف خواهد کرد.
   text_time_entries_destroy_confirmation: آیا مطمئنید که می‌خواهید ورودی(های) زمان انتخاب‌شده را حذف کنید؟
-  text_select_project_modules: 'ابزارهایی که باید برای این پروژه فعال شوند را انتخاب کنید:'
   text_default_administrator_account_changed: حساب راه‌بری پیش‌فرض تغییر کرده است
   text_file_repository_writable: پوشه پیوست‌ها نوشتنی است
-  text_plugin_assets_writable: پوشه دارایی‌های افزونه‌ها نوشتنی است
   text_all_migrations_have_been_run: همه تغییرات پایگاه داده اعمال شده اند
   text_minimagick_available: MiniMagick در دست‌رس است (اختیاری)
   text_convert_available: تبدیل ImageMagick در دست‌رس است (اختیاری)
@@ -1372,9 +1362,7 @@ fa:
   enumeration_doc_categories: دسته‌بندی اسناد
   enumeration_activities: دسته‌بندی زمان‌ها
   enumeration_system_activity: تابع پیش‌فرض‌های سامانه
-  description_filter: غربال
   description_search: بخش جست‌وجو
-  description_choose_project: پروژه‌ها
   description_project_scope: حوزه جست‌وجو
   description_notes: یادداشت‌ها
   description_message_content: محتوای پیغام‌ها
@@ -1500,3 +1488,4 @@ fa:
   button_remove_from_group: Remove from group
   button_add_to_group: Add to group
   setting_default_issue_due_date_offset: Default due date for new issues
+  field_private_by_default: Private by default

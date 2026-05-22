@@ -529,7 +529,6 @@ sr:
   label_confirmation: Потврда
   label_export_to: 'Такође доступно и у варијанти:'
   label_read: Читање...
-  label_public_projects: Јавни пројекти
   label_open_issues: отворен
   label_open_issues_plural: отворених
   label_closed_issues: затворен
@@ -558,8 +557,6 @@ sr:
   label_months_from: месеци од
   label_gantt: Гантов дијаграм
   label_internal: Унутрашњи
-  label_last_changes: "последњих %{count} промена"
-  label_change_view_all: Прикажи све промене
   label_comment: Коментар
   label_comment_plural: Коментари
   label_x_comments:
@@ -589,7 +586,6 @@ sr:
   label_this_month: овог месеца
   label_last_month: последњег месеца
   label_this_year: ове године
-  label_date_range: Временски период
   label_less_than_ago: пре мање од неколико дана
   label_more_than_ago: пре више од неколико дана
   label_ago: пре неколико дана
@@ -628,7 +624,6 @@ sr:
   label_wiki_page_plural: Wiki странице
   label_index_by_title: Индексирање по наслову
   label_index_by_date: Индексирање по датуму
-  label_current_version: Тренутна верзија
   label_preview: Преглед
   label_feed_plural: Извори вести
   label_changes_details: Детаљи свих промена
@@ -679,7 +674,6 @@ sr:
   label_month: Месец
   label_week: Седмица
   label_date_from: Шаље
-  label_date_to: Прима
   label_language_based: Базирано на језику корисника
   label_sort_by: "Сортирано по %{value}"
   label_send_test_email: Слање пробне е-поруке
@@ -714,7 +708,6 @@ sr:
   label_ldap_authentication: LDAP потврда идентитета
   label_downloads_abbr: D/L
   label_optional_description: Опционо опис
-  label_add_another_file: Додај још једну датотеку
   label_preferences: Подешавања
   label_chronological_order: по хронолошком редоследу
   label_reverse_chronological_order: по обрнутом хронолошком редоследу
@@ -835,10 +828,8 @@ sr:
   text_load_default_configuration: Учитај подразумевано конфигурисање
   text_status_changed_by_changeset: "Примењено у скупу са променама %{value}."
   text_issues_destroy_confirmation: 'Јесте ли сигурни да желите да избришете одабране проблеме?'
-  text_select_project_modules: 'Одаберите модуле које желите омогућити за овај пројекат:'
   text_default_administrator_account_changed: Подразумевани администраторски налог је промењен
   text_file_repository_writable: Фасцикла приложених датотека је уписива
-  text_plugin_assets_writable: Фасцикла елемената додатних компоненти је уписива
   text_minimagick_available: MiniMagick је доступан (опционо)
   text_destroy_time_entries_question: "%{hours} сати је пријављено за овај проблем који желите избрисати. Шта желите да урадите?"
   text_destroy_time_entries: Избриши пријављене сате
@@ -949,14 +940,12 @@ sr:
   text_git_repository_note: Repository is bare and local (e.g. /gitrepo, c:\gitrepo)
   description_query_sort_criteria_direction: Sort direction
   description_project_scope: Search scope
-  description_filter: Filter
   description_user_mail_notification: Mail notification settings
   description_message_content: Message content
   description_available_columns: Available Columns
   description_issue_category_reassign: Choose issue category
   description_search: Searchfield
   description_notes: Notes
-  description_choose_project: Projects
   description_query_sort_criteria_attribute: Sort attribute
   description_wiki_subpages_reassign: Choose new parent page
   description_selected_columns: Selected Columns
@@ -1246,7 +1235,6 @@ sr:
   error_token_expired: This password recovery link has expired, please try again.
   error_spent_on_future_date: Cannot log time on a future date
   setting_timelog_accept_future_dates: Accept time logs on future dates
-  error_not_allowed_to_log_time_for_other_users: You are not allowed to log time
     for other users
   permission_log_time_for_other_users: Log spent time for other users
   label_tomorrow: tomorrow
@@ -1572,3 +1560,4 @@ sr:
   button_remove_from_group: Remove from group
   button_add_to_group: Add to group
   setting_default_issue_due_date_offset: Default due date for new issues
+  field_private_by_default: Private by default

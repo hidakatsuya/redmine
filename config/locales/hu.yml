@@ -438,7 +438,6 @@
   label_confirmation: Jóváhagyás
   label_export_to: Exportálás
   label_read: Olvas...
-  label_public_projects: Nyilvános projektek
   label_open_issues: nyitott
   label_open_issues_plural: nyitott
   label_closed_issues: lezárt
@@ -467,8 +466,6 @@
   label_months_from: hónap, kezdve
   label_gantt: Gantt
   label_internal: Belső
-  label_last_changes: "utolsó %{count} változás"
-  label_change_view_all: Minden változás megtekintése
   label_comment: Megjegyzés
   label_comment_plural: Megjegyzés
   label_x_comments:
@@ -496,7 +493,6 @@
   label_this_month: aktuális hónap
   label_last_month: múlt hónap
   label_this_year: aktuális év
-  label_date_range: Dátum intervallum
   label_less_than_ago: kevesebb, mint nappal ezelőtt
   label_more_than_ago: több, mint nappal ezelőtt
   label_ago: nappal ezelőtt
@@ -529,7 +525,6 @@
   label_wiki_page_plural: Wiki oldalak
   label_index_by_title: Cím szerint indexelve
   label_index_by_date: Dátum szerint indexelve
-  label_current_version: Jelenlegi verzió
   label_preview: Előnézet
   label_feed_plural: Hírfolyamok
   label_changes_details: Változások részletei
@@ -577,7 +572,6 @@
   label_month: Hónap
   label_week: Hét
   label_date_from: 'Kezdet:'
-  label_date_to: 'Vége:'
   label_language_based: A felhasználó nyelve alapján
   label_sort_by: "%{value} szerint rendezve"
   label_send_test_email: Teszt e-mail küldése
@@ -609,7 +603,6 @@
   label_ldap_authentication: LDAP azonosítás
   label_downloads_abbr: D/L
   label_optional_description: Opcionális leírás
-  label_add_another_file: Újabb fájl hozzáadása
   label_preferences: Tulajdonságok
   label_chronological_order: Időrendben
   label_reverse_chronological_order: Fordított időrendben
@@ -683,7 +676,6 @@
   text_load_default_configuration: Alapértelmezett konfiguráció betöltése
   text_status_changed_by_changeset: "A változáskészletben alkalmazva %{value}."
   text_issues_destroy_confirmation: 'Biztos benne, hogy törölni szeretné a kijelölt feladatokat?'
-  text_select_project_modules: 'Válassza ki az engedélyezett modulokat ehhez a projekthez:'
   text_default_administrator_account_changed: Alapértelmezett adminisztrátor fiók megváltoztatva
   text_file_repository_writable: Fájl tároló írható
   text_minimagick_available: MiniMagick elérhető (nem kötelező)
@@ -791,7 +783,6 @@
   label_updated_time_by: "Módosította %{author} %{age}"
   text_diff_truncated: '... A diff fájl vége nem jelenik meg, mert hosszabb, mint a megjeleníthető sorok száma.'
   setting_diff_max_lines_displayed: A megjelenítendő sorok száma (maximum) a diff fájloknál
-  text_plugin_assets_writable: Plugin eszközök könyvtár írható
   warning_attachments_not_saved: "%{count} fájl mentése nem sikerült."
   button_create_and_continue: Létrehozás és folytatás
   text_custom_field_possible_values_info: 'Értékenként egy sor'
@@ -966,14 +957,12 @@
   text_git_repository_note: 'Csupasz és helyi tároló (pl. /gitrepo, c:\gitrepo)'
   description_query_sort_criteria_direction: Rendezés iránya
   description_project_scope: Keresés hatóköre
-  description_filter: Szűrő
   description_user_mail_notification: E-mail-értesítések beállításai
   description_message_content: Hozzászólás tartalma
   description_available_columns: Kiválasztható oszlopok
   description_issue_category_reassign: Válasszon feladatkategóriát
   description_search: Keresési mező
   description_notes: Megjegyzések
-  description_choose_project: Projektek
   description_query_sort_criteria_attribute: Rendezési szempont
   description_wiki_subpages_reassign: Válasszon új szülőoldalt
   description_selected_columns: Kiválasztott oszlopok
@@ -1237,7 +1226,6 @@
   error_token_expired: "Ez a jelszóváltoztatási link elévült."
   error_spent_on_future_date: "Nem lehet jövőbeli dátumra rögzíteni"
   setting_timelog_accept_future_dates: Jövőbeli időráfordítás elfogadása
-  error_not_allowed_to_log_time_for_other_users: "Nem rögzítheti más felhasználó időráfordítását"
   permission_log_time_for_other_users: Más felhasználók időráfordításának rögzítése
   label_tomorrow: holnap
   label_next_week: jövő hét
@@ -1506,3 +1494,4 @@
   button_remove_from_group: Remove from group
   button_add_to_group: Add to group
   setting_default_issue_due_date_offset: Default due date for new issues
+  field_private_by_default: Private by default

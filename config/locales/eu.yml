@@ -518,7 +518,6 @@ eu:
   label_confirmation: Baieztapena
   label_export_to: 'Eskuragarri baita:'
   label_read: Irakurri...
-  label_public_projects: Proiektu publikoak
   label_open_issues: irekita
   label_open_issues_plural: irekiak
   label_closed_issues: itxita
@@ -547,8 +546,6 @@ eu:
   label_months_from: hilabete noiztik
   label_gantt: Gantt
   label_internal: Barnekoa
-  label_last_changes: "azken %{count} aldaketak"
-  label_change_view_all: Aldaketa guztiak ikusi
   label_comment: Iruzkin
   label_comment_plural: Iruzkinak
   label_x_comments:
@@ -578,7 +575,6 @@ eu:
   label_this_month: hilabete hau
   label_last_month: pasadan hilabetea
   label_this_year: urte hau
-  label_date_range: Data tartea
   label_less_than_ago: egun hauek baino gutxiago
   label_more_than_ago: egun hauek baino gehiago
   label_ago: orain dela
@@ -617,7 +613,6 @@ eu:
   label_wiki_page_plural: Wiki orriak
   label_index_by_title: Izenburuaren araberako indizea
   label_index_by_date: Dataren araberako indizea
-  label_current_version: Uneko bertsioa
   label_preview: Aurreikusi
   label_feed_plural: Jarioak
   label_changes_details: Aldaketa guztien xehetasunak
@@ -666,7 +661,6 @@ eu:
   label_month: Hilabetea
   label_week: Astea
   label_date_from: Nork
-  label_date_to: Nori
   label_language_based: Erabiltzailearen hizkuntzaren arabera
   label_sort_by: "Ordenazioa: %{value}"
   label_send_test_email: Frogako mezua bidali
@@ -701,7 +695,6 @@ eu:
   label_ldap_authentication: LDAP autentikazioa
   label_downloads_abbr: Desk.
   label_optional_description: Aukerako deskribapena
-  label_add_another_file: Beste fitxategia gehitu
   label_preferences: Hobespenak
   label_chronological_order: Orden kronologikoan
   label_reverse_chronological_order: Alderantzizko orden kronologikoan
@@ -819,10 +812,8 @@ eu:
   text_load_default_configuration: Lehenetsitako konfigurazioa kargatu
   text_status_changed_by_changeset: "%{value} aldaketan aplikatuta."
   text_issues_destroy_confirmation: 'Ziur zaude hautatutako zeregina(k) ezabatu nahi dituzula?'
-  text_select_project_modules: 'Hautatu proiektu honetan gaitu behar diren moduluak:'
   text_default_administrator_account_changed: Lehenetsitako kudeatzaile kontua aldatuta
   text_file_repository_writable: Eranskinen direktorioan idatz daiteke
-  text_plugin_assets_writable: Pluginen baliabideen direktorioan idatz daiteke
   text_minimagick_available: MiniMagick eskuragarri (aukerazkoa)
   text_destroy_time_entries_question: "%{hours} orduei buruz berri eman zen zuk ezabatzera zoazen zereginean. Zer egin nahi duzu?"
   text_destroy_time_entries: Ezabatu berri emandako orduak
@@ -950,14 +941,12 @@ eu:
   text_git_repository_note: Repository is bare and local (e.g. /gitrepo, c:\gitrepo)
   description_query_sort_criteria_direction: Sort direction
   description_project_scope: Search scope
-  description_filter: Filter
   description_user_mail_notification: Mail notification settings
   description_message_content: Message content
   description_available_columns: Available Columns
   description_issue_category_reassign: Choose issue category
   description_search: Searchfield
   description_notes: Notes
-  description_choose_project: Projects
   description_query_sort_criteria_attribute: Sort attribute
   description_wiki_subpages_reassign: Choose new parent page
   description_selected_columns: Selected Columns
@@ -1246,7 +1235,6 @@ eu:
   error_token_expired: This password recovery link has expired, please try again.
   error_spent_on_future_date: Cannot log time on a future date
   setting_timelog_accept_future_dates: Accept time logs on future dates
-  error_not_allowed_to_log_time_for_other_users: You are not allowed to log time
     for other users
   permission_log_time_for_other_users: Log spent time for other users
   label_tomorrow: tomorrow
@@ -1572,3 +1560,4 @@ eu:
   button_remove_from_group: Remove from group
   button_add_to_group: Add to group
   setting_default_issue_due_date_offset: Default due date for new issues
+  field_private_by_default: Private by default

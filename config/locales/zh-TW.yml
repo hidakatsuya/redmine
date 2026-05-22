@@ -748,7 +748,6 @@
   label_confirmation: 確認
   label_export_to: 匯出至
   label_read: 讀取...
-  label_public_projects: 公開專案
   label_open_issues: 進行中
   label_open_issues_plural: 進行中
   label_closed_issues: 已結束
@@ -784,8 +783,6 @@
   label_months_from: 個月, 開始月份
   label_gantt: 甘特圖
   label_internal: 內部
-  label_last_changes: "最近 %{count} 個變更"
-  label_change_view_all: 檢視全部的變更
   label_comment: 回應
   label_comment_plural: 回應
   label_x_comments:
@@ -820,7 +817,6 @@
   label_this_month: 這個月
   label_last_month: 上個月
   label_this_year: 今年
-  label_date_range: 日期區間
   label_less_than_ago: 小於幾天之前
   label_more_than_ago: 大於幾天之前
   label_ago: 天以前
@@ -867,7 +863,6 @@
   label_wiki_page_new: 新增 Wiki 頁面
   label_index_by_title: 依標題索引
   label_index_by_date: 依日期索引
-  label_current_version: 現行版本
   label_preview: 預覽
   label_feed_plural: Feeds
   label_changes_details: 所有變更的明細
@@ -923,7 +918,6 @@
   label_month: 月
   label_week: 週
   label_date_from: 開始
-  label_date_to: 結束
   label_language_based: 依用戶之語言決定
   label_sort_by: "按 %{value} 排序"
   label_send_test_email: 寄送測試郵件
@@ -963,7 +957,6 @@
   label_ldap_authentication: LDAP 驗證
   label_downloads_abbr: 下載
   label_optional_description: 額外的說明
-  label_add_another_file: 增加其他檔案
   label_preferences: 偏好選項
   label_chronological_order: 以時間由遠至近排序
   label_reverse_chronological_order: 以時間由近至遠排序
@@ -1199,10 +1192,8 @@
   text_issues_destroy_confirmation: '確定刪除已選擇的議題？'
   text_issues_destroy_descendants_confirmation: "這麼做將會一併刪除 %{count} 子任務。"
   text_time_entries_destroy_confirmation: 您確定要刪除所選擇的工時紀錄？
-  text_select_project_modules: '選擇此專案可使用之模組：'
   text_default_administrator_account_changed: 已變更預設管理員帳號內容
   text_file_repository_writable: 可寫入附加檔案目錄
-  text_plugin_assets_writable: 可寫入外掛程式目錄
   text_minimagick_available: 可使用 MiniMagick (選配)
   text_convert_available: 可使用 ImageMagick 轉換圖片格式 (選配)
   text_destroy_time_entries_question: 您即將刪除的議題已報工 %{hours} 小時. 您的選擇是？
@@ -1269,9 +1260,7 @@
   enumeration_doc_categories: 文件分類
   enumeration_activities: 活動 (時間追蹤)
   enumeration_system_activity: 系統活動
-  description_filter: 篩選條件
   description_search: 搜尋欄位
-  description_choose_project: 專案清單
   description_project_scope: 搜尋範圍
   description_notes: 筆記
   description_message_content: 訊息內容
@@ -1301,7 +1290,6 @@
   error_token_expired: 此密碼復原連結已經過期, 請再試一次.
   error_spent_on_future_date: 無法輸入未來日期的工時紀錄
   setting_timelog_accept_future_dates: 接受輸入未來日期的工時紀錄
-  error_not_allowed_to_log_time_for_other_users: 您未被允許可替他人輸入工時紀錄
   permission_log_time_for_other_users: 輸入他人的工時紀錄
   label_tomorrow: 明天
   label_next_week: 下一週
@@ -1582,3 +1570,4 @@
   button_remove_from_group: Remove from group
   button_add_to_group: Add to group
   setting_default_issue_due_date_offset: Default due date for new issues
+  field_private_by_default: Private by default

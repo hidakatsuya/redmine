@@ -411,7 +411,6 @@ ru:
   general_text_Yes: 'Да'
 
   label_activity: Действия
-  label_add_another_file: Добавить ещё один файл
   label_added_time_by: "Добавил(а) %{author} %{age} назад"
   label_added: добавлено
   label_add_note: Добавить замечание
@@ -446,7 +445,6 @@ ru:
   label_change_plural: Правки
   label_change_properties: Изменить свойства
   label_change_status: Изменить статус
-  label_change_view_all: Просмотреть все изменения
   label_changes_details: Подробности по всем изменениям
   label_changeset_plural: Изменения
   label_chronological_order: В хронологическом порядке
@@ -468,14 +466,11 @@ ru:
   label_copied: скопировано
   label_copy_workflow_from: Скопировать последовательность действий из
   label_current_status: Текущий статус
-  label_current_version: Текущая версия
   label_custom_field: Настраиваемое поле
   label_custom_field_new: Новое настраиваемое поле
   label_custom_field_plural: Настраиваемые поля
   label_date_from: С
   label_date_from_to: С %{start} по %{end}
-  label_date_range: временной интервал
-  label_date_to: по
   label_date: Дата
   label_day_plural: дней(я)
   label_default: По умолчанию
@@ -545,7 +540,6 @@ ru:
   label_issue_watchers: Наблюдатели
   label_jump_to_a_project: Перейти к проекту...
   label_language_based: На основе языка
-  label_last_changes: "менее %{count} изменений"
   label_last_month: прошлый месяц
   label_last_n_days: "последние %{count} дней"
   label_last_week: прошлая неделя
@@ -616,7 +610,6 @@ ru:
   label_project_plural: Проекты
   label_project_plural2: проекта
   label_project_plural5: проектов
-  label_public_projects: Общие проекты
   label_query: Сохранённый запрос
   label_query_new: Новый запрос
   label_query_plural: Сохранённые запросы
@@ -893,14 +886,12 @@ ru:
   text_length_between: "Длина между %{min} и %{max} символов."
   text_load_default_configuration: Загрузить конфигурацию по умолчанию
   text_no_configuration_data: "Роли, трекеры, статусы задач и оперативный план не были сконфигурированы.\nНастоятельно рекомендуется загрузить конфигурацию по-умолчанию. Вы сможете её изменить потом."
-  text_plugin_assets_writable: Каталог ресурсов модулей доступен для записи
   text_project_destroy_confirmation: Вы настаиваете на удалении данного проекта и всей относящейся к нему информации?
   text_reassign_time_entries: 'Перенести зарегистрированное время на следующую задачу:'
   text_regexp_info: "например: ^[A-Z0-9]+$"
   text_repository_usernames_mapping: "Выберите или обновите пользователя Redmine, связанного с найденными именами в журнале хранилища.\nПользователи с одинаковыми именами или email в Redmine и хранилище связываются автоматически."
   text_minimagick_available: Доступно использование MiniMagick (опционально)
   text_select_mail_notifications: Выберите действия, при которых будет отсылаться уведомление на электронную почту.
-  text_select_project_modules: 'Выберите модули, которые будут использованы в проекте:'
   text_status_changed_by_changeset: "Реализовано в %{value} редакции."
   text_subprojects_destroy_warning: "Подпроекты: %{value} также будут удалены."
   text_tip_issue_begin_day: дата начала задачи
@@ -1053,14 +1044,12 @@ ru:
   text_git_repository_note: Хранилище пустое и локальное (т.е. /gitrepo, c:\gitrepo)
   description_query_sort_criteria_direction: Порядок сортировки
   description_project_scope: Область поиска
-  description_filter: Фильтр
   description_user_mail_notification: Настройки почтовых оповещений
   description_message_content: Содержание сообщения
   description_available_columns: Доступные столбцы
   description_issue_category_reassign: Выберите категорию задачи
   description_search: Поле поиска
   description_notes: Примечания
-  description_choose_project: Проекты
   description_query_sort_criteria_attribute: Критерий сортировки
   description_wiki_subpages_reassign: Выбрать новую родительскую страницу
   description_selected_columns: Выбранные столбцы
@@ -1332,7 +1321,6 @@ ru:
   error_token_expired: Срок действия этой ссылки восстановления пароля истёк. Пожалуйста, попробуйте снова.
   error_spent_on_future_date: Нельзя учитывать время в будущие даты
   setting_timelog_accept_future_dates: Принимать трудозатраты на будущие даты
-  error_not_allowed_to_log_time_for_other_users: Вам не разрешено учитывать время для других пользователей
   permission_log_time_for_other_users: Учитывать время других пользователей
   label_tomorrow: завтра
   label_next_week: следующая неделя
@@ -1638,3 +1626,4 @@ ru:
   button_remove_from_group: Remove from group
   button_add_to_group: Add to group
   setting_default_issue_due_date_offset: Default due date for new issues
+  field_private_by_default: Private by default

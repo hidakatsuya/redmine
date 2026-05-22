@@ -591,7 +591,6 @@ et:
   label_confirmation: "Kinnitus"
   label_export_to: "Saadaval ka formaadis"
   label_read: "Loe..."
-  label_public_projects: "Avalikud projektid"
   label_open_issues: "avatud"
   label_open_issues_plural: "avatud"
   label_closed_issues: "suletud"
@@ -624,8 +623,6 @@ et:
   label_months_from: "kuu kaugusel"
   label_gantt: "Gantt"
   label_internal: "Sisemine"
-  label_last_changes: "viimased %{count} muudatust"
-  label_change_view_all: "Kõik muudatused"
   label_comment: "Kommentaar"
   label_comment_plural: "Kommentaarid"
   label_x_comments:
@@ -657,7 +654,6 @@ et:
   label_this_month: "sel kuul"
   label_last_month: "eelmisel kuul"
   label_this_year: "sel aastal"
-  label_date_range: "Kuupäevavahemik"
   label_less_than_ago: "uuem kui"
   label_more_than_ago: "vanem kui"
   label_ago: "vanus"
@@ -697,7 +693,6 @@ et:
   label_wiki_page_plural: "Vikilehed"
   label_index_by_title: "Järjesta pealkirja järgi"
   label_index_by_date: "Järjesta kuupäeva järgi"
-  label_current_version: "Praegune versioon"
   label_preview: "Eelvaade"
   label_feed_plural: "Vood"
   label_changes_details: "Kõigi muudatuste üksikasjad"
@@ -749,7 +744,6 @@ et:
   label_month: "Kuu"
   label_week: "Nädal"
   label_date_from: "Alates"
-  label_date_to: "Kuni"
   label_language_based: "Kasutaja keele põhjal"
   label_sort_by: "Sorteeri %{value} järgi"
   label_send_test_email: "Saada kontrollkiri"
@@ -787,7 +781,6 @@ et:
   label_ldap_authentication: "LDAP autentimine"
   label_downloads_abbr: "A/L"
   label_optional_description: "Teave"
-  label_add_another_file: "Lisa veel üks fail"
   label_preferences: "Eelistused"
   label_chronological_order: "kronoloogiline"
   label_reverse_chronological_order: "tagurpidi kronoloogiline"
@@ -934,10 +927,8 @@ et:
   text_issues_destroy_confirmation: "Oled Sa kindel oma soovis valitud teema(d) kustutada?"
   text_issues_destroy_descendants_confirmation: "See kustutab samuti %{count} alamteemat."
   text_time_entries_destroy_confirmation: "Oled Sa kindel oma soovis valitud ajakulu kanne/kanded kustutada?"
-  text_select_project_modules: "Projektis kasutatavad moodulid"
   text_default_administrator_account_changed: "Algne administraatori konto on muudetud"
   text_file_repository_writable: "Manuste kataloog on kirjutatav"
-  text_plugin_assets_writable: "Lisamoodulite abifailide kataloog on kirjutatav"
   text_minimagick_available: "MiniMagick on kasutatav (ei ole kohustuslik)"
   text_destroy_time_entries_question: "Kustutatavatele teemadele oli kirja pandud %{hours} tundi. Mis Sa soovid ette võtta?"
   text_destroy_time_entries: "Kustuta need tunnid"
@@ -997,9 +988,7 @@ et:
   enumeration_doc_categories: "Dokumentide kategooriad"
   enumeration_activities: "Tegevused (ajakulu)"
   enumeration_system_activity: "Süsteemi aktiivsus"
-  description_filter: "Filter"
   description_search: "Otsinguväli"
-  description_choose_project: "Projektid"
   description_project_scope: "Otsingu ulatus"
   description_notes: "Märkused"
   description_message_content: "Postituse sisu"
@@ -1250,7 +1239,6 @@ et:
   error_token_expired: This password recovery link has expired, please try again.
   error_spent_on_future_date: Cannot log time on a future date
   setting_timelog_accept_future_dates: Accept time logs on future dates
-  error_not_allowed_to_log_time_for_other_users: You are not allowed to log time
     for other users
   permission_log_time_for_other_users: Log spent time for other users
   label_tomorrow: tomorrow
@@ -1576,3 +1564,4 @@ et:
   button_remove_from_group: Remove from group
   button_add_to_group: Add to group
   setting_default_issue_due_date_offset: Default due date for new issues
+  field_private_by_default: Private by default

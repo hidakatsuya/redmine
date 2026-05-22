@@ -643,7 +643,6 @@ lt:
   label_confirmation: Patvirtinimas
   label_export_to: 'Eksportuoti į:'
   label_read: Skaitykite...
-  label_public_projects: Vieši projektai
   label_open_issues: atidaryta
   label_open_issues_plural: atidaryti
   label_closed_issues: uždaryta
@@ -679,8 +678,6 @@ lt:
   label_months_from: mėnesiai nuo
   label_gantt: Gantt
   label_internal: Vidinis
-  label_last_changes: "paskutiniai %{count} pokyčiai(-ių)"
-  label_change_view_all: Peržiūrėti visus pakeitimus
   label_comment: Komentaras
   label_comment_plural: Komentarai
   label_x_comments:
@@ -715,7 +712,6 @@ lt:
   label_this_month: šis mėnuo
   label_last_month: praeitas mėnuo
   label_this_year: šiemet
-  label_date_range: Dienų diapazonas
   label_less_than_ago: vėliau nei prieš dienų
   label_more_than_ago: anksčiau nei prieš dienų
   label_ago: dienų prieš
@@ -760,7 +756,6 @@ lt:
   label_wiki_page_plural: Wiki puslapiai
   label_index_by_title: Rūšiuoti pagal pavadinimą
   label_index_by_date: Rūšiuoti pagal datą
-  label_current_version: Einamoji versija
   label_preview: Peržiūra
   label_feed_plural: Kanalai
   label_changes_details: Visų pakeitimų detalės
@@ -816,7 +811,6 @@ lt:
   label_month: Mėnuo
   label_week: Savaitė
   label_date_from: Nuo
-  label_date_to: Iki
   label_language_based: Pagrįsta vartotojo kalba
   label_sort_by: "Rūšiuoti pagal %{value}"
   label_send_test_email: Nusiųsti bandomąjį laišką
@@ -854,7 +848,6 @@ lt:
   label_ldap_authentication: LDAP autentifikacija
   label_downloads_abbr: Siunt.
   label_optional_description: Laisvai pasirenkamas apibūdinimas
-  label_add_another_file: Pridėti kitą failą
   label_preferences: Savybės
   label_chronological_order: Chronologine tvarka
   label_reverse_chronological_order: Atbuline chronologine tvarka
@@ -1080,10 +1073,8 @@ lt:
   text_issues_destroy_confirmation: 'Ar jūs tikrai norite ištrinti pažymėtą(-us) darbą(-us)?'
   text_issues_destroy_descendants_confirmation: "Taip pat bus ištrinta(-os) %{count} darbo dalis(ys)."
   text_time_entries_destroy_confirmation: 'Ar jūs tikrai norite ištrinti pasirinktą(-us) laiko įrašą(-us)?'
-  text_select_project_modules: 'Parinkite modulius, kuriuos norite naudoti šiame projekte:'
   text_default_administrator_account_changed: Administratoriaus numatytoji paskyra pakeista
   text_file_repository_writable: Į failų saugyklą saugoti galima (RW)
-  text_plugin_assets_writable: Į įskiepių katalogą įrašyti galima
   text_minimagick_available: MiniMagick pasiekiamas (pasirinktinai)
   text_convert_available: ImageMagick konvertavimas galimas (pasirinktinai)
   text_destroy_time_entries_question: "Naikinamam darbui priskirta %{hours} valandų. Ką norite su jomis daryti?"
@@ -1148,9 +1139,7 @@ lt:
   enumeration_doc_categories: Dokumento kategorijos
   enumeration_activities: Veiklos (laiko) sekimas
   enumeration_system_activity: Sistemos veikla
-  description_filter: Filtras
   description_search: Paieškos laukas
-  description_choose_project: Projektai
   description_project_scope: Paieškos sritis
   description_notes: Pastabos
   description_message_content: MŽinutės turinys
@@ -1230,7 +1219,6 @@ lt:
   error_token_expired: Slaptažodio atstatymo nuoroda nebegalioja. Pakartokite procesą iš naujo..
   error_spent_on_future_date: Negalima registruoti laiko pasirenkant ateities datas
   setting_timelog_accept_future_dates: Leisti registruoti laiką pasirenkant ateities datas
-  error_not_allowed_to_log_time_for_other_users: Jūs negalite nurodyti kitų naudotojų darbo trukmes
   permission_log_time_for_other_users: Galima nurodyti kitų naudotojų darbo trukmes
   label_tomorrow: rytoj
   label_next_week: kita savaitė
@@ -1532,3 +1520,4 @@ lt:
   button_remove_from_group: Remove from group
   button_add_to_group: Add to group
   setting_default_issue_due_date_offset: Default due date for new issues
+  field_private_by_default: Private by default

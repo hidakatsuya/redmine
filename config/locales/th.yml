@@ -416,7 +416,6 @@ th:
   label_confirmation: ยืนยัน
   label_export_to: 'รูปแบบอื่นๆ :'
   label_read: อ่าน...
-  label_public_projects: โครงการสาธารณะ
   label_open_issues: เปิด
   label_open_issues_plural: เปิด
   label_closed_issues: ปิด
@@ -445,8 +444,6 @@ th:
   label_months_from: เดือนจาก
   label_gantt: Gantt
   label_internal: ภายใน
-  label_last_changes: "last %{count} เปลี่ยนแปลง"
-  label_change_view_all: ดูการเปลี่ยนแปลงทั้งหมด
   label_comment: ความเห็น
   label_comment_plural: ความเห็น
   label_x_comments:
@@ -474,7 +471,6 @@ th:
   label_this_month: เดือนนี้
   label_last_month: เดือนที่แล้ว
   label_this_year: ปีนี้
-  label_date_range: ช่วงวันที่
   label_less_than_ago: น้อยกว่าหนึ่งวัน
   label_more_than_ago: มากกว่าหนึ่งวัน
   label_ago: วันผ่านมาแล้ว
@@ -507,7 +503,6 @@ th:
   label_wiki_page_plural: หน้า Wiki
   label_index_by_title: เรียงตามชื่อเรื่อง
   label_index_by_date: เรียงตามวัน
-  label_current_version: รุ่นปัจจุบัน
   label_preview: ตัวอย่างก่อนจัดเก็บ
   label_feed_plural: Feeds
   label_changes_details: รายละเอียดการเปลี่ยนแปลงทั้งหมด
@@ -555,7 +550,6 @@ th:
   label_month: เดือน
   label_week: สัปดาห์
   label_date_from: จาก
-  label_date_to: ถึง
   label_language_based: ขึ้นอยู่กับภาษาของผู้ใช้
   label_sort_by: "เรียงโดย %{value}"
   label_send_test_email: ส่งจดหมายทดสอบ
@@ -587,7 +581,6 @@ th:
   label_ldap_authentication: การยืนยันตัวตนโดยใช้ LDAP
   label_downloads_abbr: D/L
   label_optional_description: รายละเอียดเพิ่มเติม
-  label_add_another_file: เพิ่มแฟ้มอื่นๆ
   label_preferences: ค่าที่ชอบใจ
   label_chronological_order: เรียงจากเก่าไปใหม่
   label_reverse_chronological_order: เรียงจากใหม่ไปเก่า
@@ -661,7 +654,6 @@ th:
   text_load_default_configuration: โหลดค่าเริ่มต้น
   text_status_changed_by_changeset: "ประยุกต์ใช้ในกลุ่มการเปลี่ยนแปลง %{value}."
   text_issues_destroy_confirmation: 'คุณแน่ใจไหมว่าต้องการลบปัญหา(ทั้งหลาย)ที่เลือกไว้?'
-  text_select_project_modules: 'เลือกส่วนประกอบที่ต้องการใช้งานสำหรับโครงการนี้:'
   text_default_administrator_account_changed: ค่าเริ่มต้นของบัญชีผู้บริหารจัดการถูกเปลี่ยนแปลง
   text_file_repository_writable: ที่เก็บต้นฉบับสามารถเขียนได้
   text_minimagick_available: MiniMagick มีให้ใช้ (เป็นตัวเลือก)
@@ -770,7 +762,6 @@ th:
   label_updated_time_by: "Updated by %{author} %{age} ago"
   text_diff_truncated: '... This diff was truncated because it exceeds the maximum size that can be displayed.'
   setting_diff_max_lines_displayed: Max number of diff lines displayed
-  text_plugin_assets_writable: Plugin assets directory writable
   warning_attachments_not_saved: "%{count} file(s) could not be saved."
   button_create_and_continue: Create and add another
   text_custom_field_possible_values_info: 'One line for each value'
@@ -944,14 +935,12 @@ th:
   text_git_repository_note: Repository is bare and local (e.g. /gitrepo, c:\gitrepo)
   description_query_sort_criteria_direction: Sort direction
   description_project_scope: Search scope
-  description_filter: Filter
   description_user_mail_notification: Mail notification settings
   description_message_content: Message content
   description_available_columns: Available Columns
   description_issue_category_reassign: Choose issue category
   description_search: Searchfield
   description_notes: Notes
-  description_choose_project: Projects
   description_query_sort_criteria_attribute: Sort attribute
   description_wiki_subpages_reassign: Choose new parent page
   description_selected_columns: Selected Columns
@@ -1241,7 +1230,6 @@ th:
   error_token_expired: This password recovery link has expired, please try again.
   error_spent_on_future_date: Cannot log time on a future date
   setting_timelog_accept_future_dates: Accept time logs on future dates
-  error_not_allowed_to_log_time_for_other_users: You are not allowed to log time
     for other users
   permission_log_time_for_other_users: Log spent time for other users
   label_tomorrow: tomorrow
@@ -1567,3 +1555,4 @@ th:
   button_remove_from_group: Remove from group
   button_add_to_group: Add to group
   setting_default_issue_due_date_offset: Default due date for new issues
+  field_private_by_default: Private by default

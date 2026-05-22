@@ -241,7 +241,6 @@ en:
   error_can_not_delete_auth_source: "This authentication mode is in use and cannot be deleted."
   error_spent_on_future_date: "Cannot log time on a future date"
   error_spent_on_closed_issue: "Cannot log time on a closed issue"
-  error_not_allowed_to_log_time_for_other_users: "You are not allowed to log time for other users"
   error_can_not_execute_macro_html: "Error executing the <strong>%{name}</strong> macro (%{error})"
   error_macro_does_not_accept_block: "This macro does not accept a block of text"
   error_childpages_macro_no_argument: "With no argument, this macro can be called from wiki pages only"
@@ -326,6 +325,7 @@ en:
   field_is_public: Public
   field_parent: Subproject of
   field_is_in_roadmap: Issues displayed in roadmap
+  field_private_by_default: Private by default
   field_login: Login
   field_mail_notification: Email notifications
   field_admin: Administrator
@@ -759,7 +759,6 @@ en:
   label_confirmation: Confirmation
   label_export_to: 'Also available in:'
   label_read: Read...
-  label_public_projects: Public projects
   label_open_issues: open
   label_open_issues_plural: open
   label_closed_issues: closed
@@ -795,8 +794,6 @@ en:
   label_months_from: months from
   label_gantt: Gantt
   label_internal: Internal
-  label_last_changes: "last %{count} changes"
-  label_change_view_all: View all changes
   label_comment: Comment
   label_comment_plural: Comments
   label_x_comments:
@@ -834,7 +831,6 @@ en:
   label_last_month: last month
   label_next_month: next month
   label_this_year: this year
-  label_date_range: Date range
   label_less_than_ago: less than days ago
   label_more_than_ago: more than days ago
   label_ago: days ago
@@ -888,7 +884,6 @@ en:
   label_wiki_page_new: New wiki page
   label_index_by_title: Index by title
   label_index_by_date: Index by date
-  label_current_version: Current version
   label_preview: Preview
   label_feed_plural: Feeds
   label_changes_details: Details of all changes
@@ -948,7 +943,6 @@ en:
   label_month: Month
   label_week: Week
   label_date_from: From
-  label_date_to: To
   label_language_based: Based on user's language
   label_sort_by: "Sort by %{value}"
   label_send_test_email: Send a test email
@@ -995,7 +989,6 @@ en:
   label_ldaps_warning: It is recommended to use an encrypted LDAPS connection with certificate check to prevent any manipulation during the authentication process.
   label_downloads_abbr: D/L
   label_optional_description: Optional description
-  label_add_another_file: Add another file
   label_auto_watch_on: Auto watch
   label_auto_watch_on_issue_created: Issues I created
   label_auto_watch_on_issue_contributed_to: Issues I contributed to
@@ -1339,10 +1332,8 @@ en:
   text_issues_destroy_confirmation: 'Are you sure you want to delete the selected issue(s)?'
   text_issues_destroy_descendants_confirmation: "This will also delete %{count} subtask(s)."
   text_time_entries_destroy_confirmation: 'Are you sure you want to delete the selected time entr(y/ies)?'
-  text_select_project_modules: 'Select modules to enable for this project:'
   text_default_administrator_account_changed: Default administrator account changed
   text_file_repository_writable: Attachments directory writable
-  text_plugin_assets_writable: Plugin assets directory writable
   text_all_migrations_have_been_run: All database migrations have been run
   text_minimagick_available: MiniMagick available (optional)
   text_convert_available: ImageMagick convert available (optional)
@@ -1423,9 +1414,7 @@ en:
   enumeration_doc_categories: Document categories
   enumeration_activities: Activities (time tracking)
   enumeration_system_activity: System Activity
-  description_filter: Filter
   description_search: Searchfield
-  description_choose_project: Projects
   description_project_scope: Search scope
   description_notes: Notes
   description_message_content: Message content

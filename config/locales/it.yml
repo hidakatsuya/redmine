@@ -254,7 +254,6 @@ it:
   error_can_not_delete_auth_source: "Questa modalità di autenticazione è in uso e non può essere eliminata."
   error_spent_on_future_date: "Impossibile registrare il tempo in una data futura"
   error_spent_on_closed_issue: Impossibile registrare il tempo su una segnalazione chiusa
-  error_not_allowed_to_log_time_for_other_users: "Non ti è consentito registrare il tempo speso di altri utenti"
   error_can_not_execute_macro_html: "Errore durante l'esecuzione della macro <strong>%{name}</strong> (%{error})"
   error_macro_does_not_accept_block: "Questa macro non accetta un blocco di testo"
   error_childpages_macro_no_argument: "Questa macro può essere chiamata senza argomenti solo dalle pagine wiki"
@@ -767,7 +766,6 @@ it:
   label_confirmation: Conferma
   label_export_to: Esporta su
   label_read: Leggi...
-  label_public_projects: Progetti pubblici
   label_open_issues: aperta
   label_open_issues_plural: aperte
   label_closed_issues: chiusa
@@ -803,8 +801,6 @@ it:
   label_months_from: mesi da
   label_gantt: Gantt
   label_internal: Interno
-  label_last_changes: "ultime %{count} modifiche"
-  label_change_view_all: Tutte le modifiche
   label_comment: Commento
   label_comment_plural: Commenti
   label_x_comments:
@@ -842,7 +838,6 @@ it:
   label_last_month: ultimo mese
   label_next_month: prossimo mese
   label_this_year: quest'anno
-  label_date_range: Intervallo di date
   label_less_than_ago: meno di giorni fa
   label_more_than_ago: più di giorni fa
   label_ago: giorni fa
@@ -896,7 +891,6 @@ it:
   label_wiki_page_new: Nuova pagina wiki
   label_index_by_title: Ordina per titolo
   label_index_by_date: Ordina per data
-  label_current_version: Versione corrente
   label_preview: Anteprima
   label_feed_plural: Feed
   label_changes_details: Particolari di tutti i cambiamenti
@@ -954,7 +948,6 @@ it:
   label_month: Mese
   label_week: Settimana
   label_date_from: Da
-  label_date_to: A
   label_language_based: Basato sul linguaggio
   label_sort_by: "Ordina per %{value}"
   label_send_test_email: Invia una email di prova
@@ -1000,7 +993,6 @@ it:
   label_ldaps_warning: Si consiglia di utilizzare una connessione LDAPS crittografata con controllo del certificato per evitare qualsiasi manipolazione durante il processo di autenticazione.
   label_downloads_abbr: D/L
   label_optional_description: Descrizione opzionale
-  label_add_another_file: Aggiungi un altro file
   label_auto_watch_on: Osserva automaticamente
   label_auto_watch_on_issue_created: Segnalazioni create da me
   label_auto_watch_on_issue_contributed_to: Segnalazioni a cui ho contribuito
@@ -1321,10 +1313,8 @@ it:
   text_issues_destroy_confirmation: 'Sei sicuro di voler eliminare le segnalazioni selezionate?'
   text_issues_destroy_descendants_confirmation: Questo eliminerà anche %{count} sottoattività.
   text_time_entries_destroy_confirmation: Sei sicuro di voler eliminare l'ora\e selezionata\e?
-  text_select_project_modules: 'Seleziona i moduli abilitati per questo progetto:'
   text_default_administrator_account_changed: L'account amministrativo predefinito è stato modificato
   text_file_repository_writable: Repository dei file scrivibile
-  text_plugin_assets_writable: Directory attività dei plugins scrivibile
   text_all_migrations_have_been_run: Sono state eseguite tutte le migrazioni del database
   text_minimagick_available: MiniMagick disponibile (opzionale)
   text_convert_available: ImageMagick convert disponibile (opzionale)
@@ -1404,9 +1394,7 @@ it:
   enumeration_doc_categories: Categorie di documenti
   enumeration_activities: Attività (time tracking)
   enumeration_system_activity: Attività di sistema
-  description_filter: Filtro
   description_search: Campo di ricerca
-  description_choose_project: Progetti
   description_project_scope: Ambito della ricerca
   description_notes: Note
   description_message_content: Contenuto del messaggio
@@ -1510,3 +1498,4 @@ it:
   button_remove_from_group: Remove from group
   button_add_to_group: Add to group
   setting_default_issue_due_date_offset: Default due date for new issues
+  field_private_by_default: Private by default

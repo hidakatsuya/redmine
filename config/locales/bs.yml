@@ -497,7 +497,6 @@ bs:
   label_confirmation: Potvrda
   label_export_to: 'Također dostupno kao'
   label_read: Čitaj...
-  label_public_projects: Javni projekti
   label_open_issues: Otvoren
   label_open_issues_plural: Otvoreni
   label_closed_issues: Zatvoren
@@ -526,8 +525,6 @@ bs:
   label_months_from: mjeseci od
   label_gantt: Gantogram
   label_internal: Interno
-  label_last_changes: "posljednjih %{count} promjena"
-  label_change_view_all: Pregledaj sve promjene
   label_comment: Komentar
   label_comment_plural: Komentari
   label_x_comments:
@@ -555,7 +552,6 @@ bs:
   label_this_month: ovaj mjesec
   label_last_month: posljednji mjesec
   label_this_year: ova godina
-  label_date_range: Datumski opseg
   label_less_than_ago: ranije nego (dani)
   label_more_than_ago: starije nego (dani)
   label_ago: prije (dani)
@@ -590,7 +586,6 @@ bs:
   label_wiki_page_plural: Wiki stranice
   label_index_by_title: Indeks prema naslovima
   label_index_by_date: Indeks po datumima
-  label_current_version: Tekuća verzija
   label_preview: Pregled
   label_feed_plural: Feedovi
   label_changes_details: Detalji svih promjena
@@ -639,7 +634,6 @@ bs:
   label_month: Mjesec
   label_week: Sedmica
   label_date_from: Od
-  label_date_to: Do
   label_language_based: Bazirano na korisnikovom jeziku
   label_sort_by: "Sortiraj po %{value}"
   label_send_test_email: Pošalji testni email
@@ -672,7 +666,6 @@ bs:
   label_ldap_authentication: LDAP authentifikacija
   label_downloads_abbr: D/L
   label_optional_description: Opis (neobavezno)
-  label_add_another_file: Dodaj još jedan fajl
   label_preferences: Postavke
   label_chronological_order: Hronološki poredak
   label_reverse_chronological_order: Obrnuti hronološki poredak
@@ -750,10 +743,8 @@ bs:
   text_load_default_configuration: Učitaj uobičajenu konfiguraciju
   text_status_changed_by_changeset: "Primjenjeno u setu promjena %{value}."
   text_issues_destroy_confirmation: 'Sigurno želite izbrisati odabranu/e aktivnost/i ?'
-  text_select_project_modules: 'Odaberi module koje želite u ovom projektu:'
   text_default_administrator_account_changed: Uobičajeni administratorski račun je promjenjen
   text_file_repository_writable: U folder sa fajlovima koji su prilozi se može zapisivati
-  text_plugin_assets_writable: U folder sa pluginima se može zapisivati
   text_minimagick_available: MiniMagick available (optional)
   text_destroy_time_entries_question: "%{hours} sati je prijavljeno na aktivnostima koje želite brisati. Želite li to učiniti ?"
   text_destroy_time_entries: Izbriši prijavljeno vrijeme
@@ -959,14 +950,12 @@ bs:
   text_git_repository_note: Repozitorij je prazan i lokalni (npr. /gitrepo, c:\gitrepo)
   description_query_sort_criteria_direction: Smjer sortiranja
   description_project_scope: Opseg pretrage
-  description_filter: Filter
   description_user_mail_notification: Postavke email notifikacija
   description_message_content: Sadržaj poruke
   description_available_columns: Dostupne kolone
   description_issue_category_reassign: Odaberite kategoriju tiketa
   description_search: Polje pretrage
   description_notes: Komentari
-  description_choose_project: Projekti
   description_query_sort_criteria_attribute: Atributi sortiranja
   description_wiki_subpages_reassign: Odaberite novu matičnu stranicu
   description_selected_columns: Označene kolone
@@ -1231,7 +1220,6 @@ bs:
   error_token_expired: This password recovery link has expired, please try again.
   error_spent_on_future_date: Cannot log time on a future date
   setting_timelog_accept_future_dates: Accept time logs on future dates
-  error_not_allowed_to_log_time_for_other_users: You are not allowed to log time
     for other users
   permission_log_time_for_other_users: Log spent time for other users
   label_tomorrow: tomorrow
@@ -1557,3 +1545,4 @@ bs:
   button_remove_from_group: Remove from group
   button_add_to_group: Add to group
   setting_default_issue_due_date_offset: Default due date for new issues
+  field_private_by_default: Private by default

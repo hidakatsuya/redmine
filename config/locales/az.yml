@@ -401,7 +401,6 @@ az:
   general_text_Yes: 'Bəli'
 
   label_activity: Görülən işlər
-  label_add_another_file: Bir fayl daha əlavə etmək
   label_added_time_by: "Əlavə etdi %{author} %{age} əvvəl"
   label_added: əlavə edilib
   label_add_note: Qeydi əlavə etmək
@@ -436,7 +435,6 @@ az:
   label_change_plural: Dəyişikliklər
   label_change_properties: Xassələri dəyişmək
   label_change_status: Statusu dəyişmək
-  label_change_view_all: Bütün dəyişikliklərə baxmaq
   label_changes_details: Bütün dəyişikliklərə görə təfsilatlar
   label_changeset_plural: Dəyişikliklər
   label_chronological_order: Xronoloji ardıcıllıq ilə
@@ -458,14 +456,11 @@ az:
   label_copied: surəti köçürülüb
   label_copy_workflow_from: görülən işlərin ardıcıllığının surətini köçürmək
   label_current_status: Cari status
-  label_current_version: Cari variant
   label_custom_field: Sazlanan sahə
   label_custom_field_new: Yeni sazlanan sahə
   label_custom_field_plural: Sazlanan sahələr
   label_date_from: С
   label_date_from_to: С %{start} по %{end}
-  label_date_range: vaxt intervalı
-  label_date_to: üzrə
   label_date: Tarix
   label_day_plural: gün
   label_default: Susmaya görə
@@ -535,7 +530,6 @@ az:
   label_issue_watchers: Nəzarətçilər
   label_jump_to_a_project: ... layihəyə keçid
   label_language_based: Dilin əsasında
-  label_last_changes: "%{count} az dəyişiklik"
   label_last_month: sonuncu ay
   label_last_n_days: "son %{count} gün"
   label_last_week: sonuncu həftə
@@ -606,7 +600,6 @@ az:
   label_project_plural: Layihələr
   label_project_plural2: layihəni
   label_project_plural5: layihələri
-  label_public_projects: Ümumi layihələr
   label_query: Yadda saxlanılmış sorğu
   label_query_new: Yeni sorğu
   label_query_plural: Yadda saxlanılmış sorğular
@@ -883,14 +876,12 @@ az:
   text_length_between: "%{min} və %{max} simvollar arasındakı uzunluq."
   text_load_default_configuration: Susmaya görə konfiqurasiyanı yükləmək
   text_no_configuration_data: "Rollar, trekerlər, tapşırıqların statusları və operativ plan konfiqurasiya olunmayıblar.\nSusmaya görə konfiqurasiyanın yüklənməsi təkidlə xahiş olunur. Siz onu sonradan dəyişə bilərsiniz."
-  text_plugin_assets_writable: Modullar kataloqu qeyd üçün açıqdır
   text_project_destroy_confirmation: Siz bu layihə və ona aid olan bütün informasiyanı silmək istədiyinizə əminsinizmi?
   text_reassign_time_entries: 'Qeydiyyata alınmış vaxtı aşağıdakı tapşırığa keçir:'
   text_regexp_info: "məsələn: ^[A-Z0-9]+$"
   text_repository_usernames_mapping: "Saxlayıcının jurnalında tapılan adlarla bağlı olan Redmine istifadəçisini seçin və ya yeniləyin.\nEyni ad və e-poçta sahib olan istifadəçilər Redmine və saxlayıcıda avtomatik əlaqələndirilir."
   text_minimagick_available: MiniMagick istifadəsi mümkündür (opsional olaraq)
   text_select_mail_notifications: Elektron poçta bildirişlərin göndərilməsi seçim edəcəyiniz hərəkətlərdən asılıdır.
-  text_select_project_modules: 'Layihədə istifadə olunacaq modulları seçin:'
   text_status_changed_by_changeset: "%{value} redaksiyada reallaşdırılıb."
   text_subprojects_destroy_warning: "Altlayihələr: %{value} həmçinin silinəcək."
   text_tip_issue_begin_day: tapşırığın başlanğıc tarixi
@@ -1043,14 +1034,12 @@ az:
   text_git_repository_note: "Saxlama yerini göstərin (məs: /gitrepo, c:\\gitrepo)"
   description_query_sort_criteria_direction: Çeşidləmə qaydası
   description_project_scope: Layihənin həcmi
-  description_filter: Filtr
   description_user_mail_notification: E-poçt Mail xəbərdarlıqlarının sazlaması
   description_message_content: Mesajın kontenti
   description_available_columns: Mövcud sütunlar
   description_issue_category_reassign: Məsələnin kateqoriyasını seçin
   description_search: Axtarış sahəsi
   description_notes: Qeyd
-  description_choose_project: Layihələr
   description_query_sort_criteria_attribute: Çeşidləmə meyarları
   description_wiki_subpages_reassign: Yeni valideyn səhifəsini seçmək
   description_selected_columns: Seçilmiş sütunlar
@@ -1336,7 +1325,6 @@ az:
   error_token_expired: This password recovery link has expired, please try again.
   error_spent_on_future_date: Cannot log time on a future date
   setting_timelog_accept_future_dates: Accept time logs on future dates
-  error_not_allowed_to_log_time_for_other_users: You are not allowed to log time
     for other users
   permission_log_time_for_other_users: Log spent time for other users
   label_tomorrow: tomorrow
@@ -1662,3 +1650,4 @@ az:
   button_remove_from_group: Remove from group
   button_add_to_group: Add to group
   setting_default_issue_due_date_offset: Default due date for new issues
+  field_private_by_default: Private by default

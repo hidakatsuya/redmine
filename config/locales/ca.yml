@@ -535,7 +535,6 @@ ca:
   label_confirmation: "Confirmació"
   label_export_to: "També disponible a:"
   label_read: "Llegir..."
-  label_public_projects: "Projectes públics"
   label_open_issues: "obert"
   label_open_issues_plural: "oberts"
   label_closed_issues: "tancat"
@@ -564,8 +563,6 @@ ca:
   label_months_from: "mesos des de"
   label_gantt: "Gantt"
   label_internal: "Intern"
-  label_last_changes: "últims %{count} canvis"
-  label_change_view_all: "Visualitza tots els canvis"
   label_comment: "Comentari"
   label_comment_plural: "Comentaris"
   label_x_comments:
@@ -595,7 +592,6 @@ ca:
   label_this_month: "aquest més"
   label_last_month: "l'últim més"
   label_this_year: "aquest any"
-  label_date_range: "Rang de dates"
   label_less_than_ago: "fa menys de"
   label_more_than_ago: "fa més de"
   label_ago: "fa"
@@ -634,7 +630,6 @@ ca:
   label_wiki_page_plural: "Pàgines wiki"
   label_index_by_title: "Índex per títol"
   label_index_by_date: "Índex per data"
-  label_current_version: "Versió actual"
   label_preview: "Previsualitzar"
   label_feed_plural: "Canals"
   label_changes_details: "Detalls de tots els canvis"
@@ -685,7 +680,6 @@ ca:
   label_month: "Mes"
   label_week: "Setmana"
   label_date_from: "Des de"
-  label_date_to: "A"
   label_language_based: "Basat en l'idioma de l'usuari"
   label_sort_by: "Ordenar per %{value}"
   label_send_test_email: "Enviar correu electrònic de prova"
@@ -720,7 +714,6 @@ ca:
   label_ldap_authentication: "Autenticació LDAP"
   label_downloads_abbr: "Baixades"
   label_optional_description: "Descripció opcional"
-  label_add_another_file: "Afegir un altre fitxer"
   label_preferences: "Preferències"
   label_chronological_order: "En ordre cronològic"
   label_reverse_chronological_order: "En ordre cronològic invers"
@@ -841,10 +834,8 @@ ca:
   text_load_default_configuration: "Carregar la configuració predeterminada"
   text_status_changed_by_changeset: "Aplicat en el conjunt de canvis %{value}."
   text_issues_destroy_confirmation: "Segur que voleu suprimir les incidències seleccionades?"
-  text_select_project_modules: "Seleccionar els mòduls a habilitar per a aquest projecte:"
   text_default_administrator_account_changed: "S'ha canviat el compte d'administrador predeterminat"
   text_file_repository_writable: "Es pot escriure en el repositori de fitxers"
-  text_plugin_assets_writable: "Es pot escriure als complements actius"
   text_minimagick_available: "MiniMagick disponible (opcional)"
   text_destroy_time_entries_question: "S'han informat %{hours} hores en les incidències que aneu a suprimir. Què voleu fer?"
   text_destroy_time_entries: "Suprimir les hores informades"
@@ -951,14 +942,12 @@ ca:
   text_git_repository_note: Directori repositori local (p.e. /hgrepo, c:\hgrepo)
   description_query_sort_criteria_direction: "Ordre d'ordenació"
   description_project_scope: "Àmbit de la cerca"
-  description_filter: "Filtre"
   description_user_mail_notification: "Configuració de les notificacions per correu"
   description_message_content: "Contingut del missatge"
   description_available_columns: "Columnes disponibles"
   description_issue_category_reassign: "Escollir una categoria de la incidència"
   description_search: "Camp de cerca"
   description_notes: "Notes"
-  description_choose_project: "Projectes"
   description_query_sort_criteria_attribute: "Atribut d'ordenació"
   description_wiki_subpages_reassign: "Esculli la nova pàgina pare"
   description_selected_columns: "Columnes seleccionades"
@@ -1234,7 +1223,6 @@ ca:
   error_token_expired: Aquests enllaç de recuperació de contrasenya ha caducat, proveu-ho de nou.
   error_spent_on_future_date: No es pot registrar temps en dates futures
   setting_timelog_accept_future_dates: Accceptar registres de temps en dates futures
-  error_not_allowed_to_log_time_for_other_users: No podeu registrar temps dedicat
     per altres usuaris
   permission_log_time_for_other_users: Registrar el temps dedicat per altres usuaris
   label_tomorrow: demà
@@ -1558,3 +1546,4 @@ ca:
   button_remove_from_group: Remove from group
   button_add_to_group: Add to group
   setting_default_issue_due_date_offset: Default due date for new issues
+  field_private_by_default: Private by default

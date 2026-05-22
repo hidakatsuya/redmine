@@ -335,7 +335,6 @@ gl:
   general_text_no: 'non'
   general_text_yes: 'si'
   label_activity: Actividade
-  label_add_another_file: Engadir outro ficheiro
   label_add_note: Engadir unha nota
   label_added: engadido
   label_added_time_by: "Engadido por %{author} hai %{age}"
@@ -369,7 +368,6 @@ gl:
   label_change_plural: Cambios
   label_change_properties: Cambiar propiedades
   label_change_status: Cambiar o estado
-  label_change_view_all: Ver todos os cambios
   label_changes_details: Detalles de todos os cambios
   label_changeset_plural: Cambios
   label_chronological_order: En orde cronolóxica
@@ -399,14 +397,11 @@ gl:
   label_copied: copiado
   label_copy_workflow_from: Copiar fluxo de traballo dende
   label_current_status: Estado actual
-  label_current_version: Versión actual
   label_custom_field: Campo personalizado
   label_custom_field_new: Novo campo personalizado
   label_custom_field_plural: Campos personalizados
   label_date: Data
   label_date_from: Dende
-  label_date_range: Rango de datas
-  label_date_to: Ata
   label_day_plural: días
   label_default: Predeterminada
   label_default_columns: Columnas predeterminadas
@@ -472,7 +467,6 @@ gl:
   label_issues_by: "Peticións por %{value}"
   label_jump_to_a_project: Ir ao proxecto…
   label_language_based: Baseado no idioma
-  label_last_changes: "últimos %{count} cambios"
   label_last_month: último mes
   label_last_n_days: "últimos %{count} días"
   label_last_week: última semana
@@ -540,7 +534,6 @@ gl:
     zero:  "ningún proxecto"
     one:   "un proxecto"
     other: "%{count} proxectos"
-  label_public_projects: Proxectos públicos
   label_query: Consulta personalizada
   label_query_new: Nova consulta
   label_query_plural: Consultas personalizadas
@@ -775,7 +768,6 @@ gl:
   text_repository_usernames_mapping: "Estableza a correspondencia entre os usuarios de Redmine e os presentes no historial do repositorio.\nOs usuarios co mesmo nome ou correo en Redmine e no repositorio serán asociados automaticamente."
   text_minimagick_available: MiniMagick dispoñíbel (opcional)
   text_select_mail_notifications: Seleccionar os eventos a notificar
-  text_select_project_modules: 'Seleccione os módulos a activar para este proxecto:'
   text_status_changed_by_changeset: "Aplicado nos cambios %{value}"
   text_subprojects_destroy_warning: "Os proxectos secundarios: %{value} tamén se eliminarán"
   text_tip_issue_begin_day: tarefa que comeza este día
@@ -790,7 +782,6 @@ gl:
   text_workflow_edit: Seleccionar un fluxo de traballo para actualizar
   warning_attachments_not_saved: "Non foi posíbel gardar %{count} ficheiros."
   field_editable: "Editábel"
-  text_plugin_assets_writable: "Ten permisos de escritura no cartafol de recursos do complemento."
   label_display: "Mostrar"
   button_create_and_continue: "Crear en continuar"
   text_custom_field_possible_values_info: "Cada valor nunha liña."
@@ -963,14 +954,12 @@ gl:
   text_git_repository_note: "O repositorio está baleiro e é local (por exemplo, «/gitrepo» ou «C:\\gitrepo»)"
   description_query_sort_criteria_direction: "Dirección da orde"
   description_project_scope: "Ámbito da busca"
-  description_filter: "Filtro"
   description_user_mail_notification: "Configuración das notificacións por correo electrónico"
   description_message_content: "Contido da mensaxe"
   description_available_columns: "Columnas dispoñíbeis"
   description_issue_category_reassign: "Escolla a categoría da petición."
   description_search: "Campo de busca"
   description_notes: "Notas"
-  description_choose_project: "Proxectos"
   description_query_sort_criteria_attribute: "Ordenar polo atributo"
   description_wiki_subpages_reassign: "Escoller unha nova páxina superior"
   description_selected_columns: "Columnas seleccionadas"
@@ -1254,7 +1243,6 @@ gl:
   error_token_expired: Esta ligazón para recuperar a contrasinal ten caducado, por favor, tente de novo.
   error_spent_on_future_date: Non pode imputar tempo nunha data futura
   setting_timelog_accept_future_dates: Permitir imputar tempo en datas futuras
-  error_not_allowed_to_log_time_for_other_users: Vostede non ten permitido imputar tempo para outros usuarios
   permission_log_time_for_other_users: Imputar tempo dedicado a outros usuarios
   label_tomorrow: mañá
   label_next_week: próxima semana
@@ -1577,3 +1565,4 @@ gl:
   button_remove_from_group: Remove from group
   button_add_to_group: Add to group
   setting_default_issue_due_date_offset: Default due date for new issues
+  field_private_by_default: Private by default

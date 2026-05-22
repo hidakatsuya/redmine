@@ -477,7 +477,6 @@ vi:
   label_confirmation: Khẳng định
   label_export_to: 'Định dạng khác của trang này:'
   label_read: Đọc...
-  label_public_projects: Các dự án công cộng
   label_open_issues: mở
   label_open_issues_plural: mở
   label_closed_issues: đóng
@@ -506,8 +505,6 @@ vi:
   label_months_from: tháng từ
   label_gantt: Biểu đồ sự kiện
   label_internal: Nội bộ
-  label_last_changes: "%{count} thay đổi cuối"
-  label_change_view_all: Xem mọi thay đổi
   label_comment: Bình luận
   label_comment_plural: Bình luận
   label_x_comments:
@@ -535,7 +532,6 @@ vi:
   label_this_month: tháng này
   label_last_month: tháng cuối
   label_this_year: năm này
-  label_date_range: Thời gian
   label_less_than_ago: cách đây dưới
   label_more_than_ago: cách đây hơn
   label_ago: cách đây
@@ -570,7 +566,6 @@ vi:
   label_wiki_page_plural: Trang wiki
   label_index_by_title: Danh sách theo tên
   label_index_by_date: Danh sách theo ngày
-  label_current_version: Bản hiện tại
   label_preview: Xem trước
   label_feed_plural: Nguồn cấp tin
   label_changes_details: Chi tiết của mọi thay đổi
@@ -619,7 +614,6 @@ vi:
   label_month: Tháng
   label_week: Tuần
   label_date_from: Từ
-  label_date_to: Đến
   label_language_based: Theo ngôn ngữ người dùng
   label_sort_by: "Sắp xếp theo %{value}"
   label_send_test_email: Gửi một email kiểm tra
@@ -651,7 +645,6 @@ vi:
   label_ldap_authentication: Chứng thực LDAP
   label_downloads_abbr: Số lượng Download
   label_optional_description: Mô tả bổ sung
-  label_add_another_file: Thêm tập tin khác
   label_preferences: Cấu hình
   label_chronological_order: Bài cũ xếp trước
   label_reverse_chronological_order: Bài mới xếp trước
@@ -729,7 +722,6 @@ vi:
   text_load_default_configuration: Nạp lại cấu hình mặc định
   text_status_changed_by_changeset: "Áp dụng trong changeset : %{value}."
   text_issues_destroy_confirmation: 'Bạn có chắc chắn muốn xóa các vấn đề đã chọn ?'
-  text_select_project_modules: 'Chọn các module cho dự án:'
   text_default_administrator_account_changed: Thay đổi tài khoản quản trị mặc định
   text_file_repository_writable: Cho phép ghi thư mục đính kèm
   text_minimagick_available: Trạng thái MiniMagick
@@ -824,7 +816,6 @@ vi:
   label_updated_time_by: "Cập nhật bởi %{author} cách đây %{age}"
   text_diff_truncated: '... Thay đổi này đã được cắt bớt do nó vượt qua giới hạn kích thước có thể hiển thị.'
   setting_diff_max_lines_displayed: Số dòng thay đổi tối đa được hiển thị
-  text_plugin_assets_writable: Cho phép ghi thư mục Plugin
   warning_attachments_not_saved: "%{count} file không được lưu."
   button_create_and_continue: Tạo và tiếp tục
   text_custom_field_possible_values_info: 'Một dòng cho mỗi giá trị'
@@ -1002,14 +993,12 @@ vi:
   text_git_repository_note: Kho chứa cục bộ và công cộng (vd. /gitrepo, c:\gitrepo)
   description_query_sort_criteria_direction: Chiều sắp xếp
   description_project_scope: Phạm vi tìm kiếm
-  description_filter: Lọc
   description_user_mail_notification: Thiết lập email thông báo
   description_message_content: Nội dung thông điệp
   description_available_columns: Các cột có sẵn
   description_issue_category_reassign: Chọn danh mục vấn đề
   description_search: Trường tìm kiếm
   description_notes: Các chú ý
-  description_choose_project: Các dự án
   description_query_sort_criteria_attribute: Sắp xếp thuộc tính
   description_wiki_subpages_reassign: Chọn một trang cấp trên
   label_parent_revision: Cha
@@ -1275,7 +1264,6 @@ vi:
   error_token_expired: Liên kết khôi phục mật khẩu này đã hết hạn, vui lòng thử lại.
   error_spent_on_future_date: Không thể ghi lại thời gian vào một ngày trong tương lai
   setting_timelog_accept_future_dates: Chấp nhận nhật ký thời gian vào các ngày trong tương lai
-  error_not_allowed_to_log_time_for_other_users: Bạn không được phép ghi lại thời gian cho những người dùng khác
   permission_log_time_for_other_users: Ghi nhật ký dành thời gian cho những người dùng khác
   label_tomorrow: Ngày mai
   label_next_week: tuần tới
@@ -1575,3 +1563,4 @@ vi:
   button_remove_from_group: Remove from group
   button_add_to_group: Add to group
   setting_default_issue_due_date_offset: Default due date for new issues
+  field_private_by_default: Private by default
