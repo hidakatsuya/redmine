@@ -61,6 +61,12 @@ class ActiveSupport::TestCase
   self.use_transactional_tests = true
   self.use_instantiated_fixtures  = false
 
+  setup do
+    # Tests mutate the process-global locale; reset it so test order does not
+    # affect translated assertions in later tests run by the same worker.
+    ::I18n.locale = ::I18n.default_locale
+  end
+
   parallelize_setup do |worker|
     # Use a separate attachment directory for each worker.
     $redmine_tmp_attachments_directory =
