@@ -1332,10 +1332,16 @@ class IssuesControllerTest < Redmine::ControllerTest
   end
 
   def test_index_sort_by_spent_hours
-    get(:index, :params => {:sort => 'spent_hours:desc'})
+    get(
+      :index,
+      :params => {
+        :sort => 'spent_hours:desc',
+        :c => ['subject', 'spent_hours']
+      }
+    )
     assert_response :success
-    hours = issues_in_list.map(&:spent_hours)
-    assert_equal hours.sort.reverse, hours
+    assert_select 'td.spent_hours'
+    assert_equal ['154:15', '1:00', '0:00', '0:00', '0:00', '0:00'], columns_values_in_list('spent_hours')
   end
 
   def test_index_sort_by_spent_hours_should_sort_by_visible_spent_hours
@@ -1364,10 +1370,16 @@ class IssuesControllerTest < Redmine::ControllerTest
   end
 
   def test_index_sort_by_total_spent_hours
-    get(:index, :params => {:sort => 'total_spent_hours:desc'})
+    get(
+      :index,
+      :params => {
+        :sort => 'total_spent_hours:desc',
+        :c => ['subject', 'total_spent_hours']
+      }
+    )
     assert_response :success
-    hours = issues_in_list.map(&:total_spent_hours)
-    assert_equal hours.sort.reverse, hours
+    assert_select 'td.total_spent_hours'
+    assert_equal ['154:15', '1:00', '0:00', '0:00', '0:00', '0:00'], columns_values_in_list('total_spent_hours')
   end
 
   def test_index_sort_by_total_estimated_hours
