@@ -165,6 +165,7 @@ DESC
       ]
       if test_files.any?
         $: << "test"
+        ENV["PARALLEL_WORKERS"] ||= "1"
         Rails::TestUnit::Runner.run_from_rake 'test', test_files
       end
     end
