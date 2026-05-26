@@ -37,8 +37,6 @@ require 'net/ldap'
 require 'mocha/minitest'
 require 'fileutils'
 
-Redmine::SudoMode.disable!
-
 $redmine_tmp_attachments_directory = "#{Rails.root}/tmp/test/attachments"
 FileUtils.mkdir_p $redmine_tmp_attachments_directory
 
@@ -52,7 +50,7 @@ class ActionView::TestCase
 end
 
 class ActiveSupport::TestCase
-  parallelize(workers: 1)
+  parallelize(workers: :number_of_processors)
 
   include ActionDispatch::TestProcess
 
@@ -60,6 +58,28 @@ class ActiveSupport::TestCase
 
   self.use_transactional_tests = true
   self.use_instantiated_fixtures  = false
+
+  setup do
+    Redmine::SudoMode.stubs(:enabled?).returns(false)
+  end
+
+  setup do
+    # Tests mutate the process-global locale; reset it so test order does not
+    # affect translated assertions in later tests run by the same worker.
+    ::I18n.locale = ::I18n.default_locale
+  end
+
+  parallelize_setup do |worker|
+    # Use a separate attachment directory for each worker.
+    $redmine_tmp_attachments_directory =
+      File.join($redmine_tmp_attachments_directory, worker.to_s)
+    FileUtils.mkdir_p $redmine_tmp_attachments_directory
+
+    # Use a separate thumbnail directory for each worker.
+    Attachment.thumbnails_storage_path =
+      File.join(Attachment.thumbnails_storage_path, worker.to_s)
+    FileUtils.mkdir_p Attachment.thumbnails_storage_path
+  end
 
   # Clear Settings cache after each test to prevent test interference
   teardown do
