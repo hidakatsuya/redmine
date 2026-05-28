@@ -155,8 +155,13 @@ DESC
       Rake::Task["db:schema:dump"].invoke
     end
 
+    # Disable parallel tests by default for plugin tests.
+    task :disable_parallel_tests do
+      ENV["PARALLEL_WORKERS"] ||= "1"
+    end
+
     desc 'Runs the plugins tests.'
-    task :test do
+    task :test => %w[disable_parallel_tests] do
       test_files = FileList[
         "plugins/#{ENV['NAME'] || '*'}/test/unit/**/*_test.rb",
         "plugins/#{ENV['NAME'] || '*'}/test/functional/**/*_test.rb",
@@ -171,7 +176,7 @@ DESC
 
     namespace :test do
       desc 'Runs the plugins unit tests.'
-      task :units => "db:test:prepare" do |t|
+      task :units => %w[disable_parallel_tests db:test:prepare] do |t|
         test_files = FileList["plugins/#{ENV['NAME'] || '*'}/test/unit/**/*_test.rb"]
         if test_files.any?
           $: << "test"
@@ -180,7 +185,7 @@ DESC
       end
 
       desc 'Runs the plugins functional tests.'
-      task :functionals => "db:test:prepare" do |t|
+      task :functionals => %w[disable_parallel_tests db:test:prepare] do |t|
         test_files = FileList["plugins/#{ENV['NAME'] || '*'}/test/functional/**/*_test.rb"]
         if test_files.any?
           $: << "test"
@@ -189,7 +194,7 @@ DESC
       end
 
       desc 'Runs the plugins integration tests.'
-      task :integration => "db:test:prepare" do |t|
+      task :integration => %w[disable_parallel_tests db:test:prepare] do |t|
         test_files = FileList["plugins/#{ENV['NAME'] || '*'}/test/integration/**/*_test.rb"]
         if test_files.any?
           $: << "test"
@@ -198,7 +203,7 @@ DESC
       end
 
       desc 'Runs the plugins system tests.'
-      task :system => "db:test:prepare" do |t|
+      task :system => %w[disable_parallel_tests db:test:prepare] do |t|
         test_files = FileList["plugins/#{ENV['NAME'] || '*'}/test/system/**/*_test.rb"]
         if test_files.any?
           $: << "test"
@@ -207,7 +212,7 @@ DESC
       end
 
       desc 'Runs the plugins ui tests.'
-      task :ui => "db:test:prepare" do |t|
+      task :ui => %w[disable_parallel_tests db:test:prepare] do |t|
         test_files = FileList["plugins/#{ENV['NAME'] || '*'}/test/ui/**/*_test.rb"]
         if test_files.any?
           $: << "test"
