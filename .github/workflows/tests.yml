@@ -52,6 +52,10 @@ jobs:
           db-type: ${{ matrix.db }}
           ruby-version: ${{ matrix.ruby }}
 
+      - run: |
+          echo "PARALLEL_WORKERS=$(nproc)" >> $GITHUB_ENV
+          echo "PARALLEL_WORKERS=$PARALLEL_WORKERS"
+
       - name: Run tests
         run: |
           bin/rails test
