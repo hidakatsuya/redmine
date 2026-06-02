@@ -14,6 +14,7 @@ require 'action_view/railtie'
 require 'action_cable/engine'
 # require 'sprockets/railtie'
 require 'rails/test_unit/railtie'
+require_relative '../lib/redmine/test_unit_runner'
 
 Bundler.require(*Rails.groups)
 
