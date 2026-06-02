@@ -26,6 +26,16 @@ end
 
 $redmine_test_ldap_server = ENV['REDMINE_TEST_LDAP_SERVER'] || '127.0.0.1'
 
+plugin_test_arguments = ARGV.map {|arg| arg.tr("\\", "/")}
+if defined?(Rails::TestUnit::Runner)
+  plugin_test_arguments.concat(
+    Rails::TestUnit::Runner.filters.map {|file, _lines| file.tr("\\", "/")}
+  )
+end
+if plugin_test_arguments.any? {|arg| arg.start_with?("plugins/") && arg.include?("/test/")}
+  ENV["PARALLEL_WORKERS"] ||= "1"
+end
+
 ENV["RAILS_ENV"] = "test"
 require_relative '../config/environment'
 require 'rails/test_help'
