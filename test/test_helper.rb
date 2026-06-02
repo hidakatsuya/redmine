@@ -50,7 +50,7 @@ class ActionView::TestCase
 end
 
 class ActiveSupport::TestCase
-  parallelize(workers: :number_of_processors)
+  parallelize(workers: ENV['CI'] ? :number_of_processors : 1)
 
   include ActionDispatch::TestProcess
 
