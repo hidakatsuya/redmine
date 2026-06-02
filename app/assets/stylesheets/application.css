@@ -1068,7 +1068,23 @@ div#roadmap header:target {background-color: var(--oc-blue-0);}
 div#roadmap h3 svg {margin-inline-end: 4px;}
 body.controller-versions.action-show div#roadmap .related-issues {inline-size: 70%;}
 
-div#roadmap .version-article {padding-block-end: 12px;}
+div#roadmap article.version-article {
+  padding-block-start: 16px;
+}
+div#roadmap article.version-article .version-overview > p:first-child {
+  margin-block-start: 0;
+}
+div#roadmap article.version-article .version-overview > p:last-child {
+  margin-block-end: 6px;
+}
+div#roadmap article.version-article .version-overview,
+div#roadmap article.version-article .wiki {
+  padding-inline-start: 1.5rem;
+}
+div#roadmap article.version-article form {
+  display: block;
+  padding-inline-start: 1.5rem;
+}
 
 div#version-summary { float: inline-end; inline-size: 28%; margin-inline-start: 16px; margin-block-end: 16px; background-color: var(--oc-white); }
 div#version-summary fieldset { margin-block-end: 1em; }
@@ -1695,6 +1711,45 @@ img.ui-datepicker-trigger {
 
 #document-list .document-group {
   margin-block-end: 15px;
+}
+#document-list .document-group h3 {
+  padding: 5px;
+  background-color: var(--oc-gray-1);
+  margin: 0;
+}
+#document-list .document-group h3 + .document-item {
+  padding-block-start: 8px;
+}
+#document-list .document-item {
+  padding-block-start: 24px;
+}
+#document-list .document-item svg.icon-svg {
+  margin-inline-end: 4px;
+}
+#document-list .document-item h4.title {
+  font-size: 1rem;
+  font-weight: normal;
+  margin: 0;
+  border-block-end: none;
+}
+#document-list .document-item .updated_on {
+  color: var(--oc-gray-6);
+  font-size: 0.8125rem;
+  padding-inline-start: 1.5rem;
+}
+#document-list .document-item .updated_on em {
+  font-style: normal;
+}
+#document-list .document-item .wiki.description {
+  margin-block-start: 2px;
+  padding-inline-start: 1.5rem;
+  font-size: 0.8125rem;
+}
+#document-list .document-item .wiki.description > p:first-child {
+  margin-block-start: 0;
+}
+#document-list .document-item .wiki.description > p:last-child {
+  margin-block-end: 0;
 }
 
 /***** Progress bar *****/
@@ -2409,6 +2464,24 @@ div.news .reaction {
   float: inline-end;
   font-size: 0.9em;
   margin-inline-start: 10px;
+}
+#news-list article.news-article {
+  padding-block-start: 10px;
+}
+#news-list article.news-article header p.author,
+#news-list article.news-article .wiki {
+  margin-inline-start: 2rem;
+}
+#news-list article.news-article header h3 {
+  margin-block-end: 2px;
+}
+#news-list article.news-article header p.author {
+  margin-block-start: 2px;
+  margin-block-end: 2px;
+  color: var(--oc-gray-6);
+}
+#news-list article.news-article .wiki > p:first-child {
+  margin-block-start: 2px;
 }
 
 /* Custom JQuery styles */
