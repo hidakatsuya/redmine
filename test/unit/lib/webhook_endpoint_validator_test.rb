@@ -60,6 +60,26 @@ class WebhookEndpointValidatorTest < ActiveSupport::TestCase
     end
   end
 
+  test "should validate IPs" do
+    assert_not_empty WebhookEndpointValidator.ips_for_uri("https://example.com")
+
+    %w[
+      127.0.0.1
+      ::ffff:127.0.0.1
+      localhost
+    ].each do |host|
+      assert_empty WebhookEndpointValidator.ips_for_uri("https://#{host}")
+      assert_nil WebhookEndpointValidator.valid_ips(host)
+    end
+
+    %w[
+      missinghost.invalid
+    ].each do |host|
+      assert_empty WebhookEndpointValidator.ips_for_uri("https://#{host}")
+      assert_raises(SocketError) { WebhookEndpointValidator.valid_ips(host) }
+    end
+  end
+
   test "should validate ports" do
     %w[
       http://example.com:22
@@ -96,11 +116,15 @@ class WebhookEndpointValidatorTest < ActiveSupport::TestCase
         224.0.0.1
         ::1/128
         [::1]
-        fe80::/10
+        fe80::123
+        [fe80::123]
 
         0.0.0.0
         ::
         [::]
+
+        [::ffff:127.0.0.1]
+        [::ffff:7f00:1]
       ].each do |ip|
         assert_not WebhookEndpointValidator.safe_webhook_uri? ip
         h = TestModel.new "http://#{ip}"
