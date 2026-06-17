@@ -7,7 +7,7 @@
   <%= link_to sprite_icon('zoom-in', l(:label_details)),
               project_issues_report_details_path(@project, :detail => 'tracker'),
               :class => 'icon-only icon-zoom-in',
-              :title => l(:label_details) %>
+              :data => tooltip_stimulus_attributes(text: l(:label_details)) %>
 </h3>
 <%= render :partial => 'simple', :locals => { :data => @issues_by_tracker, :field_name => "tracker_id", :rows => @trackers } %>
 <br />
@@ -16,7 +16,7 @@
   <%= link_to sprite_icon('zoom-in', l(:label_details)),
               project_issues_report_details_path(@project, :detail => 'priority'),
               :class => 'icon-only icon-zoom-in',
-              :title => l(:label_details) %>
+              :data => tooltip_stimulus_attributes(text: l(:label_details)) %>
 </h3>
 <%= render :partial => 'simple', :locals => { :data => @issues_by_priority, :field_name => "priority_id", :rows => @priorities } %>
 <br />
@@ -25,7 +25,7 @@
   <%= link_to sprite_icon('zoom-in', l(:label_details)),
               project_issues_report_details_path(@project, :detail => 'assigned_to'),
               :class => 'icon-only icon-zoom-in',
-              :title => l(:label_details) %>
+              :data => tooltip_stimulus_attributes(text: l(:label_details)) %>
 </h3>
 <%= render :partial => 'simple', :locals => { :data => @issues_by_assigned_to, :field_name => "assigned_to_id", :rows => @assignees } %>
 <br />
@@ -34,7 +34,7 @@
   <%= link_to sprite_icon('zoom-in', l(:label_details)),
               project_issues_report_details_path(@project, :detail => 'author'),
               :class => 'icon-only icon-zoom-in',
-              :title => l(:label_details) %>
+              :data => tooltip_stimulus_attributes(text: l(:label_details)) %>
 </h3>
 <%= render :partial => 'simple', :locals => { :data => @issues_by_author, :field_name => "author_id", :rows => @authors } %>
 <br />
@@ -47,7 +47,7 @@
   <%= link_to sprite_icon('zoom-in', l(:label_details)),
               project_issues_report_details_path(@project, :detail => 'version'),
               :class => 'icon-only icon-zoom-in',
-              :title => l(:label_details) %>
+              :data => tooltip_stimulus_attributes(text: l(:label_details)) %>
 </h3>
 <%= render :partial => 'simple', :locals => { :data => @issues_by_version, :field_name => "fixed_version_id", :rows => @versions } %>
 <br />
@@ -57,7 +57,7 @@
   <%= link_to sprite_icon('zoom-in', l(:label_details)),
               project_issues_report_details_path(@project, :detail => 'subproject'),
               :class => 'icon-only icon-zoom-in',
-              :title => l(:label_details) %>
+              :data => tooltip_stimulus_attributes(text: l(:label_details)) %>
 </h3>
 <%= render :partial => 'simple', :locals => { :data => @issues_by_subproject, :field_name => "project_id", :rows => @subprojects } %>
 <br />
@@ -67,7 +67,7 @@
   <%= link_to sprite_icon('zoom-in', l(:label_details)),
               project_issues_report_details_path(@project, :detail => 'category'),
               :class => 'icon-only icon-zoom-in',
-              :title => l(:label_details) %>
+              :data => tooltip_stimulus_attributes(text: l(:label_details)) %>
 </h3>
 <%= render :partial => 'simple', :locals => { :data => @issues_by_category, :field_name => "category_id", :rows => @categories } %>
 <br />

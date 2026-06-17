@@ -120,7 +120,8 @@ module ApplicationHelper
     end
     only_path = options[:only_path].nil? ? true : options[:only_path]
     s = link_to(text, issue_url(issue, :only_path => only_path),
-                :class => issue.css_classes, :title => title)
+                :class => issue.css_classes,
+                :data => tooltip_stimulus_attributes(text: title))
     s << h(": #{subject}") if subject
     s = h("#{issue.project} - ") + s if options[:project]
     s
@@ -166,7 +167,7 @@ module ApplicationHelper
       {:controller => 'repositories', :action => 'revision',
        :id => repository.project,
        :repository_id => repository.identifier_param, :rev => rev},
-      :title => l(:label_revision_id, format_revision(revision)),
+      :data => tooltip_stimulus_attributes(text: l(:label_revision_id, format_revision(revision))),
       :accesskey => options[:accesskey]
     )
   end
@@ -216,7 +217,7 @@ module ApplicationHelper
   def link_to_version(version, options = {})
     return '' unless version && version.is_a?(Version)
 
-    options = {:title => format_date(version.effective_date)}.merge(options)
+    options[:data] = tooltip_stimulus_attributes(text: format_date(version.effective_date))
     link_to_if version.visible?, format_version_name(version), version_path(version), options
   end
 
@@ -319,7 +320,7 @@ module ApplicationHelper
             object,
             :class => ['icon-only', 'icon-download'],
             :icon => 'download',
-            :title => l(:button_download),
+            :data => tooltip_stimulus_attributes(text: l(:button_download)),
             :download => true
           ),
           class: 'attachment-filename'
@@ -353,7 +354,8 @@ module ApplicationHelper
   def thumbnail_tag(attachment)
     thumbnail_size = Setting.thumbnails_size.to_i
     thumbnail_path = thumbnail_path(attachment, :size => thumbnail_size * 2)
-    tag.div class: 'thumbnail', title: attachment.filename do
+    tag.div class: 'thumbnail',
+            data: tooltip_stimulus_attributes(text: attachment.filename) do
       link_to(
         image_tag(
           thumbnail_path,
@@ -500,16 +502,11 @@ module ApplicationHelper
           href = {:controller => 'wiki', :action => 'show',
                   :project_id => page.project, :id => page.title, :version => nil}
         end
-        content <<
-          link_to(
-            h(page.pretty_title),
-            href,
-            :title => (if options[:timestamp] && page.updated_on
-                         l(:label_updated_time, distance_of_time_in_words(Time.now, page.updated_on))
-                       else
-                         nil
-                       end)
-          )
+        tooltip =
+          if options[:timestamp] && page.updated_on
+            l(:label_updated_time, distance_of_time_in_words(Time.now, page.updated_on))
+          end
+        content << link_to(h(page.pretty_title), href, :data => tooltip_stimulus_attributes(text: tooltip))
         content << "\n" + render_page_hierarchy(pages, page.id, options) if pages[page.id]
         content << "</li>\n"
       end
@@ -585,7 +582,7 @@ module ApplicationHelper
       padding = level * 16
       text = content_tag('span', project.name, :style => "padding-inline-start:#{padding}px;")
       s << link_to(text, project_path(project, :jump => jump),
-                   :title => project.name,
+                   :data => tooltip_stimulus_attributes(text: project.name),
                    :class => (project == selected ? 'selected' : nil))
     end
     [
@@ -795,9 +792,9 @@ module ApplicationHelper
     if @project
       link_to(text,
               project_activity_path(@project, :from => User.current.time_to_date(time)),
-              :title => format_time(time))
+              :data => tooltip_stimulus_attributes(text: format_time(time)))
     else
-      content_tag('abbr', text, :title => format_time(time))
+      content_tag('abbr', text, :data => tooltip_stimulus_attributes(text: format_time(time)))
     end
   end
 
@@ -818,11 +815,13 @@ module ApplicationHelper
     data = {
       :reorder_url => options[:url] || url_for(object),
       :reorder_param => options[:param] || object.class.name.underscore
-    }
+    }.merge(
+      tooltip_stimulus_attributes(text: l(:button_sort))
+    )
+
     content_tag('span', sprite_icon('reorder', ''),
                 :class => "icon-only icon-sort-handle sort-handle",
-                :data => data,
-                :title => l(:button_sort))
+                :data => data)
   end
 
   def breadcrumb(*args)
@@ -900,7 +899,7 @@ module ApplicationHelper
     if content.present?
       trigger =
         content_tag('span', sprite_icon('3-bullets', l(:button_actions)), :class => 'icon-only icon-actions',
-                    :title => l(:button_actions))
+                    :data => tooltip_stimulus_attributes(text: l(:button_actions)))
       trigger = content_tag('span', trigger, :class => 'drdn-trigger')
       content = content_tag('div', content, :class => 'drdn-items')
       content = content_tag('div', content, :class => 'drdn-content')
@@ -1180,11 +1179,11 @@ module ApplicationHelper
                                     find_by_repository_id_and_revision(repository.id, identifier))
                 link = link_to(h("#{project_prefix}#{repo_prefix}r#{identifier}"),
                                {:only_path => only_path, :controller => 'repositories',
-                                :action => 'revision', :id => project,
-                                :repository_id => repository.identifier_param,
-                                :rev => changeset.revision},
+                               :action => 'revision', :id => project,
+                               :repository_id => repository.identifier_param,
+                               :rev => changeset.revision},
                                :class => 'changeset',
-                               :title => truncate_single_line_raw(changeset.comments, 100))
+                               :data => tooltip_stimulus_attributes(text: truncate_single_line_raw(changeset.comments, 100)))
               end
             end
           elsif sep == '#' || sep == '##'
@@ -1200,12 +1199,12 @@ module ApplicationHelper
                     link_to("#{issue.tracker.name} ##{oid}#{comment_suffix}: #{issue.subject}",
                             url,
                             :class => issue.css_classes,
-                            :title => "#{l(:field_status)}: #{issue.status.name}")
+                            :data => tooltip_stimulus_attributes(text: "#{l(:field_status)}: #{issue.status.name}"))
                   else
                     link_to("##{oid}#{comment_suffix}",
                             url,
                             :class => issue.css_classes,
-                            :title => "#{issue.tracker.name}: #{issue.subject.truncate(100)} (#{issue.status.name})")
+                            :data => tooltip_stimulus_attributes(text: "#{issue.tracker.name}: #{issue.subject.truncate(100)} (#{issue.status.name})"))
                   end
               elsif identifier == 'note'
                 link = link_to("#note-#{comment_id}", "#note-#{comment_id}")
@@ -1290,7 +1289,7 @@ module ApplicationHelper
                          :repository_id => repository.identifier_param,
                         :rev => changeset.identifier},
                         :class => 'changeset',
-                        :title => truncate_single_line_raw(changeset.comments, 100)
+                        :data => tooltip_stimulus_attributes(text: truncate_single_line_raw(changeset.comments, 100))
                       )
                   end
                 else
@@ -1396,7 +1395,7 @@ module ApplicationHelper
               :section => @current_section),
             :class => 'icon-only icon-edit'),
           :class => "contextual heading-#{level}",
-          :title => l(:button_edit_section),
+          :data => tooltip_stimulus_attributes(text: l(:button_edit_section)),
           :id => "section-#{@current_section}") + heading.html_safe
       else
         heading
@@ -1438,6 +1437,16 @@ module ApplicationHelper
       list_autofill_text_formatting_param: Setting.text_formatting,
       selection_indent_text_formatting_param: Setting.text_formatting,
       table_paste_text_formatting_param: Setting.text_formatting
+    }
+  end
+
+  def tooltip_stimulus_attributes(text:)
+    return {} if text.blank?
+
+    {
+      controller: 'tooltip',
+      action: 'mouseenter->tooltip#show mouseleave->tooltip#hide',
+      tooltip_text_value: text
     }
   end
 
@@ -1610,7 +1619,10 @@ module ApplicationHelper
   end
 
   def link_to_context_menu
-    link_to sprite_icon('3-bullets', l(:button_actions)), '#', title: l(:button_actions), class: 'icon-only icon-actions js-contextmenu '
+    link_to sprite_icon('3-bullets', l(:button_actions)),
+            '#',
+            class: 'icon-only icon-actions js-contextmenu ',
+            data: tooltip_stimulus_attributes(text: l(:button_actions))
   end
 
   # Helper to render JSON in views
@@ -1639,7 +1651,7 @@ module ApplicationHelper
     css_classes += ' ' + options[:class] if options[:class]
     link_to_function sprite_icon('checked', ''),
                      "toggleCheckboxesBySelector('#{selector}')",
-                     :title => "#{l(:button_check_all)} / #{l(:button_uncheck_all)}",
+                     :data => tooltip_stimulus_attributes(text: "#{l(:button_check_all)} / #{l(:button_uncheck_all)}"),
                      :class => css_classes
   end
 
@@ -1657,19 +1669,19 @@ module ApplicationHelper
         'tr',
         (if pcts[0] > 0
            content_tag('td', '', :style => "width: #{pcts[0]}%;",
-                       :class => 'closed', :title => titles[0])
+                       :class => 'closed', :data => tooltip_stimulus_attributes(text: titles[0]))
          else
            ''.html_safe
          end) +
         (if pcts[1] > 0
            content_tag('td', '', :style => "width: #{pcts[1]}%;",
-                      :class => 'done', :title => titles[1])
+                      :class => 'done', :data => tooltip_stimulus_attributes(text: titles[1]))
          else
            ''.html_safe
          end) +
         (if pcts[2] > 0
            content_tag('td', '', :style => "width: #{pcts[2]}%;",
-                                   :class => 'todo', :title => titles[2])
+                                   :class => 'todo', :data => tooltip_stimulus_attributes(text: titles[2]))
          else
            ''.html_safe
          end)

@@ -55,7 +55,12 @@ module WatchersHelper
       s << avatar(user, :size => "16").to_s if user.is_a?(User)
       s << link_to_principal(user, class: user.class.to_s.downcase)
       if object.respond_to?(:visible?) && user.is_a?(User) && !object.visible?(user)
-        s << content_tag('span', sprite_icon('warning', l(:notice_invalid_watcher)), class: 'icon-only icon-warning', title: l(:notice_invalid_watcher))
+        s << content_tag(
+          'span',
+          sprite_icon('warning', l(:notice_invalid_watcher)),
+          class: 'icon-only icon-warning',
+          data: tooltip_stimulus_attributes(text: l(:notice_invalid_watcher))
+        )
       end
       if remove_allowed
         url = {:controller => 'watchers',
@@ -67,7 +72,7 @@ module WatchersHelper
         s << link_to(sprite_icon('link-break', l(:button_remove)), url,
                      :remote => true, :method => 'delete',
                      :class => "delete icon-only icon-link-break",
-                     :title => l(:button_remove))
+                     :data => tooltip_stimulus_attributes(text: l(:button_remove)))
       end
       content << content_tag('li', s, :class => "user-#{user.id}")
     end

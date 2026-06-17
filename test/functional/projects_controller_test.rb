@@ -264,7 +264,7 @@ class ProjectsControllerTest < Redmine::ControllerTest
     get :index, :params => { :query_id => query.id }
     assert_response :success
     assert_select 'h2', :text => query.name
-    assert_select '#sidebar a.query.selected[title=?]', query.description, :text => query.name
+    assert_select '#sidebar a.query.selected[data-controller=?][data-tooltip-text-value=?]', 'tooltip', query.description, :text => query.name
   end
 
   def test_index_should_retrieve_default_query
@@ -275,7 +275,7 @@ class ProjectsControllerTest < Redmine::ControllerTest
       @request.session[:user_id] = user_id
       get :index
       assert_select 'h2', text: query.name
-      assert_select '#sidebar a.query.selected[title=?]', query.description, :text => query.name
+      assert_select '#sidebar a.query.selected[data-controller=?][data-tooltip-text-value=?]', 'tooltip', query.description, :text => query.name
     end
   end
 

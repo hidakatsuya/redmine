@@ -163,7 +163,7 @@ class IssuesController < ApplicationController
           flash[:notice] =
             l(:notice_issue_successful_create,
               :id => view_context.link_to("##{@issue.id}", issue_path(@issue),
-                                          :title => @issue.subject))
+                                          :data => view_context.tooltip_stimulus_attributes(text: @issue.subject)))
           redirect_after_create
         end
         format.api do

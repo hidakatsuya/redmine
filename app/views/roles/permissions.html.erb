@@ -66,7 +66,7 @@
         </td>
         <% @roles.each do |role| %>
           <% if role.setable_permissions.include? permission %>
-            <td title="<%= "#{humanized_perm_name} (#{role.name})" %>">
+            <td <%= tag.attributes(data: tooltip_stimulus_attributes(text: "#{humanized_perm_name} (#{role.name})")) %>>
               <%= check_box_tag "permissions[#{role.id}][]", permission.name, (role.permissions.include? permission.name), :id => nil, :class => "role-#{role.id}" %>
             </td>
           <% else %>

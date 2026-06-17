@@ -103,7 +103,7 @@ module CustomFieldsHelper
   def custom_field_name_tag(custom_field)
     title = custom_field.description.presence
     css = title ? "field-description" : nil
-    content_tag 'span', custom_field.name, :title => title, :class => css
+    content_tag 'span', custom_field.name, :class => css, :data => tooltip_stimulus_attributes(text: title)
   end
 
   # Return custom field label tag
