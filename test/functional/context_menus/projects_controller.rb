@@ -19,14 +19,32 @@
 
 require_relative '../../test_helper'
 
-class RoutingContextMenusTest < Redmine::RoutingTest
-  def test_context_menus_time_entries
-    should_route 'GET /time_entries/context_menu' => 'context_menus/time_entries#index'
-    should_route 'POST /time_entries/context_menu' => 'context_menus/time_entries#index'
-  end
+module ContextMenus
+  class ProjectsControllerTest < Redmine::ControllerTest
+    def test_index_admin_user
+      @request.session[:user_id] = 1
 
-  def test_context_menus_issues
-    should_route 'GET /issues/context_menu' => 'context_menus/issues#index'
-    should_route 'POST /issues/context_menu' => 'context_menus/issues#index'
+      get(
+        :index,
+        :params => {
+          :ids => [1, 2]
+        }
+      )
+
+      assert_response :success
+    end
+
+    def test_index_not_admin_user
+      @request.session[:user_id] = 2
+
+      get(
+        :index,
+        :params => {
+          :ids => [1, 2]
+        }
+      )
+
+      assert_response :forbidden
+    end
   end
 end

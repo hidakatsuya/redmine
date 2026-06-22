@@ -17,16 +17,27 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require_relative '../../test_helper'
+module ContextMenus
+  class ProjectsController < BaseController
+    before_action :require_admin
+    before_action :find_projects
 
-class RoutingContextMenusTest < Redmine::RoutingTest
-  def test_context_menus_time_entries
-    should_route 'GET /time_entries/context_menu' => 'context_menus/time_entries#index'
-    should_route 'POST /time_entries/context_menu' => 'context_menus/time_entries#index'
-  end
+    def index
+      render_context_menu 'projects'
+    end
 
-  def test_context_menus_issues
-    should_route 'GET /issues/context_menu' => 'context_menus/issues#index'
-    should_route 'POST /issues/context_menu' => 'context_menus/issues#index'
+    private
+
+    def find_projects
+      @projects = Project.where(id: params[:ids]).to_a
+      if @projects.empty?
+        render_404
+        return
+      end
+
+      if @projects.size == 1
+        @project = @projects.first
+      end
+    end
   end
 end

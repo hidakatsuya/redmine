@@ -10,10 +10,10 @@ gem 'roadie-rails', '~> 3.4.0'
 gem 'marcel'
 gem 'mail', '~> 2.9.0'
 gem 'nokogiri', '~> 1.19.1'
-gem 'i18n', '~> 1.14.1'
+gem 'i18n', '~> 1.15.2'
 gem 'rbpdf', '~> 1.21.4'
 gem 'addressable'
-gem 'rubyzip', '~> 3.3.0'
+gem 'rubyzip', '~> 3.4.0'
 gem 'propshaft', '~> 1.3.0'
 gem 'rack', '>= 3.1.3'
 gem "stimulus-rails", "~> 1.3"
@@ -115,7 +115,7 @@ group :test do
   gem "capybara", ">= 3.39"
   gem 'selenium-webdriver', '>= 4.11.0'
   # RuboCop
-  gem 'rubocop', '~> 1.87.0', require: false
+  gem 'rubocop', '~> 1.88.0', require: false
   gem 'rubocop-performance', '~> 1.26.0', require: false
   gem 'rubocop-rails', '~> 2.34.3', require: false
   gem 'bundle-audit', require: false

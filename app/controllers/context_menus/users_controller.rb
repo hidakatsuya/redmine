@@ -17,16 +17,29 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require_relative '../../test_helper'
+module ContextMenus
+  class UsersController < BaseController
+    before_action :require_admin
+    before_action :find_users
 
-class RoutingContextMenusTest < Redmine::RoutingTest
-  def test_context_menus_time_entries
-    should_route 'GET /time_entries/context_menu' => 'context_menus/time_entries#index'
-    should_route 'POST /time_entries/context_menu' => 'context_menus/time_entries#index'
-  end
+    def index
+      @groups = Group.givable.sorted.to_a
+      @common_group_ids = Group.givable.joins(:groups_users).where(groups_users: { user_id: @users.map(&:id) }).distinct.pluck(:id).to_set
 
-  def test_context_menus_issues
-    should_route 'GET /issues/context_menu' => 'context_menus/issues#index'
-    should_route 'POST /issues/context_menu' => 'context_menus/issues#index'
+      render_context_menu 'users'
+    end
+
+    private
+
+    def find_users
+      @users = User.where(id: params[:id] || params[:ids]).to_a
+      raise ActiveRecord::RecordNotFound if @users.empty?
+
+      if @users.size == 1
+        @user = @users.first
+      end
+    rescue ActiveRecord::RecordNotFound
+      render_404
+    end
   end
 end
