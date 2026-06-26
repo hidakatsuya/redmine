@@ -155,19 +155,29 @@ module ApplicationHelper
   # Generates a link to a SCM revision
   # Options:
   # * :text - Link text (default to the formatted revision)
+  # * :only_path - Generate a path instead of a full URL (default: true)
+  # * :accesskey - HTML accesskey attribute
+  # Other options are passed as HTML attributes.
   def link_to_revision(revision, repository, options={})
     if repository.is_a?(Project)
       repository = repository.repository
     end
     text = options.delete(:text) || format_revision(revision)
+    only_path = options.delete(:only_path)
     rev = revision.respond_to?(:identifier) ? revision.identifier : revision
-    link_to(
-      h(text),
+    url_options =
       {:controller => 'repositories', :action => 'revision',
        :id => repository.project,
-       :repository_id => repository.identifier_param, :rev => rev},
-      :title => l(:label_revision_id, format_revision(revision)),
-      :accesskey => options[:accesskey]
+       :repository_id => repository.identifier_param, :rev => rev}
+    url_options[:only_path] = only_path unless only_path.nil?
+    accesskey = options.delete(:accesskey)
+    html_options = options.dup
+    html_options[:title] = l(:label_revision_id, format_revision(revision)) unless html_options.key?(:title)
+    html_options[:accesskey] = accesskey if accesskey
+    link_to(
+      h(text),
+      url_options,
+      html_options
     )
   end
 
@@ -1178,13 +1188,15 @@ module ApplicationHelper
               if repository &&
                    (changeset = Changeset.visible.
                                     find_by_repository_id_and_revision(repository.id, identifier))
-                link = link_to(h("#{project_prefix}#{repo_prefix}r#{identifier}"),
-                               {:only_path => only_path, :controller => 'repositories',
-                                :action => 'revision', :id => project,
-                                :repository_id => repository.identifier_param,
-                                :rev => changeset.revision},
-                               :class => 'changeset',
-                               :title => truncate_single_line_raw(changeset.comments, 100))
+                link =
+                  link_to_revision(
+                    changeset.revision,
+                    repository,
+                    :text => "#{project_prefix}#{repo_prefix}r#{identifier}",
+                    :only_path => only_path,
+                    :class => 'changeset',
+                    :title => truncate_single_line_raw(changeset.comments, 100)
+                  )
               end
             end
           elsif sep == '#' || sep == '##'
@@ -1283,12 +1295,11 @@ module ApplicationHelper
                               repository.id, "#{name}%"
                             ).first)
                     link =
-                      link_to(
-                        h("#{project_prefix}#{repo_prefix}#{name}"),
-                        {:only_path => only_path, :controller => 'repositories',
-                         :action => 'revision', :id => project,
-                         :repository_id => repository.identifier_param,
-                        :rev => changeset.identifier},
+                      link_to_revision(
+                        changeset,
+                        repository,
+                        :text => "#{project_prefix}#{repo_prefix}#{name}",
+                        :only_path => only_path,
                         :class => 'changeset',
                         :title => truncate_single_line_raw(changeset.comments, 100)
                       )

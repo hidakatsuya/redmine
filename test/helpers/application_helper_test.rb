@@ -800,6 +800,27 @@ class ApplicationHelperTest < Redmine::HelperTest
     end
   end
 
+  def test_redmine_revision_links_should_use_link_to_revision
+    @project = Project.find(3)
+    r = Repository::Mercurial.create!(:project => @project, :url => '/tmp/test')
+    Changeset.create!(
+      :repository => r,
+      :committed_on => Time.now,
+      :revision => '123',
+      :scmid => 'abcd',
+      :comments => 'test commit'
+    )
+    original_link_to_revision = method(:link_to_revision)
+    define_singleton_method(:link_to_revision) do |*args|
+      original_link_to_revision.call(*args).sub('<a ', '<a data-link-to-revision="true" ').html_safe
+    end
+
+    with_settings :text_formatting => 'textile' do
+      result = textilizable('r123 commit:abcd')
+      assert_equal 2, result.scan('data-link-to-revision="true"').size
+    end
+  end
+
   def test_attachment_links
     text = 'attachment:error281.txt'
     result = link_to("error281.txt", "/attachments/1",
