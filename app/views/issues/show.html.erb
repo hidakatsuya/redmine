@@ -5,6 +5,10 @@
   <span class="badge badge-private private"><%= l(:field_is_private) %></span>
 <% end %>
 
+<div
+  data-controller="quote-reply-hotkeys"
+  data-action="keydown.r@document->quote-reply-hotkeys#quote"
+  data-quote-reply-hotkeys-quote-reply-outlet="[data-controller~='quote-reply']">
 <div class="<%= @issue.css_classes %> details">
   <% if @prev_issue_id || @next_issue_id %>
     <div class="next-prev-links contextual">
@@ -153,6 +157,7 @@ end %>
 </div>
 
 <%= render partial: 'action_menu_edit' unless User.current.wants_comments_in_reverse_order? %>
+</div>
 
 <% other_formats_links do |f| %>
   <%= f.link_to 'PDF' %>
