@@ -899,12 +899,13 @@ module ApplicationHelper
     content = capture(&)
     if content.present?
       trigger =
-        content_tag('span', sprite_icon('3-bullets', l(:button_actions)), :class => 'icon-only icon-actions',
-                    :title => l(:button_actions))
-      trigger = content_tag('span', trigger, :class => 'drdn-trigger')
-      content = content_tag('div', content, :class => 'drdn-items')
-      content = content_tag('div', content, :class => 'drdn-content')
-      content_tag('span', trigger + content, :class => 'drdn')
+        content_tag('span', sprite_icon('3-bullets', l(:button_actions)),
+                    :class => 'icon-only icon-actions dropdown-trigger',
+                    :title => l(:button_actions),
+                    :data => {:action => "click->dropdown#toggle"})
+      items = content_tag('span', content, :class => 'dropdown-items')
+      content = content_tag('span', items, :class => 'dropdown-content hidden', :data => {:dropdown_target => "content"})
+      content_tag('span', trigger + content, :class => 'dropdown', :data => {:controller => "dropdown"})
     end
   end
 
@@ -971,12 +972,12 @@ module ApplicationHelper
     @heading_anchors = {}
     @current_section = 0 if options[:edit_section_links]
 
-    parse_sections(text, project, obj, attr, only_path, options)
     text = parse_non_pre_blocks(text, obj, macros, options) do |txt|
       [:parse_wiki_links, :parse_redmine_links].each do |method_name|
         send method_name, txt, project, obj, attr, only_path, options
       end
     end
+    parse_sections(text, project, obj, attr, only_path, options)
     parse_headings(text, project, obj, attr, only_path, options)
 
     if @parsed_headings.any?
