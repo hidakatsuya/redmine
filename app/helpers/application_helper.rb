@@ -156,8 +156,7 @@ module ApplicationHelper
   # Options:
   # * :text - Link text (default to the formatted revision)
   # * :only_path - Generate a path instead of a full URL (default: true)
-  # * :accesskey - HTML accesskey attribute
-  # Other options are passed as HTML attributes.
+  # Other options are passed as HTML attributes (eg. :class, :title, :accesskey).
   def link_to_revision(revision, repository, options={})
     if repository.is_a?(Project)
       repository = repository.repository
@@ -170,15 +169,8 @@ module ApplicationHelper
        :id => repository.project,
        :repository_id => repository.identifier_param, :rev => rev}
     url_options[:only_path] = only_path unless only_path.nil?
-    accesskey = options.delete(:accesskey)
-    html_options = options.dup
-    html_options[:title] = l(:label_revision_id, format_revision(revision)) unless html_options.key?(:title)
-    html_options[:accesskey] = accesskey if accesskey
-    link_to(
-      h(text),
-      url_options,
-      html_options
-    )
+    options[:title] = l(:label_revision_id, format_revision(revision)) unless options.key?(:title)
+    link_to(h(text), url_options, options)
   end
 
   # Generates a link to a message
