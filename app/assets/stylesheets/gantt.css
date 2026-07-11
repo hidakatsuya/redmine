@@ -47,6 +47,7 @@
 .gantt__row {
   display: grid;
   grid-template-columns: var(--gantt-information-width) var(--gantt-timeline-width);
+  inline-size: calc(var(--gantt-information-width) + var(--gantt-timeline-width));
 }
 
 .gantt__header {
@@ -117,7 +118,7 @@
 .gantt__column-resizer {
   position: absolute;
   inset-block: 0;
-  inset-inline-end: -4px;
+  inset-inline-end: 0;
   z-index: 2;
   inline-size: 8px;
   cursor: ew-resize;
