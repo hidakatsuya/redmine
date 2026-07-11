@@ -6,6 +6,7 @@
 ## 開発
 
 * Redmined https://github.com/hidakatsuya/redmined を使う
+* Redmined は Apple container https://github.com/apple/container で使う。Apple container が起動していない場合は `container system start` を実行して起動する
 * Rails 関連のコマンドは全て Redmined を通して実行する
 * `redmined` は non tty モードで実行する: `redmined -T ls`
 * 例:
