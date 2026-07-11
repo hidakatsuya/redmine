@@ -1,0 +1,9 @@
+<div class="gantt__sidebar-grid">
+  <div class="gantt__subject-cell">
+    <%= gantt_version_row_subject_tag(row) %>
+  </div>
+
+  <% chart.selected_columns.each do %>
+    <div class="gantt__column-cell"></div>
+  <% end %>
+</div>

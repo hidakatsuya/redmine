@@ -15,6 +15,9 @@ class Redmine::Gantt::ChartBuilderTest < ActiveSupport::TestCase
     assert chart.rows.any?
     assert_equal chart.rows.map(&:row_key).uniq, chart.rows.map(&:row_key)
     assert chart.rows.all? {|row| row.record.is_a?(Project) || row.record.is_a?(Version) || row.record.is_a?(Issue)}
+    assert chart.rows.grep(Redmine::Gantt::ProjectRow).any?
+    assert chart.rows.grep(Redmine::Gantt::VersionRow).any?
+    assert chart.rows.grep(Redmine::Gantt::IssueRow).any?
   end
 
   test 'describes hierarchy with stable parent row keys' do
@@ -25,6 +28,20 @@ class Redmine::Gantt::ChartBuilderTest < ActiveSupport::TestCase
     assert_nil project_row.parent_row_key
     assert child_row
     assert_operator child_row.depth, :>, project_row.depth
+  end
+
+  test 'keeps typed rows in project version and issue traversal order' do
+    rows = build_chart.rows
+    project_index = rows.index {|row| row.row_key == "project-#{@project.id}"}
+    version_index = rows.index {|row| row.row_key == 'version-2'}
+    issue_index = rows.index {|row| row.row_key == 'issue-2'}
+
+    assert_instance_of Redmine::Gantt::ProjectRow, rows[project_index]
+    assert_instance_of Redmine::Gantt::VersionRow, rows[version_index]
+    assert_instance_of Redmine::Gantt::IssueRow, rows[issue_index]
+    assert_operator project_index, :<, version_index
+    assert_operator version_index, :<, issue_index
+    assert_equal 'version-2', rows[issue_index].parent_row_key
   end
 
   test 'places a subproject below its visible parent project' do

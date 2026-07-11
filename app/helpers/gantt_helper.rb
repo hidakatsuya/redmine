@@ -18,6 +18,16 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 module GanttHelper
+  GANTT_ROW_PARTIALS = {
+    Redmine::Gantt::ProjectRow => 'gantts/rows/project',
+    Redmine::Gantt::VersionRow => 'gantts/rows/version',
+    Redmine::Gantt::IssueRow => 'gantts/rows/issue'
+  }.freeze
+
+  def gantt_row_partial(row)
+    GANTT_ROW_PARTIALS.fetch(row.class)
+  end
+
   SELECTED_COLUMN_WIDTH = 96
 
   def gantt_zoom_link(gantt, in_or_out)
@@ -130,17 +140,34 @@ module GanttHelper
     ].join('; ')
   end
 
-  def gantt_row_subject_tag(row)
-    css_classes = ["gantt__subject-text", *row.subject_css_classes]
-    content = case row.kind
-              when :issue
-                gantt_issue_subject_content(row)
-              when :version
-                gantt_version_subject_content(row)
-              when :project
-                gantt_project_subject_content(row)
-              end
+  def gantt_project_row_subject_tag(row)
+    gantt_row_subject_tag(
+      row,
+      gantt_project_subject_content(row),
+      gantt_project_subject_css_classes(row),
+      ['gantt__subject--project', 'project-name']
+    )
+  end
 
+  def gantt_version_row_subject_tag(row)
+    gantt_row_subject_tag(
+      row,
+      gantt_version_subject_content(row),
+      gantt_version_subject_css_classes(row),
+      ['gantt__subject--version', 'version-name']
+    )
+  end
+
+  def gantt_issue_row_subject_tag(row)
+    gantt_row_subject_tag(
+      row,
+      gantt_issue_subject_content(row),
+      gantt_issue_subject_css_classes(row),
+      ['gantt__subject--issue', 'issue-subject', 'hascontextmenu']
+    )
+  end
+
+  def gantt_row_subject_tag(row, content, css_classes, container_classes)
     expander = if row.has_children
                  content_tag(
                    :button,
@@ -156,9 +183,11 @@ module GanttHelper
                  content_tag(:span, '', :class => 'gantt__expander-placeholder', :aria => {:hidden => 'true'})
                end
 
-    content_tag(:div, class: gantt_subject_container_classes(row), id: gantt_subject_dom_id(row.record)) do
+    container_classes = ['gantt__subject', *container_classes]
+    container_classes << 'is-open' if row.has_children
+    content_tag(:div, class: container_classes.join(' '), id: gantt_subject_dom_id(row.record)) do
       expander +
-        content_tag(:span, content, :class => css_classes.join(' '), :title => row.subject)
+        content_tag(:span, content, :class => ['gantt__subject-text', *css_classes].join(' '), :title => row.subject)
     end
   end
 
@@ -169,19 +198,19 @@ module GanttHelper
   end
 
   def gantt_bar_classes(row)
-    [*row.bar_css_classes, 'gantt__bar', 'task_todo']
+    [*gantt_bar_base_classes(row), 'gantt__bar', 'task_todo']
   end
 
   def gantt_done_bar_classes(row)
-    [*row.bar_css_classes, 'gantt__bar', 'gantt__bar--done', 'task_done']
+    [*gantt_bar_base_classes(row), 'gantt__bar', 'gantt__bar--done', 'task_done']
   end
 
   def gantt_late_bar_classes(row)
-    [*row.bar_css_classes, 'gantt__bar', 'gantt__bar--late', 'task_late']
+    [*gantt_bar_base_classes(row), 'gantt__bar', 'gantt__bar--late', 'task_late']
   end
 
   def gantt_marker_classes(row, side)
-    [*row.bar_css_classes, 'gantt__marker', "gantt__marker--#{side}", side == :start ? 'starting' : 'ending']
+    [*gantt_bar_base_classes(row), 'gantt__marker', "gantt__marker--#{side}", side == :start ? 'starting' : 'ending']
   end
 
   def gantt_bar_dom_id(row, state)
@@ -189,23 +218,45 @@ module GanttHelper
   end
 
   def gantt_progress_state(row)
-    row.subject_state
+    return 'none' if row.project?
+    return 'closed' if row.closed?
+    return 'over-end' if row.over_end_date?
+    return 'behind-start' if row.behind_start_date?
+
+    'todo'
   end
 
   private
 
-  def gantt_subject_container_classes(row)
-    classes =
-      case row.kind
-      when :issue
-        ['gantt__subject', 'gantt__subject--issue', 'issue-subject', 'hascontextmenu']
-      when :version
-        ['gantt__subject', 'gantt__subject--version', 'version-name']
-      else
-        ['gantt__subject', 'gantt__subject--project', 'project-name']
-      end
-    classes << 'is-open' if row.has_children
-    classes.join(' ')
+  def gantt_project_subject_css_classes(row)
+    row.overdue? ? ['project-overdue'] : []
+  end
+
+  def gantt_version_subject_css_classes(row)
+    classes = []
+    classes << 'version-behind-schedule' if row.behind_schedule?
+    classes << 'version-overdue' if row.overdue?
+    classes << 'version-closed' if row.closed?
+    classes << 'behind-start-date' if row.behind_start_date?
+    classes << 'over-end-date' if row.over_end_date?
+    classes
+  end
+
+  def gantt_issue_subject_css_classes(row)
+    classes = []
+    classes << 'issue-overdue' if row.overdue?
+    classes << 'issue-behind-schedule' if row.behind_schedule?
+    classes << 'issue-closed' if row.closed?
+    classes << 'behind-start-date' if row.behind_start_date?
+    classes << 'over-end-date' if row.over_end_date?
+    classes
+  end
+
+  def gantt_bar_base_classes(row)
+    classes = ['task', row.kind.to_s]
+    return classes unless row.issue?
+
+    classes.tap {|values| values[-1] = row.parent? ? 'parent' : 'leaf'}
   end
 
   def gantt_subject_dom_id(record)

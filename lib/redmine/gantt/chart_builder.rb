@@ -4,6 +4,11 @@ module Redmine
   module Gantt
     class ChartBuilder
       DEFAULT_SUBJECT_WIDTH = 330
+      ROW_BUILDERS = {
+        Project => ProjectRowBuilder,
+        Version => VersionRowBuilder,
+        Issue => IssueRowBuilder
+      }.freeze
 
       class MaxRowsReached < StandardError
       end
@@ -12,7 +17,6 @@ module Redmine
         @gantt = gantt
         @query = query
         @rows = []
-        @schedule_builder = ScheduleBuilder.new(gantt)
       end
 
       def build
@@ -51,7 +55,7 @@ module Redmine
 
       def append_project(project, level)
         parent_row_key = "project-#{project.parent_id}" if level.positive?
-        add_row(project, :project, level, parent_row_key)
+        add_row(project, level, parent_row_key)
 
         issues = @gantt.project_issues(project).select {|issue| issue.fixed_version_id.nil?}
         append_issues(issues, level + 1, "project-#{project.id}")
@@ -64,7 +68,7 @@ module Redmine
       end
 
       def append_version(project, version, depth)
-        add_row(version, :version, depth, "project-#{project.id}")
+        add_row(version, depth, "project-#{project.id}")
         append_issues(@gantt.version_issues(project, version), depth + 1, "version-#{version.id}")
       end
 
@@ -84,73 +88,24 @@ module Redmine
               parent_row_key
             end
 
-          add_row(issue, :issue, issue_depth, issue_parent_row_key)
+          add_row(issue, issue_depth, issue_parent_row_key)
           ancestors << issue unless issue.leaf?
         end
       end
 
-      def add_row(record, kind, depth, parent_row_key)
+      def add_row(record, depth, parent_row_key)
         @row_count += 1
         if @gantt.max_rows && @row_count > @gantt.max_rows
           raise MaxRowsReached
         end
 
-        @rows << Row.new(
-          :row_key => row_key(record),
-          :kind => kind,
+        builder = ROW_BUILDERS.fetch(record.class)
+        @rows << builder.new(
+          record,
+          :gantt => @gantt,
           :depth => depth,
-          :parent_row_key => parent_row_key,
-          :has_children => has_children?(record),
-          :subject => subject_text(record),
-          :schedule => build_schedule(record, kind),
-          :editable => record.is_a?(Issue) && record.editable?(User.current),
-          :record => record,
-          :subject_state => subject_state(record, kind),
-          :subject_css_classes => subject_css_classes(record, kind),
-          :bar_css_classes => bar_css_classes(record, kind)
-        )
-      end
-
-      def build_schedule(record, kind)
-        case kind
-        when :project
-          return unless record.start_date && record.due_date
-
-          @schedule_builder.build(
-            :start_on => record.start_date,
-            :end_on => record.due_date,
-            :progress => nil,
-            :markers => true,
-            :label => record.name
-          )
-        when :version
-          return unless record.start_date && record.due_date
-
-          percent = record.visible_fixed_issues.completed_percent
-          label = "#{record} #{percent.to_f.round}%"
-          label = "#{record.project} - #{label}" unless @gantt.project && @gantt.project == record.project
-
-          @schedule_builder.build(
-            :start_on => record.start_date,
-            :end_on => record.due_date,
-            :progress => percent,
-            :markers => true,
-            :label => label
-          )
-        when :issue
-          return unless record.due_before
-
-          label = record.status.name.dup
-          label << " #{record.done_ratio}%" unless record.disabled_core_fields.include?('done_ratio')
-
-          @schedule_builder.build(
-            :start_on => record.start_date,
-            :end_on => record.due_before,
-            :progress => record.done_ratio,
-            :markers => !record.leaf?,
-            :label => label
-          )
-        end
+          :parent_row_key => parent_row_key
+        ).build
       end
 
       def selected_columns
@@ -275,108 +230,6 @@ module Redmine
         return unless User.current.today.between?(@gantt.date_from, @gantt.date_to)
 
         (User.current.today - @gantt.date_from + 1).to_i
-      end
-
-      def row_key(record)
-        "#{record.class.name.demodulize.downcase}-#{record.id}"
-      end
-
-      def subject_text(record)
-        case record
-        when Project
-          record.name
-        when Version
-          record.to_s_with_project
-        when Issue
-          record.subject
-        end
-      end
-
-      def has_children?(record)
-        case record
-        when Project
-          @gantt.projects.any? {|project| project.parent_id == record.id} ||
-            @gantt.project_issues(record).any? ||
-            @gantt.project_versions(record).any?
-        when Version
-          @gantt.version_issues(record.project, record).any?
-        when Issue
-          return false if record.leaf?
-
-          children = record.children & @gantt.project_issues(record.project)
-          children.any? {|child| child.fixed_version_id == record.fixed_version_id}
-        else
-          false
-        end
-      end
-
-      def subject_state(record, kind)
-        case kind
-        when :issue
-          return 'closed' if record.closed?
-          return 'over-end' if over_end_date?(record, record.done_ratio, record.due_before)
-          return 'behind-start' if behind_start_date?(record, record.done_ratio, record.due_before)
-
-          'todo'
-        when :version
-          percent = record.visible_fixed_issues.completed_percent
-          return 'closed' unless record.open?
-          return 'over-end' if over_end_date?(record, percent, record.due_date)
-          return 'behind-start' if behind_start_date?(record, percent, record.due_date)
-
-          'todo'
-        else
-          'none'
-        end
-      end
-
-      def subject_css_classes(record, kind)
-        classes = []
-        case kind
-        when :issue
-          classes << 'issue-overdue' if record.overdue?
-          classes << 'issue-behind-schedule' if record.behind_schedule?
-          classes << 'issue-closed' if record.closed?
-          classes << 'behind-start-date' if behind_start_date?(record, record.done_ratio, record.due_before)
-          classes << 'over-end-date' if over_end_date?(record, record.done_ratio, record.due_before)
-        when :version
-          classes << 'version-behind-schedule' if record.behind_schedule?
-          classes << 'version-overdue' if record.overdue?
-          classes << 'version-closed' unless record.open?
-          percent = record.visible_fixed_issues.completed_percent
-          classes << 'behind-start-date' if behind_start_date?(record, percent, record.due_date)
-          classes << 'over-end-date' if over_end_date?(record, percent, record.due_date)
-        when :project
-          classes << 'project-overdue' if record.overdue?
-        end
-        classes
-      end
-
-      def bar_css_classes(record, kind)
-        classes = ['task']
-        case kind
-        when :project
-          classes << 'project'
-        when :version
-          classes << 'version'
-        when :issue
-          classes << (record.leaf? ? 'leaf' : 'parent')
-        end
-        classes
-      end
-
-      def behind_start_date?(record, progress, end_on)
-        return false unless record.start_date && end_on && progress
-
-        progress_date = record.start_date + (end_on - record.start_date + 1) * (progress / 100.0)
-        progress_date < @gantt.date_from
-      end
-
-      def over_end_date?(record, progress, end_on)
-        return false unless record.start_date && end_on && progress
-
-        progress_date = record.start_date + (end_on - record.start_date + 1) * (progress / 100.0)
-        progress_date > @gantt.date_to && progress > 0
       end
     end
   end
