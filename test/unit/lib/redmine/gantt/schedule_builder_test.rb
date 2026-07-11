@@ -51,4 +51,42 @@ class Redmine::Gantt::ScheduleBuilderTest < ActiveSupport::TestCase
 
     assert_not schedule.visible?
   end
+
+  test 'preserves the legacy gantt date calculations' do
+    travel_to Date.new(2026, 1, 15) do
+      gantt = Redmine::Helpers::Gantt.new(:year => 2026, :month => 1, :months => 1)
+      builder = Redmine::Gantt::ScheduleBuilder.new(gantt)
+      cases = [
+        [Date.new(2025, 12, 28), Date.new(2026, 1, 1), 30],
+        [Date.new(2026, 1, 1), Date.new(2026, 1, 1), 0],
+        [Date.new(2026, 1, 8), Date.new(2026, 1, 22), 30],
+        [Date.new(2026, 1, 31), Date.new(2026, 2, 2), 100],
+        [Date.new(2026, 2, 2), Date.new(2026, 2, 4), 50]
+      ]
+
+      cases.each do |start_on, end_on, progress|
+        legacy = gantt.send(:coordinates, start_on, end_on, progress, 1)
+        schedule = builder.build(
+          :start_on => start_on,
+          :end_on => end_on,
+          :progress => progress,
+          :markers => true,
+          :label => '_'
+        )
+
+        assert_offset legacy[:start], schedule.start_offset
+        assert_offset legacy[:end], schedule.end_offset
+        assert_offset legacy[:bar_start], schedule.bar_start_offset
+        assert_offset legacy[:bar_end], schedule.bar_end_offset
+        assert_offset legacy[:bar_progress_end], schedule.progress_offset
+        assert_offset legacy[:bar_late_end], schedule.late_offset
+      end
+    end
+  end
+
+  private
+
+  def assert_offset(expected, actual)
+    expected.nil? ? assert_nil(actual) : assert_equal(expected, actual)
+  end
 end
