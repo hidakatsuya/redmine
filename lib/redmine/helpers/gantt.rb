@@ -56,7 +56,8 @@ module Redmine
         end
       end
 
-      attr_reader :year_from, :month_from, :date_from, :date_to, :zoom, :months, :truncated, :max_rows
+      attr_accessor :truncated
+      attr_reader :year_from, :month_from, :date_from, :date_to, :zoom, :months, :max_rows
       attr_reader :query, :project
       attr_accessor :view
 
@@ -106,10 +107,6 @@ module Redmine
       def project=(project)
         @project = project
         @chart = nil
-      end
-
-      def truncated=(truncated)
-        @truncated = truncated
       end
 
       def chart

@@ -45,23 +45,19 @@ module GanttHelper
   end
 
   def gantt_chart_tag(query, chart, project: nil, &)
-    active_column_count = query.draw_selected_columns ? chart.selected_columns.size : 0
-    active_columns_width = active_column_count * SELECTED_COLUMN_WIDTH
+    selected_columns_width = chart.selected_columns.size * SELECTED_COLUMN_WIDTH
     data_attributes = {
       controller: 'gantt--chart',
       action: %w(
         gantt--options:toggle-display@document->gantt--chart#handleOptionsDisplay
-        gantt--options:selected-columns-changed@document->gantt--chart#handleSelectedColumnsChanged
         gantt--options:toggle-relations@document->gantt--chart#handleOptionsRelations
         gantt--options:toggle-progress@document->gantt--chart#handleOptionsProgress
         gantt:row-toggled->gantt--chart#handleLayoutInvalidated
         gantt:sidebar-resized->gantt--chart#handleSidebarResized
         resize@window->gantt--chart#handleWindowResize
-        scroll->gantt--chart#handleScroll
       ).join(' '),
       'gantt--chart-issue-relation-types-value': Redmine::Helpers::Gantt::DRAW_TYPES.transform_values(&:symbolize_keys).to_json,
       'gantt--chart-relations-value': chart.relations.map(&:to_h).to_json,
-      'gantt--chart-active-columns-value': chart.selected_columns.map {|column| column.name.to_s }.to_json,
       'gantt--chart-show-selected-columns-value': query.draw_selected_columns ? 'true' : 'false',
       'gantt--chart-show-relations-value': query.draw_relations ? 'true' : 'false',
       'gantt--chart-show-progress-value': query.draw_progress_line ? 'true' : 'false'
@@ -71,8 +67,8 @@ module GanttHelper
       "--gantt-row-height: #{chart.row_height}px",
       "--gantt-header-rows: #{chart.header_layers}",
       "--gantt-day-width: #{chart.day_width}px",
-      "--gantt-columns-width: #{active_columns_width}px",
-      "--gantt-active-columns-count: #{active_column_count}",
+      "--gantt-selected-columns-width: #{selected_columns_width}px",
+      "--gantt-selected-columns-count: #{chart.selected_columns.size}",
       "--gantt-subject-width: #{chart.sidebar_subject_width}px",
       "--gantt-timeline-width: #{chart.timeline_width}px"
     ].join('; ')
@@ -91,7 +87,7 @@ module GanttHelper
   end
 
   def gantt_sidebar_grid_style(chart)
-    "grid-template-columns: minmax(0, var(--gantt-subject-width)) repeat(var(--gantt-active-columns-count), #{SELECTED_COLUMN_WIDTH}px)"
+    "grid-template-columns: minmax(0, var(--gantt-subject-width)) repeat(#{chart.selected_columns.size}, #{SELECTED_COLUMN_WIDTH}px)"
   end
 
   def gantt_row_style(row)
@@ -171,12 +167,6 @@ module GanttHelper
     return ''.html_safe unless row.issue?
 
     content_tag(:div, column_content(column, row.record), :class => ['gantt__cell-value', column.css_classes].compact.join(' '))
-  end
-
-  def gantt_timeline_row_classes(row)
-    classes = ['gantt__timeline-row']
-    classes << "gantt__timeline-row--#{row.kind}"
-    classes
   end
 
   def gantt_bar_classes(row)

@@ -13,25 +13,13 @@ class GanttsTest < ApplicationSystemTestCase
 
     assert_no_selector '.gantt.is-showing-columns'
     assert_in_delta 330, sidebar_width, 1
-    assert_no_selector '.gantt__column-header[data-column-name="status"]', visible: true
-    assert_no_selector '.gantt__column-header[data-column-name="priority"]', visible: true
-    assert_no_selector '.gantt__column-header[data-column-name="assigned_to"]', visible: true
-    assert_no_selector '.gantt__column-header[data-column-name="updated_on"]', visible: true
+    assert_no_selector '.gantt__column-header', visible: true
 
     find('#draw_selected_columns').check
 
     assert_selector '.gantt.is-showing-columns'
     assert sidebar_width > 330
-    assert_selector '.gantt__column-header[data-column-name="status"]'
-    assert_selector '.gantt__column-header[data-column-name="priority"]'
-    assert_selector '.gantt__column-header[data-column-name="assigned_to"]'
-    assert_selector '.gantt__column-header[data-column-name="updated_on"]'
-
-    move_available_column_to_selected('due_date')
-    assert_selector '.gantt__column-header[data-column-name="due_date"]'
-
-    move_selected_column_to_available('updated_on')
-    assert_no_selector '.gantt__column-header[data-column-name="updated_on"]', visible: true
+    assert_selector '.gantt__column-header', count: 4
   end
 
   test 'related issues toggle displays and hides relation arrows' do
@@ -72,28 +60,29 @@ class GanttsTest < ApplicationSystemTestCase
     assert width_after > width_before
   end
 
-  test 'sidebar rows align with timeline rows' do
+  test 'information and timeline cells share a row' do
     visit_gantt
     expand_options
 
     alignment = page.evaluate_script(<<~JS)
       (() => {
-        const sidebarRow = document.querySelector('.gantt__row[data-row-key="project-1"]')
-        const timelineRow = document.querySelector('.gantt__timeline-row[data-row-key="project-1"]')
-        const sidebarHeader = document.querySelector('.gantt__header--sidebar')
-        const timelineHeader = document.querySelector('.gantt__header--timeline')
+        const row = document.querySelector('.gantt__row[data-row-key="project-1"]')
+        const information = row.querySelector('.gantt__row-information')
+        const timeline = row.querySelector('.gantt__timeline-cell')
+        const informationHeader = document.querySelector('.gantt__header-information')
+        const timelineHeader = document.querySelector('.gantt__header-timeline')
 
         return {
-          sidebarTop: sidebarRow.getBoundingClientRect().top,
-          timelineTop: timelineRow.getBoundingClientRect().top,
-          sidebarHeaderHeight: sidebarHeader.getBoundingClientRect().height,
+          informationTop: information.getBoundingClientRect().top,
+          timelineTop: timeline.getBoundingClientRect().top,
+          informationHeaderHeight: informationHeader.getBoundingClientRect().height,
           timelineHeaderHeight: timelineHeader.getBoundingClientRect().height
         }
       })()
     JS
 
-    assert_in_delta alignment['timelineTop'], alignment['sidebarTop'], 1
-    assert_in_delta alignment['timelineHeaderHeight'], alignment['sidebarHeaderHeight'], 1
+    assert_in_delta alignment['timelineTop'], alignment['informationTop'], 1
+    assert_in_delta alignment['timelineHeaderHeight'], alignment['informationHeaderHeight'], 1
   end
 
   test 'sidebar header stays above timeline header while horizontally scrolling' do
@@ -103,7 +92,7 @@ class GanttsTest < ApplicationSystemTestCase
     header = page.evaluate_script(<<~JS)
       (() => {
         const viewport = document.querySelector('.gantt__viewport')
-        const sidebarHeader = document.querySelector('.gantt__header--sidebar')
+        const sidebarHeader = document.querySelector('.gantt__header-information')
         viewport.scrollLeft = 320
 
         const rect = sidebarHeader.getBoundingClientRect()
@@ -118,28 +107,26 @@ class GanttsTest < ApplicationSystemTestCase
       })()
     JS
 
-    assert_includes header['classes'], 'gantt__header--sidebar'
+    assert_includes header['classes'], 'gantt__header-information'
     assert_equal '35', header['sidebarZ']
   end
 
-  test 'hover highlights both sidebar and timeline row' do
+  test 'hover highlights the whole row' do
     visit_gantt
 
     find('.gantt__row[data-row-key="issue-1"]').hover
 
     state = page.evaluate_script(<<~JS)
       (() => {
-        const sidebarRow = document.querySelector('.gantt__row[data-row-key="issue-1"]')
-        const timelineRow = document.querySelector('.gantt__timeline-row[data-row-key="issue-1"]')
+        const row = document.querySelector('.gantt__row[data-row-key="issue-1"]')
         return {
-          sidebarHovered: sidebarRow.classList.contains('is-hovered'),
-          timelineHovered: timelineRow.classList.contains('is-hovered')
+          information: getComputedStyle(row.querySelector('.gantt__row-information')).backgroundColor,
+          timeline: getComputedStyle(row.querySelector('.gantt__timeline-cell')).backgroundColor
         }
       })()
     JS
 
-    assert_equal true, state['sidebarHovered']
-    assert_equal true, state['timelineHovered']
+    assert_equal state['information'], state['timeline']
   end
 
   test 'context menu and tooltip interactions' do
@@ -164,7 +151,6 @@ class GanttsTest < ApplicationSystemTestCase
     # Click outside the context menu to close it
     issue1_subject_row.click(x: -1, y: 0)
     assert_no_selector '#context-menu'
-
   end
 
   private
@@ -179,33 +165,11 @@ class GanttsTest < ApplicationSystemTestCase
   end
 
   def sidebar_width
-    page.evaluate_script("document.querySelector('.gantt__sidebar').offsetWidth")
+    page.evaluate_script("document.querySelector('.gantt__header-information').offsetWidth")
   end
 
   def drag_splitter(distance)
     handle = find('.gantt__splitter')
     page.driver.browser.action.click_and_hold(handle.native).move_by(distance, 0).release.perform
-  end
-
-  def move_available_column_to_selected(column_name)
-    page.execute_script(<<~JS)
-      (() => {
-        const available = document.getElementById('available_c')
-        const option = Array.from(available.options).find((candidate) => candidate.value === #{column_name.to_json})
-        option.selected = true
-        moveOptions(available.form.available_c, available.form.selected_c)
-      })()
-    JS
-  end
-
-  def move_selected_column_to_available(column_name)
-    page.execute_script(<<~JS)
-      (() => {
-        const selected = document.getElementById('selected_c')
-        const option = Array.from(selected.options).find((candidate) => candidate.value === #{column_name.to_json})
-        option.selected = true
-        moveOptions(selected.form.selected_c, selected.form.available_c)
-      })()
-    JS
   end
 end

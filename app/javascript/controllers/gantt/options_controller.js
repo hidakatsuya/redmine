@@ -14,12 +14,6 @@ export default class extends Controller {
   connect() {
     this.#dispatchInitialStates()
     this.#disableUnavailableColumns()
-    this.#observeSelectedColumns()
-    this.#dispatchSelectedColumns()
-  }
-
-  disconnect() {
-    this.columnsObserver?.disconnect()
   }
 
   toggleDisplay(event) {
@@ -58,26 +52,6 @@ export default class extends Controller {
     }
   }
 
-  #observeSelectedColumns() {
-    const selectedColumns = this.#selectedColumnsElement()
-    if (!selectedColumns) return
-
-    this.columnsObserver = new MutationObserver(() => this.#dispatchSelectedColumns())
-    this.columnsObserver.observe(selectedColumns, { childList: true })
-    selectedColumns.addEventListener("change", () => this.#dispatchSelectedColumns())
-  }
-
-  #dispatchSelectedColumns() {
-    const selectedColumns = this.#selectedColumnsElement()
-    if (!selectedColumns) return
-
-    this.dispatch("selected-columns-changed", {
-      detail: {
-        columns: Array.from(selectedColumns.options).filter((option) => !option.disabled).map((option) => option.value)
-      }
-    })
-  }
-
   #disableUnavailableColumns() {
     if (!Array.isArray(this.unavailableColumnsValue)) {
       return
@@ -85,9 +59,5 @@ export default class extends Controller {
     this.unavailableColumnsValue.forEach((column) => {
       this.$("#available_c, #selected_c").children(`[value='${column}']`).prop("disabled", true)
     })
-  }
-
-  #selectedColumnsElement() {
-    return this.element.querySelector("#selected_c")
   }
 }

@@ -4,10 +4,20 @@ const RELATION_STROKE_WIDTH = 2
 const SVG_NS = "http://www.w3.org/2000/svg"
 
 export default class extends Controller {
-  static targets = ["viewport", "timelineHeader", "timelineRows", "overlay", "todayLine", "sidebar"]
+  static targets = [
+    "body",
+    "doneBar",
+    "endAnchor",
+    "overlay",
+    "row",
+    "startAnchor",
+    "svgLayer",
+    "todayLine",
+    "todoBar",
+    "viewport"
+  ]
 
   static values = {
-    activeColumns: Array,
     issueRelationTypes: Object,
     relations: Array,
     showSelectedColumns: Boolean,
@@ -16,145 +26,109 @@ export default class extends Controller {
   }
 
   connect() {
+    this.resizeObserver = new ResizeObserver(() => this.#scheduleOverlayDraw())
+    this.resizeObserver.observe(this.bodyTarget)
     this.#applySelectedColumnsState()
-    this.#applyActiveColumnsState()
-    this.#drawOverlay()
+    this.#scheduleOverlayDraw()
   }
 
-  activeColumnsValueChanged() {
-    this.#applyActiveColumnsState()
-    this.#drawOverlay()
+  disconnect() {
+    this.resizeObserver?.disconnect()
+    if (this.animationFrame) cancelAnimationFrame(this.animationFrame)
   }
 
   showSelectedColumnsValueChanged() {
     this.#applySelectedColumnsState()
+    this.#scheduleOverlayDraw()
   }
 
   showRelationsValueChanged() {
-    this.#drawOverlay()
+    this.#scheduleOverlayDraw()
   }
 
   showProgressValueChanged() {
-    this.#drawOverlay()
+    this.#scheduleOverlayDraw()
   }
 
   handleOptionsDisplay(event) {
     this.showSelectedColumnsValue = !!event.detail?.enabled
   }
 
-  handleSelectedColumnsChanged(event) {
-    this.activeColumnsValue = event.detail?.columns || []
-  }
-
   handleOptionsRelations(event) {
     this.showRelationsValue = !!event.detail?.enabled
-    this.#drawOverlay()
   }
 
   handleOptionsProgress(event) {
     this.showProgressValue = !!event.detail?.enabled
-    this.#drawOverlay()
   }
 
   handleLayoutInvalidated() {
-    this.#drawOverlay()
+    this.#scheduleOverlayDraw()
   }
 
   handleSidebarResized() {
-    this.#drawOverlay()
+    this.#scheduleOverlayDraw()
   }
 
   handleWindowResize() {
-    this.#drawOverlay()
-  }
-
-  handleScroll() {
-    this.#drawOverlay()
-  }
-
-  hoverRow(event) {
-    this.#setHoveredRow(event.currentTarget.dataset.rowKey, true)
-  }
-
-  unhoverRow(event) {
-    this.#setHoveredRow(event.currentTarget.dataset.rowKey, false)
+    this.#scheduleOverlayDraw()
   }
 
   #applySelectedColumnsState() {
     this.element.classList.toggle("is-showing-columns", this.showSelectedColumnsValue)
-    this.#syncColumnMetrics()
   }
 
-  #applyActiveColumnsState() {
-    const activeColumns = new Set(this.activeColumnsValue)
+  #scheduleOverlayDraw() {
+    if (this.animationFrame) return
 
-    this.element.querySelectorAll("[data-column-name]").forEach((element) => {
-      element.classList.toggle("is-active-column", activeColumns.has(element.dataset.columnName))
+    this.animationFrame = requestAnimationFrame(() => {
+      this.animationFrame = null
+      this.#drawOverlay()
     })
-
-    this.#syncColumnMetrics()
-  }
-
-  #syncColumnMetrics() {
-    const activeCount = this.showSelectedColumnsValue ? this.activeColumnsValue.length : 0
-    this.element.style.setProperty("--gantt-active-columns-count", String(activeCount))
-    this.element.style.setProperty("--gantt-columns-width", `${activeCount * 96}px`)
   }
 
   #drawOverlay() {
-    const overlay = this.overlayTarget
-    const width = Math.max(this.timelineRowsTarget.scrollWidth, 1)
-    const height = Math.max(this.timelineRowsTarget.scrollHeight, 1)
-    overlay.replaceChildren()
-
+    const width = Math.max(this.overlayTarget.clientWidth, 1)
+    const height = Math.max(this.bodyTarget.scrollHeight, 1)
     const svg = document.createElementNS(SVG_NS, "svg")
+
     svg.setAttribute("width", String(width))
     svg.setAttribute("height", String(height))
     svg.setAttribute("viewBox", `0 0 ${width} ${height}`)
     svg.setAttribute("aria-hidden", "true")
-    overlay.appendChild(svg)
+    this.svgLayerTarget.replaceChildren(svg)
 
-    if (this.showProgressValue) {
-      this.#drawProgressLine(svg, width)
-    }
-
-    if (this.showRelationsValue) {
-      this.#drawRelations(svg)
-    }
+    if (this.showProgressValue) this.#drawProgressLine(svg, width)
+    if (this.showRelationsValue) this.#drawRelations(svg)
   }
 
   #drawRelations(svg) {
-    const overlayRect = this.overlayTarget.getBoundingClientRect()
+    const anchors = this.#anchorsByRowKey()
 
     this.relationsValue.forEach((relation) => {
-      const fromAnchor = this.#anchorForRow(relation.from_row_key, "end")
-      const toAnchor = this.#anchorForRow(relation.to_row_key, "start")
+      const fromAnchor = anchors.end.get(relation.from_row_key)
+      const toAnchor = anchors.start.get(relation.to_row_key)
 
-      if (!fromAnchor || !toAnchor) return
+      if (!fromAnchor || !toAnchor || this.#isHidden(fromAnchor) || this.#isHidden(toAnchor)) return
 
-      const fromRect = fromAnchor.getBoundingClientRect()
-      const toRect = toAnchor.getBoundingClientRect()
-      const fromX = fromRect.left - overlayRect.left
-      const fromY = fromRect.top - overlayRect.top
-      const toX = toRect.left - overlayRect.left
-      const toY = toRect.top - overlayRect.top
-      const relationConfig = this.issueRelationTypesValue[relation.type] || {}
-      const margin = relationConfig.landscape_margin || 0
-      const color = relationConfig.color || "#000"
-      const viaX = fromX + margin
-      const targetViaX = toX - margin
+      const from = this.#pointInOverlay(fromAnchor)
+      const to = this.#pointInOverlay(toAnchor)
+      const config = this.issueRelationTypesValue[relation.type] || {}
+      const margin = config.landscape_margin || 0
+      const color = config.color || "#000"
+      const viaX = from.x + margin
+      const targetViaX = to.x - margin
 
-      this.#drawPath(svg, ["M", fromX, fromY, "L", viaX, fromY], color)
-
+      this.#drawPath(svg, ["M", from.x, from.y, "L", viaX, from.y], color)
       if (viaX < targetViaX) {
-        this.#drawPath(svg, ["M", viaX, fromY, "L", viaX, toY, "L", toX, toY], color)
+        this.#drawPath(svg, ["M", viaX, from.y, "L", viaX, to.y, "L", to.x, to.y], color)
       } else {
-        const midY = toY + (fromY > toY ? 10 : -10)
-        this.#drawPath(svg, ["M", viaX, fromY, "L", viaX, midY, "L", targetViaX, midY, "L", targetViaX, toY, "L", toX, toY], color)
+        const midY = to.y + (from.y > to.y ? 10 : -10)
+        this.#drawPath(svg, ["M", viaX, from.y, "L", viaX, midY, "L", targetViaX, midY, "L", targetViaX, to.y, "L", to.x, to.y], color)
       }
 
       const arrow = document.createElementNS(SVG_NS, "path")
-      arrow.setAttribute("d", ["M", toX, toY, "l", -8, -4, "l", 0, 8, "z"].join(" "))
+      arrow.setAttribute("d", ["M", to.x, to.y, "l", -8, -4, "l", 0, 8, "z"].join(" "))
       arrow.setAttribute("fill", color)
       arrow.setAttribute("stroke", "none")
       svg.appendChild(arrow)
@@ -164,65 +138,69 @@ export default class extends Controller {
   #drawProgressLine(svg, width) {
     if (!this.hasTodayLineTarget) return
 
-    const overlayRect = this.overlayTarget.getBoundingClientRect()
-    const todayRect = this.todayLineTarget.getBoundingClientRect()
-    const todayX = todayRect.left - overlayRect.left
+    const todayX = this.#pointInOverlay(this.todayLineTarget).x
     const color = getComputedStyle(this.todayLineTarget).borderInlineStartColor || "#ff0000"
+    const doneBars = this.#elementsByRowKey(this.doneBarTargets)
+    const todoBars = this.#elementsByRowKey(this.todoBarTargets)
     const points = [{ left: todayX, top: 0 }]
 
-    this.#visibleTimelineRows().forEach((row) => {
+    this.rowTargets.forEach((row) => {
+      if (row.classList.contains("is-hidden") || row.dataset.kind === "project") return
+
       const state = row.dataset.progressState
-      if (!state || row.dataset.kind === "project") return
+      if (!state) return
 
       const rowRect = row.getBoundingClientRect()
-      const rowTop = rowRect.top - overlayRect.top
-      const topUpper = rowTop + 6
-      const topCenter = rowTop + rowRect.height / 2
-      const topLower = rowTop + rowRect.height - 6
+      const overlayRect = this.overlayTarget.getBoundingClientRect()
+      const top = rowRect.top - overlayRect.top
+      const center = top + rowRect.height / 2
 
       if (state === "closed") {
-        points.push({ left: todayX, top: topCenter })
-        return
+        points.push({ left: todayX, top: center })
+      } else if (state === "over-end") {
+        points.push({ left: width, top: top + 6, edge: "right" })
+        points.push({ left: width, top: top + rowRect.height - 6, edge: "right", skip: true })
+      } else if (state === "behind-start") {
+        points.push({ left: 0, top: top + 6, edge: "left" })
+        points.push({ left: 0, top: top + rowRect.height - 6, edge: "left", skip: true })
+      } else if (doneBars.has(row.dataset.rowKey)) {
+        const rect = doneBars.get(row.dataset.rowKey).getBoundingClientRect()
+        points.push({ left: rect.right - overlayRect.left, top: center })
+      } else {
+        const todoBar = todoBars.get(row.dataset.rowKey)
+        const todoLeft = todoBar ? todoBar.getBoundingClientRect().left - overlayRect.left : todayX
+        points.push({ left: Math.min(todayX, todoLeft), top: center })
       }
-
-      if (state === "over-end") {
-        points.push({ left: width, top: topUpper, rightEdge: true })
-        points.push({ left: width, top: topLower, rightEdge: true, skipStroke: true })
-        return
-      }
-
-      if (state === "behind-start") {
-        points.push({ left: 0, top: topUpper, leftEdge: true })
-        points.push({ left: 0, top: topLower, leftEdge: true, skipStroke: true })
-        return
-      }
-
-      const doneBar = row.querySelector(".task_done")
-      if (doneBar) {
-        const doneRect = doneBar.getBoundingClientRect()
-        points.push({ left: doneRect.right - overlayRect.left, top: topCenter })
-        return
-      }
-
-      const todoBar = row.querySelector(".task_todo")
-      const todoLeft = todoBar ? todoBar.getBoundingClientRect().left - overlayRect.left : todayX
-      points.push({ left: Math.min(todayX, todoLeft), top: topCenter })
     })
 
     for (let index = 1; index < points.length; index += 1) {
       const previous = points[index - 1]
       const current = points[index]
-
-      if (
-        current.skipStroke ||
-        (previous.rightEdge && current.rightEdge) ||
-        (previous.leftEdge && current.leftEdge)
-      ) {
-        continue
-      }
+      if (current.skip || (previous.edge && previous.edge === current.edge)) continue
 
       this.#drawPath(svg, ["M", previous.left, previous.top, "L", current.left, current.top], color)
     }
+  }
+
+  #anchorsByRowKey() {
+    return {
+      start: this.#elementsByRowKey(this.startAnchorTargets),
+      end: this.#elementsByRowKey(this.endAnchorTargets)
+    }
+  }
+
+  #elementsByRowKey(elements) {
+    return new Map(elements.map((element) => [element.dataset.rowKey, element]))
+  }
+
+  #isHidden(element) {
+    return element.closest(".gantt__row")?.classList.contains("is-hidden")
+  }
+
+  #pointInOverlay(element) {
+    const rect = element.getBoundingClientRect()
+    const overlayRect = this.overlayTarget.getBoundingClientRect()
+    return { x: rect.left - overlayRect.left, y: rect.top - overlayRect.top }
   }
 
   #drawPath(svg, parts, color) {
@@ -232,29 +210,5 @@ export default class extends Controller {
     path.setAttribute("stroke-width", String(RELATION_STROKE_WIDTH))
     path.setAttribute("fill", "none")
     svg.appendChild(path)
-  }
-
-  #anchorForRow(rowKey, side) {
-    const selector = `[data-row-key="${rowKey}"] [data-gantt-role="${side}-anchor"]`
-    const anchor = this.timelineRowsTarget.querySelector(selector)
-
-    if (!anchor) return null
-
-    const row = anchor.closest(".gantt__timeline-row")
-    return row && row.classList.contains("is-hidden") ? null : anchor
-  }
-
-  #visibleTimelineRows() {
-    return Array.from(this.timelineRowsTarget.querySelectorAll(".gantt__timeline-row")).filter((row) => !row.classList.contains("is-hidden"))
-  }
-
-  #setHoveredRow(rowKey, hovered) {
-    if (!rowKey) return
-
-    this.element.querySelectorAll(`[data-row-key="${rowKey}"]`).forEach((element) => {
-      if (element.classList.contains("gantt__row") || element.classList.contains("gantt__timeline-row")) {
-        element.classList.toggle("is-hovered", hovered)
-      }
-    })
   }
 }

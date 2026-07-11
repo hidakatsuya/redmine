@@ -1,0 +1,85 @@
+<div class="gantt__row gantt__row--<%= row.kind %>"
+     id="gantt-row-<%= row.row_key %>"
+     data-gantt--chart-target="row"
+     data-gantt--subjects-target="row"
+     data-row-key="<%= row.row_key %>"
+     data-parent-row-key="<%= row.parent_row_key %>"
+     data-kind="<%= row.kind %>"
+     data-progress-state="<%= gantt_progress_state(row) %>"
+     style="<%= gantt_row_style(row) %>">
+  <div class="gantt__row-information">
+    <div class="gantt__sidebar-grid" style="<%= gantt_sidebar_grid_style(chart) %>">
+      <div class="gantt__subject-cell">
+        <%= gantt_row_subject_tag(row) %>
+      </div>
+
+      <% chart.selected_columns.each do |column| %>
+        <div class="gantt__column-cell">
+          <%= gantt_row_column_content(row, column) %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="gantt__timeline-cell">
+    <% if row.schedule&.visible? %>
+      <% bar_classes = gantt_bar_classes(row) %>
+      <% bar_classes << 'hascontextmenu' if row.issue? %>
+      <div class="<%= bar_classes.join(' ') %>"
+           id="<%= gantt_bar_dom_id(row, 'task-todo') %>"
+           style="<%= gantt_schedule_style(row.schedule) %>"
+           data-gantt--chart-target="todoBar"
+           data-row-key="<%= row.row_key %>"
+           data-start-on="<%= row.schedule.start_on %>"
+           data-end-on="<%= row.schedule.end_on %>"
+           data-editable="<%= row.editable %>">
+        <span class="gantt__bar-anchor gantt__bar-anchor--start"
+              data-gantt--chart-target="startAnchor"
+              data-row-key="<%= row.row_key %>"></span>
+        <span class="gantt__bar-anchor gantt__bar-anchor--end"
+              data-gantt--chart-target="endAnchor"
+              data-row-key="<%= row.row_key %>"></span>
+        <% if row.issue? %>
+          <%= content_tag(:input, nil, :type => 'checkbox', :name => 'ids[]',
+                          :value => row.record.id, :style => 'display:none;',
+                          :class => 'toggle-selection') %>
+        <% end %>
+      </div>
+
+      <% if row.schedule.late_offset %>
+        <div class="<%= gantt_late_bar_classes(row).join(' ') %>" style="<%= gantt_late_style(row.schedule) %>"></div>
+      <% end %>
+
+      <% if row.schedule.progress_offset %>
+        <div class="<%= gantt_done_bar_classes(row).join(' ') %>"
+             id="<%= gantt_bar_dom_id(row, 'task-done') %>"
+             data-gantt--chart-target="doneBar"
+             data-row-key="<%= row.row_key %>"
+             style="<%= gantt_progress_style(row.schedule) %>"></div>
+      <% end %>
+
+      <% if row.schedule.show_start_marker %>
+        <div class="<%= gantt_marker_classes(row, :start).join(' ') %>"
+             style="<%= gantt_marker_style(row.schedule.start_offset) %>"></div>
+      <% end %>
+
+      <% if row.schedule.show_end_marker %>
+        <div class="<%= gantt_marker_classes(row, :end).join(' ') %>"
+             style="<%= gantt_marker_style(row.schedule.end_offset) %>"></div>
+      <% end %>
+
+      <div class="gantt__label"><span style="<%= gantt_label_style(row.schedule) %>"><%= row.schedule.label %></span></div>
+
+      <% if row.issue? %>
+        <div class="tooltip hascontextmenu gantt__bar-hitbox"
+             style="<%= gantt_schedule_style(row.schedule) %>"
+             data-row-key="<%= row.row_key %>">
+          <span class="tip"><%= render_issue_tooltip(row.record) %></span>
+          <%= content_tag(:input, nil, :type => 'checkbox', :name => 'ids[]',
+                          :value => row.record.id, :style => 'display:none;',
+                          :class => 'toggle-selection') %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>
