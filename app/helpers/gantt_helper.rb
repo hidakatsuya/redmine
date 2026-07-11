@@ -52,12 +52,14 @@ module GanttHelper
         gantt--options:toggle-display@document->gantt--chart#handleOptionsDisplay
         gantt--options:toggle-relations@document->gantt--chart#handleOptionsRelations
         gantt--options:toggle-progress@document->gantt--chart#handleOptionsProgress
+        gantt--column:resize->gantt--chart#handleColumnResize
         gantt:row-toggled->gantt--chart#handleLayoutInvalidated
         gantt:sidebar-resized->gantt--chart#handleSidebarResized
         resize@window->gantt--chart#handleWindowResize
       ).join(' '),
       'gantt--chart-issue-relation-types-value': Redmine::Helpers::Gantt::DRAW_TYPES.transform_values(&:symbolize_keys).to_json,
       'gantt--chart-relations-value': chart.relations.map(&:to_h).to_json,
+      'gantt--chart-column-widths-value': chart.selected_columns.map { SELECTED_COLUMN_WIDTH }.to_json,
       'gantt--chart-show-selected-columns-value': query.draw_selected_columns ? 'true' : 'false',
       'gantt--chart-show-relations-value': query.draw_relations ? 'true' : 'false',
       'gantt--chart-show-progress-value': query.draw_progress_line ? 'true' : 'false'
@@ -69,6 +71,7 @@ module GanttHelper
       "--gantt-day-width: #{chart.day_width}px",
       "--gantt-selected-columns-width: #{selected_columns_width}px",
       "--gantt-selected-columns-count: #{chart.selected_columns.size}",
+      "--gantt-selected-columns-template: #{chart.selected_columns.map { "#{SELECTED_COLUMN_WIDTH}px" }.join(' ')}",
       "--gantt-subject-width: #{chart.sidebar_subject_width}px",
       "--gantt-timeline-width: #{chart.timeline_width}px"
     ].join('; ')
@@ -84,10 +87,6 @@ module GanttHelper
       "--gantt-segment-span: #{segment.span}",
       "--gantt-scale-layer: #{segment.layer}"
     ].join('; ')
-  end
-
-  def gantt_sidebar_grid_style(chart)
-    "grid-template-columns: minmax(0, var(--gantt-subject-width)) repeat(#{chart.selected_columns.size}, #{SELECTED_COLUMN_WIDTH}px)"
   end
 
   def gantt_row_style(row)

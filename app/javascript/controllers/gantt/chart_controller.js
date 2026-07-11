@@ -18,6 +18,7 @@ export default class extends Controller {
   ]
 
   static values = {
+    columnWidths: Array,
     issueRelationTypes: Object,
     relations: Array,
     showSelectedColumns: Boolean,
@@ -52,6 +53,19 @@ export default class extends Controller {
 
   handleOptionsDisplay(event) {
     this.showSelectedColumnsValue = !!event.detail?.enabled
+  }
+
+  handleColumnResize(event) {
+    const index = Number(event.detail?.index)
+    const width = Number(event.detail?.width)
+    if (!Number.isInteger(index) || !Number.isFinite(width)) return
+
+    const widths = [...this.columnWidthsValue]
+    widths[index] = width
+    this.columnWidthsValue = widths
+    this.element.style.setProperty("--gantt-selected-columns-template", widths.map((value) => `${value}px`).join(" "))
+    this.element.style.setProperty("--gantt-selected-columns-width", `${widths.reduce((sum, value) => sum + value, 0)}px`)
+    this.#scheduleOverlayDraw()
   }
 
   handleOptionsRelations(event) {

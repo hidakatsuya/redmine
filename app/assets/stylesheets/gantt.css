@@ -9,6 +9,7 @@
   --gantt-day-width: 4px;
   --gantt-subject-width: 330px;
   --gantt-column-width: 96px;
+  --gantt-selected-columns-template: none;
   --gantt-selected-columns-width: 0px;
   --gantt-information-width: var(--gantt-subject-width);
   --gantt-timeline-width: 960px;
@@ -78,7 +79,7 @@
 }
 
 .gantt.is-showing-columns .gantt__sidebar-grid {
-  grid-template-columns: minmax(0, var(--gantt-subject-width)) repeat(var(--gantt-selected-columns-count), var(--gantt-column-width));
+  grid-template-columns: minmax(0, var(--gantt-subject-width)) var(--gantt-selected-columns-template);
 }
 
 .gantt:not(.is-showing-columns) .gantt__column-header,
@@ -107,6 +108,19 @@
   color: var(--gantt-text-muted);
   font-size: 0.85rem;
   font-weight: 600;
+}
+
+.gantt__column-header {
+  position: relative;
+}
+
+.gantt__column-resizer {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: -4px;
+  z-index: 2;
+  inline-size: 8px;
+  cursor: ew-resize;
 }
 
 .gantt__column-cell {

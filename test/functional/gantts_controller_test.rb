@@ -165,8 +165,19 @@ class GanttsControllerTest < Redmine::ControllerTest
 
     assert_response :success
     assert_select '.gantt__column-header', :count => 2
+    assert_select '.gantt__column-header[data-controller="gantt--column"] .gantt__column-resizer', :count => 2
     assert_select '.gantt__row--issue .gantt__column-cell', :minimum => 2
     assert_select '.gantt[style*="--gantt-selected-columns-count: 2"]'
+    assert_select '.gantt__sidebar-grid[style]', :count => 0
+  end
+
+  test 'keeps subject content in the information column when columns are hidden' do
+    get(:show, :params => {:project_id => 1})
+
+    assert_response :success
+    assert_select '.gantt:not(.is-showing-columns)'
+    assert_select '.gantt__row-information .gantt__subject-cell a', :minimum => 1
+    assert_select '.gantt__sidebar-grid[style]', :count => 0
   end
 
   def test_gantt_should_export_to_pdf

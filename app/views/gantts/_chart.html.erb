@@ -12,11 +12,16 @@
 
       <div class="gantt__header">
         <div class="gantt__header-information">
-          <div class="gantt__sidebar-grid gantt__sidebar-grid--header" style="<%= gantt_sidebar_grid_style(chart) %>">
+          <div class="gantt__sidebar-grid gantt__sidebar-grid--header">
             <div class="gantt__subject-header"><%= l(:field_subject) %></div>
-            <% chart.selected_columns.each do |column| %>
-              <div class="gantt__column-header">
+            <% chart.selected_columns.each_with_index do |column, index| %>
+              <div class="gantt__column-header"
+                   data-controller="gantt--column"
+                   data-gantt--column-index-value="<%= index %>">
                 <%= column.caption %>
+                <span class="gantt__column-resizer"
+                      data-action="pointerdown->gantt--column#startResize"
+                      aria-hidden="true"></span>
               </div>
             <% end %>
           </div>

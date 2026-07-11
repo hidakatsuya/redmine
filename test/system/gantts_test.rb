@@ -60,6 +60,17 @@ class GanttsTest < ApplicationSystemTestCase
     assert width_after > width_before
   end
 
+  test 'selected columns can be resized independently' do
+    visit_gantt
+    expand_options
+    find('#draw_selected_columns').check
+
+    width_before = column_width(0)
+    drag_column_resizer(0, 80)
+
+    assert_operator column_width(0), :>, width_before
+  end
+
   test 'information and timeline cells share a row' do
     visit_gantt
     expand_options
@@ -139,7 +150,7 @@ class GanttsTest < ApplicationSystemTestCase
     issue1_tooltip.hover
 
     within issue1_tooltip do
-      assert_selector 'span.tip', visible: false
+      assert_selector 'span.tip', :text => issue1_subject_row.first('a.issue').text, :visible => false
     end
 
     # Context menu for issue subject
@@ -151,6 +162,12 @@ class GanttsTest < ApplicationSystemTestCase
     # Click outside the context menu to close it
     issue1_subject_row.click(x: -1, y: 0)
     assert_no_selector '#context-menu'
+
+    # Context menu for issue task bar
+    issue1_tooltip.right_click
+
+    assert_selector '#context-menu'
+    assert_selector '#context-menu a.icon-edit'
   end
 
   private
@@ -170,6 +187,15 @@ class GanttsTest < ApplicationSystemTestCase
 
   def drag_splitter(distance)
     handle = find('.gantt__splitter')
+    page.driver.browser.action.click_and_hold(handle.native).move_by(distance, 0).release.perform
+  end
+
+  def column_width(index)
+    page.evaluate_script("document.querySelectorAll('.gantt__column-header')[#{index}].offsetWidth")
+  end
+
+  def drag_column_resizer(index, distance)
+    handle = all('.gantt__column-resizer')[index]
     page.driver.browser.action.click_and_hold(handle.native).move_by(distance, 0).release.perform
   end
 end
