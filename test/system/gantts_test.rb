@@ -104,21 +104,19 @@ class GanttsTest < ApplicationSystemTestCase
       (() => {
         const viewport = document.querySelector('.gantt__viewport')
         const sidebarHeader = document.querySelector('.gantt__header-information')
-        viewport.scrollLeft = 320
+        viewport.scrollLeft = 800
 
         const rect = sidebarHeader.getBoundingClientRect()
-        const probeX = rect.right - 12
-        const probeY = rect.top + 12
-        const element = document.elementFromPoint(probeX, probeY)
 
         return {
-          classes: element ? Array.from(element.classList) : [],
+          sidebarLeft: rect.left,
+          viewportLeft: viewport.getBoundingClientRect().left,
           sidebarZ: getComputedStyle(sidebarHeader).zIndex
         }
       })()
     JS
 
-    assert_includes header['classes'], 'gantt__header-information'
+    assert_in_delta header['viewportLeft'], header['sidebarLeft'], 1
     assert_equal '35', header['sidebarZ']
   end
 
