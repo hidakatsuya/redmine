@@ -3,37 +3,50 @@
 module Redmine
   module Gantt
     class Row
-      attr_reader :row_key, :kind, :depth, :parent_row_key, :has_children, :subject,
-                  :schedule, :editable, :record, :subject_state,
-                  :subject_css_classes, :bar_css_classes
+      attr_reader :row_key, :depth, :parent_row_key, :has_children, :subject,
+                  :schedule, :record
 
-      def initialize(row_key:, kind:, depth:, parent_row_key:, has_children:, subject:,
-                     schedule:, editable:, record:, subject_state:,
-                     subject_css_classes:, bar_css_classes:)
+      def initialize(row_key:, depth:, parent_row_key:, has_children:, subject:,
+                     schedule:, record:)
         @row_key = row_key
-        @kind = kind
         @depth = depth
         @parent_row_key = parent_row_key
         @has_children = has_children
         @subject = subject
         @schedule = schedule
-        @editable = editable
         @record = record
-        @subject_state = subject_state
-        @subject_css_classes = subject_css_classes
-        @bar_css_classes = bar_css_classes
       end
 
-      def issue?
-        kind == :issue
+      def editable?
+        false
       end
 
-      def version?
-        kind == :version
+      def context_menu?
+        false
       end
 
-      def project?
-        kind == :project
+      def parent?
+        false
+      end
+
+      def closed?
+        false
+      end
+
+      def overdue?
+        false
+      end
+
+      def behind_schedule?
+        false
+      end
+
+      def behind_start_date?
+        false
+      end
+
+      def over_end_date?
+        false
       end
     end
   end
