@@ -36,15 +36,8 @@ export default class extends Controller {
   #subjectWidth() {
     const style = getComputedStyle(this.root)
     const subjectWidth = parseFloat(style.getPropertyValue("--gantt-subject-width"))
-    const sidebarWidth = parseFloat(style.getPropertyValue("--gantt-sidebar-width"))
-    const columnsWidth = parseFloat(style.getPropertyValue("--gantt-columns-width")) || 0
 
     if (!Number.isNaN(subjectWidth) && subjectWidth > 0) return subjectWidth
-
-    if (this.root.classList.contains("is-showing-columns")) {
-      return Math.max(MIN_WIDTH, sidebarWidth - columnsWidth)
-    }
-
-    return Math.max(MIN_WIDTH, sidebarWidth)
+    return MIN_WIDTH
   }
 }

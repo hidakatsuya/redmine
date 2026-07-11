@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Redmine
   module Gantt
     class ChartBuilder
@@ -39,7 +41,6 @@ module Redmine
           :relations => build_relations,
           :scale_segments => build_scale_segments,
           :selected_columns => selected_columns,
-          :available_columns => available_columns,
           :timeline_width => ((@gantt.date_to - @gantt.date_from + 1) * day_width).to_i,
           :sidebar_subject_width => DEFAULT_SUBJECT_WIDTH,
           :today_offset => today_offset
@@ -49,7 +50,8 @@ module Redmine
       private
 
       def append_project(project, level)
-        add_row(project, :project, level, nil)
+        parent_row_key = "project-#{project.parent_id}" if level.positive?
+        add_row(project, :project, level, parent_row_key)
 
         issues = @gantt.project_issues(project).select {|issue| issue.fixed_version_id.nil?}
         append_issues(issues, level + 1, "project-#{project.id}")
@@ -71,9 +73,7 @@ module Redmine
         ancestors = []
 
         issues.each do |issue|
-          while ancestors.any? && !issue.is_descendant_of?(ancestors.last)
-            ancestors.pop
-          end
+          ancestors.pop while ancestors.any? && !issue.is_descendant_of?(ancestors.last)
 
           issue_depth = depth + ancestors.size
           direct_parent = ancestors.last
@@ -102,9 +102,8 @@ module Redmine
           :parent_row_key => parent_row_key,
           :has_children => has_children?(record),
           :subject => subject_text(record),
-          :columns => available_columns.index_with { nil },
           :schedule => build_schedule(record, kind),
-          :editable => record.is_a?(Issue),
+          :editable => record.is_a?(Issue) && record.editable?(User.current),
           :record => record,
           :subject_state => subject_state(record, kind),
           :subject_css_classes => subject_css_classes(record, kind),
@@ -128,7 +127,7 @@ module Redmine
           return unless record.start_date && record.due_date
 
           percent = record.visible_fixed_issues.completed_percent
-          label = +"#{record} #{percent.to_f.round}%"
+          label = "#{record} #{percent.to_f.round}%"
           label = "#{record.project} - #{label}" unless @gantt.project && @gantt.project == record.project
 
           @schedule_builder.build(
@@ -160,20 +159,14 @@ module Redmine
         end
       end
 
-      def available_columns
-        @available_columns ||= @query.available_inline_columns.reject do |column|
-          Redmine::Helpers::Gantt::UNAVAILABLE_COLUMNS.include?(column.name)
-        end
-      end
-
       def build_relations
-        visible_row_keys = @rows.select(&:issue?).map(&:row_key)
+        visible_row_keys = @rows.select(&:issue?).index_by(&:row_key)
         @rows.filter_map do |row|
           next unless row.issue?
 
           @gantt.relations.fetch(row.record.id, []).filter_map do |relation|
             target_key = "issue-#{relation.issue_to_id}"
-            next unless visible_row_keys.include?(target_key)
+            next unless visible_row_keys.key?(target_key)
 
             Relation.new(
               :from_row_key => row.row_key,
@@ -199,7 +192,7 @@ module Redmine
             :span => span,
             :css_classes => %w[gantt__scale-segment gantt__scale-segment--month]
           )
-          month = month >> 1
+          month >>= 1
         end
 
         if show_weeks?
@@ -302,7 +295,9 @@ module Redmine
       def has_children?(record)
         case record
         when Project
-          @gantt.project_issues(record).any? || @gantt.project_versions(record).any?
+          @gantt.projects.any? {|project| project.parent_id == record.id} ||
+            @gantt.project_issues(record).any? ||
+            @gantt.project_versions(record).any?
         when Version
           @gantt.version_issues(record.project, record).any?
         when Issue

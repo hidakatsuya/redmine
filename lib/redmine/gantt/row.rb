@@ -1,12 +1,14 @@
+# frozen_string_literal: true
+
 module Redmine
   module Gantt
     class Row
       attr_reader :row_key, :kind, :depth, :parent_row_key, :has_children, :subject,
-                  :columns, :schedule, :editable, :record, :subject_state,
+                  :schedule, :editable, :record, :subject_state,
                   :subject_css_classes, :bar_css_classes
 
       def initialize(row_key:, kind:, depth:, parent_row_key:, has_children:, subject:,
-                     columns:, schedule:, editable:, record:, subject_state:,
+                     schedule:, editable:, record:, subject_state:,
                      subject_css_classes:, bar_css_classes:)
         @row_key = row_key
         @kind = kind
@@ -14,7 +16,6 @@ module Redmine
         @parent_row_key = parent_row_key
         @has_children = has_children
         @subject = subject
-        @columns = columns
         @schedule = schedule
         @editable = editable
         @record = record

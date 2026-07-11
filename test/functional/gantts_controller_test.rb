@@ -152,6 +152,23 @@ class GanttsControllerTest < Redmine::ControllerTest
                   "\"to_row_key\":\"issue-#{issue2.id}\""
   end
 
+  test 'renders only selected columns in chart rows' do
+    get(
+      :show,
+      :params => {
+        :project_id => 1,
+        :set_filter => 1,
+        :c => %w[status priority],
+        :query => {:draw_selected_columns => '1'}
+      }
+    )
+
+    assert_response :success
+    assert_select '.gantt__column-header', :count => 2
+    assert_select '.gantt__row--issue .gantt__column-cell', :minimum => 2
+    assert_select '.gantt[style*="--gantt-selected-columns-count: 2"]'
+  end
+
   def test_gantt_should_export_to_pdf
     get(
       :show,
@@ -356,21 +373,21 @@ class GanttsControllerTest < Redmine::ControllerTest
 
   def assert_subject_row(row_key, row:, text:)
     nth = row.to_i + 1
-    assert_select "div.gantt__rows--sidebar > div.gantt__row:nth-child(#{nth})[data-row-key=?]", row_key do
+    assert_select "div.gantt__body > div.gantt__row:nth-child(#{nth})[data-row-key=?]", row_key do
       assert_select 'a', text: text
     end
   end
 
   def assert_issue_row(issue_id, link_text, row:)
     nth = row.to_i + 1
-    selector = "div.gantt__rows--sidebar > div.gantt__row:nth-child(#{nth})[data-row-key=\"issue-#{issue_id}\"]"
+    selector = "div.gantt__body > div.gantt__row:nth-child(#{nth})[data-row-key=\"issue-#{issue_id}\"]"
     assert_select selector do
       assert_select 'a.issue', text: link_text
     end
   end
 
   def assert_chart_row(row_key, row:, selector:)
-    matcher = "#gantt_area > div.gantt__timeline-row[data-row-key=\"#{row_key}\"] #{selector}"
+    matcher = "#gantt_area > div.gantt__row[data-row-key=\"#{row_key}\"] #{selector}"
     assert_select matcher, minimum: 1
   end
 

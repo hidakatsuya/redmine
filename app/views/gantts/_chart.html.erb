@@ -10,12 +10,12 @@
     <%= form_tag({}, data: {cm_url: issues_context_menu_path}, class: 'gantt__layout') do %>
       <%= hidden_field_tag 'back_url', url_for(params: request.query_parameters), id: nil %>
 
-      <section class="gantt__sidebar" data-controller="gantt--subjects" data-gantt--chart-target="sidebar">
-        <div class="gantt__header gantt__header--sidebar">
+      <div class="gantt__header">
+        <div class="gantt__header-information">
           <div class="gantt__sidebar-grid gantt__sidebar-grid--header" style="<%= gantt_sidebar_grid_style(chart) %>">
             <div class="gantt__subject-header"><%= l(:field_subject) %></div>
-            <% chart.available_columns.each do |column| %>
-              <div class="gantt__column-header" data-column-name="<%= column.name %>">
+            <% chart.selected_columns.each do |column| %>
+              <div class="gantt__column-header">
                 <%= column.caption %>
               </div>
             <% end %>
@@ -24,16 +24,7 @@
                data-controller="gantt--splitter"
                data-action="pointerdown->gantt--splitter#startResize"></div>
         </div>
-
-        <div class="gantt__rows gantt__rows--sidebar">
-          <% chart.rows.each do |row| %>
-            <%= render partial: 'gantts/sidebar_row', locals: {row: row, chart: chart} %>
-          <% end %>
-        </div>
-      </section>
-
-      <section class="gantt__timeline">
-        <div class="gantt__header gantt__header--timeline">
+        <div class="gantt__header-timeline">
           <div class="gantt__scale" data-gantt--chart-target="timelineHeader">
             <% scale_segments.each do |layer, segments| %>
               <div class="gantt__scale-row gantt__scale-row--<%= layer %>">
@@ -55,22 +46,26 @@
             <% end %>
           </div>
         </div>
+      </div>
 
-        <div class="gantt__rows gantt__rows--timeline" id="gantt_area" data-gantt--chart-target="timelineRows">
+      <div class="gantt__body"
+           id="gantt_area"
+           data-controller="gantt--subjects"
+           data-gantt--chart-target="body">
+        <% chart.rows.each do |row| %>
+          <%= render partial: 'gantts/row', locals: {row: row, chart: chart} %>
+        <% end %>
+
+        <div class="gantt__overlay" id="gantt_draw_area" data-gantt--chart-target="overlay">
           <% if chart.today_offset %>
             <div class="gantt__today-line"
                  id="today_line"
                  data-gantt--chart-target="todayLine"
                  style="--gantt-today-unit: <%= chart.today_offset %>"></div>
           <% end %>
-
-          <% chart.rows.each do |row| %>
-            <%= render partial: 'gantts/timeline_row', locals: {row: row, chart: chart} %>
-          <% end %>
-
-          <div class="gantt__overlay" id="gantt_draw_area" data-gantt--chart-target="overlay"></div>
+          <div data-gantt--chart-target="svgLayer"></div>
         </div>
-      </section>
+      </div>
     <% end %>
   </div>
 <% end %>
