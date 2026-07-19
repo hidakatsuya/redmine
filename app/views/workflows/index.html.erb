@@ -24,7 +24,7 @@
     <td>
       <%= link_to(count,
                   {:action => 'edit', :role_id => role, :tracker_id => tracker},
-                  :data => tooltip_stimulus_attributes(text: l(:button_edit)),
+                  **tooltip_options(l(:button_edit)),
                   :class => ('decoration-red' if count == 0)) %>
     </td>
   <% end -%>

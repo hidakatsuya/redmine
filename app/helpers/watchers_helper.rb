@@ -59,7 +59,7 @@ module WatchersHelper
           'span',
           sprite_icon('warning', l(:notice_invalid_watcher)),
           class: 'icon-only icon-warning',
-          data: tooltip_stimulus_attributes(text: l(:notice_invalid_watcher))
+          **tooltip_options(l(:notice_invalid_watcher))
         )
       end
       if remove_allowed
@@ -72,7 +72,7 @@ module WatchersHelper
         s << link_to(sprite_icon('link-break', l(:button_remove)), url,
                      :remote => true, :method => 'delete',
                      :class => "delete icon-only icon-link-break",
-                     :data => tooltip_stimulus_attributes(text: l(:button_remove)))
+                     **tooltip_options(l(:button_remove)))
       end
       content << content_tag('li', s, :class => "user-#{user.id}")
     end

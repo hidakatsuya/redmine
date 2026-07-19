@@ -412,7 +412,8 @@ class IssuesHelperTest < Redmine::HelperTest
       " closed rel-follows\">",
       html
     )
-    assert_include 'data-tooltip-text-value="Remove relation"', html
+    assert_include 'title="Remove relation"', html
+    assert_include 'data-tooltip-target="trigger"', html
 
     html = render_issue_relations(closed_issue, [relation])
     assert_include(
@@ -424,7 +425,8 @@ class IssuesHelperTest < Redmine::HelperTest
       " rel-precedes\">",
       html
     )
-    assert_include 'data-tooltip-text-value="Remove relation"', html
+    assert_include 'title="Remove relation"', html
+    assert_include 'data-tooltip-target="trigger"', html
   end
 
   def test_render_descendants_stats

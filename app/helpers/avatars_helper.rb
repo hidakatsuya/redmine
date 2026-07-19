@@ -60,7 +60,7 @@ module AvatarsHelper
       link_to avatar(user, options),
               url,
               :target => '_blank',
-              :data => tooltip_stimulus_attributes(text: l(:button_edit))
+              **tooltip_options(l(:button_edit))
     end
   end
 
@@ -79,14 +79,16 @@ module AvatarsHelper
   def gravatar_avatar_tag(user, options)
     options[:default] = Setting.gravatar_default
     options[:class] = [GravatarHelper::DEFAULT_OPTIONS[:class], options[:class]].compact.join(' ')
-    tooltip = options.delete(:title)
+    tooltip = options[:title]
 
     email = extract_email_from_user(user)
 
     if user.respond_to?(:mail)
-      options[:data] = tooltip_stimulus_attributes(text: tooltip || user.name)
+      tooltip ||= user.name
       options[:initials] = user.initials if options[:default] == "initials" && user.initials.present?
     end
+
+    options = tooltip_options(tooltip, options)
 
     if email.present?
       gravatar(email.to_s.downcase, options) rescue nil
@@ -104,7 +106,7 @@ module AvatarsHelper
       user.initials,
       role: 'img',
       class: css_class,
-      data: tooltip_stimulus_attributes(text: tooltip)
+      **tooltip_options(tooltip)
     )
   end
 

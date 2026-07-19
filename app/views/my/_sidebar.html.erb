@@ -34,9 +34,9 @@
        role="button"
        tabindex="0"
        style="display: none;"
-       data-action="click->api-key-copy#copy mouseenter->tooltip#show mouseleave->tooltip#hide"
-       data-controller="tooltip"
-       data-tooltip-text-value="<%= l(:button_copy) %>">
+       data-action="click->api-key-copy#copy"
+       data-tooltip-target="trigger"
+       title="<%= l(:button_copy) %>">
       <%= sprite_icon('copy') %>
     </a>
   </div>

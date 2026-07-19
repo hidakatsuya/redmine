@@ -218,7 +218,7 @@ module QueriesHelper
       sort_param = {param_key => query.sort_criteria.add(column.name, order).to_param}
       sort_param = {$1 => {$2 => sort_param.values.first}} while sort_param.keys.first.to_s =~ /^(.+)\[(.+)\]$/
       link_options = {
-        :data => tooltip_stimulus_attributes(text: l(:label_sort_by, "\"#{column.caption}\"")),
+        **tooltip_options(l(:label_sort_by, "\"#{column.caption}\"")),
         :class => css
       }
       if options[:sort_link_options]
@@ -507,10 +507,11 @@ module QueriesHelper
           content_tag('li',
                       link_to(query.name,
                               url_params.merge(:query_id => query),
-                              :class => css,
-                              :data => {
-                                :disable_with => CGI.escapeHTML(query.name)
-                              }.merge(tooltip_stimulus_attributes(text: query.description))) +
+                              **tooltip_options(
+                                query.description,
+                                :class => css,
+                                :data => {:disable_with => CGI.escapeHTML(query.name)}
+                              )) +
                         clear_link.html_safe)
         end.join("\n").html_safe,
         :class => 'queries'
@@ -522,7 +523,7 @@ module QueriesHelper
       sprite_icon('clear-query', l(:button_clear)),
       params,
       :class => 'icon-only icon-clear-query',
-      :data => tooltip_stimulus_attributes(text: l(:button_clear))
+      **tooltip_options(l(:button_clear))
     )
   end
 

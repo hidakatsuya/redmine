@@ -690,6 +690,7 @@ function setupCopyButtonsToPreElements() {
 
     const copyButton = document.createElement("a");
     copyButton.title = rm.I18n.buttonCopy;
+    copyButton.dataset.tooltipTarget = "trigger";
     copyButton.classList.add("copy-pre-content-link", "icon-only");
     copyButton.append(createSVGIcon("copy-pre-content"));
 

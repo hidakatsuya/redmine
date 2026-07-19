@@ -162,8 +162,9 @@ class IssuesController < ApplicationController
           render_attachment_warning_if_needed(@issue)
           flash[:notice] =
             l(:notice_issue_successful_create,
-              :id => view_context.link_to("##{@issue.id}", issue_path(@issue),
-                                          :data => view_context.tooltip_stimulus_attributes(text: @issue.subject)))
+              :id => view_context.link_to(
+                "##{@issue.id}", issue_path(@issue), **view_context.tooltip_options(@issue.subject)
+              ))
           redirect_after_create
         end
         format.api do

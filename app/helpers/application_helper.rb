@@ -121,7 +121,7 @@ module ApplicationHelper
     only_path = options[:only_path].nil? ? true : options[:only_path]
     s = link_to(text, issue_url(issue, :only_path => only_path),
                 :class => issue.css_classes,
-                :data => tooltip_stimulus_attributes(text: title))
+                **tooltip_options(title))
     s << h(": #{subject}") if subject
     s = h("#{issue.project} - ") + s if options[:project]
     s
@@ -167,7 +167,7 @@ module ApplicationHelper
       {:controller => 'repositories', :action => 'revision',
        :id => repository.project,
        :repository_id => repository.identifier_param, :rev => rev},
-      :data => tooltip_stimulus_attributes(text: l(:label_revision_id, format_revision(revision))),
+      **tooltip_options(l(:label_revision_id, format_revision(revision))),
       :accesskey => options[:accesskey]
     )
   end
@@ -217,7 +217,8 @@ module ApplicationHelper
   def link_to_version(version, options = {})
     return '' unless version && version.is_a?(Version)
 
-    options[:data] = tooltip_stimulus_attributes(text: format_date(version.effective_date))
+    title = options.fetch(:title, format_date(version.effective_date))
+    options = tooltip_options(title, options.except(:title))
     link_to_if version.visible?, format_version_name(version), version_path(version), options
   end
 
@@ -320,7 +321,7 @@ module ApplicationHelper
             object,
             :class => ['icon-only', 'icon-download'],
             :icon => 'download',
-            :data => tooltip_stimulus_attributes(text: l(:button_download)),
+            **tooltip_options(l(:button_download)),
             :download => true
           ),
           class: 'attachment-filename'
@@ -355,7 +356,7 @@ module ApplicationHelper
     thumbnail_size = Setting.thumbnails_size.to_i
     thumbnail_path = thumbnail_path(attachment, :size => thumbnail_size * 2)
     tag.div class: 'thumbnail',
-            data: tooltip_stimulus_attributes(text: attachment.filename) do
+            **tooltip_options(attachment.filename) do
       link_to(
         image_tag(
           thumbnail_path,
@@ -506,7 +507,7 @@ module ApplicationHelper
           if options[:timestamp] && page.updated_on
             l(:label_updated_time, distance_of_time_in_words(Time.now, page.updated_on))
           end
-        content << link_to(h(page.pretty_title), href, :data => tooltip_stimulus_attributes(text: tooltip))
+        content << link_to(h(page.pretty_title), href, **tooltip_options(tooltip))
         content << "\n" + render_page_hierarchy(pages, page.id, options) if pages[page.id]
         content << "</li>\n"
       end
@@ -582,7 +583,7 @@ module ApplicationHelper
       padding = level * 16
       text = content_tag('span', project.name, :style => "padding-inline-start:#{padding}px;")
       s << link_to(text, project_path(project, :jump => jump),
-                   :data => tooltip_stimulus_attributes(text: project.name),
+                   **tooltip_options(project.name),
                    :class => (project == selected ? 'selected' : nil))
     end
     [
@@ -764,9 +765,9 @@ module ApplicationHelper
     if @project
       link_to(text,
               project_activity_path(@project, :from => User.current.time_to_date(time)),
-              :data => tooltip_stimulus_attributes(text: format_time(time)))
+              **tooltip_options(format_time(time)))
     else
-      content_tag('abbr', text, :data => tooltip_stimulus_attributes(text: format_time(time)))
+      content_tag('abbr', text, **tooltip_options(format_time(time)))
     end
   end
 
@@ -787,13 +788,14 @@ module ApplicationHelper
     data = {
       :reorder_url => options[:url] || url_for(object),
       :reorder_param => options[:param] || object.class.name.underscore
-    }.merge(
-      tooltip_stimulus_attributes(text: l(:button_sort))
-    )
+    }
 
     content_tag('span', sprite_icon('reorder', ''),
-                :class => "icon-only icon-sort-handle sort-handle",
-                :data => data)
+                **tooltip_options(
+                  l(:button_sort),
+                  :class => "icon-only icon-sort-handle sort-handle",
+                  :data => data
+                ))
   end
 
   def breadcrumb(*args)
@@ -871,7 +873,7 @@ module ApplicationHelper
     if content.present?
       trigger =
         content_tag('span', sprite_icon('3-bullets', l(:button_actions)), :class => 'icon-only icon-actions',
-                    :data => tooltip_stimulus_attributes(text: l(:button_actions)))
+                    **tooltip_options(l(:button_actions)))
       trigger = content_tag('span', trigger, :class => 'drdn-trigger')
       content = content_tag('div', content, :class => 'drdn-items')
       content = content_tag('div', content, :class => 'drdn-content')
@@ -1155,7 +1157,7 @@ module ApplicationHelper
                                :repository_id => repository.identifier_param,
                                :rev => changeset.revision},
                                :class => 'changeset',
-                               :data => tooltip_stimulus_attributes(text: truncate_single_line_raw(changeset.comments, 100)))
+                               **tooltip_options(truncate_single_line_raw(changeset.comments, 100)))
               end
             end
           elsif sep == '#' || sep == '##'
@@ -1171,12 +1173,12 @@ module ApplicationHelper
                     link_to("#{issue.tracker.name} ##{oid}#{comment_suffix}: #{issue.subject}",
                             url,
                             :class => issue.css_classes,
-                            :data => tooltip_stimulus_attributes(text: "#{l(:field_status)}: #{issue.status.name}"))
+                            **tooltip_options("#{l(:field_status)}: #{issue.status.name}"))
                   else
                     link_to("##{oid}#{comment_suffix}",
                             url,
                             :class => issue.css_classes,
-                            :data => tooltip_stimulus_attributes(text: "#{issue.tracker.name}: #{issue.subject.truncate(100)} (#{issue.status.name})"))
+                            **tooltip_options("#{issue.tracker.name}: #{issue.subject.truncate(100)} (#{issue.status.name})"))
                   end
               elsif identifier == 'note'
                 link = link_to("#note-#{comment_id}", "#note-#{comment_id}")
@@ -1261,7 +1263,7 @@ module ApplicationHelper
                          :repository_id => repository.identifier_param,
                         :rev => changeset.identifier},
                         :class => 'changeset',
-                        :data => tooltip_stimulus_attributes(text: truncate_single_line_raw(changeset.comments, 100))
+                        **tooltip_options(truncate_single_line_raw(changeset.comments, 100))
                       )
                   end
                 else
@@ -1367,7 +1369,7 @@ module ApplicationHelper
               :section => @current_section),
             :class => 'icon-only icon-edit'),
           :class => "contextual heading-#{level}",
-          :data => tooltip_stimulus_attributes(text: l(:button_edit_section)),
+          **tooltip_options(l(:button_edit_section)),
           :id => "section-#{@current_section}") + heading.html_safe
       else
         heading
@@ -1411,14 +1413,13 @@ module ApplicationHelper
     }
   end
 
-  def tooltip_stimulus_attributes(text:)
-    return {} if text.blank?
+  def tooltip_options(text, html_options = {})
+    return html_options if text.blank?
 
-    {
-      controller: 'tooltip',
-      action: 'mouseenter->tooltip#show mouseleave->tooltip#hide',
-      tooltip_text_value: text
-    }
+    html_options.merge(
+      title: text,
+      data: (html_options[:data] || {}).merge(tooltip_target: 'trigger')
+    )
   end
 
   unless const_defined?(:MACROS_RE)
@@ -1593,7 +1594,7 @@ module ApplicationHelper
     link_to sprite_icon('3-bullets', l(:button_actions)),
             '#',
             class: 'icon-only icon-actions js-contextmenu ',
-            data: tooltip_stimulus_attributes(text: l(:button_actions))
+            **tooltip_options(l(:button_actions))
   end
 
   # Helper to render JSON in views
@@ -1622,7 +1623,7 @@ module ApplicationHelper
     css_classes += ' ' + options[:class] if options[:class]
     link_to_function sprite_icon('checked', ''),
                      "toggleCheckboxesBySelector('#{selector}')",
-                     :data => tooltip_stimulus_attributes(text: "#{l(:button_check_all)} / #{l(:button_uncheck_all)}"),
+                     **tooltip_options("#{l(:button_check_all)} / #{l(:button_uncheck_all)}"),
                      :class => css_classes
   end
 
@@ -1640,19 +1641,19 @@ module ApplicationHelper
         'tr',
         (if pcts[0] > 0
            content_tag('td', '', :style => "width: #{pcts[0]}%;",
-                       :class => 'closed', :data => tooltip_stimulus_attributes(text: titles[0]))
+                       :class => 'closed', **tooltip_options(titles[0]))
          else
            ''.html_safe
          end) +
         (if pcts[1] > 0
            content_tag('td', '', :style => "width: #{pcts[1]}%;",
-                      :class => 'done', :data => tooltip_stimulus_attributes(text: titles[1]))
+                      :class => 'done', **tooltip_options(titles[1]))
          else
            ''.html_safe
          end) +
         (if pcts[2] > 0
            content_tag('td', '', :style => "width: #{pcts[2]}%;",
-                                   :class => 'todo', :data => tooltip_stimulus_attributes(text: titles[2]))
+                                   :class => 'todo', **tooltip_options(titles[2]))
          else
            ''.html_safe
          end)

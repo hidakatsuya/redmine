@@ -27,9 +27,9 @@ class ProjectsHelperTest < Redmine::HelperTest
     @project = Project.find(2)
     User.current = User.find(1)
     assert_select_in link_to_version(Version.find(5)),
-                     'a[href=?][data-controller=?][data-tooltip-text-value=?]',
+                     'a[href=?][data-tooltip-target=?][title=?]',
                      '/versions/5',
-                     'tooltip',
+                     'trigger',
                      '07/01/2006',
                      :text => 'Alpha'
   end
@@ -37,9 +37,9 @@ class ProjectsHelperTest < Redmine::HelperTest
   def test_link_to_version
     User.current = User.find(1)
     assert_select_in link_to_version(Version.find(5)),
-                     'a[href=?][data-controller=?][data-tooltip-text-value=?]',
+                     'a[href=?][data-tooltip-target=?][title=?]',
                      '/versions/5',
-                     'tooltip',
+                     'trigger',
                      '07/01/2006',
                      :text => 'OnlineStore - Alpha'
   end

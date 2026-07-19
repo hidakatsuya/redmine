@@ -18,7 +18,7 @@
 <!-- page specific tags -->
 <%= yield :header_tags -%>
 </head>
-<body class="<%= body_css_classes %>" data-text-formatting="<%= Setting.text_formatting %>">
+<body class="<%= body_css_classes %>" data-controller="tooltip" data-text-formatting="<%= Setting.text_formatting %>">
 <%= call_hook :view_layouts_base_body_top %>
 <div id="wrapper">
 

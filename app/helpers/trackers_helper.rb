@@ -21,6 +21,6 @@ module TrackersHelper
   def tracker_name_tag(tracker)
     title = tracker.description.presence
     css = title ? "field-description" : nil
-    content_tag 'span', tracker.name, :class => css, :data => tooltip_stimulus_attributes(text: title)
+    content_tag 'span', tracker.name, :class => css, **tooltip_options(title)
   end
 end

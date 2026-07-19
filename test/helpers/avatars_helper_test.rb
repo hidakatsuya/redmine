@@ -64,7 +64,9 @@ class AvatarsHelperTest < Redmine::HelperTest
   end
 
   def test_avatar_with_html_option
-    assert_include 'data-tooltip-text-value="John Smith"', avatar('jsmith <jsmith@somenet.foo>', :title => 'John Smith')
+    avatar = avatar('jsmith <jsmith@somenet.foo>', :title => 'John Smith')
+    assert_include 'title="John Smith"', avatar
+    assert_include 'data-tooltip-target="trigger"', avatar
   end
 
   def test_avatar_css_class
