@@ -67,6 +67,7 @@ class Redmine::Gantt::ChartTest < ActiveSupport::TestCase
     assert_equal 1 + [chart.zoom > 1, chart.zoom > 3, chart.zoom > 2].count(true), chart.header_layers
     assert chart.scale_segments.any?
     assert chart.scale_segments.frozen?
+    assert chart.scale_segments.all? {|segment| segment.kind && !segment.respond_to?(:css_classes)}
     assert chart.relations.frozen?
     chart.relations.each do |relation|
       assert_includes visible_keys, relation.from_row_key

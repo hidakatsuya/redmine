@@ -16,9 +16,8 @@
           data-gantt--chart-target="endAnchor"
           data-row-key="<%= row.row_key %>"></span>
     <% if row.context_menu? %>
-      <%= content_tag(:input, nil, :type => 'checkbox', :name => 'ids[]',
-                      :value => row.record.id, :style => 'display:none;',
-                      :class => 'toggle-selection') %>
+      <%= content_tag(:input, nil, :type => 'checkbox', :name => 'ids[]', :value => row.record.id,
+                      :style => 'display:none;', :class => 'toggle-selection') %>
     <% end %>
   </div>
 
@@ -51,9 +50,8 @@
          style="<%= gantt_schedule_style(row.schedule) %>"
          data-row-key="<%= row.row_key %>">
       <span class="tip"><%= render_issue_tooltip(row.record) %></span>
-      <%= content_tag(:input, nil, :type => 'checkbox', :name => 'ids[]',
-                      :value => row.record.id, :style => 'display:none;',
-                      :class => 'toggle-selection') %>
+      <%= content_tag(:input, nil, :type => 'checkbox', :name => 'ids[]', :value => row.record.id,
+                      :style => 'display:none;', :class => 'toggle-selection') %>
     </div>
   <% end %>
 <% end %>

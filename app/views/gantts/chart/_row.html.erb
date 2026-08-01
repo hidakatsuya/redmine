@@ -8,10 +8,20 @@
      data-progress-state="<%= gantt_progress_state(row) %>"
      style="<%= gantt_row_style(row) %>">
   <div class="gantt__row-information">
-    <%= render partial: gantt_row_partial(row), locals: {row: row, chart: chart} %>
+    <div class="gantt__sidebar-grid">
+      <div class="gantt__subject-cell">
+        <%= render partial: gantt_row_partial(row), locals: {row: row} %>
+      </div>
+
+      <% chart.selected_columns.each do |column| %>
+        <div class="gantt__column-cell">
+          <%= gantt_row_column_content(row, column) %>
+        </div>
+      <% end %>
+    </div>
   </div>
 
   <div class="gantt__timeline-cell">
-    <%= render partial: 'gantts/rows/schedule', locals: {row: row} %>
+    <%= render partial: 'gantts/chart/schedule', locals: {row: row} %>
   </div>
 </div>

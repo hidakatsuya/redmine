@@ -5,7 +5,7 @@ module Redmine
     class Chart
       DEFAULT_SUBJECT_WIDTH = 330
       Relation = Struct.new(:from_row_key, :to_row_key, :type, keyword_init: true)
-      ScaleSegment = Struct.new(:layer, :label, :start_offset, :span, :css_classes, :title, keyword_init: true)
+      ScaleSegment = Struct.new(:layer, :label, :start_offset, :span, :kind, :non_working_day, :title, keyword_init: true)
 
       attr_reader :date_from, :date_to, :zoom, :day_width, :header_layers, :rows,
                   :relations, :scale_segments, :selected_columns, :timeline_width,
@@ -132,7 +132,7 @@ module Redmine
                                        :title => "#{::I18n.t('date.month_names')[month.month]} #{month.year}",
                                        :start_offset => (month - @date_from).to_i,
                                        :span => ((month >> 1) - month).to_i,
-                                       :css_classes => %w[gantt__scale-segment gantt__scale-segment--month])
+                                       :kind => :month, :non_working_day => false)
           month >>= 1
         end
         append_week_segments(segments, layer += 1) if show_weeks?
@@ -147,7 +147,7 @@ module Redmine
           segments << ScaleSegment.new(:layer => layer, :label => week.cweek.to_s,
                                        :start_offset => (week - @date_from).to_i,
                                        :span => [7, (@date_to - week + 1).to_i].min,
-                                       :css_classes => %w[gantt__scale-segment gantt__scale-segment--week])
+                                       :kind => :week, :non_working_day => false)
           week += 7
         end
       end
@@ -157,14 +157,9 @@ module Redmine
           label = suffix == 'day-number' ? date.day.to_s : ::I18n.t('date.abbr_day_names')[date.wday]
           segments << ScaleSegment.new(:layer => layer, :label => label,
                                        :start_offset => (date - @date_from).to_i, :span => 1,
-                                       :css_classes => day_css_classes(date, suffix))
+                                       :kind => suffix.tr('-', '_').to_sym,
+                                       :non_working_day => @gantt.non_working_week_days.include?(date.cwday))
         end
-      end
-
-      def day_css_classes(date, suffix)
-        classes = ['gantt__scale-segment', "gantt__scale-segment--#{suffix}"]
-        classes << 'is-non-working-day' if @gantt.non_working_week_days.include?(date.cwday)
-        classes
       end
 
       def header_layers_for(zoom)
