@@ -34,17 +34,10 @@
             <% scale_segments.each do |layer, segments| %>
               <div class="gantt__scale-row gantt__scale-row--<%= layer %>">
                 <% segments.each do |segment| %>
-                  <% segment_start = chart.date_from + segment.start_offset %>
-                  <div class="<%= segment.css_classes.join(' ') %>"
+                  <div class="<%= gantt_scale_segment_css_classes(segment).join(' ') %>"
                        style="<%= gantt_scale_segment_style(segment) %>"
                        title="<%= segment.title %>">
-                    <% if layer.zero? %>
-                      <%= link_to segment.label,
-                                  gantt.params.merge(year: segment_start.year, month: segment_start.month),
-                                  title: segment.title %>
-                    <% else %>
-                      <span><%= segment.label %></span>
-                    <% end %>
+                    <%= gantt_scale_segment_content(segment, gantt) %>
                   </div>
                 <% end %>
               </div>
@@ -58,7 +51,7 @@
            data-controller="gantt--subjects"
            data-gantt--chart-target="body">
         <% chart.rows.each do |row| %>
-          <%= render partial: 'gantts/row', locals: {row: row, chart: chart} %>
+          <%= render partial: 'gantts/chart/row', locals: {row: row, chart: chart} %>
         <% end %>
 
         <div class="gantt__overlay" id="gantt_draw_area" data-gantt--chart-target="overlay">
