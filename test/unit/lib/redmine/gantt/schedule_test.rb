@@ -21,8 +21,8 @@ class Redmine::Gantt::ScheduleTest < ActiveSupport::TestCase
 
     assert_equal 0, schedule.bar_start_offset
     assert_equal 31, schedule.bar_end_offset
-    assert_not schedule.show_start_marker
-    assert_not schedule.show_end_marker
+    assert_not schedule.start_marker?
+    assert_not schedule.end_marker?
   end
 
   test 'uses day offsets and exposes progress and late portions' do
@@ -33,8 +33,10 @@ class Redmine::Gantt::ScheduleTest < ActiveSupport::TestCase
       assert_equal 21, schedule.bar_end_offset
       assert_equal 10, schedule.progress_offset
       assert_equal 15, schedule.late_offset
-      assert schedule.show_start_marker
-      assert schedule.show_end_marker
+      assert schedule.progress?
+      assert schedule.late?
+      assert schedule.start_marker?
+      assert schedule.end_marker?
       assert_predicate schedule, :frozen?
     end
   end
@@ -43,6 +45,8 @@ class Redmine::Gantt::ScheduleTest < ActiveSupport::TestCase
     schedule = build(:start_on => @date_from - 10, :end_on => @date_from - 2, :progress => 0, :markers => false, :label => 'Outside')
 
     assert_not schedule.visible?
+    assert_not schedule.progress?
+    assert_not schedule.late?
   end
 
   test 'preserves the legacy gantt date calculations' do

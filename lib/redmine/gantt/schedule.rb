@@ -4,11 +4,11 @@ module Redmine
   module Gantt
     class Schedule
       attr_reader :start_on, :end_on, :visible_start, :visible_end, :progress_end, :late_end,
-                  :show_start_marker, :show_end_marker, :label, :start_offset, :end_offset,
+                  :label, :start_offset, :end_offset,
                   :bar_start_offset, :bar_end_offset, :progress_offset, :late_offset
 
       def initialize(start_on:, end_on:, visible_start:, visible_end:, progress_end:, late_end:,
-                     show_start_marker:, show_end_marker:, label:, start_offset:, end_offset:,
+                     start_marker:, end_marker:, label:, start_offset:, end_offset:,
                      bar_start_offset:, bar_end_offset:, progress_offset:, late_offset:)
         @start_on = start_on
         @end_on = end_on
@@ -16,8 +16,8 @@ module Redmine
         @visible_end = visible_end
         @progress_end = progress_end
         @late_end = late_end
-        @show_start_marker = show_start_marker
-        @show_end_marker = show_end_marker
+        @start_marker = start_marker
+        @end_marker = end_marker
         @label = label
         @start_offset = start_offset
         @end_offset = end_offset
@@ -29,7 +29,23 @@ module Redmine
       end
 
       def visible?
-        bar_start_offset && bar_end_offset
+        !bar_start_offset.nil? && !bar_end_offset.nil?
+      end
+
+      def progress?
+        !progress_offset.nil?
+      end
+
+      def late?
+        !late_offset.nil?
+      end
+
+      def start_marker?
+        @start_marker
+      end
+
+      def end_marker?
+        @end_marker
       end
 
       def self.build(gantt:, start_on:, end_on:, progress:, markers:, label:)
@@ -38,7 +54,7 @@ module Redmine
           :start_on => start_on, :end_on => end_on,
           :visible_start => visible_date(start_on, gantt.date_from), :visible_end => visible_date(end_on, gantt.date_to),
           :progress_end => offset_to_date(gantt, coords[:bar_progress_end]), :late_end => offset_to_date(gantt, coords[:bar_late_end]),
-          :show_start_marker => markers && coords[:start].present?, :show_end_marker => markers && coords[:end].present?, :label => label,
+          :start_marker => markers && coords[:start].present?, :end_marker => markers && coords[:end].present?, :label => label,
           :start_offset => coords[:start], :end_offset => coords[:end], :bar_start_offset => coords[:bar_start],
           :bar_end_offset => coords[:bar_end], :progress_offset => coords[:bar_progress_end], :late_offset => coords[:bar_late_end]
         )

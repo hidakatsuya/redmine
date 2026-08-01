@@ -3,24 +3,33 @@
 module Redmine
   module Gantt
     class Version < Row
-      attr_reader :completed_percent
+      attr_reader :version, :completed_percent
 
       def self.build(record:, gantt:, depth:, parent_row_key:)
         percent = record.visible_fixed_issues.completed_percent
         new(
           **common_attributes(record, depth, parent_row_key),
-          :has_children => gantt.version_issues(record.project, record).any?,
+          :expandable => gantt.version_issues(record.project, record).any?,
           :subject => record.to_s_with_project,
           :schedule => schedule_for(record, gantt, percent),
+          :version => record,
           :completed_percent => percent,
+          :closed => !record.open?,
+          :overdue => record.overdue?,
+          :behind_schedule => record.behind_schedule?,
           :behind_start_date => behind_start_date?(record, gantt, percent, record.due_date),
           :over_end_date => over_end_date?(record, gantt, percent, record.due_date)
         )
       end
 
-      def initialize(completed_percent:, behind_start_date:, over_end_date:, **attributes)
+      def initialize(version:, completed_percent:, closed:, overdue:, behind_schedule:,
+                     behind_start_date:, over_end_date:, **attributes)
         super(**attributes)
+        @version = version
         @completed_percent = completed_percent
+        @closed = closed
+        @overdue = overdue
+        @behind_schedule = behind_schedule
         @behind_start_date = behind_start_date
         @over_end_date = over_end_date
         freeze
@@ -43,15 +52,15 @@ module Redmine
       end
 
       def closed?
-        !record.open?
+        @closed
       end
 
       def overdue?
-        record.overdue?
+        @overdue
       end
 
       def behind_schedule?
-        record.behind_schedule?
+        @behind_schedule
       end
 
       def behind_start_date?

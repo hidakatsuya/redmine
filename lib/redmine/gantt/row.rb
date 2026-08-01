@@ -3,30 +3,26 @@
 module Redmine
   module Gantt
     class Row
-      attr_reader :row_key, :depth, :parent_row_key, :has_children, :subject,
-                  :schedule, :record
+      attr_reader :row_key, :depth, :parent_row_key, :subject, :schedule
 
-      def initialize(row_key:, depth:, parent_row_key:, has_children:, subject:,
-                     schedule:, record:)
+      def initialize(row_key:, depth:, parent_row_key:, expandable:, subject:, schedule:)
         @row_key = row_key
         @depth = depth
         @parent_row_key = parent_row_key
-        @has_children = has_children
+        @expandable = expandable
         @subject = subject
         @schedule = schedule
-        @record = record
+      end
+
+      def expandable?
+        @expandable
       end
 
       class << self
         private
 
         def common_attributes(record, depth, parent_row_key)
-          {
-            :row_key => "#{record.class.name.demodulize.downcase}-#{record.id}",
-            :depth => depth,
-            :parent_row_key => parent_row_key,
-            :record => record
-          }
+          {:row_key => "#{record.class.name.demodulize.downcase}-#{record.id}", :depth => depth, :parent_row_key => parent_row_key}
         end
 
         def behind_start_date?(record, gantt, progress, end_on)
@@ -51,10 +47,6 @@ module Redmine
       end
 
       def context_menu?
-        false
-      end
-
-      def parent?
         false
       end
 

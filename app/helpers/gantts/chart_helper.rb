@@ -14,7 +14,7 @@ module Gantts
       GANTT_ROW_PARTIALS.fetch(row.class)
     end
 
-    def gantt_chart_tag(query, chart, project: nil, &)
+    def gantt_chart_tag(chart, project: nil, &)
       selected_columns_width = chart.selected_columns.size * SELECTED_COLUMN_WIDTH
       data_attributes = {
         :controller => 'gantt--chart',
@@ -30,9 +30,9 @@ module Gantts
         'gantt--chart-issue-relation-types-value' => Redmine::Helpers::Gantt::DRAW_TYPES.transform_values(&:symbolize_keys).to_json,
         'gantt--chart-relations-value' => chart.relations.map(&:to_h).to_json,
         'gantt--chart-column-widths-value' => chart.selected_columns.map { SELECTED_COLUMN_WIDTH }.to_json,
-        'gantt--chart-show-selected-columns-value' => query.draw_selected_columns ? 'true' : 'false',
-        'gantt--chart-show-relations-value' => query.draw_relations ? 'true' : 'false',
-        'gantt--chart-show-progress-value' => query.draw_progress_line ? 'true' : 'false'
+        'gantt--chart-show-selected-columns-value' => chart.show_selected_columns? ? 'true' : 'false',
+        'gantt--chart-show-relations-value' => chart.show_relations? ? 'true' : 'false',
+        'gantt--chart-show-progress-value' => chart.show_progress_line? ? 'true' : 'false'
       }
       styles = [
         "--gantt-row-height: #{chart.row_height}px", "--gantt-header-rows: #{chart.header_layers}",
@@ -41,7 +41,7 @@ module Gantts
         "--gantt-selected-columns-template: #{chart.selected_columns.map { "#{SELECTED_COLUMN_WIDTH}px" }.join(' ')}",
         "--gantt-subject-width: #{chart.sidebar_subject_width}px", "--gantt-timeline-width: #{chart.timeline_width}px"
       ].join('; ')
-      tag.div(:class => ['gantt', ('is-showing-columns' if query.draw_selected_columns)], :style => styles,
+      tag.div(:class => ['gantt', ('is-showing-columns' if chart.show_selected_columns?)], :style => styles,
               :data => data_attributes.merge('gantt-project-id': project&.id), &)
     end
 
@@ -53,8 +53,7 @@ module Gantts
 
     def gantt_scale_segment_content(segment, gantt)
       if segment.kind == :month
-        segment_start = gantt.chart.date_from + segment.start_offset
-        link_to(segment.label, gantt.params.merge(:year => segment_start.year, :month => segment_start.month), :title => segment.title)
+        link_to(segment.label, gantt.params.merge(:year => segment.start_on.year, :month => segment.start_on.month), :title => segment.title)
       else
         content_tag(:span, segment.label)
       end
@@ -84,13 +83,13 @@ module Gantts
     end
 
     def gantt_progress_style(schedule)
-      return unless schedule&.progress_offset
+      return unless schedule&.progress?
 
       ["--gantt-start-unit: #{schedule.bar_start_offset}", "--gantt-end-unit: #{schedule.progress_offset}"].join('; ')
     end
 
     def gantt_late_style(schedule)
-      return unless schedule&.late_offset
+      return unless schedule&.late?
 
       ["--gantt-start-unit: #{schedule.bar_start_offset}", "--gantt-end-unit: #{schedule.late_offset}"].join('; ')
     end
@@ -112,7 +111,7 @@ module Gantts
 
     def gantt_row_subject_tag(row, content, css_classes, container_classes)
       expander =
-        if row.has_children
+        if row.expandable?
           content_tag(:button, sprite_icon('angle-down', :rtl => true), :type => 'button',
                       :class => 'gantt__expander icon icon-expanded', :aria => {:expanded => 'true'},
                       :data => {:action => 'click->gantt--subjects#toggleRow'})
@@ -120,8 +119,8 @@ module Gantts
           content_tag(:span, '', :class => 'gantt__expander-placeholder', :aria => {:hidden => 'true'})
         end
       classes = ['gantt__subject', *container_classes]
-      classes << 'is-open' if row.has_children
-      content_tag(:div, :class => classes.join(' '), :id => gantt_subject_dom_id(row.record)) do
+      classes << 'is-open' if row.expandable?
+      content_tag(:div, :class => classes.join(' '), :id => row.row_key) do
         expander + content_tag(:span, content, :class => ['gantt__subject-text', *css_classes].join(' '), :title => row.subject)
       end
     end
@@ -129,7 +128,7 @@ module Gantts
     def gantt_row_column_content(row, column)
       return ''.html_safe unless row.issue?
 
-      content_tag(:div, column_content(column, row.record), :class => ['gantt__cell-value', column.css_classes].compact.join(' '))
+      content_tag(:div, column_content(column, row.issue), :class => ['gantt__cell-value', column.css_classes].compact.join(' '))
     end
 
     def gantt_bar_classes(row)
@@ -191,15 +190,11 @@ module Gantts
       classes = ['task', row.kind.to_s]
       return classes unless row.issue?
 
-      classes.tap {|values| values[-1] = row.parent? ? 'parent' : 'leaf'}
-    end
-
-    def gantt_subject_dom_id(record)
-      "#{record.class.name.demodulize.downcase}-#{record.id}"
+      classes.tap {|values| values[-1] = row.summary? ? 'parent' : 'leaf'}
     end
 
     def gantt_issue_subject_content(row)
-      issue = row.record
+      issue = row.issue
       content = +''
       content << sprite_icon('issue') unless issue.assigned_to
       content << assignee_avatar(issue.assigned_to, :size => 13, :class => 'icon-avatar')
@@ -212,14 +207,14 @@ module Gantts
     def gantt_version_subject_content(row)
       content = +''
       content << sprite_icon('package')
-      content << link_to_version(row.record)
+      content << link_to_version(row.version)
       content.html_safe
     end
 
     def gantt_project_subject_content(row)
       content = +''
       content << sprite_icon('projects')
-      content << link_to_project(row.record)
+      content << link_to_project(row.project)
       content.html_safe
     end
   end

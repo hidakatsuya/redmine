@@ -3,18 +3,24 @@
 module Redmine
   module Gantt
     class Project < Row
+      attr_reader :project
+
       def self.build(record:, gantt:, depth:, parent_row_key:)
         new(
           **common_attributes(record, depth, parent_row_key),
-          :has_children => gantt.projects.any? {|project| project.parent_id == record.id} ||
+          :expandable => gantt.projects.any? {|project| project.parent_id == record.id} ||
             gantt.project_issues(record).any? || gantt.project_versions(record).any?,
           :subject => record.name,
-          :schedule => schedule_for(record, gantt)
+          :schedule => schedule_for(record, gantt),
+          :project => record,
+          :overdue => record.overdue?
         )
       end
 
-      def initialize(**attributes)
-        super
+      def initialize(project:, overdue:, **attributes)
+        super(**attributes)
+        @project = project
+        @overdue = overdue
         freeze
       end
 
@@ -35,7 +41,7 @@ module Redmine
       end
 
       def overdue?
-        record.overdue?
+        @overdue
       end
 
       def self.schedule_for(record, gantt)
