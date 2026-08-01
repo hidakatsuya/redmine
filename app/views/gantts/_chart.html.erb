@@ -1,7 +1,7 @@
 <% chart = gantt.chart %>
 <% scale_segments = chart.scale_segments.group_by(&:layer) %>
 
-<% if gantt.truncated %>
+<% if chart.truncated? %>
   <p class="warning"><%= l(:notice_gantt_chart_truncated, max: gantt.max_rows) %></p>
 <% end %>
 

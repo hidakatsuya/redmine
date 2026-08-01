@@ -19,9 +19,9 @@
 
 module GanttHelper
   GANTT_ROW_PARTIALS = {
-    Redmine::Gantt::ProjectRow => 'gantts/rows/project',
-    Redmine::Gantt::VersionRow => 'gantts/rows/version',
-    Redmine::Gantt::IssueRow => 'gantts/rows/issue'
+    Redmine::Gantt::Project => 'gantts/rows/project',
+    Redmine::Gantt::Version => 'gantts/rows/version',
+    Redmine::Gantt::Issue => 'gantts/rows/issue'
   }.freeze
 
   def gantt_row_partial(row)
