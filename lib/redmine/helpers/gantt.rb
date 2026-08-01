@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require 'redmine/gantt/chart_builder'
+require 'redmine/gantt/chart'
 
 module Redmine
   module Helpers
@@ -110,7 +110,7 @@ module Redmine
       end
 
       def chart
-        @chart ||= Redmine::Gantt::ChartBuilder.new(self, :query => @query).build
+        @chart ||= Redmine::Gantt::Chart.build(self, :query => @query)
       end
 
       def common_params

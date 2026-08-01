@@ -2,24 +2,20 @@
 
 require_relative '../../../../test_helper'
 
-class Redmine::Gantt::RowBuildersTest < ActiveSupport::TestCase
+class Redmine::Gantt::RowsTest < ActiveSupport::TestCase
   setup do
     User.current = users(:users_002)
     @project = projects(:projects_001)
     @query = IssueQuery.new(:project => @project, :name => '_')
-    @gantt = Redmine::Helpers::Gantt.new(
-      :year => User.current.today.year,
-      :month => User.current.today.month,
-      :months => 2
-    )
+    @gantt = Redmine::Helpers::Gantt.new(:year => User.current.today.year, :month => User.current.today.month, :months => 2)
     @gantt.project = @project
     @gantt.query = @query
   end
 
-  test 'project builder creates a project row with project schedule semantics' do
-    row = build(Redmine::Gantt::ProjectRowBuilder, @project, :depth => 0, :parent_row_key => nil)
+  test 'project row retains project schedule semantics and is frozen' do
+    row = build(Redmine::Gantt::Project, @project, :depth => 0, :parent_row_key => nil)
 
-    assert_instance_of Redmine::Gantt::ProjectRow, row
+    assert_instance_of Redmine::Gantt::Project, row
     assert_equal "project-#{@project.id}", row.row_key
     assert_equal @project.name, row.subject
     assert row.has_children
@@ -27,28 +23,28 @@ class Redmine::Gantt::RowBuildersTest < ActiveSupport::TestCase
     assert_equal @project.start_date, row.schedule.start_on
     assert_equal @project.due_date, row.schedule.end_on
     assert_not row.context_menu?
+    assert_predicate row, :frozen?
   end
 
-  test 'version builder creates a version row with completion and closed semantics' do
+  test 'version row retains completion and closed semantics and is frozen' do
     version = versions(:versions_001)
-    row = build(Redmine::Gantt::VersionRowBuilder, version, :depth => 1,
-                                                      :parent_row_key => "project-#{@project.id}")
+    row = build(Redmine::Gantt::Version, version, :depth => 1, :parent_row_key => "project-#{@project.id}")
 
-    assert_instance_of Redmine::Gantt::VersionRow, row
+    assert_instance_of Redmine::Gantt::Version, row
     assert_equal 'version-1', row.row_key
     assert_equal version.visible_fixed_issues.completed_percent, row.completed_percent
     assert row.closed?
     assert_equal version.start_date, row.schedule.start_on
     assert_equal version.due_date, row.schedule.end_on
     assert_not row.editable?
+    assert_predicate row, :frozen?
   end
 
-  test 'issue builder creates an issue row with issue schedule and interaction semantics' do
+  test 'issue row retains interaction semantics and is frozen' do
     issue = issues(:issues_003)
-    row = build(Redmine::Gantt::IssueRowBuilder, issue, :depth => 1,
-                                                    :parent_row_key => "project-#{@project.id}")
+    row = build(Redmine::Gantt::Issue, issue, :depth => 1, :parent_row_key => "project-#{@project.id}")
 
-    assert_instance_of Redmine::Gantt::IssueRow, row
+    assert_instance_of Redmine::Gantt::Issue, row
     assert_equal 'issue-3', row.row_key
     assert_equal issue.subject, row.subject
     assert_equal issue.start_date, row.schedule.start_on
@@ -58,11 +54,12 @@ class Redmine::Gantt::RowBuildersTest < ActiveSupport::TestCase
     assert_equal issue.editable?(User.current), row.editable?
     assert_equal issue.overdue?, row.overdue?
     assert_equal issue.behind_schedule?, row.behind_schedule?
+    assert_predicate row, :frozen?
   end
 
   private
 
-  def build(builder, record, **attributes)
-    builder.new(record, :gantt => @gantt, **attributes).build
+  def build(row_class, record, **attributes)
+    row_class.build(record: record, gantt: @gantt, **attributes)
   end
 end
