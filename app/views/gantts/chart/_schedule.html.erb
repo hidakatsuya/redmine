@@ -16,16 +16,16 @@
           data-gantt--chart-target="endAnchor"
           data-row-key="<%= row.row_key %>"></span>
     <% if row.context_menu? %>
-      <%= content_tag(:input, nil, :type => 'checkbox', :name => 'ids[]', :value => row.record.id,
+      <%= content_tag(:input, nil, :type => 'checkbox', :name => 'ids[]', :value => row.issue.id,
                       :style => 'display:none;', :class => 'toggle-selection') %>
     <% end %>
   </div>
 
-  <% if row.schedule.late_offset %>
+  <% if row.schedule.late? %>
     <div class="<%= gantt_late_bar_classes(row).join(' ') %>" style="<%= gantt_late_style(row.schedule) %>"></div>
   <% end %>
 
-  <% if row.schedule.progress_offset %>
+  <% if row.schedule.progress? %>
     <div class="<%= gantt_done_bar_classes(row).join(' ') %>"
          id="<%= gantt_bar_dom_id(row, 'task-done') %>"
          data-gantt--chart-target="doneBar"
@@ -33,12 +33,12 @@
          style="<%= gantt_progress_style(row.schedule) %>"></div>
   <% end %>
 
-  <% if row.schedule.show_start_marker %>
+  <% if row.schedule.start_marker? %>
     <div class="<%= gantt_marker_classes(row, :start).join(' ') %>"
          style="<%= gantt_marker_style(row.schedule.start_offset) %>"></div>
   <% end %>
 
-  <% if row.schedule.show_end_marker %>
+  <% if row.schedule.end_marker? %>
     <div class="<%= gantt_marker_classes(row, :end).join(' ') %>"
          style="<%= gantt_marker_style(row.schedule.end_offset) %>"></div>
   <% end %>
@@ -49,8 +49,8 @@
     <div class="tooltip hascontextmenu gantt__bar-hitbox"
          style="<%= gantt_schedule_style(row.schedule) %>"
          data-row-key="<%= row.row_key %>">
-      <span class="tip"><%= render_issue_tooltip(row.record) %></span>
-      <%= content_tag(:input, nil, :type => 'checkbox', :name => 'ids[]', :value => row.record.id,
+      <span class="tip"><%= render_issue_tooltip(row.issue) %></span>
+      <%= content_tag(:input, nil, :type => 'checkbox', :name => 'ids[]', :value => row.issue.id,
                       :style => 'display:none;', :class => 'toggle-selection') %>
     </div>
   <% end %>

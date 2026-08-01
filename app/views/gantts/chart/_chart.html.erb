@@ -1,11 +1,10 @@
 <% chart = gantt.chart %>
-<% scale_segments = chart.scale_segments.group_by(&:layer) %>
 
 <% if chart.truncated? %>
   <p class="warning"><%= l(:notice_gantt_chart_truncated, max: gantt.max_rows) %></p>
 <% end %>
 
-<%= gantt_chart_tag(query, chart, project: @project) do %>
+<%= gantt_chart_tag(chart, project: @project) do %>
   <div class="gantt__viewport" data-gantt--chart-target="viewport">
     <%= form_tag({}, data: {cm_url: issues_context_menu_path}, class: 'gantt__layout') do %>
       <%= hidden_field_tag 'back_url', url_for(params: request.query_parameters), id: nil %>
@@ -31,9 +30,9 @@
         </div>
         <div class="gantt__header-timeline">
           <div class="gantt__scale" data-gantt--chart-target="timelineHeader">
-            <% scale_segments.each do |layer, segments| %>
-              <div class="gantt__scale-row gantt__scale-row--<%= layer %>">
-                <% segments.each do |segment| %>
+            <% chart.scale_layers.each do |layer| %>
+              <div class="gantt__scale-row gantt__scale-row--<%= layer.index %>">
+                <% layer.segments.each do |segment| %>
                   <div class="<%= gantt_scale_segment_css_classes(segment).join(' ') %>"
                        style="<%= gantt_scale_segment_style(segment) %>"
                        title="<%= segment.title %>">
@@ -55,7 +54,7 @@
         <% end %>
 
         <div class="gantt__overlay" id="gantt_draw_area" data-gantt--chart-target="overlay">
-          <% if chart.today_offset %>
+          <% if chart.show_today? %>
             <div class="gantt__today-line"
                  id="today_line"
                  data-gantt--chart-target="todayLine"
