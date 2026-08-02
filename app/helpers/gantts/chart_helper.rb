@@ -58,6 +58,23 @@ module Gantts
       "--gantt-depth: #{row.depth}"
     end
 
+    def gantt_row_tag(row, &)
+      tag.div(
+        :id => "gantt-row-#{row.row_key}",
+        :class => ['gantt__row', "gantt__row--#{row.kind}"],
+        :style => gantt_row_style(row),
+        :data => {
+          'gantt--chart-target' => 'row',
+          'gantt--subjects-target' => 'row',
+          :row_key => row.row_key,
+          :parent_row_key => row.parent_row_key.to_s,
+          :kind => row.kind,
+          :progress_state => gantt_progress_state(row)
+        },
+        &
+      )
+    end
+
     def gantt_schedule_style(schedule)
       return unless schedule&.visible?
 
@@ -95,23 +112,6 @@ module Gantts
         ],
         &
       )
-    end
-
-    def gantt_row_subject_text_classes(row)
-      [
-        'gantt__subject-text',
-        {
-          'project-overdue': row.project? && row.overdue?,
-          'version-behind-schedule': row.version? && row.behind_schedule?,
-          'version-overdue': row.version? && row.overdue?,
-          'version-closed': row.version? && row.closed?,
-          'issue-overdue': row.issue? && row.overdue?,
-          'issue-behind-schedule': row.issue? && row.behind_schedule?,
-          'issue-closed': row.issue? && row.closed?,
-          'behind-start-date': !row.project? && row.behind_start_date?,
-          'over-end-date': !row.project? && row.over_end_date?
-        }
-      ]
     end
 
     def gantt_bar_classes(row)

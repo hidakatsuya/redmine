@@ -1,2 +1,23 @@
-<%= sprite_icon('projects') -%>
-<%= link_to_project(row.project) %>
+<%= gantt_row_tag(row) do %>
+  <div class="gantt__row-information gantt__sidebar-grid">
+    <div class="gantt__subject-cell">
+      <%= gantt_row_subject_tag(row) do %>
+        <%= render partial: 'gantts/chart/expander', locals: {row: row} %>
+
+        <%= tag.span class: ['gantt__subject-text', {'project-overdue': row.overdue?}],
+                     title: row.subject do %>
+          <%= sprite_icon('projects') -%>
+          <%= link_to_project(row.project) %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <% chart.selected_columns.each do %>
+      <div class="gantt__column-cell"></div>
+    <% end %>
+  </div>
+
+  <div class="gantt__timeline-cell">
+    <%= render partial: 'gantts/chart/schedule', locals: {row: row} %>
+  </div>
+<% end %>

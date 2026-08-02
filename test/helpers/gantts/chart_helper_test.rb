@@ -18,7 +18,7 @@ class Gantts::ChartHelperTest < Redmine::HelperTest
   end
 
   test 'builds subject wrapper, semantic classes, row styles, and progress states' do
-    row = stub(:depth => 2, :row_key => 'issue-1', :kind => :issue,
+    row = stub(:depth => 2, :row_key => 'issue-1', :parent_row_key => 'project-1', :kind => :issue,
                :project? => false, :version? => false, :issue? => true,
                :expandable? => false, :context_menu? => true, :closed? => false,
                :overdue? => true, :behind_schedule? => false,
@@ -27,16 +27,18 @@ class Gantts::ChartHelperTest < Redmine::HelperTest
     assert_equal '--gantt-depth: 2', gantt_row_style(row)
     assert_equal 'task-todo-issue-1', gantt_bar_dom_id(row, 'task-todo')
     assert_equal 'behind-start', gantt_progress_state(row)
+    row_tag = gantt_row_tag(row) {'Row'}
+    assert_include 'id="gantt-row-issue-1"', row_tag
+    assert_include 'class="gantt__row gantt__row--issue"', row_tag
+    assert_include 'data-gantt--chart-target="row"', row_tag
+    assert_include 'data-gantt--subjects-target="row"', row_tag
+    assert_include 'data-parent-row-key="project-1"', row_tag
+    assert_include 'data-progress-state="behind-start"', row_tag
     subject = gantt_row_subject_tag(row) {'Subject'}
     assert_include 'id="issue-1"', subject
     assert_include 'gantt__subject--issue', subject
     assert_include 'hascontextmenu', subject
     assert_not_include 'is-open', subject
-    assert_equal ['gantt__subject-text', {
-      'project-overdue': false, 'version-behind-schedule': false, 'version-overdue': false,
-      'version-closed': false, 'issue-overdue': true, 'issue-behind-schedule': false,
-      'issue-closed': false, 'behind-start-date': true, 'over-end-date': false
-    }], gantt_row_subject_text_classes(row)
   end
 
   test 'builds chart styles including selected column dimensions' do

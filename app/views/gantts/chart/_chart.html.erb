@@ -56,7 +56,7 @@
            data-controller="gantt--subjects"
            data-gantt--chart-target="body">
         <% chart.rows.each do |row| %>
-          <%= render partial: 'gantts/chart/row', locals: {row: row, chart: chart} %>
+          <%= render partial: "gantts/chart/rows/#{row.kind}", locals: {row: row, chart: chart} %>
         <% end %>
 
         <div class="gantt__overlay" id="gantt_draw_area" data-gantt--chart-target="overlay">
