@@ -167,6 +167,10 @@ class GanttsControllerTest < Redmine::ControllerTest
     assert_select '.gantt__column-header', :count => 2
     assert_select '.gantt__column-header[data-controller="gantt--column"] .gantt__column-resizer', :count => 2
     assert_select '.gantt__row--issue .gantt__column-cell', :minimum => 2
+    assert_select '.gantt__row--project .gantt__column-cell:empty', :minimum => 2
+    assert_select '.gantt__row--version .gantt__column-cell:empty', :minimum => 2
+    assert_select '.gantt__row-information.gantt__sidebar-grid', :minimum => 1
+    assert_select '.gantt__row-information > .gantt__sidebar-grid', :count => 0
     assert_select '.gantt[style*="--gantt-selected-columns-count: 2"]'
     assert_select '.gantt__sidebar-grid[style]', :count => 0
   end
