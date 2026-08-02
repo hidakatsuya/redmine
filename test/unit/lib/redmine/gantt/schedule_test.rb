@@ -41,6 +41,17 @@ class Redmine::Gantt::ScheduleTest < ActiveSupport::TestCase
     end
   end
 
+  test 'uses a private builder without retaining construction dependencies' do
+    schedule = build(:start_on => @date_from, :end_on => @date_from + 5,
+                     :progress => 50, :markers => true, :label => 'Schedule')
+
+    assert Redmine::Gantt::Schedule.const_defined?(:Builder, false)
+    assert_raises(NameError) {Redmine::Gantt::Schedule::Builder}
+    assert_nil schedule.instance_variable_get(:@gantt)
+    assert_nil schedule.instance_variable_get(:@progress)
+    assert_nil schedule.instance_variable_get(:@markers)
+  end
+
   test 'is not visible outside the chart range' do
     schedule = build(:start_on => @date_from - 10, :end_on => @date_from - 2, :progress => 0, :markers => false, :label => 'Outside')
 
