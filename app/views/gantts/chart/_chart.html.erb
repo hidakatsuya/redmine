@@ -33,11 +33,17 @@
             <% chart.scale_layers.each do |layer| %>
               <div class="gantt__scale-row gantt__scale-row--<%= layer.index %>">
                 <% layer.segments.each do |segment| %>
-                  <div class="<%= gantt_scale_segment_css_classes(segment).join(' ') %>"
-                       style="<%= gantt_scale_segment_style(segment) %>"
-                       title="<%= segment.title %>">
-                    <%= gantt_scale_segment_content(segment, gantt) %>
-                  </div>
+                  <%= tag.div class: gantt_scale_segment_css_classes(segment),
+                              style: gantt_scale_segment_style(segment),
+                              title: segment.title do %>
+                    <% if segment.kind == :month %>
+                      <%= link_to segment.label,
+                                  gantt.params.merge(year: segment.start_on.year, month: segment.start_on.month),
+                                  title: segment.title %>
+                    <% else %>
+                      <%= tag.span segment.label %>
+                    <% end %>
+                  <% end %>
                 <% end %>
               </div>
             <% end %>

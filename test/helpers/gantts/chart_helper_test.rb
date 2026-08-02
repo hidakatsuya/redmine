@@ -4,52 +4,39 @@ require_relative '../../test_helper'
 
 class Gantts::ChartHelperTest < Redmine::HelperTest
   include Gantts::ChartHelper
-  include QueriesHelper
 
-  Segment = Struct.new(:layer, :label, :start_on, :start_offset, :span, :kind, :non_working_day, :title, keyword_init: true)
+  Segment = Struct.new(:layer, :label, :start_offset, :span, :kind, :non_working_day, keyword_init: true)
 
   test 'builds semantic scale classes and preserves scale style' do
     segment = Segment.new(:layer => 2, :label => 'Mon', :start_offset => 3, :span => 1,
                           :kind => :day_name, :non_working_day => true)
 
-    assert_equal ['gantt__scale-segment', 'gantt__scale-segment--day-name', 'is-non-working-day'],
+    assert_equal ['gantt__scale-segment', 'gantt__scale-segment--day-name', {'is-non-working-day': true}],
                  gantt_scale_segment_css_classes(segment)
     assert_equal '--gantt-segment-start: 3; --gantt-segment-span: 1; --gantt-scale-layer: 2',
                  gantt_scale_segment_style(segment)
   end
 
-  test 'builds scale links and labels from semantic segments' do
-    gantt = stub(:params => {:controller => 'gantts', :action => 'show', :zoom => 2})
-    month = Segment.new(:layer => 0, :label => '2026-2', :start_on => Date.new(2026, 2, 1),
-                        :start_offset => 31, :span => 28,
-                        :kind => :month, :non_working_day => false, :title => 'February 2026')
-    week = Segment.new(:layer => 1, :label => '6', :start_offset => 35, :span => 7,
-                       :kind => :week, :non_working_day => false)
-
-    assert_include 'year=2026', gantt_scale_segment_content(month, gantt)
-    assert_include 'month=2', gantt_scale_segment_content(month, gantt)
-    assert_equal '<span>6</span>', gantt_scale_segment_content(week, gantt)
-  end
-
-  test 'builds subject DOM identifiers, row styles, and progress states' do
-    record = issues(:issues_001)
-    row = stub(:depth => 2, :row_key => 'issue-1', :project? => false, :closed? => false,
+  test 'builds subject wrapper, semantic classes, row styles, and progress states' do
+    row = stub(:depth => 2, :row_key => 'issue-1', :kind => :issue,
+               :project? => false, :version? => false, :issue? => true,
+               :expandable? => false, :context_menu? => true, :closed? => false,
+               :overdue? => true, :behind_schedule? => false,
                :over_end_date? => false, :behind_start_date? => true)
 
     assert_equal '--gantt-depth: 2', gantt_row_style(row)
     assert_equal 'task-todo-issue-1', gantt_bar_dom_id(row, 'task-todo')
     assert_equal 'behind-start', gantt_progress_state(row)
-    assert_include 'id="issue-1"', gantt_row_subject_tag(stub(:expandable? => false, :row_key => 'issue-1',
-                                                            :subject => 'Subject'),
-                                                           'Subject', [], [])
-  end
-
-  test 'renders issue selected column content and keeps other row kinds empty' do
-    column = QueryColumn.new(:subject)
-    issue = issues(:issues_001)
-
-    assert_equal '', gantt_row_column_content(stub(:issue? => false), column)
-    assert_include 'gantt__cell-value subject', gantt_row_column_content(stub(:issue? => true, :issue => issue), column)
+    subject = gantt_row_subject_tag(row) {'Subject'}
+    assert_include 'id="issue-1"', subject
+    assert_include 'gantt__subject--issue', subject
+    assert_include 'hascontextmenu', subject
+    assert_not_include 'is-open', subject
+    assert_equal ['gantt__subject-text', {
+      'project-overdue': false, 'version-behind-schedule': false, 'version-overdue': false,
+      'version-closed': false, 'issue-overdue': true, 'issue-behind-schedule': false,
+      'issue-closed': false, 'behind-start-date': true, 'over-end-date': false
+    }], gantt_row_subject_text_classes(row)
   end
 
   test 'builds chart styles including selected column dimensions' do
