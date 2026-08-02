@@ -10,12 +10,28 @@
   <div class="gantt__row-information">
     <div class="gantt__sidebar-grid">
       <div class="gantt__subject-cell">
-        <%= render partial: gantt_row_partial(row), locals: {row: row} %>
+        <%= gantt_row_subject_tag(row) do %>
+          <% if row.expandable? %>
+            <%= tag.button sprite_icon('angle-down', rtl: true),
+                           type: 'button',
+                           class: ['gantt__expander', 'icon', 'icon-expanded'],
+                           aria: {expanded: true},
+                           data: {action: 'click->gantt--subjects#toggleRow'} %>
+          <% else %>
+            <%= tag.span '', class: 'gantt__expander-placeholder', aria: {hidden: true} %>
+          <% end %>
+
+          <%= tag.span class: gantt_row_subject_text_classes(row), title: row.subject do %>
+            <%= render partial: "gantts/chart/rows/#{row.kind}", locals: {row: row} %>
+          <% end %>
+        <% end %>
       </div>
 
       <% chart.selected_columns.each do |column| %>
         <div class="gantt__column-cell">
-          <%= gantt_row_column_content(row, column) %>
+          <% if row.issue? %>
+            <%= tag.div column_content(column, row.issue), class: ['gantt__cell-value', column.css_classes] %>
+          <% end %>
         </div>
       <% end %>
     </div>

@@ -1,1 +1,5 @@
-<%= gantt_issue_row_subject_tag(row) %>
+<%= sprite_icon('issue') unless row.issue.assigned_to -%>
+<%= assignee_avatar(row.issue.assigned_to, size: 13, class: 'icon-avatar') -%>
+<%= link_to_issue(row.issue) -%>
+<%= tag.input type: 'checkbox', name: 'ids[]', value: row.issue.id,
+              style: 'display:none;', class: 'toggle-selection' %>
