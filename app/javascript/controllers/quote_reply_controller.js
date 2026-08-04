@@ -8,7 +8,7 @@ class QuoteExtractor {
     this.selection = window.getSelection();
   }
 
-  get isSelected() {
+  get #isSelected() {
     return this.selection.containsNode(this.targetElement, true);
   }
 
@@ -16,8 +16,12 @@ class QuoteExtractor {
     return new QuoteExtractor(targetElement).extract();
   }
 
+  static retriveSelectedRange(targetElement) {
+    return new QuoteExtractor(targetElement).#retriveSelectedRange();
+  }
+
   extract() {
-    const range = this.retriveSelectedRange();
+    const range = this.#retriveSelectedRange();
 
     if (!range) {
       return null;
@@ -33,8 +37,8 @@ class QuoteExtractor {
     return range;
   }
 
-  retriveSelectedRange() {
-    if (!this.isSelected) {
+  #retriveSelectedRange() {
+    if (!this.#isSelected) {
       return null;
     }
 
@@ -62,7 +66,7 @@ class QuoteTextFormatter {
     // Remove all unnecessary anchor elements
     fragment.querySelectorAll('a.wiki-anchor').forEach(e => e.remove());
 
-    const html = this.adjustLineBreaks(fragment.innerHTML);
+    const html = this.#adjustLineBreaks(fragment.innerHTML);
 
     const result = document.createElement('div');
     result.innerHTML = html;
@@ -74,7 +78,7 @@ class QuoteTextFormatter {
       .replace(/\n+/g, "\n");
   }
 
-  adjustLineBreaks(html) {
+  #adjustLineBreaks(html) {
     return html
       .replace(/<\/(h1|h2|h3|h4|div|p|li|tr)>/g, "\n</$1>")
       .replace(/<br>/g, "\n")
@@ -87,18 +91,18 @@ class QuoteCommonMarkFormatter {
       return null;
     }
 
-    const htmlFragment = this.extractHtmlFragmentFrom(selectedRange);
-    const preparedHtml = this.prepareHtml(htmlFragment);
+    const htmlFragment = this.#extractHtmlFragmentFrom(selectedRange);
+    const preparedHtml = this.#prepareHtml(htmlFragment);
 
-    return this.convertHtmlToCommonMark(preparedHtml);
+    return this.#convertHtmlToCommonMark(preparedHtml);
   }
 
-  extractHtmlFragmentFrom(range) {
+  #extractHtmlFragmentFrom(range) {
     const fragment = document.createElement('div');
     const ancestorNodeName = range.commonAncestorContainer.nodeName;
 
     if (ancestorNodeName == 'CODE' || ancestorNodeName == '#text') {
-      fragment.appendChild(this.wrapPreCode(range));
+      fragment.appendChild(this.#wrapPreCode(range));
     } else {
       fragment.appendChild(range.cloneContents());
     }
@@ -111,7 +115,7 @@ class QuoteCommonMarkFormatter {
   // To create a complete code block, wrap the selected content with the `<pre><code>` tags.
   //
   // selected contentes => <pre><code class="ruby">selected contents</code></pre>
-  wrapPreCode(range) {
+  #wrapPreCode(range) {
     const rangeAncestor = range.commonAncestorContainer;
 
     let codeElement = null;
@@ -135,7 +139,7 @@ class QuoteCommonMarkFormatter {
     return pre;
   }
 
-  convertHtmlToCommonMark(html) {
+  #convertHtmlToCommonMark(html) {
     const turndownService = new TurndownService({
       codeBlockStyle: 'fenced',
       headingStyle: 'atx'
@@ -185,7 +189,7 @@ class QuoteCommonMarkFormatter {
     return turndownService.turndown(html);
   }
 
-  prepareHtml(htmlFragment) {
+  #prepareHtml(htmlFragment) {
     // Remove all anchor elements.
     // <h1>Title1<a href="#Title" class="wiki-anchor">¶</a></h1> => <h1>Title1</h1>
     htmlFragment.querySelectorAll('a.wiki-anchor').forEach(e => e.remove());
@@ -201,7 +205,7 @@ class QuoteCommonMarkFormatter {
 }
 
 export default class extends Controller {
-  static targets = [ 'content' ];
+  static targets = [ 'button', 'content' ];
 
   quote(event) {
     const { url, textFormatting } = event.params;
@@ -220,5 +224,15 @@ export default class extends Controller {
       contentType: 'application/json',
       responseKind: 'script'
     });
+  }
+
+  triggerQuote() {
+    if (this.hasButtonTarget) {
+      this.buttonTarget.click();
+    }
+  }
+
+  hasSelectedRange() {
+    return QuoteExtractor.retriveSelectedRange(this.contentTarget) !== null;
   }
 }
