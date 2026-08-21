@@ -4,265 +4,393 @@
  * This code is released under the GNU General Public License.
  */
 
-.gantt_subjects div > span.expander {
-  margin-inline-start: 0;
-  cursor: pointer;
-}
+.gantt {
+  --gantt-row-height: 32px;
+  --gantt-day-width: 4px;
+  --gantt-subject-width: 330px;
+  --gantt-column-width: 96px;
+  --gantt-selected-columns-template: none;
+  --gantt-selected-columns-width: 0px;
+  --gantt-information-width: var(--gantt-subject-width);
+  --gantt-timeline-width: 960px;
+  --gantt-header-bg: var(--oc-gray-1);
+  --gantt-header-border: var(--oc-gray-4);
+  --gantt-row-border: var(--oc-gray-3);
+  --gantt-row-hover: var(--oc-yellow-0);
+  --gantt-surface: var(--oc-white);
+  --gantt-text-muted: var(--oc-gray-6);
+  --gantt-timeline-grid: rgba(var(--oc-gray-4-rgb), 0.35);
+  --gantt-progress-line: var(--oc-red-6);
 
-.gantt_subjects .avatar {
-  margin-inline-end: 4px;
-}
-
-.gantt_subjects div.project-name a,
-.gantt_subjects div.version-name a {
-  margin-inline-start: 4px;
-}
-
-/***** Gantt chart *****/
-table.gantt-table {
-  inline-size: 100%;
-  border-collapse: collapse;
-  /* Force LTR for Gantt even in RTL locales because column resizing, relation lines, and the progress line don't work in RTL yet. */
   direction: ltr;
 }
 
-table.gantt-table td {
-  padding: 0;
+.gantt.is-showing-columns {
+  --gantt-information-width: calc(var(--gantt-subject-width) + var(--gantt-selected-columns-width));
 }
 
-.gantt_hdr {
-  position: absolute;
+.gantt__viewport {
+  overflow: auto;
+  max-inline-size: 100%;
+  max-block-size: calc(100vh - 14rem);
+  border: 1px solid var(--gantt-header-border);
+  border-radius: 4px;
+  background: var(--gantt-surface);
+}
+
+.gantt__layout {
+  min-inline-size: calc(var(--gantt-information-width) + var(--gantt-timeline-width));
+  margin: 0;
+}
+
+.gantt__header,
+.gantt__row {
+  display: grid;
+  grid-template-columns: var(--gantt-information-width) var(--gantt-timeline-width);
+  inline-size: calc(var(--gantt-information-width) + var(--gantt-timeline-width));
+}
+
+.gantt__header {
+  position: sticky;
   inset-block-start: 0;
-  block-size: 16px;
-  border-block: 1px solid var(--oc-gray-4);
-  border-inline-start: 1px solid var(--oc-gray-4);
-  text-align: center;
-  overflow: hidden;
+  z-index: 30;
+  min-block-size: calc(var(--gantt-row-height) * var(--gantt-header-rows));
+  background: var(--gantt-header-bg);
+  border-block-end: 1px solid var(--gantt-header-border);
 }
 
-#gantt_area .gantt_hdr {
-  border-inline-start: 0;
-  border-inline-end: 1px solid var(--oc-gray-4);
+.gantt__header-information,
+.gantt__row-information {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 20;
+  background: var(--gantt-surface);
+  border-inline-end: 1px solid var(--gantt-header-border);
 }
 
-.gantt_subjects_container:not(.draw_selected_columns) .gantt_hdr,
-.last_gantt_selected_column .gantt_hdr {
-  border-inline-end: 1px solid var(--oc-gray-4);
+.gantt__header-information {
+  z-index: 35;
+  background: var(--gantt-header-bg);
 }
 
-.last_gantt_selected_column .gantt_selected_column_container,
-.gantt_subjects_container .gantt_subjects * {
-  z-index: 10;
+.gantt__sidebar-grid {
+  display: grid;
+  grid-template-columns: minmax(0, var(--gantt-subject-width));
+  block-size: 100%;
 }
 
-.gantt_subjects_column + td {
-  padding: 0;
+.gantt.is-showing-columns .gantt__sidebar-grid {
+  grid-template-columns: minmax(0, var(--gantt-subject-width)) var(--gantt-selected-columns-template);
 }
 
-.gantt_hdr.nwday {
-  background-color: var(--oc-gray-1);
-  color: var(--oc-gray-6);
+.gantt:not(.is-showing-columns) .gantt__column-header,
+.gantt:not(.is-showing-columns) .gantt__column-cell {
+  display: none;
 }
 
-.gantt_subjects,
-.gantt_selected_column_content.gantt_hdr {
-  font-size: 0.8em;
-  position: relative;
-  z-index: 1;
-}
-
-.gantt_subjects div,
-.gantt_selected_column_content div {
-  line-height: 16px;
-  block-size: 16px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: clip;
-  inline-size: 100%;
-}
-
-.gantt_subjects div.issue-subject:hover {
-  background-color: var(--oc-yellow-0);
-}
-
-.gantt_selected_column_content > div {
-  padding-inline-start: 3px;
+.gantt__subject-header,
+.gantt__column-header,
+.gantt__subject-cell,
+.gantt__column-cell {
+  display: flex;
+  align-items: center;
+  min-inline-size: 0;
+  min-block-size: var(--gantt-row-height);
+  padding-inline: 0.5rem;
+  border-inline-end: 1px solid var(--gantt-row-border);
   box-sizing: border-box;
+  overflow: hidden;
 }
 
-.gantt_hdr_selected_column_name {
+.gantt__subject-header,
+.gantt__column-header {
+  min-block-size: calc(var(--gantt-row-height) * var(--gantt-header-rows));
+  background: var(--gantt-header-bg);
+  color: var(--gantt-text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.gantt__column-header {
+  position: relative;
+}
+
+.gantt__column-resizer {
   position: absolute;
-  inset-block-start: 50%;
-  inline-size: 100%;
-  transform: translateY(-50%);
-  -webkit-transform: translateY(-50%);
-  font-size: 0.8em;
+  inset-block: 0;
+  inset-inline-end: 0;
+  z-index: 2;
+  inline-size: 8px;
+  cursor: ew-resize;
+}
+
+.gantt__column-cell {
+  font-size: 0.85rem;
+}
+
+.gantt__cell-value,
+.gantt__subject-text,
+.gantt__subject-text a {
+  min-inline-size: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-td.gantt_selected_column {
-  inline-size: 50px;
+.gantt__subject {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-inline-size: 0;
+  inline-size: 100%;
+  padding-inline-start: calc(var(--gantt-depth) * 1.25rem);
+  box-sizing: border-box;
 }
 
-td.gantt_selected_column .gantt_hdr,
-.gantt_selected_column_container {
-  inline-size: 49px;
+.gantt__subject-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
-td.gantt_watcher_users_column div.issue_watcher_users ul {
-  margin: 0;
+.gantt__expander,
+.gantt__expander-placeholder {
+  flex: none;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+}
+
+.gantt__expander {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 0;
-  list-style: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
 }
 
-td.gantt_watcher_users_column div.issue_watcher_users ul li {
-  display: inline;
+.gantt__expander[aria-expanded="false"] {
+  transform: rotate(-90deg);
 }
 
-td.gantt_watcher_users_column div.issue_watcher_users ul li:not(:last-child)::after {
-  content: ', ';
-  white-space: pre;
-}
-
-.task {
+.gantt__splitter {
   position: absolute;
-  block-size: 8px;
-  font-size: 0.8em;
-  color: var(--oc-gray-6);
-  padding: 0;
-  margin: 0;
-  line-height: 16px;
+  inset-block: 0;
+  inset-inline-end: -5px;
+  z-index: 40;
+  inline-size: 10px;
+  cursor: ew-resize;
+}
+
+.gantt__header-timeline,
+.gantt__timeline-cell {
+  position: relative;
+  inline-size: var(--gantt-timeline-width);
+}
+
+.gantt__header-timeline {
+  background: var(--gantt-header-bg);
+}
+
+.gantt__body {
+  position: relative;
+}
+
+.gantt__row {
+  block-size: var(--gantt-row-height);
+}
+
+.gantt__row.is-hidden {
+  display: none;
+}
+
+.gantt__row-information,
+.gantt__timeline-cell {
+  border-block-end: 1px solid var(--gantt-row-border);
+  box-sizing: border-box;
+}
+
+.gantt__timeline-cell {
+  background:
+    repeating-linear-gradient(
+      to right,
+      transparent,
+      transparent calc(var(--gantt-day-width) - 1px),
+      var(--gantt-timeline-grid) calc(var(--gantt-day-width) - 1px),
+      var(--gantt-timeline-grid) var(--gantt-day-width)
+    );
+}
+
+.gantt__row:hover .gantt__row-information,
+.gantt__row:hover .gantt__timeline-cell {
+  background-color: var(--gantt-row-hover);
+}
+
+.gantt__scale {
+  position: relative;
+  inline-size: var(--gantt-timeline-width);
+}
+
+.gantt__scale-row {
+  position: relative;
+  block-size: var(--gantt-row-height);
+  border-block-end: 1px solid var(--gantt-header-border);
+}
+
+.gantt__scale-row:last-child {
+  border-block-end: 0;
+}
+
+.gantt__scale-segment {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(var(--gantt-segment-start) * var(--gantt-day-width));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: calc(var(--gantt-segment-span) * var(--gantt-day-width));
+  padding-inline: 0.25rem;
+  border-inline-end: 1px solid var(--gantt-header-border);
+  box-sizing: border-box;
+  overflow: hidden;
+  color: var(--gantt-text-muted);
+  font-size: 0.78rem;
+  text-align: center;
   white-space: nowrap;
 }
 
-.task.label {
+.gantt__scale-segment a,
+.gantt__scale-segment span {
   inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.task.label.project,
-.task.label.version {
-  font-weight: bold;
+.gantt__scale-segment--month {
+  color: var(--oc-gray-8);
+  font-weight: 600;
 }
 
-.task_late {
-  background: var(--oc-red-5) url(/task_late.png);
-  border: 1px solid var(--oc-red-5);
+.gantt__scale-segment.is-non-working-day {
+  background-color: rgba(var(--oc-gray-3-rgb), 0.5);
 }
 
-.task_done {
-  background: var(--oc-green-7) url(/task_done.png);
-  border: 1px solid var(--oc-green-7);
-}
-
-.task_todo {
-  background: var(--oc-gray-5) url(/task_todo.png);
-  border: 1px solid var(--oc-gray-5);
-}
-
-.task_todo.parent {
-  background: var(--oc-gray-6);
-  border: 1px solid var(--oc-gray-6);
-  block-size: 3px;
-}
-
-.task_late.parent,
-.task_done.parent {
-  block-size: 3px;
-}
-
-.task.parent.marker.starting {
+.gantt__bar,
+.gantt__marker,
+.gantt__bar-hitbox,
+.gantt__label span {
   position: absolute;
-  background: url(/task_parent_end.png) no-repeat 0 0;
-  inline-size: 8px;
-  block-size: 16px;
-  margin-inline-start: -4px;
-  inset-inline-start: 0;
-  inset-block-start: -1px;
 }
 
-.task.parent.marker.ending {
+.gantt__bar,
+.gantt__bar-hitbox {
+  inset-inline-start: calc(var(--gantt-start-unit) * var(--gantt-day-width));
+  inline-size: max(1px, calc((var(--gantt-end-unit) - var(--gantt-start-unit)) * var(--gantt-day-width) - 2px));
+}
+
+.gantt__bar {
+  inset-block-start: calc((var(--gantt-row-height) - 12px) / 2);
+  z-index: 3;
+  block-size: 12px;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.gantt__bar-hitbox {
+  inset-block-start: calc((var(--gantt-row-height) - 20px) / 2);
+  z-index: 8;
+  block-size: 20px;
+  background: transparent;
+}
+
+.gantt__bar-anchor {
   position: absolute;
-  background: url(/task_parent_end.png) no-repeat 0 0;
+  inset-block-start: 50%;
+  inline-size: 1px;
+  block-size: 1px;
+}
+
+.gantt__bar-anchor--start { inset-inline-start: 0; }
+.gantt__bar-anchor--end { inset-inline-end: 0; }
+
+.gantt__bar.task_todo { background: var(--oc-gray-5) url(/task_todo.png); border: 1px solid var(--oc-gray-5); }
+.gantt__bar.task_done { z-index: 4; background: var(--oc-green-7) url(/task_done.png); border: 1px solid var(--oc-green-7); }
+.gantt__bar.task_late { z-index: 2; background: var(--oc-red-5) url(/task_late.png); border: 1px solid var(--oc-red-5); }
+
+.gantt__bar.project,
+.gantt__bar.version,
+.gantt__bar.parent {
+  inset-block-start: calc((var(--gantt-row-height) - 6px) / 2);
+  block-size: 6px;
+}
+
+.gantt__marker {
+  inset-block-start: calc((var(--gantt-row-height) - 14px) / 2);
+  inset-inline-start: calc(var(--gantt-marker-unit) * var(--gantt-day-width) - 4px);
+  z-index: 5;
   inline-size: 8px;
-  block-size: 16px;
-  margin-inline-start: -4px;
-  inset-inline-end: 0;
-  inset-block-start: -1px;
-}
-
-.version.task_late {
-  background: var(--oc-red-5) url(/milestone_late.png);
-  border: 1px solid var(--oc-red-5);
-  block-size: 2px;
-  margin-block-start: 3px;
-}
-
-.version.task_done {
-  background: var(--oc-green-7) url(/milestone_done.png);
-  border: 1px solid var(--oc-green-7);
-  block-size: 2px;
-  margin-block-start: 3px;
-}
-
-.version.task_todo {
-  background: var(--oc-white) url(/milestone_todo.png);
-  border: 1px solid var(--oc-white);
-  block-size: 2px;
-  margin-block-start: 3px;
-}
-
-.version.marker {
-  background-image: url(/version_marker.png);
+  block-size: 14px;
+  background-position: center;
   background-repeat: no-repeat;
-  border: 0;
-  margin-inline-start: -4px;
-  margin-block-start: 1px;
 }
 
-.project.task_late {
-  background: var(--oc-red-5) url(/milestone_late.png);
-  border: 1px solid var(--oc-red-5);
-  block-size: 2px;
-  margin-block-start: 3px;
+.gantt__marker.project { background-image: url(/project_marker.png); }
+.gantt__marker.version { background-image: url(/version_marker.png); }
+.gantt__marker.parent { background-image: url(/task_parent_end.png); }
+
+.gantt__label {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 
-.project.task_done {
-  background: var(--oc-green-7) url(/milestone_done.png);
-  border: 1px solid var(--oc-green-7);
-  block-size: 2px;
-  margin-block-start: 3px;
+.gantt__label span {
+  inset-block-start: 50%;
+  inset-inline-start: calc(var(--gantt-label-unit) * var(--gantt-day-width) + 8px);
+  transform: translateY(-50%);
+  color: var(--gantt-text-muted);
+  font-size: 0.8rem;
+  white-space: nowrap;
 }
 
-.project.task_todo {
-  background: var(--oc-white) url(/milestone_todo.png);
-  border: 1px solid var(--oc-white);
-  block-size: 2px;
-  margin-block-start: 3px;
+.gantt__overlay {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: var(--gantt-information-width);
+  z-index: 15;
+  inline-size: var(--gantt-timeline-width);
+  pointer-events: none;
 }
 
-.project.marker {
-  background-image: url(/project_marker.png);
-  background-repeat: no-repeat;
-  border: 0;
-  margin-inline-start: -4px;
-  margin-block-start: 1px;
+.gantt__overlay svg {
+  position: absolute;
+  inset: 0;
 }
 
-/* RTL adjustment (disabled while Gantt is forced LTR).  Enable when RTL is supported.
-[dir="rtl"] :is(.marker, .task.parent.marker) {
-  background-position: right;
-}
-*/
-
-.version-behind-schedule a,
-.issue-behind-schedule a {
-  color: var(--oc-yellow-8);
+.gantt__today-line {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(var(--gantt-today-unit) * var(--gantt-day-width) - 1px);
+  z-index: 1;
+  inline-size: 0;
+  border-inline-start: 1px dashed var(--gantt-progress-line);
 }
 
-.version-overdue a,
-.issue-overdue a,
-.project-overdue a {
-  color: var(--oc-red-8);
+.gantt .avatar { margin-inline-end: 0.125rem; }
+.gantt .version-behind-schedule a,
+.gantt .issue-behind-schedule a { color: var(--oc-yellow-8); }
+.gantt .version-overdue a,
+.gantt .issue-overdue a,
+.gantt .project-overdue a { color: var(--oc-red-8); }
+.gantt .issue-closed a,
+.gantt .version-closed a { color: var(--gantt-text-muted); }
+
+@media print {
+  .gantt__viewport { max-block-size: none; overflow: visible; border: 0; }
+  .gantt__splitter { display: none; }
+  .gantt__header,
+  .gantt__header-information,
+  .gantt__row-information { position: static; }
 }

@@ -1,0 +1,56 @@
+<% if row.schedule&.visible? %>
+  <%= tag.div class: gantt_bar_classes(row),
+              id: gantt_bar_dom_id(row, 'task-todo'),
+              style: gantt_schedule_style(row.schedule),
+              data: {
+                'gantt--chart-target': 'todoBar',
+                row_key: row.row_key,
+                start_on: row.schedule.start_on,
+                end_on: row.schedule.end_on,
+                editable: row.editable?
+              } do %>
+    <span class="gantt__bar-anchor gantt__bar-anchor--start"
+          data-gantt--chart-target="startAnchor"
+          data-row-key="<%= row.row_key %>"></span>
+    <span class="gantt__bar-anchor gantt__bar-anchor--end"
+          data-gantt--chart-target="endAnchor"
+          data-row-key="<%= row.row_key %>"></span>
+    <% if row.context_menu? %>
+      <%= tag.input type: 'checkbox', name: 'ids[]', value: row.issue.id,
+                    style: 'display:none;', class: 'toggle-selection' %>
+    <% end %>
+  <% end %>
+
+  <% if row.schedule.late? %>
+    <%= tag.div class: gantt_late_bar_classes(row), style: gantt_late_style(row.schedule) %>
+  <% end %>
+
+  <% if row.schedule.progress? %>
+    <%= tag.div class: gantt_done_bar_classes(row),
+                id: gantt_bar_dom_id(row, 'task-done'),
+                style: gantt_progress_style(row.schedule),
+                data: {'gantt--chart-target': 'doneBar', row_key: row.row_key} %>
+  <% end %>
+
+  <% if row.schedule.start_marker? %>
+    <%= tag.div class: gantt_marker_classes(row, :start),
+                style: gantt_marker_style(row.schedule.start_offset) %>
+  <% end %>
+
+  <% if row.schedule.end_marker? %>
+    <%= tag.div class: gantt_marker_classes(row, :end),
+                style: gantt_marker_style(row.schedule.end_offset) %>
+  <% end %>
+
+  <div class="gantt__label"><span style="<%= gantt_label_style(row.schedule) %>"><%= row.schedule.label %></span></div>
+
+  <% if row.context_menu? %>
+    <div class="tooltip hascontextmenu gantt__bar-hitbox"
+         style="<%= gantt_schedule_style(row.schedule) %>"
+         data-row-key="<%= row.row_key %>">
+      <span class="tip"><%= render_issue_tooltip(row.issue) %></span>
+      <%= tag.input type: 'checkbox', name: 'ids[]', value: row.issue.id,
+                    style: 'display:none;', class: 'toggle-selection' %>
+    </div>
+  <% end %>
+<% end %>

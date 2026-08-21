@@ -1,0 +1,37 @@
+<%= gantt_row_tag(row) do %>
+  <div class="gantt__row-information gantt__sidebar-grid">
+    <div class="gantt__subject-cell">
+      <%= gantt_row_subject_tag(row) do %>
+        <%= render partial: 'gantts/chart/expander', locals: {row: row} %>
+
+        <%= tag.span class: [
+              'gantt__subject-text',
+              {
+                'issue-overdue': row.overdue?,
+                'issue-behind-schedule': row.behind_schedule?,
+                'issue-closed': row.closed?,
+                'behind-start-date': row.behind_start_date?,
+                'over-end-date': row.over_end_date?
+              }
+            ],
+            title: row.subject do %>
+          <%= sprite_icon('issue') unless row.issue.assigned_to -%>
+          <%= assignee_avatar(row.issue.assigned_to, size: 13, class: 'icon-avatar') -%>
+          <%= link_to_issue(row.issue) -%>
+          <%= tag.input type: 'checkbox', name: 'ids[]', value: row.issue.id,
+                        style: 'display:none;', class: 'toggle-selection' %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <% chart.selected_columns.each do |column| %>
+      <div class="gantt__column-cell">
+        <%= tag.div column_content(column, row.issue), class: ['gantt__cell-value', column.css_classes] %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="gantt__timeline-cell">
+    <%= render partial: 'gantts/chart/schedule', locals: {row: row} %>
+  </div>
+<% end %>

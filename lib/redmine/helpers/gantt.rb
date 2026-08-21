@@ -17,6 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+require 'redmine/gantt/chart'
+
 module Redmine
   module Helpers
     # Simple class to handle gantt chart data
@@ -54,10 +56,9 @@ module Redmine
         end
       end
 
-      attr_reader :year_from, :month_from, :date_from, :date_to, :zoom, :months, :truncated, :max_rows
-      attr_accessor :query
-      attr_accessor :project
-      attr_accessor :view
+      attr_accessor :truncated
+      attr_reader :year_from, :month_from, :date_from, :date_to, :zoom, :months, :max_rows
+      attr_reader :query, :project
 
       def initialize(options={})
         options = options.dup
@@ -87,7 +88,6 @@ module Redmine
         @date_to = (@date_from >> @months) - 1
         @subjects = +''
         @lines = +''
-        @columns ||= {}
         @number_of_rows = nil
         @truncated = false
         if options.has_key?(:max_rows)
@@ -95,6 +95,20 @@ module Redmine
         else
           @max_rows = (Setting.gantt_items_limit.presence&.to_i)
         end
+      end
+
+      def query=(query)
+        @query = query
+        @chart = nil
+      end
+
+      def project=(project)
+        @project = project
+        @chart = nil
+      end
+
+      def chart
+        @chart ||= Redmine::Gantt::Chart.build(self, :query => @query)
       end
 
       def common_params
@@ -147,12 +161,6 @@ module Redmine
       def lines(options={})
         render(options.merge(:only => :lines)) unless @lines_rendered
         @lines
-      end
-
-      # Renders the selected column of the Gantt chart, the right side of subjects.
-      def selected_column_content(options={})
-        render(options.merge(:only => :selected_columns)) unless @columns.has_key?(options[:column].name)
-        @columns[options[:column].name]
       end
 
       # Returns issues that will be rendered
@@ -220,12 +228,11 @@ module Redmine
 
       def render(options={})
         options = {:top => 0, :top_increment => 20,
-                   :indent_increment => 20, :render => :subject,
-                   :format => :html}.merge(options)
+                   :indent_increment => 20, :render => :subject}.merge(options)
+        options.fetch(:format)
         indent = options[:indent] || 4
-        @subjects = +'' unless options[:only] == :lines || options[:only] == :selected_columns
-        @lines = +'' unless options[:only] == :subjects || options[:only] == :selected_columns
-        @columns[options[:column].name] = +'' if options[:only] == :selected_columns && @columns.has_key?(options[:column]) == false
+        @subjects = +'' unless options[:only] == :lines
+        @lines = +'' unless options[:only] == :subjects
         @number_of_rows = 0
         begin
           Project.project_tree(projects) do |project, level|
@@ -235,8 +242,8 @@ module Redmine
         rescue MaxLinesLimitReached
           @truncated = true
         end
-        @subjects_rendered = true unless options[:only] == :lines || options[:only] == :selected_columns
-        @lines_rendered = true unless options[:only] == :subjects || options[:only] == :selected_columns
+        @subjects_rendered = true unless options[:only] == :lines
+        @lines_rendered = true unless options[:only] == :subjects
         render_end(options)
       end
 
@@ -282,9 +289,8 @@ module Redmine
 
       def render_object_row(object, options)
         class_name = object.class.name.downcase
-        send(:"subject_for_#{class_name}", object, options) unless options[:only] == :lines || options[:only] == :selected_columns
-        send(:"line_for_#{class_name}", object, options) unless options[:only] == :subjects || options[:only] == :selected_columns
-        column_content_for_issue(object, options) if options[:only] == :selected_columns && options[:column].present? && object.is_a?(Issue)
+        send(:"subject_for_#{class_name}", object, options) unless options[:only] == :lines
+        send(:"line_for_#{class_name}", object, options) unless options[:only] == :subjects
         options[:top] += options[:top_increment]
         @number_of_rows += 1
         if @max_rows && @number_of_rows >= @max_rows
@@ -351,24 +357,6 @@ module Redmine
           end
           markers = !issue.leaf?
           line(issue.start_date, issue.due_before, issue.done_ratio, markers, label, options, issue)
-        end
-      end
-
-      def column_content_for_issue(issue, options)
-        if options[:format] == :html
-          data_options = {}
-          data_options[:collapse_expand] = "issue-#{issue.id}"
-          data_options[:number_of_rows] = number_of_rows
-          style = "position: absolute;inset-block-start: #{options[:top]}px; font-size: 0.8em;"
-          content =
-            view.content_tag(
-              :div, view.column_content(options[:column], issue),
-              :style => style, :class => "issue_#{options[:column].name}",
-              :id => "#{options[:column].name}_issue_#{issue.id}",
-              :data => data_options
-            )
-          @columns[options[:column].name] << content if @columns.has_key?(options[:column].name)
-          content
         end
       end
 
@@ -730,111 +718,6 @@ module Redmine
         end
       end
 
-      def html_subject_content(object)
-        case object
-        when Issue
-          issue = object
-          css_classes = +''
-          css_classes << ' issue-overdue' if issue.overdue?
-          css_classes << ' issue-behind-schedule' if issue.behind_schedule?
-          css_classes << ' icon icon-issue' unless issue.assigned_to
-          css_classes << ' issue-closed' if issue.closed?
-          if issue.start_date && issue.due_before && issue.done_ratio
-            progress_date = calc_progress_date(issue.start_date,
-                                               issue.due_before, issue.done_ratio)
-            css_classes << ' behind-start-date' if progress_date < self.date_from
-            css_classes << ' over-end-date' if progress_date > self.date_to && issue.done_ratio > 0
-          end
-          s = (+"").html_safe
-          s << view.sprite_icon('issue').html_safe unless issue.assigned_to
-          s << view.assignee_avatar(issue.assigned_to, :size => 13, :class => 'icon-avatar')
-          s << view.link_to_issue(issue).html_safe
-          s << view.content_tag(:input, nil, :type => 'checkbox', :name => 'ids[]',
-                                :value => issue.id, :style => 'display:none;',
-                                :class => 'toggle-selection')
-          view.content_tag(:span, s, :class => css_classes).html_safe
-        when Version
-          version = object
-          html_class = +""
-          html_class << 'icon icon-package '
-          html_class << (version.behind_schedule? ? 'version-behind-schedule' : '') << " "
-          html_class << (version.overdue? ? 'version-overdue' : '')
-          html_class << ' version-closed' unless version.open?
-          if version.due_date && version.start_date && version.visible_fixed_issues.completed_percent
-            progress_date = calc_progress_date(version.start_date,
-                                               version.due_date, version.visible_fixed_issues.completed_percent)
-            html_class << ' behind-start-date' if progress_date < self.date_from
-            html_class << ' over-end-date' if progress_date > self.date_to && version.visible_fixed_issues.completed_percent > 0
-          end
-          s = (+"").html_safe
-          s << view.sprite_icon('package').html_safe
-          s << view.link_to_version(version).html_safe
-          view.content_tag(:span, s, :class => html_class).html_safe
-        when Project
-          project = object
-          html_class = +""
-          html_class << 'icon icon-projects '
-          html_class << (project.overdue? ? 'project-overdue' : '')
-          s = (+"").html_safe
-          s << view.sprite_icon('projects').html_safe
-          s << view.link_to_project(project).html_safe
-          view.content_tag(:span, s, :class => html_class).html_safe
-        end
-      end
-
-      def html_subject(params, subject, object)
-        content = html_subject_content(object) || subject
-        tag_options = {}
-        case object
-        when Issue
-          tag_options[:id] = "issue-#{object.id}"
-          tag_options[:class] = "issue-subject hascontextmenu"
-          tag_options[:title] = object.subject
-          has_children =
-            if object.leaf?
-              false
-            else
-              children = object.children & project_issues(object.project)
-              fixed_version_id = object.fixed_version_id
-              children.any? {|child| child.fixed_version_id == fixed_version_id}
-            end
-        when Version
-          tag_options[:id] = "version-#{object.id}"
-          tag_options[:class] = "version-name"
-          has_children = object.fixed_issues.exists?
-        when Project
-          tag_options[:class] = "project-name"
-          has_children = object.issues.exists? || object.versions.exists?
-        end
-        if object
-          tag_options[:data] = {
-            :collapse_expand => {
-              :top_increment => params[:top_increment],
-              :obj_id => "#{object.class}-#{object.id}".downcase,
-            },
-            :number_of_rows => number_of_rows,
-          }
-        end
-        if has_children
-          content = view.content_tag(:span,
-                                     view.sprite_icon('angle-down', rtl: true).html_safe,
-                                     :class => 'icon icon-expanded expander',
-                                     :data => {:action => 'click->gantt--subjects#handleEntryClick'}) + content
-          tag_options[:class] += ' open'
-        else
-          if params[:indent]
-            params = params.dup
-            params[:indent] += 18
-          end
-        end
-        style = "position: absolute;inset-block-start:#{params[:top]}px;inset-inline-start:#{params[:indent]}px;"
-        style += "width:#{params[:subject_width] - params[:indent]}px;" if params[:subject_width]
-        tag_options[:style] = style
-        output = view.content_tag(:div, content, tag_options)
-        @subjects << output
-        output
-      end
-
       def pdf_subject(params, subject, options={})
         pdf_new_page?(params)
         params[:pdf].SetY(params[:top])
@@ -856,138 +739,6 @@ module Redmine
         params[:image].draw('text %d,%d %s' % [
           params[:indent], params[:top] + 2, magick_text(subject)
         ])
-      end
-
-      def issue_relations(issue)
-        rels = {}
-        if relations[issue.id]
-          relations[issue.id].each do |relation|
-            (rels[relation.relation_type] ||= []) << relation.issue_to_id
-          end
-        end
-        rels
-      end
-
-      def html_task(params, coords, markers, label, object)
-        output = +''
-        data_options = {}
-        if object
-          data_options[:collapse_expand] = "#{object.class}-#{object.id}".downcase
-          data_options[:number_of_rows] = number_of_rows
-        end
-        css = "task " +
-          case object
-          when Project
-            "project"
-          when Version
-            "version"
-          when Issue
-            object.leaf? ? 'leaf' : 'parent'
-          else
-            ""
-          end
-        # Renders the task bar, with progress and late
-        if coords[:bar_start] && coords[:bar_end]
-          width = coords[:bar_end] - coords[:bar_start] - 2
-          style = +""
-          style << "inset-block-start:#{params[:top]}px;"
-          style << "inset-inline-start:#{coords[:bar_start]}px;"
-          style << "width:#{width}px;"
-          html_id = "task-todo-issue-#{object.id}" if object.is_a?(Issue)
-          html_id = "task-todo-version-#{object.id}" if object.is_a?(Version)
-          content_opt = {:style => style,
-                         :class => "#{css} task_todo",
-                         :id => html_id,
-                         :data => {}}
-          if object.is_a?(Issue)
-            rels = issue_relations(object)
-            if rels.present?
-              content_opt[:data] = {"rels" => rels.to_json}
-            end
-          end
-          content_opt[:data].merge!(data_options)
-          output << view.content_tag(:div, '&nbsp;'.html_safe, content_opt)
-          if coords[:bar_late_end]
-            width = coords[:bar_late_end] - coords[:bar_start] - 2
-            style = +""
-            style << "inset-block-start:#{params[:top]}px;"
-            style << "inset-inline-start:#{coords[:bar_start]}px;"
-            style << "width:#{width}px;"
-            output << view.content_tag(:div, '&nbsp;'.html_safe,
-                                       :style => style,
-                                       :class => "#{css} task_late",
-                                       :data => data_options)
-          end
-          if coords[:bar_progress_end]
-            width = coords[:bar_progress_end] - coords[:bar_start] - 2
-            style = +""
-            style << "inset-block-start:#{params[:top]}px;"
-            style << "inset-inline-start:#{coords[:bar_start]}px;"
-            style << "width:#{width}px;"
-            html_id = "task-done-issue-#{object.id}" if object.is_a?(Issue)
-            html_id = "task-done-version-#{object.id}" if object.is_a?(Version)
-            output << view.content_tag(:div, '&nbsp;'.html_safe,
-                                       :style => style,
-                                       :class => "#{css} task_done",
-                                       :id => html_id,
-                                       :data => data_options)
-          end
-        end
-        # Renders the markers
-        if markers
-          if coords[:start]
-            style = +""
-            style << "inset-block-start:#{params[:top]}px;"
-            style << "inset-inline-start:#{coords[:start]}px;"
-            style << "width:15px;"
-            output << view.content_tag(:div, '&nbsp;'.html_safe,
-                                       :style => style,
-                                       :class => "#{css} marker starting",
-                                       :data => data_options)
-          end
-          if coords[:end]
-            style = +""
-            style << "inset-block-start:#{params[:top]}px;"
-            style << "inset-inline-start:#{coords[:end]}px;"
-            style << "width:15px;"
-            output << view.content_tag(:div, '&nbsp;'.html_safe,
-                                       :style => style,
-                                       :class => "#{css} marker ending",
-                                       :data => data_options)
-          end
-        end
-        # Renders the label on the right
-        if label
-          style = +""
-          style << "inset-block-start:#{params[:top]}px;"
-          style << "inset-inline-start:#{(coords[:bar_end] || 0) + 8}px;"
-          style << "width:15px;"
-          output << view.content_tag(:div, label,
-                                     :style => style,
-                                     :class => "#{css} label",
-                                     :data => data_options)
-        end
-        # Renders the tooltip
-        if object.is_a?(Issue) && coords[:bar_start] && coords[:bar_end]
-          s = view.content_tag(:span,
-                               view.render_issue_tooltip(object).html_safe,
-                               :class => "tip")
-          s += view.content_tag(:input, nil, :type => 'checkbox', :name => 'ids[]',
-                                :value => object.id, :style => 'display:none;',
-                                :class => 'toggle-selection')
-          style = +""
-          style << "position: absolute;"
-          style << "inset-block-start:#{params[:top]}px;"
-          style << "inset-inline-start:#{coords[:bar_start]}px;"
-          style << "width:#{coords[:bar_end] - coords[:bar_start]}px;"
-          style << "height:12px;"
-          output << view.content_tag(:div, s.html_safe,
-                                     :style => style,
-                                     :class => "tooltip hascontextmenu",
-                                     :data => data_options)
-        end
-        @lines << output
-        output
       end
 
       def pdf_task(params, coords, markers, label, object)

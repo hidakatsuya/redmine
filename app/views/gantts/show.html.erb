@@ -1,5 +1,3 @@
-<% @gantt.view = self %>
-
 <div class="contextual"></div>
 
 <h2><%= @query.new_record? ? l(:label_gantt) : @query.name %></h2>
@@ -12,7 +10,7 @@
 <%= error_messages_for 'query' %>
 
 <% if @query.valid? %>
-<%= render partial: 'chart', locals: {gantt: @gantt, query: @query} %>
+<%= render partial: 'gantts/chart/chart', locals: {gantt: @gantt, query: @query} %>
 <% end %>
 
 <% content_for :sidebar do %>

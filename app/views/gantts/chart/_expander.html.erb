@@ -1,0 +1,9 @@
+<% if row.expandable? %>
+  <%= tag.button sprite_icon('angle-down', rtl: true),
+                 type: 'button',
+                 class: ['gantt__expander', 'icon', 'icon-expanded'],
+                 aria: {expanded: true},
+                 data: {action: 'click->gantt--subjects#toggleRow'} %>
+<% else %>
+  <%= tag.span '', class: 'gantt__expander-placeholder', aria: {hidden: true} %>
+<% end %>

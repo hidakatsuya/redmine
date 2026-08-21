@@ -1,76 +1,39 @@
 import { Controller } from "@hotwired/stimulus"
 
+const MIN_WIDTH = 48
+
 export default class extends Controller {
-  static values = {
-    minWidth: Number,
-    column: String,
-    // Local value
-    mobileMode: { type: Boolean, default: false }
+  static values = { index: Number }
+
+  startResize(event) {
+    event.preventDefault()
+    this.startX = event.clientX
+    this.startWidth = this.element.getBoundingClientRect().width
+    this.pointerId = event.pointerId
+    this.handle = event.currentTarget
+    this.resizeHandler = this.#resize.bind(this)
+    this.stopHandler = this.#stopResize.bind(this)
+
+    this.handle.setPointerCapture(this.pointerId)
+    this.handle.addEventListener("pointermove", this.resizeHandler)
+    this.handle.addEventListener("pointerup", this.stopHandler)
+    this.handle.addEventListener("pointercancel", this.stopHandler)
   }
 
-  #$element = null
-
-  initialize() {
-    this.$ = window.jQuery
+  #resize(event) {
+    this.dispatch("resize", {
+      detail: {
+        index: this.indexValue,
+        width: Math.max(MIN_WIDTH, this.startWidth + event.clientX - this.startX)
+      },
+      bubbles: true
+    })
   }
 
-  connect() {
-    this.#$element = this.$(this.element)
-    this.#setupResizable()
-    this.#dispatchResizeColumn()
-  }
-
-  disconnect() {
-    this.#$element?.resizable("destroy")
-    this.#$element = null
-  }
-
-  handleWindowResize(_event) {
-    this.mobileModeValue = this.#isMobile()
-
-    this.#dispatchResizeColumn()
-  }
-
-  mobileModeValueChanged(current, old) {
-    if (current == old) return
-
-    if (this.mobileModeValue) {
-      this.#$element?.resizable("disable")
-    } else {
-      this.#$element?.resizable("enable")
-    }
-  }
-
-  #setupResizable() {
-    const alsoResize = [
-      `.gantt_${this.columnValue}_container`,
-      `.gantt_${this.columnValue}_container > .gantt_hdr`
-    ]
-    const options = {
-      handles: "e",
-      minWidth: this.minWidthValue,
-      zIndex: 30,
-      alsoResize: alsoResize.join(","),
-      create: () => {
-        this.$(".ui-resizable-e").css("cursor", "ew-resize")
-      }
-    }
-
-    this.#$element
-      .resizable(options)
-      .on("resize", (event) => {
-        event.stopPropagation()
-        this.#dispatchResizeColumn()
-      })
-  }
-
-  #dispatchResizeColumn() {
-    if (!this.#$element) return
-
-    this.dispatch(`resize-column-${this.columnValue}`, { detail: { width: this.#$element.width() } })
-  }
-
-  #isMobile() {
-    return !!(typeof window.isMobile === "function" && window.isMobile())
+  #stopResize() {
+    this.handle.releasePointerCapture(this.pointerId)
+    this.handle.removeEventListener("pointermove", this.resizeHandler)
+    this.handle.removeEventListener("pointerup", this.stopHandler)
+    this.handle.removeEventListener("pointercancel", this.stopHandler)
   }
 }

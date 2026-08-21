@@ -1,0 +1,93 @@
+<% chart = gantt.chart %>
+
+<% if chart.truncated? %>
+  <p class="warning"><%= l(:notice_gantt_chart_truncated, max: gantt.max_rows) %></p>
+<% end %>
+
+<%= gantt_chart_tag(chart, project: @project) do %>
+  <div class="gantt__viewport" data-gantt--chart-target="viewport">
+    <%= form_tag({}, data: {cm_url: issues_context_menu_path}, class: 'gantt__layout') do %>
+      <%= hidden_field_tag 'back_url', url_for(params: request.query_parameters), id: nil %>
+
+      <div class="gantt__header">
+        <div class="gantt__header-information">
+          <div class="gantt__sidebar-grid gantt__sidebar-grid--header">
+            <div class="gantt__subject-header"><%= l(:field_subject) %></div>
+            <% chart.selected_columns.each_with_index do |column, index| %>
+              <div class="gantt__column-header"
+                   data-controller="gantt--column"
+                   data-gantt--column-index-value="<%= index %>">
+                <%= column.caption %>
+                <span class="gantt__column-resizer"
+                      data-action="pointerdown->gantt--column#startResize"
+                      aria-hidden="true"></span>
+              </div>
+            <% end %>
+          </div>
+          <div class="gantt__splitter"
+               data-controller="gantt--splitter"
+               data-action="pointerdown->gantt--splitter#startResize"></div>
+        </div>
+        <div class="gantt__header-timeline">
+          <div class="gantt__scale" data-gantt--chart-target="timelineHeader">
+            <% chart.scale_layers.each do |layer| %>
+              <div class="gantt__scale-row gantt__scale-row--<%= layer.index %>">
+                <% layer.segments.each do |segment| %>
+                  <%= tag.div class: gantt_scale_segment_css_classes(segment),
+                              style: gantt_scale_segment_style(segment),
+                              title: segment.title do %>
+                    <% if segment.kind == :month %>
+                      <%= link_to segment.label,
+                                  gantt.params.merge(year: segment.start_on.year, month: segment.start_on.month),
+                                  title: segment.title %>
+                    <% else %>
+                      <%= tag.span segment.label %>
+                    <% end %>
+                  <% end %>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <div class="gantt__body"
+           id="gantt_area"
+           data-controller="gantt--subjects"
+           data-gantt--chart-target="body">
+        <% chart.rows.each do |row| %>
+          <%= render partial: "gantts/chart/#{row.kind}", locals: {row: row, chart: chart} %>
+        <% end %>
+
+        <div class="gantt__overlay" id="gantt_draw_area" data-gantt--chart-target="overlay">
+          <% if chart.show_today? %>
+            <div class="gantt__today-line"
+                 id="today_line"
+                 data-gantt--chart-target="todayLine"
+                 style="--gantt-today-unit: <%= chart.today_offset %>"></div>
+          <% end %>
+          <div data-gantt--chart-target="svgLayer"></div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
+<span class="pagination">
+  <ul class="pages">
+    <li class="previous page">
+      <%= link_to("\xc2\xab " + l(:label_previous),
+                  {params: request.query_parameters.merge(gantt.params_previous)},
+                  accesskey: accesskey(:previous)) %>
+    </li><li class="next page">
+      <%= link_to(l(:label_next) + " \xc2\xbb",
+                  {params: request.query_parameters.merge(gantt.params_next)},
+                  accesskey: accesskey(:next)) %>
+    </li>
+  </ul>
+</span>
+
+<% other_formats_links do |f| %>
+  <%= f.link_to_with_query_parameters 'PDF', gantt.params %>
+  <%= f.link_to_with_query_parameters('PNG', gantt.params) if gantt.respond_to?('to_image') %>
+<% end %>
