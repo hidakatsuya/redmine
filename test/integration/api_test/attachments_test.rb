@@ -142,7 +142,7 @@ class Redmine::ApiTest::AttachmentsTest < Redmine::ApiTest::Base
     assert_nil attachment.container
     assert_equal 2, attachment.author_id
     assert_equal 'File content'.size, attachment.filesize
-    assert attachment.content_type.blank?
+    assert_equal 'application/octet-stream', attachment.content_type
     assert attachment.filename.present?
     assert_match %r{\d+_[0-9a-z]+}, attachment.diskfile
     assert File.exist?(attachment.diskfile)
@@ -188,6 +188,23 @@ class Redmine::ApiTest::AttachmentsTest < Redmine::ApiTest::Base
     attachment = Attachment.order(id: :desc).first
     assert_equal 'test.txt', attachment.filename
     assert_match /_test\.txt$/, attachment.diskfile
+  end
+
+  test "POST /uploads.json should sanitize NUL in :filename param" do
+    set_tmp_attachments_directory
+    assert_difference 'Attachment.count' do
+      post(
+        '/uploads.json?filename=hello%00world.txt',
+        :headers => {
+          "RAW_POST_DATA" => 'File content',
+          "CONTENT_TYPE" => 'application/octet-stream'
+        }.merge(credentials('jsmith'))
+      )
+      assert_response :created
+    end
+
+    attachment = Attachment.order(id: :desc).first
+    assert_equal 'hello_world.txt', attachment.filename
   end
 
   test "POST /uploads.xml should not accept other content types" do

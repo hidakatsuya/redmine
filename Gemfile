@@ -18,7 +18,7 @@ gem 'propshaft', '~> 1.3.0'
 gem 'rack', '>= 3.1.3'
 gem "stimulus-rails", "~> 1.3"
 gem "importmap-rails", "~> 2.0"
-gem 'commonmarker', '~> 2.8.2'
+gem 'commonmarker', '~> 2.9.0'
 gem "doorkeeper", "~> 5.8.2"
 gem "bcrypt", require: false
 gem "doorkeeper-i18n", "~> 5.2"
@@ -108,15 +108,15 @@ end
 group :test do
   gem "rails-dom-testing", '>= 2.3.0'
   gem 'mocha', '>= 2.0.1'
-  gem 'simplecov', '~> 1.0.1', :require => false
+  gem 'simplecov', '~> 1.1.1', :require => false
   gem "ffi", platforms: [:mingw, :x64_mingw, :mswin]
   # For running system tests
   gem 'puma'
   gem "capybara", ">= 3.39"
   gem 'selenium-webdriver', '>= 4.11.0'
   # RuboCop
-  gem 'rubocop', '~> 1.88.0', require: false
-  gem 'rubocop-performance', '~> 1.26.0', require: false
+  gem 'rubocop', '~> 1.89.0', require: false
+  gem 'rubocop-performance', '~> 1.27.0', require: false
   gem 'rubocop-rails', '~> 2.34.3', require: false
   gem 'bundle-audit', require: false
   # for testing oauth provider capabilities
