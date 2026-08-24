@@ -37,9 +37,7 @@ class Changeset < ApplicationRecord
     :datetime => :committed_on,
     :url =>
       proc do |o|
-        {:controller => 'repositories', :action => 'revision',
-         :id => o.repository.project,
-         :repository_id => o.repository.identifier_param, :rev => o.identifier}
+        o.repository.revision_url_options(o.identifier)
       end
   )
   acts_as_searchable :columns => 'comments',
