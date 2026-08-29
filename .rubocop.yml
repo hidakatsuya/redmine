@@ -1,7 +1,7 @@
 inherit_from: .rubocop_todo.yml
 
 AllCops:
-  TargetRubyVersion: 3.2
+  TargetRubyVersion: 3.3
   TargetRailsVersion: 8.1
 
   NewCops: enable
@@ -199,6 +199,10 @@ Rails/SkipsModelValidations:
   Enabled: false
 
 Rails/SquishedSQLHeredocs:
+  Enabled: false
+
+Rails/StrongParametersExpect:
+  # `params.expect` rejects the Hash and Array parameter values used in the controllers
   Enabled: false
 
 Rails/ThreeStateBooleanColumn:
