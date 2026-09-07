@@ -222,7 +222,7 @@ class User < Principal
   def self.try_to_login(login, password, active_only=true)
     try_to_login!(login, password, active_only)
   rescue AuthSourceException => e
-    logger.error "An error occured when authenticating #{login}: #{e.message}"
+    logger.error "An error occurred when authenticating #{login}: #{e.message}"
     nil
   end
 
@@ -648,10 +648,10 @@ class User < Principal
           where(Member.arel_table[:user_id].eq(id)).distinct
 
     if @roles.blank?
-      group_class = anonymous? ? GroupAnonymous : GroupNonMember
+      group = anonymous? ? Group.anonymous : Group.non_member
       @roles = Role.joins(members: :project).
         where(["#{Project.table_name}.status <> ? AND #{Project.table_name}.is_public = ?", Project::STATUS_ARCHIVED, true]).
-        where(Member.arel_table[:user_id].eq(group_class.first.id)).distinct
+        where(Member.arel_table[:user_id].eq(group.id)).distinct
     end
 
     @roles
@@ -697,8 +697,8 @@ class User < Principal
     Project.unscoped do
       return @project_ids_by_role if @project_ids_by_role
 
-      group_class = anonymous? ? GroupAnonymous.unscoped : GroupNonMember.unscoped
-      group_id = group_class.pick(:id)
+      group = anonymous? ? Group.anonymous : Group.non_member
+      group_id = group.id
 
       members = Member.joins(:project, :member_roles).
         where("#{Project.table_name}.status <> 9").
@@ -747,7 +747,7 @@ class User < Principal
     if arg.is_a?(User)
       self == arg
     elsif arg.is_a?(Group)
-      arg.users.include?(self)
+      group_ids.include?(arg.id)
     else
       false
     end

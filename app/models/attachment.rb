@@ -280,7 +280,7 @@ class Attachment < ApplicationRecord
       rescue => e
         if logger
           logger.error(
-            "An error occured while generating thumbnail for #{disk_filename} " \
+            "An error occurred while generating thumbnail for #{disk_filename} " \
               "to #{target}\nException was: #{e.message}"
           )
         end
@@ -326,6 +326,19 @@ class Attachment < ApplicationRecord
     Redmine::MimeType.of(filename) == "application/pdf"
   end
 
+  # Returns true for attachments that can be previewed as PDF files,
+  # including PDF compatible files such as Adobe Illustrator
+  # (application/illustrator)
+  def pdf_previewable?
+    if content_type.blank? || content_type == 'application/octet-stream'
+      # The type of attachments created before Redmine started detecting the
+      # content type from the file contents can only be guessed from the name
+      is_pdf?
+    else
+      !!Marcel::Magic.child?(content_type, 'application/pdf')
+    end
+  end
+
   def is_video?
     Redmine::MimeType.is_type?('video', filename)
   end
@@ -348,7 +361,7 @@ class Attachment < ApplicationRecord
   rescue => e
     if logger
       logger.error(
-        "An error occured while generating markdownized preview for #{disk_filename} " \
+        "An error occurred while generating markdownized preview for #{disk_filename} " \
           "to #{target}\nException was: #{e.message}"
       )
     end
