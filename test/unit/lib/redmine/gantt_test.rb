@@ -17,9 +17,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require_relative '../../../../test_helper'
+require_relative '../../../test_helper'
 
-class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
+class Redmine::GanttTest < Redmine::HelperTest
   setup do
     User.current = User.find(1)
   end
@@ -31,7 +31,7 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
 
   def create_gantt(project=Project.generate!, options={})
     @project = project
-    @gantt = Redmine::Helpers::Gantt.new(options)
+    @gantt = Redmine::Gantt.new(options)
     @gantt.project = @project
     @gantt.query = IssueQuery.new(:project => @project, :name => 'Gantt')
     @gantt.instance_variable_set(:@date_from, options[:date_from] || (today - 14))
@@ -52,8 +52,8 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
     Project.generate!
     Project.generate!
     create_gantt(nil)
-    @gantt.stubs(:number_of_rows_on_project).returns(7)
-    @gantt.stubs(:projects).returns(Project.all)
+    @gantt.dataset.stubs(:number_of_rows_on_project).returns(7)
+    @gantt.dataset.stubs(:projects).returns(Project.all)
 
     assert_equal Project.count * 7, @gantt.number_of_rows
   end
@@ -67,12 +67,6 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
 
     create_gantt(project, :max_rows => 3)
     assert_equal 3, @gantt.number_of_rows
-  end
-
-  test '#render requires an explicit export format' do
-    create_gantt
-
-    assert_raises(KeyError) { @gantt.render }
   end
 
   test '#number_of_rows_on_project should count zero for an empty project' do
@@ -110,7 +104,7 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
     assert child3.lft < child2.lft
     issues = [child3, child2, child1, issue2, issue1]
 
-    Redmine::Helpers::Gantt.sort_issues!(issues)
+    Redmine::Gantt.sort_issues!(issues)
 
     assert_equal [issue1.id, child1.id, child3.id, child2.id, issue2.id], issues.map(&:id)
   end
@@ -123,7 +117,7 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
     issue4 = Issue.generate!(:subject => 'test', :project => project, :start_date => (today - 2))
     issues = [issue4, issue3, issue2, issue1]
 
-    Redmine::Helpers::Gantt.sort_issues!(issues)
+    Redmine::Gantt.sort_issues!(issues)
 
     assert_equal [issue1.id, issue2.id, issue4.id, issue3.id], issues.map(&:id)
   end
@@ -140,12 +134,12 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
     issue1_child1_child2 = Issue.generate!(:parent_issue_id => issue1_child1.id, :subject => 'child', :project => project,
                                            :start_date => (today - 9))
     assert_equal [[today - 10, issue1.id], [today - 9, issue1_child1.id], [today - 8, issue1_child1_child1.id]],
-                 Redmine::Helpers::Gantt.sort_issue_logic(issue1_child1_child1)
+                 Redmine::Gantt.sort_issue_logic(issue1_child1_child1)
     assert_equal [[today - 10, issue1.id], [today - 9, issue1_child1.id], [today - 9, issue1_child1_child2.id]],
-                 Redmine::Helpers::Gantt.sort_issue_logic(issue1_child1_child2)
+                 Redmine::Gantt.sort_issue_logic(issue1_child1_child2)
     issues = [issue1_child1_child2, issue1_child1_child1, issue1_child2, issue1_child1, issue2, issue1]
 
-    Redmine::Helpers::Gantt.sort_issues!(issues)
+    Redmine::Gantt.sort_issues!(issues)
 
     assert_equal [issue1.id, issue1_child1.id, issue1_child2.id, issue1_child1_child2.id, issue1_child1_child1.id, issue2.id],
                  issues.map(&:id)
@@ -159,12 +153,12 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
     versions << Version.create!(:project => project, :name => 'test3')
     versions << Version.create!(:project => project, :name => 'test4', :effective_date => '2013-10-02')
 
-    assert_equal versions.sort, Redmine::Helpers::Gantt.sort_versions!(versions.dup)
+    assert_equal versions.sort, Redmine::Gantt.sort_versions!(versions.dup)
   end
 
   def test_magick_text
     create_gantt
 
-    assert_equal "'foo\\'bar\\\\baz'", @gantt.send(:magick_text, "foo'bar\\baz")
+    assert_equal "'foo\\'bar\\\\baz'", Redmine::Gantt::Exports::Image.new(@gantt).send(:magick_text, "foo'bar\\baz")
   end
 end

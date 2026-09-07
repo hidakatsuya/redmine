@@ -185,6 +185,7 @@ class GanttsControllerTest < Redmine::ControllerTest
   end
 
   def test_gantt_should_export_to_pdf
+    Redmine::Gantt::Chart.expects(:build).never
     get(
       :show,
       :params => {
@@ -207,6 +208,7 @@ class GanttsControllerTest < Redmine::ControllerTest
 
   if Object.const_defined?(:MiniMagick) && convert_installed?
     def test_gantt_should_export_to_png
+      Redmine::Gantt::Chart.expects(:build).never
       get(
         :show,
         :params => {
@@ -274,8 +276,8 @@ class GanttsControllerTest < Redmine::ControllerTest
     assert_chart_row('issue-1', row: '3', selector: 'div.task.leaf.task_todo')
 
     # Version 1.0
-    assert_subject_row('version-2', row: '4', text: '1.0')
-    assert_chart_row('version-2', row: '4', selector: 'div.task.version.task_todo')
+    assert_subject_row('project-1-version-2', row: '4', text: '1.0')
+    assert_chart_row('project-1-version-2', row: '4', selector: 'div.task.version.task_todo')
 
     assert_issue_row(2, 'Feature request #2', row: '5')
     assert_chart_row('issue-2', row: '5', selector: 'div.task.leaf.task_todo')
@@ -387,22 +389,17 @@ class GanttsControllerTest < Redmine::ControllerTest
   private
 
   def assert_subject_row(row_key, row:, text:)
-    nth = row.to_i + 1
-    assert_select "div.gantt__body > div.gantt__row:nth-child(#{nth})[data-row-key=?]", row_key do
-      assert_select 'a', text: text
-    end
+    rows = css_select('div.gantt__project-section > div.gantt__row').to_a
+    assert_equal row_key, rows.fetch(row.to_i)['data-row-key']
+    assert_select rows.fetch(row.to_i), 'a', text: text
   end
 
   def assert_issue_row(issue_id, link_text, row:)
-    nth = row.to_i + 1
-    selector = "div.gantt__body > div.gantt__row:nth-child(#{nth})[data-row-key=\"issue-#{issue_id}\"]"
-    assert_select selector do
-      assert_select 'a.issue', text: link_text
-    end
+    assert_subject_row("issue-#{issue_id}", row: row, text: link_text)
   end
 
   def assert_chart_row(row_key, row:, selector:)
-    matcher = "#gantt_area > div.gantt__row[data-row-key=\"#{row_key}\"] #{selector}"
+    matcher = "#gantt_area .gantt__project-section > div.gantt__row[data-row-key=\"#{row_key}\"] #{selector}"
     assert_select matcher, minimum: 1
   end
 

@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 
-const MIN_WIDTH = 240
+const MIN_WIDTH = 100
 
 export default class extends Controller {
   startResize(event) {

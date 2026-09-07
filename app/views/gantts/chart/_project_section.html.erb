@@ -1,0 +1,5 @@
+<div id="gantt-project-<%= section.project.id %>" class="gantt__project-section">
+  <% section.each_row do |row| %>
+    <%= render partial: "gantts/chart/#{row.kind}", locals: {row: row, chart: chart} %>
+  <% end %>
+</div>

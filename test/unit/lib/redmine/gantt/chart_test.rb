@@ -13,7 +13,7 @@ class Redmine::Gantt::ChartTest < ActiveSupport::TestCase
     chart = build_chart
     rows = chart.rows
     project_index = rows.index {|row| row.row_key == "project-#{@project.id}"}
-    version_index = rows.index {|row| row.row_key == 'version-2'}
+    version_index = rows.index {|row| row.row_key == 'project-1-version-2'}
     issue_index = rows.index {|row| row.row_key == 'issue-2'}
 
     assert rows.any?
@@ -24,7 +24,7 @@ class Redmine::Gantt::ChartTest < ActiveSupport::TestCase
     assert_instance_of Redmine::Gantt::Issue, rows[issue_index]
     assert_operator project_index, :<, version_index
     assert_operator version_index, :<, issue_index
-    assert_equal 'version-2', rows[issue_index].parent_row_key
+    assert_equal 'project-1-version-2', rows[issue_index].parent_row_key
     assert rows.frozen?
   end
 
@@ -69,7 +69,7 @@ class Redmine::Gantt::ChartTest < ActiveSupport::TestCase
     @query.stubs(:draw_relations).returns(true)
     @query.stubs(:draw_progress_line).returns(false)
 
-    assert_equal @query.inline_columns.reject {|column| Redmine::Helpers::Gantt::UNAVAILABLE_COLUMNS.include?(column.name)},
+    assert_equal @query.inline_columns.reject {|column| Redmine::Gantt::UNAVAILABLE_COLUMNS.include?(column.name)},
                  chart.selected_columns
     assert_equal 1 + [chart.zoom > 1, chart.zoom > 3, chart.zoom > 2].count(true), chart.header_layers
     assert chart.relations.frozen?
@@ -103,7 +103,7 @@ class Redmine::Gantt::ChartTest < ActiveSupport::TestCase
   end
 
   def build_gantt(options={})
-    Redmine::Helpers::Gantt.new(options).tap do |gantt|
+    Redmine::Gantt.new(options).tap do |gantt|
       gantt.project = @project
       gantt.query = @query
     end

@@ -27,14 +27,14 @@ class Gantts::ChartHelperTest < Redmine::HelperTest
     assert_equal '--gantt-depth: 2', gantt_row_style(row)
     assert_equal 'task-todo-issue-1', gantt_bar_dom_id(row, 'task-todo')
     assert_equal 'behind-start', gantt_progress_state(row)
-    row_tag = gantt_row_tag(row) {'Row'}
+    row_tag = tag.div(**gantt_row_attributes(row)) {'Row'}
     assert_include 'id="gantt-row-issue-1"', row_tag
     assert_include 'class="gantt__row gantt__row--issue"', row_tag
     assert_include 'data-gantt--chart-target="row"', row_tag
     assert_include 'data-gantt--subjects-target="row"', row_tag
     assert_include 'data-parent-row-key="project-1"', row_tag
     assert_include 'data-progress-state="behind-start"', row_tag
-    subject = gantt_row_subject_tag(row) {'Subject'}
+    subject = tag.div(**gantt_row_subject_attributes(row)) {'Subject'}
     assert_include 'id="issue-1"', subject
     assert_include 'gantt__subject--issue', subject
     assert_include 'hascontextmenu', subject
@@ -42,14 +42,14 @@ class Gantts::ChartHelperTest < Redmine::HelperTest
   end
 
   test 'builds chart styles including selected column dimensions' do
-    chart = stub(:selected_columns => [stub, stub], :row_height => 32, :header_layers => 2, :day_width => 4,
+    chart = stub(:selected_columns => [stub, stub], :row_height => 20, :header_layers => 2, :day_width => 4,
                  :sidebar_subject_width => 330, :timeline_width => 120, :relations => [], :show_selected_columns? => true,
                  :show_relations? => false, :show_progress_line? => true)
 
-    html = gantt_chart_tag(chart) { 'chart' }
+    html = tag.div(**gantt_chart_attributes(chart)) { 'chart' }
 
     assert_include 'is-showing-columns', html
-    assert_include '--gantt-selected-columns-width: 192px', html
-    assert_include 'data-gantt--chart-column-widths-value="[96,96]"', html
+    assert_include '--gantt-selected-columns-width: 100px', html
+    assert_include 'data-gantt--chart-column-widths-value="[50,50]"', html
   end
 end

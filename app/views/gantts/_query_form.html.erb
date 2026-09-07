@@ -21,7 +21,7 @@
 
       <fieldset id="options" class="collapsible collapsed"
                 data-controller="gantt--options"
-                data-gantt--options-unavailable-columns-value="<%= Redmine::Helpers::Gantt::UNAVAILABLE_COLUMNS.map(&:to_s).to_json %>">
+                data-gantt--options-unavailable-columns-value="<%= Redmine::Gantt::UNAVAILABLE_COLUMNS.map(&:to_s).to_json %>">
 
         <legend onclick="toggleFieldset(this);" class="icon icon-collapsed">
           <%= sprite_icon('angle-right', rtl: true) %>
@@ -63,7 +63,7 @@
                     'gantt--options-target': 'relations'
                   } %>
                 <% [IssueRelation::TYPE_BLOCKS, IssueRelation::TYPE_PRECEDES].each do |rel| %>
-                  <% color = Redmine::Helpers::Gantt::DRAW_TYPES[rel][:color] %>
+                  <% color = Redmine::Gantt::DRAW_TYPES[rel][:color] %>
                   <%= content_tag(:span, '&nbsp;&nbsp;&nbsp;'.html_safe, style: "background-color: #{color}") %>
                   <%= l(IssueRelation::TYPES[rel][:name]) %>
                 <% end %>

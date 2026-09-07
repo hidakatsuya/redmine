@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 module Redmine
-  module Gantt
+  class Gantt
     class Version < Row
       attr_reader :version, :completed_percent
 
-      def self.build(record:, gantt:, depth:, parent_row_key:)
+      def self.build(record:, gantt:, depth:, parent_row_key:, row_key: nil, display_project: nil)
         percent = record.visible_fixed_issues.completed_percent
         new(
-          **common_attributes(record, depth, parent_row_key),
-          :expandable => gantt.version_issues(record.project, record).any?,
+          **common_attributes(record, depth, parent_row_key, row_key),
+          :expandable => gantt.dataset.version_issues(display_project || record.project, record).any?,
           :subject => record.to_s_with_project,
           :schedule => schedule_for(record, gantt, percent),
           :version => record,

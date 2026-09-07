@@ -8,9 +8,9 @@ module Gantts
       :issue => 'issue-subject'
     }.freeze
 
-    SELECTED_COLUMN_WIDTH = 96
+    SELECTED_COLUMN_WIDTH = 50
 
-    def gantt_chart_tag(chart, project: nil, &)
+    def gantt_chart_attributes(chart, project: nil)
       selected_columns_width = chart.selected_columns.size * SELECTED_COLUMN_WIDTH
       data_attributes = {
         :controller => 'gantt--chart',
@@ -22,8 +22,10 @@ module Gantts
           gantt:row-toggled->gantt--chart#handleLayoutInvalidated
           gantt:sidebar-resized->gantt--chart#handleSidebarResized
           resize@window->gantt--chart#handleWindowResize
+          beforeprint@window->gantt--chart#handleBeforePrint
+          afterprint@window->gantt--chart#handleAfterPrint
         ).join(' '),
-        'gantt--chart-issue-relation-types-value' => Redmine::Helpers::Gantt::DRAW_TYPES.transform_values(&:symbolize_keys).to_json,
+        'gantt--chart-issue-relation-types-value' => Redmine::Gantt::DRAW_TYPES.transform_values(&:symbolize_keys).to_json,
         'gantt--chart-relations-value' => chart.relations.map(&:to_h).to_json,
         'gantt--chart-column-widths-value' => chart.selected_columns.map { SELECTED_COLUMN_WIDTH }.to_json,
         'gantt--chart-show-selected-columns-value' => chart.show_selected_columns? ? 'true' : 'false',
@@ -37,8 +39,18 @@ module Gantts
         "--gantt-selected-columns-template: #{chart.selected_columns.map { "#{SELECTED_COLUMN_WIDTH}px" }.join(' ')}",
         "--gantt-subject-width: #{chart.sidebar_subject_width}px", "--gantt-timeline-width: #{chart.timeline_width}px"
       ].join('; ')
-      tag.div(:class => ['gantt', {'is-showing-columns': chart.show_selected_columns?}], :style => styles,
-              :data => data_attributes.merge('gantt-project-id': project&.id), &)
+      {:class => ['gantt', {'is-showing-columns': chart.show_selected_columns?}], :style => styles,
+       :data => data_attributes.merge('gantt-project-id': project&.id)}
+    end
+
+    def gantt_expander(row)
+      if row.expandable?
+        tag.button sprite_icon('angle-down', :rtl => true),
+                   :type => 'button', :class => ['gantt__expander', 'icon', 'icon-expanded'],
+                   :aria => {:expanded => true}, :data => {:action => 'click->gantt--subjects#toggleRow'}
+      else
+        tag.span '', :class => 'gantt__expander-placeholder', :aria => {:hidden => true}
+      end
     end
 
     def gantt_scale_segment_css_classes(segment)
@@ -58,8 +70,8 @@ module Gantts
       "--gantt-depth: #{row.depth}"
     end
 
-    def gantt_row_tag(row, &)
-      tag.div(
+    def gantt_row_attributes(row)
+      {
         :id => "gantt-row-#{row.row_key}",
         :class => ['gantt__row', "gantt__row--#{row.kind}"],
         :style => gantt_row_style(row),
@@ -70,9 +82,8 @@ module Gantts
           :parent_row_key => row.parent_row_key.to_s,
           :kind => row.kind,
           :progress_state => gantt_progress_state(row)
-        },
-        &
-      )
+        }
+      }
     end
 
     def gantt_schedule_style(schedule)
@@ -86,13 +97,13 @@ module Gantts
     end
 
     def gantt_label_style(schedule)
-      "--gantt-label-unit: #{schedule.bar_end_offset}" if schedule&.visible?
+      "--gantt-label-unit: #{schedule.bar_end_offset || 0}"
     end
 
-    def gantt_progress_style(schedule)
+    def gantt_progress_style(schedule, day_width:)
       return unless schedule&.progress?
 
-      ["--gantt-start-unit: #{schedule.bar_start_offset}", "--gantt-end-unit: #{schedule.progress_offset}"].join('; ')
+      ["--gantt-start-unit: #{schedule.bar_start_offset}", "--gantt-end-unit: #{(schedule.progress_offset * day_width).floor.to_f / day_width}"].join('; ')
     end
 
     def gantt_late_style(schedule)
@@ -101,8 +112,8 @@ module Gantts
       ["--gantt-start-unit: #{schedule.bar_start_offset}", "--gantt-end-unit: #{schedule.late_offset}"].join('; ')
     end
 
-    def gantt_row_subject_tag(row, &)
-      tag.div(
+    def gantt_row_subject_attributes(row)
+      {
         :id => row.row_key,
         :class => [
           'gantt__subject',
@@ -110,12 +121,11 @@ module Gantts
           ROW_SUBJECT_CLASSES.fetch(row.kind),
           {'is-open': row.expandable?, hascontextmenu: row.context_menu?}
         ],
-        &
-      )
+      }
     end
 
     def gantt_bar_classes(row)
-      [*gantt_bar_base_classes(row), 'gantt__bar', 'task_todo', {hascontextmenu: row.context_menu?}]
+      [*gantt_bar_base_classes(row), 'gantt__bar', 'task_todo']
     end
 
     def gantt_done_bar_classes(row)

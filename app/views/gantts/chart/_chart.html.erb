@@ -4,15 +4,15 @@
   <p class="warning"><%= l(:notice_gantt_chart_truncated, max: gantt.max_rows) %></p>
 <% end %>
 
-<%= gantt_chart_tag(chart, project: @project) do %>
+<div <%= tag.attributes(gantt_chart_attributes(chart, project: @project)) %>>
   <div class="gantt__viewport" data-gantt--chart-target="viewport">
-    <%= form_tag({}, data: {cm_url: issues_context_menu_path}, class: 'gantt__layout') do %>
+    <%= form_tag({}, data: {cm_url: issues_context_menu_path}, class: 'gantt__layout') %>
       <%= hidden_field_tag 'back_url', url_for(params: request.query_parameters), id: nil %>
 
       <div class="gantt__header">
         <div class="gantt__header-information">
           <div class="gantt__sidebar-grid gantt__sidebar-grid--header">
-            <div class="gantt__subject-header"><%= l(:field_subject) %></div>
+            <div class="gantt__subject-header"></div>
             <% chart.selected_columns.each_with_index do |column, index| %>
               <div class="gantt__column-header"
                    data-controller="gantt--column"
@@ -55,9 +55,17 @@
            id="gantt_area"
            data-controller="gantt--subjects"
            data-gantt--chart-target="body">
-        <% chart.rows.each do |row| %>
-          <%= render partial: "gantts/chart/#{row.kind}", locals: {row: row, chart: chart} %>
-        <% end %>
+        <div class="gantt__sidebar-background" aria-hidden="true"></div>
+        <div class="gantt__grid" aria-hidden="true">
+          <% chart.scale_layers.last.segments.each do |segment| %>
+            <%= tag.div class: ['gantt__grid-column', {'is-non-working-day': segment.non_working_day}],
+                        style: gantt_scale_segment_style(segment) %>
+          <% end %>
+        </div>
+        <div class="gantt__rows">
+          <%= render partial: 'gantts/chart/project_section', collection: chart.sections,
+                     as: :section, locals: {chart: chart} %>
+        </div>
 
         <div class="gantt__overlay" id="gantt_draw_area" data-gantt--chart-target="overlay">
           <% if chart.show_today? %>
@@ -69,9 +77,9 @@
           <div data-gantt--chart-target="svgLayer"></div>
         </div>
       </div>
-    <% end %>
+    </form>
   </div>
-<% end %>
+</div>
 
 <span class="pagination">
   <ul class="pages">

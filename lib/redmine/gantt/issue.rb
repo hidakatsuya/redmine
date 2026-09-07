@@ -1,19 +1,18 @@
 # frozen_string_literal: true
 
 module Redmine
-  module Gantt
+  class Gantt
     class Issue < Row
       attr_reader :issue
 
-      def self.build(record:, gantt:, depth:, parent_row_key:)
+      def self.build(record:, gantt:, depth:, parent_row_key:, row_key: nil, display_project: nil)
         summary = !record.leaf?
         new(
-          **common_attributes(record, depth, parent_row_key),
+          **common_attributes(record, depth, parent_row_key, row_key),
           :expandable => expandable?(record, gantt),
           :subject => record.subject,
           :schedule => schedule_for(record, gantt, summary),
           :issue => record,
-          :editable => record.editable?(User.current),
           :summary => summary,
           :closed => record.closed?,
           :overdue => record.overdue?,
@@ -23,11 +22,10 @@ module Redmine
         )
       end
 
-      def initialize(issue:, editable:, summary:, closed:, overdue:, behind_schedule:,
+      def initialize(issue:, summary:, closed:, overdue:, behind_schedule:,
                      behind_start_date:, over_end_date:, **attributes)
         super(**attributes)
         @issue = issue
-        @editable = editable
         @summary = summary
         @closed = closed
         @overdue = overdue
@@ -51,10 +49,6 @@ module Redmine
 
       def version?
         false
-      end
-
-      def editable?
-        @editable
       end
 
       def context_menu?
@@ -87,7 +81,7 @@ module Redmine
 
       def self.expandable?(record, gantt)
         !record.leaf? &&
-          (record.children & gantt.project_issues(record.project)).any? do |child|
+          (record.children & gantt.dataset.project_issues(record.project)).any? do |child|
             child.fixed_version_id == record.fixed_version_id
           end
       end

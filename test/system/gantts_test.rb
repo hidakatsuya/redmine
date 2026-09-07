@@ -120,22 +120,66 @@ class GanttsTest < ApplicationSystemTestCase
     assert_equal '35', header['sidebarZ']
   end
 
-  test 'hover highlights the whole row' do
+  test 'retains compact rows and document scrolling' do
     visit_gantt
 
-    find('.gantt__row[data-row-key="issue-1"]').hover
-
-    state = page.evaluate_script(<<~JS)
+    dimensions = page.evaluate_script(<<~JS)
       (() => {
-        const row = document.querySelector('.gantt__row[data-row-key="issue-1"]')
-        return {
-          information: getComputedStyle(row.querySelector('.gantt__row-information')).backgroundColor,
-          timeline: getComputedStyle(row.querySelector('.gantt__timeline-cell')).backgroundColor
-        }
+        const row = document.querySelector('.gantt__row')
+        const viewport = document.querySelector('.gantt__viewport')
+        return [row.getBoundingClientRect().height, getComputedStyle(viewport).maxBlockSize,
+                getComputedStyle(document.querySelector('.gantt__header')).position]
       })()
     JS
 
-    assert_equal state['information'], state['timeline']
+    assert_equal [20, 'none', 'relative'], dimensions
+  end
+
+  test 'sidebar blank areas cover the timeline while horizontally scrolling' do
+    visit_gantt
+    expand_options
+
+    [false, true].each do |columns|
+      find('#draw_selected_columns').set(columns)
+      coverage = page.evaluate_script(<<~JS)
+        (() => {
+          const viewport = document.querySelector('.gantt__viewport')
+          const body = document.querySelector('.gantt__body')
+          const background = document.querySelector('.gantt__sidebar-background')
+          body.scrollIntoView({block: 'end'})
+          viewport.scrollLeft = 200
+          const rect = background.getBoundingClientRect()
+          const bodyRect = body.getBoundingClientRect()
+          const x = rect.right - 5
+          return {
+            scroll: viewport.scrollLeft,
+            left: rect.left,
+            viewportLeft: viewport.getBoundingClientRect().left,
+            topCovered: document.elementFromPoint(x, bodyRect.top + 3) === background,
+            bottomCovered: document.elementFromPoint(x, bodyRect.bottom - 5) === background
+          }
+        })()
+      JS
+      assert_operator coverage['scroll'], :>, 0
+      assert_in_delta coverage['viewportLeft'], coverage['left'], 1, coverage.inspect
+      assert coverage['topCovered'], 'timeline must not show above the first row'
+      assert coverage['bottomCovered'], 'timeline must not show below the last row'
+    end
+  end
+
+  test 'scale boundaries use a single horizontal border' do
+    visit '/projects/ecookbook/issues/gantt?zoom=4'
+    borders = page.evaluate_script(<<~JS)
+      (() => {
+        const layers = Array.from(document.querySelectorAll('.gantt__scale-row'))
+        const border = (element, side) => parseFloat(getComputedStyle(element)[side])
+        return layers.slice(1).map((layer, index) =>
+          border(layers[index], 'borderBottomWidth') +
+          border(layers[index].firstElementChild, 'borderBottomWidth') +
+          border(layer, 'borderTopWidth') + border(layer.firstElementChild, 'borderTopWidth'))
+      })()
+    JS
+    assert_equal [1, 1, 1], borders
   end
 
   test 'context menu and tooltip interactions' do
@@ -166,6 +210,33 @@ class GanttsTest < ApplicationSystemTestCase
 
     assert_selector '#context-menu'
     assert_selector '#context-menu a.icon-edit'
+  end
+
+  test 'printing keeps rows on the same continuous plane as relation lines' do
+    visit_gantt
+    page.driver.browser.execute_cdp('Emulation.setEmulatedMedia', :media => 'print')
+    page.execute_script("window.dispatchEvent(new Event('beforeprint'))")
+
+    assert_selector '.gantt.is-printing'
+    positions = page.evaluate_script(<<~JS)
+      Array.from(document.querySelectorAll('.gantt__row:not(.is-hidden)')).map(row => ({
+        position: getComputedStyle(row).position,
+        top: row.offsetTop,
+        height: row.offsetHeight
+      }))
+    JS
+    assert positions.all? {|row| row['position'] == 'absolute'}
+    positions.each_cons(2) do |previous, current|
+      assert_equal previous['top'] + previous['height'], current['top']
+    end
+    assert_selector '#gantt_draw_area path', minimum: 1
+
+    page.driver.browser.execute_cdp('Emulation.setEmulatedMedia', :media => '')
+    page.execute_script("window.dispatchEvent(new Event('afterprint'))")
+    assert_no_selector '.gantt.is-printing'
+    assert_equal 'static', page.evaluate_script("getComputedStyle(document.querySelector('.gantt__row')).position")
+  ensure
+    page.driver.browser.execute_cdp('Emulation.setEmulatedMedia', :media => '')
   end
 
   private

@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 
-const MIN_WIDTH = 48
+const MIN_WIDTH = 20
 
 export default class extends Controller {
   static values = { index: Number }

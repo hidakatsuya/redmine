@@ -7,10 +7,8 @@ export default class extends Controller {
   static targets = [
     "body",
     "doneBar",
-    "endAnchor",
     "overlay",
     "row",
-    "startAnchor",
     "svgLayer",
     "todayLine",
     "todoBar",
@@ -88,6 +86,28 @@ export default class extends Controller {
     this.#scheduleOverlayDraw()
   }
 
+  handleBeforePrint() {
+    if (this.animationFrame) cancelAnimationFrame(this.animationFrame)
+    this.animationFrame = null
+    const padding = parseFloat(getComputedStyle(this.bodyTarget).paddingBlockStart)
+    let height = 0
+    this.rowTargets.forEach((row) => {
+      if (this.#isHidden(row)) return
+      row.style.setProperty("--gantt-print-top", `${padding + height}px`)
+      height += row.offsetHeight
+    })
+    this.bodyTarget.style.setProperty("--gantt-print-height", `${height}px`)
+    // Flow pagination can move rows independently of the single SVG overlay.
+    // Print both on one continuous coordinate plane, as the legacy chart did.
+    this.element.classList.add("is-printing")
+    this.#drawOverlay()
+  }
+
+  handleAfterPrint() {
+    this.element.classList.remove("is-printing")
+    this.#scheduleOverlayDraw()
+  }
+
   #applySelectedColumnsState() {
     this.element.classList.toggle("is-showing-columns", this.showSelectedColumnsValue)
   }
@@ -117,16 +137,16 @@ export default class extends Controller {
   }
 
   #drawRelations(svg) {
-    const anchors = this.#anchorsByRowKey()
+    const bars = this.#elementsByRowKey(this.todoBarTargets)
 
     this.relationsValue.forEach((relation) => {
-      const fromAnchor = anchors.end.get(relation.from_row_key)
-      const toAnchor = anchors.start.get(relation.to_row_key)
+      const fromAnchor = bars.get(relation.from_row_key)
+      const toAnchor = bars.get(relation.to_row_key)
 
       if (!fromAnchor || !toAnchor || this.#isHidden(fromAnchor) || this.#isHidden(toAnchor)) return
 
-      const from = this.#pointInOverlay(fromAnchor)
-      const to = this.#pointInOverlay(toAnchor)
+      const from = this.#pointInOverlay(fromAnchor, "end")
+      const to = this.#pointInOverlay(toAnchor, "start")
       const config = this.issueRelationTypesValue[relation.type] || {}
       const margin = config.landscape_margin || 0
       const color = config.color || "#000"
@@ -196,13 +216,6 @@ export default class extends Controller {
     }
   }
 
-  #anchorsByRowKey() {
-    return {
-      start: this.#elementsByRowKey(this.startAnchorTargets),
-      end: this.#elementsByRowKey(this.endAnchorTargets)
-    }
-  }
-
   #elementsByRowKey(elements) {
     return new Map(elements.map((element) => [element.dataset.rowKey, element]))
   }
@@ -211,10 +224,13 @@ export default class extends Controller {
     return element.closest(".gantt__row")?.classList.contains("is-hidden")
   }
 
-  #pointInOverlay(element) {
+  #pointInOverlay(element, side) {
     const rect = element.getBoundingClientRect()
     const overlayRect = this.overlayTarget.getBoundingClientRect()
-    return { x: rect.left - overlayRect.left, y: rect.top - overlayRect.top }
+    return {
+      x: (side === "end" ? rect.right : rect.left) - overlayRect.left,
+      y: rect.top - overlayRect.top + (side ? rect.height / 2 : 0)
+    }
   }
 
   #drawPath(svg, parts, color) {

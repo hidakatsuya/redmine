@@ -31,7 +31,7 @@ class GanttsController < ApplicationController
   include Redmine::Export::PDF
 
   def show
-    @gantt = Redmine::Helpers::Gantt.new(params)
+    @gantt = Redmine::Gantt.new(params)
     @gantt.project = @project
     retrieve_query
     @query.group_by = nil

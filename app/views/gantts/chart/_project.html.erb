@@ -1,15 +1,15 @@
-<%= gantt_row_tag(row) do %>
+<div <%= tag.attributes(gantt_row_attributes(row)) %>>
   <div class="gantt__row-information gantt__sidebar-grid">
     <div class="gantt__subject-cell">
-      <%= gantt_row_subject_tag(row) do %>
-        <%= render partial: 'gantts/chart/expander', locals: {row: row} %>
+      <div <%= tag.attributes(gantt_row_subject_attributes(row)) %>>
+        <%= gantt_expander(row) %>
 
-        <%= tag.span class: ['gantt__subject-text', {'project-overdue': row.overdue?}],
-                     title: row.subject do %>
+        <span <%= tag.attributes class: ['gantt__subject-text', {'project-overdue': row.overdue?}],
+                     title: row.subject %>>
           <%= sprite_icon('projects') -%>
           <%= link_to_project(row.project) %>
-        <% end %>
-      <% end %>
+        </span>
+      </div>
     </div>
 
     <% chart.selected_columns.each do %>
@@ -18,6 +18,6 @@
   </div>
 
   <div class="gantt__timeline-cell">
-    <%= render partial: 'gantts/chart/schedule', locals: {row: row} %>
+    <%= render partial: 'gantts/chart/schedule', locals: {row: row, chart: chart} %>
   </div>
-<% end %>
+</div>

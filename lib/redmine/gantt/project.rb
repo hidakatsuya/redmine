@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 module Redmine
-  module Gantt
+  class Gantt
     class Project < Row
       attr_reader :project
 
-      def self.build(record:, gantt:, depth:, parent_row_key:)
+      def self.build(record:, gantt:, depth:, parent_row_key:, row_key: nil, display_project: nil)
         new(
-          **common_attributes(record, depth, parent_row_key),
-          :expandable => gantt.projects.any? {|project| project.parent_id == record.id} ||
-            gantt.project_issues(record).any? || gantt.project_versions(record).any?,
+          **common_attributes(record, depth, parent_row_key, row_key),
+          :expandable => gantt.dataset.projects.any? {|project| project.parent_id == record.id} ||
+            gantt.dataset.project_issues(record).any? || gantt.dataset.project_versions(record).any?,
           :subject => record.name,
           :schedule => schedule_for(record, gantt),
           :project => record,

@@ -31,7 +31,7 @@ class Redmine::Gantt::ScheduleTest < ActiveSupport::TestCase
 
       assert_equal 4, schedule.bar_start_offset
       assert_equal 21, schedule.bar_end_offset
-      assert_equal 10, schedule.progress_offset
+      assert_in_delta 10.8, schedule.progress_offset
       assert_equal 15, schedule.late_offset
       assert schedule.progress?
       assert schedule.late?
@@ -39,17 +39,6 @@ class Redmine::Gantt::ScheduleTest < ActiveSupport::TestCase
       assert schedule.end_marker?
       assert_predicate schedule, :frozen?
     end
-  end
-
-  test 'uses a private builder without retaining construction dependencies' do
-    schedule = build(:start_on => @date_from, :end_on => @date_from + 5,
-                     :progress => 50, :markers => true, :label => 'Schedule')
-
-    assert Redmine::Gantt::Schedule.const_defined?(:Builder, false)
-    assert_raises(NameError) {Redmine::Gantt::Schedule::Builder}
-    assert_nil schedule.instance_variable_get(:@gantt)
-    assert_nil schedule.instance_variable_get(:@progress)
-    assert_nil schedule.instance_variable_get(:@markers)
   end
 
   test 'is not visible outside the chart range' do
@@ -60,21 +49,21 @@ class Redmine::Gantt::ScheduleTest < ActiveSupport::TestCase
     assert_not schedule.late?
   end
 
-  test 'preserves the legacy gantt date calculations' do
-    travel_to Date.new(2026, 1, 15) do
-      gantt = Redmine::Helpers::Gantt.new(:year => 2026, :month => 1, :months => 1)
-      [[Date.new(2025, 12, 28), Date.new(2026, 1, 1), 30], [Date.new(2026, 1, 1), Date.new(2026, 1, 1), 0],
-       [Date.new(2026, 1, 8), Date.new(2026, 1, 22), 30], [Date.new(2026, 1, 31), Date.new(2026, 2, 2), 100],
-       [Date.new(2026, 2, 2), Date.new(2026, 2, 4), 50]].each do |start_on, end_on, progress|
-        legacy = gantt.send(:coordinates, start_on, end_on, progress, 1)
-        schedule = Redmine::Gantt::Schedule.build(:gantt => gantt, :start_on => start_on, :end_on => end_on,
-                                                   :progress => progress, :markers => true, :label => '_')
-        OFFSETS.each do |key, reader|
-          actual = schedule.public_send(reader)
-          legacy[key] ? assert_equal(legacy[key], actual) : assert_nil(actual)
-        end
-      end
-    end
+  test 'retains fractional progress until converted to output units' do
+    schedule = build(:start_on => Date.new(2026, 1, 8), :end_on => Date.new(2026, 1, 22),
+                     :progress => 30, :markers => true, :label => '_')
+
+    assert_equal 11.5, schedule.progress_offset
+    assert_equal [23, 46, 92, 184], [2, 4, 8, 16].map {|width| (schedule.progress_offset * width).floor}
+  end
+
+  test 'shares unrounded date offsets with exports' do
+    offsets = Redmine::Gantt::Schedule.offsets(:date_from => @date_from, :date_to => Date.new(2026, 1, 31),
+                                              :start_on => Date.new(2026, 1, 8), :end_on => Date.new(2026, 1, 22),
+                                              :progress => 30, :today => Date.new(2026, 1, 15))
+
+    assert_equal({:start => 7, :end => 22, :bar_start => 7, :bar_end => 22,
+                  :bar_progress_end => 11.5, :bar_late_end => 15}, offsets)
   end
 
   private

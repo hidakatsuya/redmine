@@ -7,7 +7,7 @@ class Redmine::Gantt::RowsTest < ActiveSupport::TestCase
     User.current = users(:users_002)
     @project = projects(:projects_001)
     @query = IssueQuery.new(:project => @project, :name => '_')
-    @gantt = Redmine::Helpers::Gantt.new(:year => User.current.today.year, :month => User.current.today.month, :months => 2)
+    @gantt = Redmine::Gantt.new(:year => User.current.today.year, :month => User.current.today.month, :months => 2)
     @gantt.project = @project
     @gantt.query = @query
   end
@@ -39,7 +39,6 @@ class Redmine::Gantt::RowsTest < ActiveSupport::TestCase
     assert row.closed?
     assert_equal version.start_date, row.schedule.start_on
     assert_equal version.due_date, row.schedule.end_on
-    assert_not row.editable?
     assert_predicate row, :frozen?
   end
 
@@ -55,7 +54,6 @@ class Redmine::Gantt::RowsTest < ActiveSupport::TestCase
     assert_equal issue.due_before, row.schedule.end_on
     assert_equal issue.status.name, row.schedule.label.split.first
     assert row.context_menu?
-    assert_equal issue.editable?(User.current), row.editable?
     assert_equal issue.overdue?, row.overdue?
     assert_equal issue.behind_schedule?, row.behind_schedule?
     assert_equal !issue.leaf?, row.summary?
@@ -64,19 +62,16 @@ class Redmine::Gantt::RowsTest < ActiveSupport::TestCase
 
   test 'captures row state at build time' do
     issue = issues(:issues_003)
-    issue.stubs(:editable?).returns(true)
     issue.stubs(:leaf?).returns(false)
     issue.stubs(:closed?).returns(false)
     issue.stubs(:overdue?).returns(false)
     issue.stubs(:behind_schedule?).returns(false)
     row = build(Redmine::Gantt::Issue, issue, :depth => 1, :parent_row_key => "project-#{@project.id}")
-    issue.stubs(:editable?).returns(false)
     issue.stubs(:leaf?).returns(true)
     issue.stubs(:closed?).returns(true)
     issue.stubs(:overdue?).returns(true)
     issue.stubs(:behind_schedule?).returns(true)
 
-    assert row.editable?
     assert row.summary?
     assert_not row.closed?
     assert_not row.overdue?
