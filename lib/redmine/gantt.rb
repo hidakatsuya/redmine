@@ -42,12 +42,14 @@ module Redmine
     attr_reader :year_from, :month_from, :date_from, :date_to, :zoom, :months, :max_rows,
                 :query, :project
 
-    def initialize(options={})
-      options = options.dup
-      if options[:year] && options[:year].to_i >0
-        @year_from = options[:year].to_i
-        if options[:month] && options[:month].to_i >=1 && options[:month].to_i <= 12
-          @month_from = options[:month].to_i
+    def initialize(query:, project: nil, year: nil, month: nil, zoom: nil, months: nil,
+                   max_rows: Setting.gantt_items_limit.presence&.to_i)
+      @query = query
+      @project = project
+      if year && year.to_i >0
+        @year_from = year.to_i
+        if month && month.to_i >=1 && month.to_i <= 12
+          @month_from = month.to_i
         else
           @month_from = 1
         end
@@ -55,9 +57,9 @@ module Redmine
         @month_from ||= User.current.today.month
         @year_from ||= User.current.today.year
       end
-      zoom = (options[:zoom] || User.current.pref[:gantt_zoom]).to_i
+      zoom = (zoom || User.current.pref[:gantt_zoom]).to_i
       @zoom = (zoom > 0 && zoom < 5) ? zoom : 2
-      months = (options[:months] || User.current.pref[:gantt_months]).to_i
+      months = (months || User.current.pref[:gantt_months]).to_i
       @months = (months > 0 && months < Setting.gantt_months_limit.to_i + 1) ? months : 6
       # Save gantt parameters as user preference (zoom and months count)
       if User.current.logged? &&
@@ -69,23 +71,7 @@ module Redmine
       @date_from = Date.civil(@year_from, @month_from, 1)
       @date_to = (@date_from >> @months) - 1
       @truncated = false
-      if options.has_key?(:max_rows)
-        @max_rows = options[:max_rows]
-      else
-        @max_rows = (Setting.gantt_items_limit.presence&.to_i)
-      end
-    end
-
-    def query=(query)
-      @query = query
-      @chart = nil
-      @dataset = nil
-    end
-
-    def project=(project)
-      @project = project
-      @chart = nil
-      @dataset = nil
+      @max_rows = max_rows
     end
 
     def chart

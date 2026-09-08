@@ -37,6 +37,32 @@ class GanttsTest < ApplicationSystemTestCase
     assert_selector '#gantt_draw_area path', minimum: 1
   end
 
+  test 'selected subjects retain an opaque highlight and light text' do
+    visit_gantt
+    subject = find('.gantt__subject--issue', match: :first)
+    subject.right_click
+    assert_selector '.gantt__subject.context-menu-selection'
+
+    colors = page.evaluate_script(<<~JS)
+      (() => {
+        const subject = document.querySelector('.gantt__subject.context-menu-selection')
+        const text = subject.querySelector('.gantt__subject-text')
+        const root = getComputedStyle(document.documentElement)
+        const probe = document.createElement('span')
+        document.body.appendChild(probe)
+        probe.style.color = root.getPropertyValue('--oc-gray-0')
+        probe.style.backgroundColor = root.getPropertyValue('--oc-blue-7')
+        const expected = getComputedStyle(probe)
+        const result = [getComputedStyle(text).backgroundColor === expected.backgroundColor,
+                        getComputedStyle(text.querySelector('a')).color === expected.color,
+                        getComputedStyle(subject).backgroundColor === 'rgba(0, 0, 0, 0)']
+        probe.remove()
+        return result
+      })()
+    JS
+    assert_equal [true, true, true], colors
+  end
+
   test 'progress line toggle draws zigzag line' do
     visit_gantt
     expand_options

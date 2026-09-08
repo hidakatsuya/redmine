@@ -24,6 +24,33 @@ class Redmine::GanttTest < Redmine::HelperTest
     User.current = User.find(1)
   end
 
+  test 'initialization accepts explicit display parameters and saves preferences' do
+    User.current = User.find(1)
+    gantt = Redmine::Gantt.new(:query => nil, :year => '2026', :month => '6', :zoom => '3', :months => '2')
+
+    assert_equal Date.new(2026, 6, 1), gantt.date_from
+    assert_equal Date.new(2026, 7, 31), gantt.date_to
+    assert_equal 3, gantt.zoom
+    assert_equal 3, User.current.preference.reload[:gantt_zoom]
+    assert_equal 2, User.current.preference[:gantt_months]
+  end
+
+  test 'omitted row limit uses the setting and explicit nil disables it' do
+    with_settings :gantt_items_limit => '42' do
+      assert_equal 42, Redmine::Gantt.new(:query => nil).max_rows
+      assert_nil Redmine::Gantt.new(:query => nil, :max_rows => nil).max_rows
+    end
+  end
+
+  test 'invalid display parameters retain the existing defaults' do
+    gantt = Redmine::Gantt.new(:query => nil, :year => '2026', :month => '13', :zoom => '5', :months => '0')
+
+    assert_equal Date.new(2026, 1, 1), gantt.date_from
+    assert_equal 2, gantt.zoom
+    assert_equal 6, gantt.months
+    assert_raises(ArgumentError) {Redmine::Gantt.new(:query => nil, :unknown => 'value')}
+  end
+
   def today
     @today ||= Date.today
   end
@@ -31,9 +58,8 @@ class Redmine::GanttTest < Redmine::HelperTest
 
   def create_gantt(project=Project.generate!, options={})
     @project = project
-    @gantt = Redmine::Gantt.new(options)
-    @gantt.project = @project
-    @gantt.query = IssueQuery.new(:project => @project, :name => 'Gantt')
+    query = IssueQuery.new(:project => @project, :name => 'Gantt')
+    @gantt = Redmine::Gantt.new(:query => query, :project => @project, **options.except(:date_from, :date_to))
     @gantt.instance_variable_set(:@date_from, options[:date_from] || (today - 14))
     @gantt.instance_variable_set(:@date_to, options[:date_to] || (today + 14))
   end

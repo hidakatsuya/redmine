@@ -115,9 +115,6 @@ class Redmine::Gantt::ChartTest < ActiveSupport::TestCase
   end
 
   def build_gantt(options={})
-    Redmine::Gantt.new(options).tap do |gantt|
-      gantt.project = @project
-      gantt.query = @query
-    end
+    Redmine::Gantt.new(:query => @query, :project => @project, **options)
   end
 end

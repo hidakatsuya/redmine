@@ -34,8 +34,8 @@ methods materialize arrays; rendering should use each_row instead.
 
 The source records and their associations are ordinary Active Record objects.
 These objects are request-local, not deeply immutable or suitable for caching
-between requests or users. Reassigning the query invalidates the facade's data
-and chart caches; existing sections keep their captured dataset.
+between requests or users. Pass query and project as initialization keywords. To change the search
+context, construct a new Gantt instead of mutating its query or project.
 
 Each section has its own HTML wrapper (gantt-project-ID). A future partial
 update must also refresh affected ancestor aggregates, shared versions, and
@@ -70,3 +70,5 @@ For export changes, compare rendered PDF pages and PNG pixels, including multipl
 pages and shared versions. For memory changes, use identical database snapshots
 and fresh server processes; compare response time, allocations, full-GC RSS and
 peak RSS. Allocation counts alone do not establish a memory improvement.
+
+A Japanese component guide is available in doc/GANTT_ARCHITECTURE.md.

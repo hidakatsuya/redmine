@@ -7,9 +7,7 @@ class Redmine::Gantt::RowsTest < ActiveSupport::TestCase
     User.current = users(:users_002)
     @project = projects(:projects_001)
     @query = IssueQuery.new(:project => @project, :name => '_')
-    @gantt = Redmine::Gantt.new(:year => User.current.today.year, :month => User.current.today.month, :months => 2)
-    @gantt.project = @project
-    @gantt.query = @query
+    @gantt = Redmine::Gantt.new(:query => @query, :project => @project, :year => User.current.today.year, :month => User.current.today.month, :months => 2)
   end
 
   test 'project row retains project schedule semantics and is frozen' do

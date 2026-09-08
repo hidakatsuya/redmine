@@ -9,7 +9,7 @@ module Redmine
         entry = gantt.dataset.each_project.find {|record, _depth, _limit| record.id == project.id}
         return unless entry
 
-        new(gantt.dup.freeze, *entry)
+        new(gantt, *entry)
       end
 
       def initialize(gantt, project, depth, limit)

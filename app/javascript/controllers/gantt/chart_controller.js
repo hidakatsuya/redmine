@@ -156,7 +156,7 @@ export default class extends Controller {
       if (viaX < targetViaX) {
         this.#drawPath(svg, ["M", viaX, from.y, "L", viaX, to.y, "L", to.x, to.y], color)
       } else {
-        const midY = to.y + (from.y > to.y ? 10 : -10)
+        const midY = to.y + from.height * (from.y > to.y ? 1 : -1)
         this.#drawPath(svg, ["M", viaX, from.y, "L", viaX, midY, "L", targetViaX, midY, "L", targetViaX, to.y, "L", to.x, to.y], color)
       }
 
@@ -226,9 +226,14 @@ export default class extends Controller {
   #pointInOverlay(element, side) {
     const rect = element.getBoundingClientRect()
     const overlayRect = this.overlayTarget.getBoundingClientRect()
+    const style = getComputedStyle(element)
+    // Legacy relation anchors used the bar's content dimensions, excluding borders.
+    const width = rect.width - parseFloat(style.borderLeftWidth) - parseFloat(style.borderRightWidth)
+    const height = rect.height - parseFloat(style.borderTopWidth) - parseFloat(style.borderBottomWidth)
     return {
-      x: (side === "end" ? rect.right : rect.left) - overlayRect.left,
-      y: rect.top - overlayRect.top + (side ? rect.height / 2 : 0)
+      x: rect.left - overlayRect.left + (side === "end" ? width : 0),
+      y: rect.top - overlayRect.top + (side ? height / 2 : 0),
+      height
     }
   }
 

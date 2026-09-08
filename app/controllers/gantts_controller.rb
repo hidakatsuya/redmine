@@ -31,11 +31,13 @@ class GanttsController < ApplicationController
   include Redmine::Export::PDF
 
   def show
-    @gantt = Redmine::Gantt.new(params)
-    @gantt.project = @project
     retrieve_query
     @query.group_by = nil
-    @gantt.query = @query if @query.valid?
+    @gantt = Redmine::Gantt.new(
+      :query => (@query if @query.valid?), :project => @project,
+      :year => params[:year], :month => params[:month],
+      :zoom => params[:zoom], :months => params[:months]
+    )
 
     basename = (@project ? "#{@project.identifier}-" : '') + 'gantt'
 

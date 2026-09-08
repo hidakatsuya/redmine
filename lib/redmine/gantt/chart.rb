@@ -82,7 +82,7 @@ module Redmine
           zoom = @gantt.zoom
           day_width = 2**zoom
           dataset = @gantt.dataset
-          context = @gantt.dup.freeze
+          context = @gantt
           sections = dataset.each_project.map do |project, depth, limit|
             ProjectSection.new(context, project, depth, limit)
           end.freeze
