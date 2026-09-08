@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# rubocop:disable all
 
 require 'selenium-webdriver'
 require 'json'
@@ -250,3 +251,5 @@ cases.each do |test_case|
   puts "#{LABEL} #{test_case['id']}: #{result['error'] || (result['issue_set_matches'] && result['issue_order_matches'] ? 'captured' : 'semantic mismatch')}"
   $stdout.flush
 end
+
+# rubocop:enable all

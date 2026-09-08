@@ -32,6 +32,9 @@ queryとprojectのsetterは設けない。条件が変われば新しいGanttを
 ただし、渡されたIssueQueryやActive Recordオブジェクト自体を深くfreezeしているわけではない。
 構築後に検索条件を書き換えず、リクエスト・ユーザーをまたいでGanttを共有しない。
 初期化時のユーザー設定保存は旧実装から維持している副作用である。
+初期化の詳細はprivateメソッドへ分ける。`resolve_start_date` は開始日の決定、
+`normalize_zoom`・`normalize_months` は引数・ユーザー設定の正規化、
+`save_preferences` はログイン済みかつ値が変わった場合の保存を担当する。
 
 ## データとViewModel
 
@@ -121,6 +124,8 @@ DB取得と行順の判断はDataset、表示用状態はViewModel、HTMLの表�
 | `chart_controller.js` | 上記イベントを受けて表示状態を反映。DOMのバー位置から関連線・進捗線をネイティブSVGで描画。ResizeObserverとrequestAnimationFrameで再描画をまとめる。印刷前後の配置切替も担当。 |
 
 件名・バーの右クリックや複数選択は既存の `app/assets/javascripts/context_menu.js` と連携する。
+取得対象の関連種別は `Dataset::RELATION_TYPES`、色と描画間隔は `ChartHelper::RELATION_STYLES` に定義する。
+凡例とSVG描画は同じスタイル定義を利用し、データ取得は表示スタイルに依存しない。
 ガント専用JSはDBの検索・行順・業務上の日程を決めない。Raphaelは利用しない。
 関連線は旧実装のcontent-box寸法を基準に接続点と回り込み位置を決める。
 

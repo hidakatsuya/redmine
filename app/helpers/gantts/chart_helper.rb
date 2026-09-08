@@ -2,6 +2,11 @@
 
 module Gantts
   module ChartHelper
+    RELATION_STYLES = {
+      IssueRelation::TYPE_BLOCKS => { landscape_margin: 16, color: '#fa5252' }.freeze,
+      IssueRelation::TYPE_PRECEDES => { landscape_margin: 20, color: '#228be6' }.freeze
+    }.freeze
+
     ROW_SUBJECT_CLASSES = {
       project: 'project-name',
       version: 'version-name',
@@ -25,7 +30,7 @@ module Gantts
           beforeprint@window->gantt--chart#handleBeforePrint
           afterprint@window->gantt--chart#handleAfterPrint
         ).join(' '),
-        'gantt--chart-issue-relation-types-value' => Redmine::Gantt::DRAW_TYPES.transform_values(&:symbolize_keys).to_json,
+        'gantt--chart-issue-relation-types-value' => RELATION_STYLES.to_json,
         'gantt--chart-relations-value' => chart.relations.map(&:to_h).to_json,
         'gantt--chart-column-widths-value' => chart.selected_columns.map { SELECTED_COLUMN_WIDTH }.to_json,
         'gantt--chart-show-selected-columns-value' => chart.show_selected_columns? ? 'true' : 'false',

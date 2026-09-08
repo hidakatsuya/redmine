@@ -62,9 +62,8 @@
                     action: 'change->gantt--options#toggleRelations',
                     'gantt--options-target': 'relations'
                   } %>
-                <% [IssueRelation::TYPE_BLOCKS, IssueRelation::TYPE_PRECEDES].each do |rel| %>
-                  <% color = Redmine::Gantt::DRAW_TYPES[rel][:color] %>
-                  <%= content_tag(:span, '&nbsp;&nbsp;&nbsp;'.html_safe, style: "background-color: #{color}") %>
+                <% Gantts::ChartHelper::RELATION_STYLES.each do |rel, style| %>
+                  <%= content_tag(:span, '&nbsp;&nbsp;&nbsp;'.html_safe, style: "background-color: #{style[:color]}") %>
                   <%= l(IssueRelation::TYPES[rel][:name]) %>
                 <% end %>
               </label>

@@ -51,6 +51,37 @@ class Redmine::GanttTest < Redmine::HelperTest
     assert_raises(ArgumentError) {Redmine::Gantt.new(query: nil, unknown: 'value')}
   end
 
+  test 'missing or invalid year uses the current month regardless of the month argument' do
+    User.current.stubs(:today).returns(Date.new(2026, 9, 9))
+
+    [nil, '', '0', '-1'].each do |year|
+      gantt = Redmine::Gantt.new(query: nil, year: year, month: 3)
+      assert_equal Date.new(2026, 9, 1), gantt.date_from
+      assert_equal [2026, 9], [gantt.year_from, gantt.month_from]
+    end
+  end
+
+  test 'omitted display parameters reuse preferences without saving them again' do
+    User.current = User.find(1)
+    User.current.pref[:gantt_zoom] = 4
+    User.current.pref[:gantt_months] = 3
+    User.current.pref.save!
+    User.current.pref.expects(:save).never
+
+    gantt = Redmine::Gantt.new(query: nil)
+
+    assert_equal [4, 3], [gantt.zoom, gantt.months]
+  end
+
+  test 'anonymous display preferences are never saved' do
+    User.current = User.anonymous
+    User.current.pref.expects(:save).never
+
+    gantt = Redmine::Gantt.new(query: nil, zoom: 4, months: 3)
+
+    assert_equal [4, 3], [gantt.zoom, gantt.months]
+  end
+
   def today
     @today ||= Date.today
   end

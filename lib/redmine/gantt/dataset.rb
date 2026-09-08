@@ -3,6 +3,8 @@
 module Redmine
   class Gantt
     class Dataset
+      RELATION_TYPES = [IssueRelation::TYPE_BLOCKS, IssueRelation::TYPE_PRECEDES].freeze
+
       attr_reader :query, :max_rows
 
       def initialize(query:, max_rows:)
@@ -27,7 +29,7 @@ module Redmine
         if issues.any?
           issue_ids = issues.map(&:id)
           @relations = ::IssueRelation.
-            where(issue_from_id: issue_ids, issue_to_id: issue_ids, relation_type: Redmine::Gantt::DRAW_TYPES.keys).
+            where(issue_from_id: issue_ids, issue_to_id: issue_ids, relation_type: RELATION_TYPES).
             group_by(&:issue_from_id)
         else
           @relations = {}

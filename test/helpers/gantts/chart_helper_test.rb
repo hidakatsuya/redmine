@@ -46,7 +46,12 @@ class Gantts::ChartHelperTest < Redmine::HelperTest
                  sidebar_subject_width: 330, timeline_width: 120, relations: [], :show_selected_columns? => true,
                  :show_relations? => false, :show_progress_line? => true)
 
-    html = tag.div(**gantt_chart_attributes(chart)) { 'chart' }
+    attributes = gantt_chart_attributes(chart)
+    styles = JSON.parse(attributes[:data]['gantt--chart-issue-relation-types-value'])
+    assert_equal Redmine::Gantt::Dataset::RELATION_TYPES.sort, styles.keys.sort
+    assert_equal({ 'landscape_margin' => 16, 'color' => '#fa5252' }, styles.fetch(IssueRelation::TYPE_BLOCKS))
+    assert_equal({ 'landscape_margin' => 20, 'color' => '#228be6' }, styles.fetch(IssueRelation::TYPE_PRECEDES))
+    html = tag.div(**attributes) { 'chart' }
 
     assert_include 'is-showing-columns', html
     assert_include '--gantt-selected-columns-width: 100px', html

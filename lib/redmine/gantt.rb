@@ -24,18 +24,6 @@ module Redmine
     include Redmine::I18n
     include Redmine::Utils::DateCalculation
 
-    # Relation types that are rendered
-    DRAW_TYPES = {
-      IssueRelation::TYPE_BLOCKS   => {
-        landscape_margin: 16,
-        color: '#fa5252' # oc-red-6
-      },
-      IssueRelation::TYPE_PRECEDES => {
-        landscape_margin: 20,
-        color: '#228be6' # oc-blue-6
-      }
-    }.freeze
-
     UNAVAILABLE_COLUMNS = [:tracker, :id, :subject]
 
     attr_accessor :truncated
@@ -46,32 +34,17 @@ module Redmine
                    max_rows: Setting.gantt_items_limit.presence&.to_i)
       @query = query
       @project = project
-      if year && year.to_i >0
-        @year_from = year.to_i
-        if month && month.to_i >=1 && month.to_i <= 12
-          @month_from = month.to_i
-        else
-          @month_from = 1
-        end
-      else
-        @month_from ||= User.current.today.month
-        @year_from ||= User.current.today.year
-      end
-      zoom = (zoom || User.current.pref[:gantt_zoom]).to_i
-      @zoom = (zoom > 0 && zoom < 5) ? zoom : 2
-      months = (months || User.current.pref[:gantt_months]).to_i
-      @months = (months > 0 && months < Setting.gantt_months_limit.to_i + 1) ? months : 6
-      # Save gantt parameters as user preference (zoom and months count)
-      if User.current.logged? &&
-           (@zoom   != User.current.pref[:gantt_zoom] ||
-            @months != User.current.pref[:gantt_months])
-        User.current.pref[:gantt_zoom], User.current.pref[:gantt_months] = @zoom, @months
-        User.current.preference.save
-      end
-      @date_from = Date.civil(@year_from, @month_from, 1)
-      @date_to = (@date_from >> @months) - 1
-      @truncated = false
       @max_rows = max_rows
+      @truncated = false
+
+      @date_from = resolve_start_date(year, month)
+      @year_from = @date_from.year
+      @month_from = @date_from.month
+      @zoom = normalize_zoom(zoom)
+      @months = normalize_months(months)
+      @date_to = (@date_from >> @months) - 1
+
+      save_preferences
     end
 
     def chart
@@ -107,6 +80,37 @@ module Redmine
       ensure
         @truncated = export.truncated if export
       end
+    end
+
+    private
+
+    def resolve_start_date(year, month)
+      return User.current.today.beginning_of_month unless year && year.to_i.positive?
+
+      month = (month || 1).to_i
+      month = 1 unless month.between?(1, 12)
+      Date.civil(year.to_i, month, 1)
+    end
+
+    def normalize_zoom(zoom)
+      zoom = (zoom || User.current.pref[:gantt_zoom]).to_i
+      zoom.between?(1, 4) ? zoom : 2
+    end
+
+    def normalize_months(months)
+      months = (months || User.current.pref[:gantt_months]).to_i
+      months.between?(1, Setting.gantt_months_limit.to_i) ? months : 6
+    end
+
+    def save_preferences
+      return unless User.current.logged?
+
+      preference = User.current.pref
+      return if preference[:gantt_zoom] == zoom && preference[:gantt_months] == months
+
+      preference[:gantt_zoom] = zoom
+      preference[:gantt_months] = months
+      preference.save
     end
   end
 end
