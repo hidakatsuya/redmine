@@ -83,7 +83,11 @@ module ApplicationHelper
     css_classes = ['user-mention']
     if user.is_a?(User)
       css_classes << 'user-current' if user == User.current
-      css_classes << 'user-mentionable' if object.respond_to?(:visible?) && object.visible?(user)
+      if object.respond_to?(:visible?)
+        @mention_visible_cache ||= {}
+        is_visible = @mention_visible_cache[[object, user.id]] ||= object.visible?(user)
+        css_classes << 'user-mentionable' if is_visible
+      end
     end
 
     link_to_user(user, only_path: options[:only_path], class: css_classes.join(' '), mention: true)
@@ -1348,7 +1352,8 @@ module ApplicationHelper
             end
           elsif sep == "@"
             name = remove_double_quotes(identifier)
-            u = User.visible.find_by_login(name.downcase)
+            @users_by_login ||= {}
+            u = @users_by_login.fetch(name.downcase) { |k| @users_by_login[k] = User.visible.find_by_login(k) }
             link = link_to_mention(u, obj, only_path: only_path) if u
           end
         end

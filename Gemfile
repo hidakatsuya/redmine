@@ -13,7 +13,7 @@ gem 'i18n', '~> 1.15.2'
 # Loaded on demand by lib/redmine/export/pdf/itcpdf.rb, keep `require: false`
 gem 'rbpdf', '~> 1.21.4', require: false
 gem 'addressable'
-gem 'rubyzip', '~> 3.5.0'
+gem 'rubyzip', '~> 3.6.0'
 gem 'propshaft', '~> 1.3.0'
 gem 'rack', '>= 3.1.3'
 gem "stimulus-rails", "~> 1.3"
@@ -30,6 +30,9 @@ gem 'net-imap', '~> 0.6.1'
 gem 'net-pop', '~> 0.1.2'
 gem 'net-smtp', '~> 0.5.1'
 gem 'ostruct'
+# json 3.0.0 is not compatible with Rails 8.1.3.1 (https://github.com/rails/rails/pull/58601).
+# TODO: Remove this pin after updating to a Rails version that includes the fix.
+gem 'json', '< 3.0'
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :x64_mingw, :mswin]
