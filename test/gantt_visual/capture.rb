@@ -95,6 +95,28 @@ def perform(driver, action)
     driver.execute_script("document.querySelector(arguments[0]).scrollLeft = arguments[1]", modern ? '.gantt__viewport' : '#gantt_area', left)
   when 'narrow'
     driver.execute_cdp('Emulation.setDeviceMetricsOverride', width: 1000, height: 1000, deviceScaleFactor: 1, mobile: false)
+  when /\Aresize-(subject|column)-(body|bottom)\z/
+    subject = Regexp.last_match(1) == 'subject'
+    bottom = Regexp.last_match(2) == 'bottom'
+    driver.execute_script(<<~JS, modern, subject, bottom)
+      const modern = arguments[0], subject = arguments[1], bottom = arguments[2];
+      const body = document.querySelector('#gantt_area').getBoundingClientRect();
+      const top = modern ? body.top : document.querySelector(".gantt_subjects_container > .gantt_hdr").getBoundingClientRect().bottom;
+      const y = bottom ? body.bottom - 40 : top + 50;
+      window.scrollBy(0, y - window.innerHeight / 2);
+    JS
+    x, y = driver.execute_script(<<~JS, modern, subject, bottom)
+      const modern = arguments[0], subject = arguments[1], bottom = arguments[2];
+      const selector = modern ? (subject ? '.gantt__subject-guide' : '.gantt__column-guide') :
+        (subject ? '.gantt_subjects_column' : 'td.gantt_selected_column');
+      const column = document.querySelector(selector);
+      const handle = column.querySelector(modern ? (subject ? '.gantt__splitter' : '.gantt__column-resizer') : '.ui-resizable-e');
+      const edge = handle.getBoundingClientRect();
+      const body = document.querySelector('#gantt_area').getBoundingClientRect();
+      const top = modern ? body.top : document.querySelector('.gantt_subjects_container > .gantt_hdr').getBoundingClientRect().bottom;
+      return [Math.round(edge.left + edge.width / 2), Math.round(bottom ? body.bottom - 40 : top + 50)];
+    JS
+    driver.action.move_to_location(x, y).click_and_hold.move_by(60, 0).release.perform
   when 'resize-subject', 'resize-column'
     selector = if modern
                  action == 'resize-subject' ? '.gantt__splitter' : '.gantt__column-resizer'
@@ -156,7 +178,7 @@ def perform(driver, action)
   elsif action.start_with?('expand-')
     raise 'Expand did not restore descendants' unless after['rows'].all? {|r| r['visible']}
   elsif action.start_with?('resize-')
-    field = action == 'resize-subject' ? 'subjectWidth' : 'columnWidth'
+    field = action.start_with?('resize-subject') ? 'subjectWidth' : 'columnWidth'
     raise 'Resize did not increase width' unless after[field] > before[field]
   elsif action == 'multi-select'
     raise 'Incorrect selected issues' unless after['selected'].uniq.sort == [MANIFEST['issues']['basic-open'], MANIFEST['issues']['basic-long']].sort

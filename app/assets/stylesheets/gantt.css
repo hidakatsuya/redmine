@@ -62,7 +62,6 @@
   inset-inline-start: 0;
   z-index: 20;
   background: var(--gantt-surface);
-  border-inline-end: 1px solid var(--gantt-header-border);
 }
 
 .gantt__header-information {
@@ -80,6 +79,7 @@
   grid-template-columns: minmax(0, var(--gantt-subject-width)) var(--gantt-selected-columns-template);
 }
 
+.gantt:not(.is-showing-columns) .gantt__column-guide,
 .gantt:not(.is-showing-columns) .gantt__column-header,
 .gantt:not(.is-showing-columns) .gantt__column-cell {
   display: none;
@@ -103,11 +103,14 @@
 .gantt__column-header {
   min-block-size: calc(18px * var(--gantt-header-rows));
   background: var(--gantt-header-bg);
+  border-inline-end-color: var(--gantt-header-border);
   font-size: 0.8em;
   font-weight: normal;
 }
 
 .gantt__column-header .gantt__cell-value { text-overflow: ellipsis; }
+
+.gantt__subject-header { position: relative; }
 
 .gantt__column-header {
   position: relative;
@@ -179,7 +182,7 @@
 .gantt__splitter {
   position: absolute;
   inset-block: 0;
-  inset-inline-end: -5px;
+  inset-inline-end: 0;
   z-index: 40;
   inline-size: 10px;
   cursor: ew-resize;
@@ -215,6 +218,29 @@
   border-inline-end: 1px solid var(--gantt-header-border);
   box-sizing: border-box;
 }
+
+/* Column boundaries continue through the top padding and the empty bottom area. */
+.gantt__column-guides {
+  grid-area: 1 / 1;
+  position: sticky;
+  inset-inline-start: 0;
+  inline-size: var(--gantt-information-width);
+  block-size: auto;
+  margin-block: -8px -262px;
+  z-index: 25;
+  pointer-events: none;
+}
+
+.gantt__subject-guide,
+.gantt__column-guide {
+  position: relative;
+  min-inline-size: 0;
+  border-inline-end: 1px solid var(--gantt-header-border);
+  box-sizing: border-box;
+}
+
+.gantt__column-guides .gantt__splitter,
+.gantt__column-guides .gantt__column-resizer { pointer-events: auto; }
 
 .gantt__rows { grid-area: 1 / 1; }
 
@@ -426,7 +452,8 @@
   .gantt__splitter, .gantt__column-resizer { display: none; }
   .gantt.is-printing .gantt__body { display: block; }
   .gantt.is-printing .gantt__row { position: absolute; inset-block-start: var(--gantt-print-top); }
-  .gantt__sidebar-background { position: absolute; inset-block: 0; margin-block: 0; }
+  .gantt__sidebar-background,
+  .gantt__column-guides { position: absolute; inset-block: 0; margin-block: 0; }
   .gantt__header,
   .gantt__header-information,
   .gantt__row-information { position: static; }

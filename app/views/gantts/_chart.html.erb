@@ -10,7 +10,11 @@
       <div class="gantt__header">
         <div class="gantt__header-information">
           <div class="gantt__sidebar-grid gantt__sidebar-grid--header">
-            <div class="gantt__subject-header"></div>
+            <div class="gantt__subject-header">
+              <div class="gantt__splitter"
+                   data-controller="gantt--splitter"
+                   data-action="pointerdown->gantt--splitter#startResize"></div>
+            </div>
             <% gantt.chart.selected_columns.each_with_index do |column, index| %>
               <div class="gantt__column-header"
                    data-controller="gantt--column"
@@ -22,9 +26,6 @@
               </div>
             <% end %>
           </div>
-          <div class="gantt__splitter"
-               data-controller="gantt--splitter"
-               data-action="pointerdown->gantt--splitter#startResize"></div>
         </div>
         <div class="gantt__header-timeline">
           <div class="gantt__scale" data-gantt--chart-target="timelineHeader">
@@ -58,6 +59,21 @@
           <% gantt.chart.scale_layers.last.segments.each do |segment| %>
             <%= tag.div class: ['gantt__grid-column', {'is-non-working-day': segment.non_working_day}],
                         style: gantt_scale_segment_style(segment) %>
+          <% end %>
+        </div>
+        <div class="gantt__column-guides gantt__sidebar-grid" aria-hidden="true">
+          <div class="gantt__subject-guide">
+            <div class="gantt__splitter"
+                 data-controller="gantt--splitter"
+                 data-action="pointerdown->gantt--splitter#startResize"></div>
+          </div>
+          <% gantt.chart.selected_columns.each_index do |index| %>
+            <div class="gantt__column-guide"
+                 data-controller="gantt--column"
+                 data-gantt--column-index-value="<%= index %>">
+              <span class="gantt__column-resizer"
+                    data-action="pointerdown->gantt--column#startResize"></span>
+            </div>
           <% end %>
         </div>
         <div class="gantt__rows">

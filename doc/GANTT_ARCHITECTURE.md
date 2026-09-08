@@ -105,7 +105,7 @@ Turboでセクションを更新する際は、祖先の集計、共有バージ
 | `app/views/gantts/chart/_schedule.html.erb` | 全行型共通のバー、遅延・完了部分、端点、ラベル、操作領域。 |
 | `app/helpers/gantts/chart_helper.rb` / `Gantts::ChartHelper` | ViewModelからHTML属性・CSS変数・Stimulusデータ・アイコンを組み立てる。 |
 | `app/helpers/gantt_helper.rb` / `GanttHelper` | 前後・月・ズーム・出力リンクに使うパラメータ生成、ズームリンク、ChartHelperの取り込み。 |
-| `app/assets/stylesheets/gantt.css` | Grid構造、固定情報列、バー・目盛り、印刷レイアウト。 |
+| `app/assets/stylesheets/gantt.css` | Grid構造、固定情報列、バー・目盛り、印刷レイアウト。本文には行数に依存しない罫線・リサイズ用の層を重ね、上余白と下の空白まで列境界を連続させる。 |
 | `app/assets/stylesheets/context_menu.css` | Redmine共通の選択表示。ガントの件名は不透明な青と白い文字、バーは半透明の選択色。 |
 
 DB取得と行順の判断はDataset、表示用状態はViewModel、HTMLの表現はERB/Helperに置く。
@@ -119,8 +119,8 @@ DB取得と行順の判断はDataset、表示用状態はViewModel、HTMLの表�
 |---|---|
 | `options_controller.js` | フォームの表示列・関連線・進捗線の変更をイベント通知。既存の列選択UIとの連携にjQueryを利用。 |
 | `subjects_controller.js` | 行キー・親行キーと開閉状態から子孫の可視性を更新し、レイアウト変更を通知。 |
-| `column_controller.js` | 追加情報列のPointer操作を幅変更イベントに変換。 |
-| `splitter_controller.js` | 件名ペインの幅を変更し、CSS変数とイベントで通知。 |
+| `column_controller.js` | 追加情報列のヘッダー・本文にあるハンドルのPointer操作を幅変更イベントに変換。 |
+| `splitter_controller.js` | 件名列の右境界をヘッダー・本文からドラッグし、幅の変更をCSS変数とイベントで通知。 |
 | `chart_controller.js` | 上記イベントを受けて表示状態を反映。DOMのバー位置から関連線・進捗線をネイティブSVGで描画。ResizeObserverとrequestAnimationFrameで再描画をまとめる。印刷前後の配置切替も担当。 |
 
 件名・バーの右クリックや複数選択は既存の `app/assets/javascripts/context_menu.js` と連携する。

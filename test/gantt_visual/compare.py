@@ -32,6 +32,15 @@ for case in cases:
         for name in ['issue_set_matches', 'issue_order_matches']:
             if not state.get(name): entry['failures'].append(f'{label}: {name}')
         if state.get('error'): entry['failures'].append(f"{label}: {state['error']}")
+        if cid == 'G21-column-boundaries':
+            previous = state['states'].get('screen', {})
+            for action in case['actions']:
+                current = state['states'].get(action, {})
+                if action.startswith('resize-'):
+                    field = 'subjectWidth' if action.startswith('resize-subject') else 'columnWidth'
+                    if field not in previous or field not in current or abs(current[field] - previous[field] - 60) > 1:
+                        entry['failures'].append(f'{label}: {action}: width did not increase by 60px')
+                previous = current
         if cid == 'G14-saved':
             for step, month, zoom in [('next', 12, 3), ('previous', 6, 3), ('zoom-in', 6, 4), ('reload', 6, 4)]:
                 query = parse_qs(urlparse(state['states'].get(step, {}).get('url', '')).query)

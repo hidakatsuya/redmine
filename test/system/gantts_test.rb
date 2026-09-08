@@ -177,12 +177,16 @@ class GanttsTest < ApplicationSystemTestCase
           const rect = background.getBoundingClientRect()
           const bodyRect = body.getBoundingClientRect()
           const x = rect.right - 5
+          const covered = y => {
+            const hit = document.elementFromPoint(x, y)
+            return hit === background || !!hit?.closest('.gantt__column-guides')
+          }
           return {
             scroll: viewport.scrollLeft,
             left: rect.left,
             viewportLeft: viewport.getBoundingClientRect().left,
-            topCovered: document.elementFromPoint(x, bodyRect.top + 3) === background,
-            bottomCovered: document.elementFromPoint(x, bodyRect.bottom - 5) === background
+            topCovered: covered(bodyRect.top + 3),
+            bottomCovered: covered(bodyRect.bottom - 5)
           }
         })()
       JS
@@ -282,6 +286,53 @@ class GanttsTest < ApplicationSystemTestCase
     page.driver.browser.execute_cdp('Emulation.setEmulatedMedia', media: '')
   end
 
+  test 'column boundaries span the body and resize from rows and blank space' do
+    visit '/projects/ecookbook/issues/gantt?year=2026&month=6&zoom=4'
+    expand_options
+    find('#draw_selected_columns').check
+
+    bounds = page.evaluate_script(<<~JS)
+      (() => {
+        const body = document.querySelector('.gantt__body').getBoundingClientRect()
+        const header = document.querySelector('.gantt__header').getBoundingClientRect()
+        const headings = document.querySelectorAll('.gantt__subject-header, .gantt__column-header')
+        return Array.from(document.querySelectorAll('.gantt__subject-guide, .gantt__column-guide')).map((e, index) => {
+          const rect = e.getBoundingClientRect()
+          return [rect.top - header.bottom, rect.bottom - body.bottom, getComputedStyle(e).borderRightWidth,
+                  rect.right - headings[index].getBoundingClientRect().right]
+        })
+      })()
+    JS
+    assert_equal 5, bounds.size
+    bounds.each do |top, bottom, border, horizontal_offset|
+      assert_in_delta 0, top, 1
+      assert_in_delta 0, bottom, 1
+      assert_equal '1px', border
+      assert_in_delta 0, horizontal_offset, 0.1
+    end
+
+    %w(subject column).each do |kind|
+      %w(body bottom).each do |region|
+        selector = kind == 'subject' ? '.gantt__subject-guide' : '.gantt__column-guide'
+        before = kind == 'subject' ? sidebar_width : column_width(0)
+        page.execute_script(<<~JS)
+          const body = document.querySelector('.gantt__body').getBoundingClientRect()
+          window.scrollBy(0, #{region == 'bottom' ? 'body.bottom - 40' : 'body.top + 50'} - innerHeight / 2)
+        JS
+        x, y = page.evaluate_script(<<~JS)
+          (() => {
+            const edge = document.querySelector('#{selector}').getBoundingClientRect()
+            const body = document.querySelector('.gantt__body').getBoundingClientRect()
+            return [Math.round(edge.right - 3), Math.round(#{region == 'bottom' ? 'body.bottom - 40' : 'body.top + 50'})]
+          })()
+        JS
+        page.driver.browser.action.move_to_location(x, y).click_and_hold.move_by(40, 0).release.perform
+        after = kind == 'subject' ? sidebar_width : column_width(0)
+        assert_in_delta before + 40, after, 1, "#{kind} resize from #{region}"
+      end
+    end
+  end
+
   private
 
   def visit_gantt
@@ -298,7 +349,7 @@ class GanttsTest < ApplicationSystemTestCase
   end
 
   def drag_splitter(distance)
-    handle = find('.gantt__splitter')
+    handle = find('.gantt__header .gantt__splitter')
     page.driver.browser.action.click_and_hold(handle.native).move_by(distance, 0).release.perform
   end
 

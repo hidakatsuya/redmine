@@ -1,6 +1,6 @@
 # ガントの比較テスト
 
-`doc/GANTT_TEST_PLAN.md` の G01–G20 を40個の具体的なケースにした検証用ツール。
+`doc/GANTT_TEST_PLAN.md` の G01–G21 を41個の具体的なケースにした検証用ツール。
 専用 SQLite DB、固定日時、同じ bundle / Chromium / フォントで比較する。
 実行結果は `tmp/gantt_visual/` に保存し、通常の Rails テストには組み込まない。
 
@@ -61,3 +61,5 @@ python3 test/gantt_visual/compare.py
 OS の印刷ダイアログのキャンセル、Safari/Firefox、実プリンターはこのツールの対象外。
 G20 は Chromium の実際の PDF 生成と復帰後の開閉・リサイズまでを自動確認する。
 性能計測は画像取得と分けて行う。
+
+G21では件名・追加列をヘッダー、本文、最終行の下からリサイズする。旧版のjQuery UIハンドルは罫線の外側にあるため、各実装のハンドル中心から同じ距離をドラッグする。
