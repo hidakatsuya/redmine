@@ -3,7 +3,9 @@ Gantt chart implementation
 
 Redmine::Gantt handles request parameters and user preferences. It is
 also the entry point for HTML, PDF and PNG. The implementation lives under
-lib/redmine/gantt; HTML markup belongs in app/views/gantts/chart, presentation
+lib/redmine/gantt; the chart entry partial is app/views/gantts/_chart.html.erb,
+with component partials under app/views/gantts/chart. Navigation parameters belong
+in GanttHelper, presentation
 attributes and icons in Gantts::ChartHelper, and browser interaction in the
 Stimulus controllers under app/javascript/controllers/gantt.
 

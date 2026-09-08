@@ -20,26 +20,39 @@
 module GanttHelper
   include Gantts::ChartHelper
 
+  def gantt_params(gantt, date: gantt.date_from, zoom: gantt.zoom)
+    { controller: 'gantts', action: 'show', project_id: gantt.project,
+      year: date.year, month: date.month, zoom: zoom, months: gantt.months }
+  end
+
+  def gantt_previous_params(gantt)
+    gantt_params(gantt, date: gantt.date_from << gantt.months)
+  end
+
+  def gantt_next_params(gantt)
+    gantt_params(gantt, date: gantt.date_from >> gantt.months)
+  end
+
   def gantt_zoom_link(gantt, in_or_out)
     case in_or_out
     when :in
       if gantt.zoom < 4
         link_to(
           sprite_icon('zoom-in', l(:text_zoom_in)),
-          {:params => request.query_parameters.merge(gantt.params.merge(:zoom => (gantt.zoom + 1)))},
-          :class => 'icon icon-zoom-in')
+          { params: request.query_parameters.merge(gantt_params(gantt, zoom: gantt.zoom + 1)) },
+          class: 'icon icon-zoom-in')
       else
-        content_tag(:span, sprite_icon('zoom-in', l(:text_zoom_in)), :class => 'icon icon-zoom-in').html_safe
+        content_tag(:span, sprite_icon('zoom-in', l(:text_zoom_in)), class: 'icon icon-zoom-in').html_safe
       end
 
     when :out
       if gantt.zoom > 1
         link_to(
           sprite_icon('zoom-out', l(:text_zoom_out)),
-          {:params => request.query_parameters.merge(gantt.params.merge(:zoom => (gantt.zoom - 1)))},
-          :class => 'icon icon-zoom-out')
+          { params: request.query_parameters.merge(gantt_params(gantt, zoom: gantt.zoom - 1)) },
+          class: 'icon icon-zoom-out')
       else
-        content_tag(:span, sprite_icon('zoom-out', l(:text_zoom_out)), :class => 'icon icon-zoom-out').html_safe
+        content_tag(:span, sprite_icon('zoom-out', l(:text_zoom_out)), class: 'icon icon-zoom-out').html_safe
       end
     end
   end

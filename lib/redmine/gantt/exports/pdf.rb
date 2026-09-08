@@ -123,15 +123,15 @@ module Redmine
           # Tasks
           top = headers_height + y_start
           options = {
-            :top => top,
-            :zoom => zoom,
-            :subject_width => subject_width,
-            :g_width => g_width,
-            :indent => 0,
-            :indent_increment => 5,
-            :top_increment => 5,
-            :format => :pdf,
-            :pdf => pdf
+            top: top,
+            zoom: zoom,
+            subject_width: subject_width,
+            g_width: g_width,
+            indent: 0,
+            indent_increment: 5,
+            top_increment: 5,
+            format: :pdf,
+            pdf: pdf
           }
           render_rows(options)
           pdf.Output

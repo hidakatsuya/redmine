@@ -22,7 +22,7 @@ module Redmine
         private
 
         def common_attributes(record, depth, parent_row_key, row_key = nil)
-          {:row_key => row_key || "#{record.class.name.demodulize.downcase}-#{record.id}", :depth => depth, :parent_row_key => parent_row_key}
+          { row_key: row_key || "#{record.class.name.demodulize.downcase}-#{record.id}", depth: depth, parent_row_key: parent_row_key }
         end
 
         def behind_start_date?(record, gantt, progress, end_on)

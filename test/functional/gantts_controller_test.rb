@@ -155,33 +155,33 @@ class GanttsControllerTest < Redmine::ControllerTest
   test 'renders only selected columns in chart rows' do
     get(
       :show,
-      :params => {
-        :project_id => 1,
-        :set_filter => 1,
-        :c => %w[status priority],
-        :query => {:draw_selected_columns => '1'}
+      params: {
+        project_id: 1,
+        set_filter: 1,
+        c: %w[status priority],
+        query: { draw_selected_columns: '1' }
       }
     )
 
     assert_response :success
-    assert_select '.gantt__column-header', :count => 2
-    assert_select '.gantt__column-header[data-controller="gantt--column"] .gantt__column-resizer', :count => 2
-    assert_select '.gantt__row--issue .gantt__column-cell', :minimum => 2
-    assert_select '.gantt__row--project .gantt__column-cell:empty', :minimum => 2
-    assert_select '.gantt__row--version .gantt__column-cell:empty', :minimum => 2
-    assert_select '.gantt__row-information.gantt__sidebar-grid', :minimum => 1
-    assert_select '.gantt__row-information > .gantt__sidebar-grid', :count => 0
+    assert_select '.gantt__column-header', count: 2
+    assert_select '.gantt__column-header[data-controller="gantt--column"] .gantt__column-resizer', count: 2
+    assert_select '.gantt__row--issue .gantt__column-cell', minimum: 2
+    assert_select '.gantt__row--project .gantt__column-cell:empty', minimum: 2
+    assert_select '.gantt__row--version .gantt__column-cell:empty', minimum: 2
+    assert_select '.gantt__row-information.gantt__sidebar-grid', minimum: 1
+    assert_select '.gantt__row-information > .gantt__sidebar-grid', count: 0
     assert_select '.gantt[style*="--gantt-selected-columns-count: 2"]'
-    assert_select '.gantt__sidebar-grid[style]', :count => 0
+    assert_select '.gantt__sidebar-grid[style]', count: 0
   end
 
   test 'keeps subject content in the information column when columns are hidden' do
-    get(:show, :params => {:project_id => 1})
+    get(:show, params: { project_id: 1 })
 
     assert_response :success
     assert_select '.gantt:not(.is-showing-columns)'
-    assert_select '.gantt__row-information .gantt__subject-cell a', :minimum => 1
-    assert_select '.gantt__sidebar-grid[style]', :count => 0
+    assert_select '.gantt__row-information .gantt__subject-cell a', minimum: 1
+    assert_select '.gantt__sidebar-grid[style]', count: 0
   end
 
   def test_gantt_should_export_to_pdf
@@ -235,7 +235,7 @@ class GanttsControllerTest < Redmine::ControllerTest
         }
       )
       assert_response :success
-      assert_select 'div.gantt__scale-segment--month>a', :text => /^[\d-]+$/, :count => 40
+      assert_select 'div.gantt__scale-segment--month>a', text: /^[\d-]+$/, count: 40
 
       # Displays 6 months (the default value for `months`) if `months` exceeds
       # gant_months_limit
@@ -248,7 +248,7 @@ class GanttsControllerTest < Redmine::ControllerTest
         }
       )
       assert_response :success
-      assert_select 'div.gantt__scale-segment--month>a', :text => /^[\d-]+$/, :count => 6
+      assert_select 'div.gantt__scale-segment--month>a', text: /^[\d-]+$/, count: 6
     end
   end
 

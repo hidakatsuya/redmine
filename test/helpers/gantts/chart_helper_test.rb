@@ -8,17 +8,17 @@ class Gantts::ChartHelperTest < Redmine::HelperTest
   Segment = Struct.new(:layer, :label, :start_offset, :span, :kind, :non_working_day, keyword_init: true)
 
   test 'builds semantic scale classes and preserves scale style' do
-    segment = Segment.new(:layer => 2, :label => 'Mon', :start_offset => 3, :span => 1,
-                          :kind => :day_name, :non_working_day => true)
+    segment = Segment.new(layer: 2, label: 'Mon', start_offset: 3, span: 1,
+                          kind: :day_name, non_working_day: true)
 
-    assert_equal ['gantt__scale-segment', 'gantt__scale-segment--day-name', {'is-non-working-day': true}],
+    assert_equal ['gantt__scale-segment', 'gantt__scale-segment--day-name', { 'is-non-working-day': true }],
                  gantt_scale_segment_css_classes(segment)
     assert_equal '--gantt-segment-start: 3; --gantt-segment-span: 1; --gantt-scale-layer: 2',
                  gantt_scale_segment_style(segment)
   end
 
   test 'builds subject wrapper, semantic classes, row styles, and progress states' do
-    row = stub(:depth => 2, :row_key => 'issue-1', :parent_row_key => 'project-1', :kind => :issue,
+    row = stub(depth: 2, row_key: 'issue-1', parent_row_key: 'project-1', kind: :issue,
                :project? => false, :version? => false, :issue? => true,
                :expandable? => false, :context_menu? => true, :closed? => false,
                :overdue? => true, :behind_schedule? => false,
@@ -42,8 +42,8 @@ class Gantts::ChartHelperTest < Redmine::HelperTest
   end
 
   test 'builds chart styles including selected column dimensions' do
-    chart = stub(:selected_columns => [stub, stub], :row_height => 20, :row_count => 3, :header_layers => 2, :day_width => 4,
-                 :sidebar_subject_width => 330, :timeline_width => 120, :relations => [], :show_selected_columns? => true,
+    chart = stub(selected_columns: [stub, stub], row_height: 20, row_count: 3, header_layers: 2, day_width: 4,
+                 sidebar_subject_width: 330, timeline_width: 120, relations: [], :show_selected_columns? => true,
                  :show_relations? => false, :show_progress_line? => true)
 
     html = tag.div(**gantt_chart_attributes(chart)) { 'chart' }

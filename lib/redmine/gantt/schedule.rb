@@ -7,9 +7,9 @@ module Redmine
                   :bar_start_offset, :bar_end_offset, :progress_offset, :late_offset
 
       def self.build(gantt:, start_on:, end_on:, progress:, markers:, label:)
-        offsets = offsets(:date_from => gantt.date_from, :date_to => gantt.date_to,
-                          :start_on => start_on, :end_on => end_on,
-                          :progress => progress, :today => User.current.today)
+        offsets = offsets(date_from: gantt.date_from, date_to: gantt.date_to,
+                          start_on: start_on, end_on: end_on,
+                          progress: progress, today: User.current.today)
         new(start_on, end_on, label, markers, offsets)
       end
 

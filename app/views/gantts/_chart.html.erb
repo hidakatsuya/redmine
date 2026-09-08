@@ -1,10 +1,8 @@
-<% chart = gantt.chart %>
-
-<% if chart.truncated? %>
+<% if gantt.chart.truncated? %>
   <p class="warning"><%= l(:notice_gantt_chart_truncated, max: gantt.max_rows) %></p>
 <% end %>
 
-<div <%= tag.attributes(gantt_chart_attributes(chart, project: @project)) %>>
+<div <%= tag.attributes(gantt_chart_attributes(gantt.chart, project: @project)) %>>
   <div class="gantt__viewport" data-gantt--chart-target="viewport">
     <%= form_tag({}, data: {cm_url: issues_context_menu_path}, class: 'gantt__layout') %>
       <%= hidden_field_tag 'back_url', url_for(params: request.query_parameters), id: nil %>
@@ -13,7 +11,7 @@
         <div class="gantt__header-information">
           <div class="gantt__sidebar-grid gantt__sidebar-grid--header">
             <div class="gantt__subject-header"></div>
-            <% chart.selected_columns.each_with_index do |column, index| %>
+            <% gantt.chart.selected_columns.each_with_index do |column, index| %>
               <div class="gantt__column-header"
                    data-controller="gantt--column"
                    data-gantt--column-index-value="<%= index %>">
@@ -30,7 +28,7 @@
         </div>
         <div class="gantt__header-timeline">
           <div class="gantt__scale" data-gantt--chart-target="timelineHeader">
-            <% chart.scale_layers.each do |layer| %>
+            <% gantt.chart.scale_layers.each do |layer| %>
               <div class="gantt__scale-row gantt__scale-row--<%= layer.index %>">
                 <% layer.segments.each do |segment| %>
                   <%= tag.div class: gantt_scale_segment_css_classes(segment),
@@ -38,7 +36,7 @@
                               title: segment.title do %>
                     <% if segment.kind == :month %>
                       <%= link_to segment.label,
-                                  gantt.params.merge(year: segment.start_on.year, month: segment.start_on.month),
+                                  gantt_params(gantt, date: segment.start_on),
                                   title: segment.title %>
                     <% else %>
                       <%= tag.span segment.label %>
@@ -57,22 +55,22 @@
            data-gantt--chart-target="body">
         <div class="gantt__sidebar-background" aria-hidden="true"></div>
         <div class="gantt__grid" aria-hidden="true">
-          <% chart.scale_layers.last.segments.each do |segment| %>
+          <% gantt.chart.scale_layers.last.segments.each do |segment| %>
             <%= tag.div class: ['gantt__grid-column', {'is-non-working-day': segment.non_working_day}],
                         style: gantt_scale_segment_style(segment) %>
           <% end %>
         </div>
         <div class="gantt__rows">
-          <%= render partial: 'gantts/chart/project_section', collection: chart.sections,
-                     as: :section, locals: {chart: chart} %>
+          <%= render partial: 'gantts/chart/project_section', collection: gantt.chart.sections,
+                     as: :section, locals: { chart: gantt.chart } %>
         </div>
 
         <div class="gantt__overlay" id="gantt_draw_area" data-gantt--chart-target="overlay">
-          <% if chart.show_today? %>
+          <% if gantt.chart.show_today? %>
             <div class="gantt__today-line"
                  id="today_line"
                  data-gantt--chart-target="todayLine"
-                 style="--gantt-today-unit: <%= chart.today_offset %>"></div>
+                 style="--gantt-today-unit: <%= gantt.chart.today_offset %>"></div>
           <% end %>
           <div data-gantt--chart-target="svgLayer"></div>
         </div>
@@ -85,17 +83,17 @@
   <ul class="pages">
     <li class="previous page">
       <%= link_to("\xc2\xab " + l(:label_previous),
-                  {params: request.query_parameters.merge(gantt.params_previous)},
+                  {params: request.query_parameters.merge(gantt_previous_params(gantt))},
                   accesskey: accesskey(:previous)) %>
     </li><li class="next page">
       <%= link_to(l(:label_next) + " \xc2\xbb",
-                  {params: request.query_parameters.merge(gantt.params_next)},
+                  {params: request.query_parameters.merge(gantt_next_params(gantt))},
                   accesskey: accesskey(:next)) %>
     </li>
   </ul>
 </span>
 
 <% other_formats_links do |f| %>
-  <%= f.link_to_with_query_parameters 'PDF', gantt.params %>
-  <%= f.link_to_with_query_parameters('PNG', gantt.params) if gantt.respond_to?('to_image') %>
+  <%= f.link_to_with_query_parameters 'PDF', gantt_params(gantt) %>
+  <%= f.link_to_with_query_parameters('PNG', gantt_params(gantt)) if gantt.respond_to?('to_image') %>
 <% end %>

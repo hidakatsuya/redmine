@@ -6,12 +6,12 @@ class Redmine::Gantt::RowsTest < ActiveSupport::TestCase
   setup do
     User.current = users(:users_002)
     @project = projects(:projects_001)
-    @query = IssueQuery.new(:project => @project, :name => '_')
-    @gantt = Redmine::Gantt.new(:query => @query, :project => @project, :year => User.current.today.year, :month => User.current.today.month, :months => 2)
+    @query = IssueQuery.new(project: @project, name: '_')
+    @gantt = Redmine::Gantt.new(query: @query, project: @project, year: User.current.today.year, month: User.current.today.month, months: 2)
   end
 
   test 'project row retains project schedule semantics and is frozen' do
-    row = build(Redmine::Gantt::Project, @project, :depth => 0, :parent_row_key => nil)
+    row = build(Redmine::Gantt::Project, @project, depth: 0, parent_row_key: nil)
 
     assert_instance_of Redmine::Gantt::Project, row
     assert_not_respond_to row, :record
@@ -28,7 +28,7 @@ class Redmine::Gantt::RowsTest < ActiveSupport::TestCase
 
   test 'version row retains completion and closed semantics and is frozen' do
     version = versions(:versions_001)
-    row = build(Redmine::Gantt::Version, version, :depth => 1, :parent_row_key => "project-#{@project.id}")
+    row = build(Redmine::Gantt::Version, version, depth: 1, parent_row_key: "project-#{@project.id}")
 
     assert_instance_of Redmine::Gantt::Version, row
     assert_equal 'version-1', row.row_key
@@ -42,7 +42,7 @@ class Redmine::Gantt::RowsTest < ActiveSupport::TestCase
 
   test 'issue row retains interaction semantics and is frozen' do
     issue = issues(:issues_003)
-    row = build(Redmine::Gantt::Issue, issue, :depth => 1, :parent_row_key => "project-#{@project.id}")
+    row = build(Redmine::Gantt::Issue, issue, depth: 1, parent_row_key: "project-#{@project.id}")
 
     assert_instance_of Redmine::Gantt::Issue, row
     assert_equal 'issue-3', row.row_key
@@ -64,7 +64,7 @@ class Redmine::Gantt::RowsTest < ActiveSupport::TestCase
     issue.stubs(:closed?).returns(false)
     issue.stubs(:overdue?).returns(false)
     issue.stubs(:behind_schedule?).returns(false)
-    row = build(Redmine::Gantt::Issue, issue, :depth => 1, :parent_row_key => "project-#{@project.id}")
+    row = build(Redmine::Gantt::Issue, issue, depth: 1, parent_row_key: "project-#{@project.id}")
     issue.stubs(:leaf?).returns(true)
     issue.stubs(:closed?).returns(true)
     issue.stubs(:overdue?).returns(true)
@@ -78,13 +78,13 @@ class Redmine::Gantt::RowsTest < ActiveSupport::TestCase
 
   test 'captures project and version status at build time' do
     @project.stubs(:overdue?).returns(false)
-    project_row = build(Redmine::Gantt::Project, @project, :depth => 0, :parent_row_key => nil)
+    project_row = build(Redmine::Gantt::Project, @project, depth: 0, parent_row_key: nil)
     @project.stubs(:overdue?).returns(true)
     version = versions(:versions_001)
     version.stubs(:open?).returns(true)
     version.stubs(:overdue?).returns(false)
     version.stubs(:behind_schedule?).returns(false)
-    version_row = build(Redmine::Gantt::Version, version, :depth => 1, :parent_row_key => "project-#{@project.id}")
+    version_row = build(Redmine::Gantt::Version, version, depth: 1, parent_row_key: "project-#{@project.id}")
     version.stubs(:open?).returns(false)
     version.stubs(:overdue?).returns(true)
     version.stubs(:behind_schedule?).returns(true)

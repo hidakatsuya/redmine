@@ -6,7 +6,7 @@ class Redmine::Gantt::ChartTest < ActiveSupport::TestCase
   setup do
     User.current = users(:users_002)
     @project = projects(:projects_001)
-    @query = IssueQuery.new(:project => @project, :name => '_')
+    @query = IssueQuery.new(project: @project, name: '_')
   end
 
   test 'builds immutable rows in project version and issue traversal order' do
@@ -42,8 +42,8 @@ class Redmine::Gantt::ChartTest < ActiveSupport::TestCase
   end
 
   test 'exposes truncation without changing the legacy gantt truncation state' do
-    gantt = build_gantt(:max_rows => 2)
-    chart = Redmine::Gantt::Chart.build(gantt, :query => @query)
+    gantt = build_gantt(max_rows: 2)
+    chart = Redmine::Gantt::Chart.build(gantt, query: @query)
 
     assert_equal 2, chart.rows.size
     assert_predicate chart, :truncated?
@@ -98,7 +98,7 @@ class Redmine::Gantt::ChartTest < ActiveSupport::TestCase
 
   test 'weekday labels use the localized abbreviation as the legacy chart does' do
     I18n.with_locale(:ar) do
-      chart = Redmine::Gantt::Chart.build(build_gantt(:zoom => 3), :query => @query)
+      chart = Redmine::Gantt::Chart.build(build_gantt(zoom: 3), query: @query)
       days = chart.scale_layers.last.segments.first(7)
 
       days.each do |day|
@@ -111,10 +111,10 @@ class Redmine::Gantt::ChartTest < ActiveSupport::TestCase
   private
 
   def build_chart
-    Redmine::Gantt::Chart.build(build_gantt, :query => @query)
+    Redmine::Gantt::Chart.build(build_gantt, query: @query)
   end
 
   def build_gantt(options={})
-    Redmine::Gantt.new(:query => @query, :project => @project, **options)
+    Redmine::Gantt.new(query: @query, project: @project, **options)
   end
 end

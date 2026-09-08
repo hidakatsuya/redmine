@@ -17,7 +17,7 @@ ORIGIN = "http://127.0.0.1:#{PORT}"
 MANIFEST = JSON.parse(File.read(File.join(OUTPUT, 'manifest.json')))
 
 def ready(driver)
-  Selenium::WebDriver::Wait.new(:timeout => 30).until {driver.find_elements(:css, '#gantt_area').any?}
+  Selenium::WebDriver::Wait.new(timeout: 30).until {driver.find_elements(:css, '#gantt_area').any?}
   driver.execute_async_script(<<~'JS')
     const done = arguments[0];
     document.fonts.ready.then(() => Promise.all(Array.from(document.images).map(i =>
@@ -59,9 +59,9 @@ def snapshot(driver)
 end
 
 def print_pdf(driver, filename)
-  result = driver.execute_cdp('Page.printToPDF', :paperWidth => 11.69, :paperHeight => 8.27,
-                             :marginTop => 0.4, :marginBottom => 0.4, :marginLeft => 0.4, :marginRight => 0.4,
-                             :printBackground => true, :displayHeaderFooter => false)
+  result = driver.execute_cdp('Page.printToPDF', paperWidth: 11.69, paperHeight: 8.27,
+                             marginTop: 0.4, marginBottom: 0.4, marginLeft: 0.4, marginRight: 0.4,
+                             printBackground: true, displayHeaderFooter: false)
   File.binwrite(filename, Base64.decode64(result.fetch('data')))
 end
 
@@ -90,10 +90,10 @@ def perform(driver, action)
   when 'columns-off', 'columns-on'
     checkbox(driver, 'draw_selected_columns', action.end_with?('-on'))
   when 'scroll', 'scroll-to-bars', 'scroll-to-ends'
-    left = {'scroll' => 250, 'scroll-to-bars' => 700, 'scroll-to-ends' => 1400}.fetch(action)
+    left = { 'scroll' => 250, 'scroll-to-bars' => 700, 'scroll-to-ends' => 1400 }.fetch(action)
     driver.execute_script("document.querySelector(arguments[0]).scrollLeft = arguments[1]", modern ? '.gantt__viewport' : '#gantt_area', left)
   when 'narrow'
-    driver.execute_cdp('Emulation.setDeviceMetricsOverride', :width => 1000, :height => 1000, :deviceScaleFactor => 1, :mobile => false)
+    driver.execute_cdp('Emulation.setDeviceMetricsOverride', width: 1000, height: 1000, deviceScaleFactor: 1, mobile: false)
   when 'resize-subject', 'resize-column'
     selector = if modern
                  action == 'resize-subject' ? '.gantt__splitter' : '.gantt__column-resizer'
@@ -134,10 +134,10 @@ def perform(driver, action)
     case action
     when 'tooltip'
       driver.action.move_to(bar).perform
-      Selenium::WebDriver::Wait.new(:timeout => 10).until {bar.find_element(:css, '.tip').displayed?}
+      Selenium::WebDriver::Wait.new(timeout: 10).until {bar.find_element(:css, '.tip').displayed?}
     when 'subject-menu', 'bar-menu'
       driver.action.context_click(action == 'subject-menu' ? subject : bar).perform
-      Selenium::WebDriver::Wait.new(:timeout => 10).until {driver.find_elements(:css, '#context-menu a.icon-edit').any?(&:displayed?)}
+      Selenium::WebDriver::Wait.new(timeout: 10).until {driver.find_elements(:css, '#context-menu a.icon-edit').any?(&:displayed?)}
     when 'multi-select'
       other = driver.find_element(:css, "#issue-#{MANIFEST['issues']['basic-long']}")
       driver.action.click(subject).key_down(:control).click(other).key_up(:control).perform
@@ -167,11 +167,11 @@ def export_files(driver, directory, name, result)
     uri = URI(driver.current_url.sub('/gantt?', "/gantt.#{format}?"))
     request = Net::HTTP::Get.new(uri)
     request['Cookie'] = driver.manage.all_cookies.map {|cookie| "#{cookie[:name]}=#{cookie[:value]}"}.join('; ')
-    response = Net::HTTP.start(uri.host, uri.port, :read_timeout => 120) {|http| http.request(request)}
+    response = Net::HTTP.start(uri.host, uri.port, read_timeout: 120) {|http| http.request(request)}
     File.binwrite(File.join(directory, "#{name}.#{format}"), response.body)
     magic = format == 'pdf' ? response.body.start_with?('%PDF-') : response.body.b.start_with?("\x89PNG".b)
-    result['exports']["#{name}.#{format}"] = {'status' => response.code.to_i, 'type' => response['content-type'],
-                                           'bytes' => response.body.bytesize, 'valid_header' => magic, 'url' => uri.to_s}
+    result['exports']["#{name}.#{format}"] = { 'status' => response.code.to_i, 'type' => response['content-type'],
+                                           'bytes' => response.body.bytesize, 'valid_header' => magic, 'url' => uri.to_s }
   end
 end
 
@@ -184,13 +184,13 @@ cases.each do |test_case|
   db = File.join(OUTPUT, "#{LABEL}.sqlite3")
   FileUtils.cp(File.join(OUTPUT, 'seed.sqlite3'), db)
   log = File.open(File.join(directory, 'server.log'), 'w')
-  env = {'RAILS_ENV' => 'production', 'DATABASE_URL' => "sqlite3:#{db}", 'SECRET_KEY_BASE_DUMMY' => '1',
-         'BUNDLE_GEMFILE' => File.join(ROOT, 'Gemfile'), 'RUBYOPT' => "-r#{ROOT}/test/gantt_visual/frozen_clock.rb"}
+  env = { 'RAILS_ENV' => 'production', 'DATABASE_URL' => "sqlite3:#{db}", 'SECRET_KEY_BASE_DUMMY' => '1',
+         'BUNDLE_GEMFILE' => File.join(ROOT, 'Gemfile'), 'RUBYOPT' => "-r#{ROOT}/test/gantt_visual/frozen_clock.rb" }
   env['GANTT_VISUAL_LIMIT'] = test_case['limit'].to_s if test_case['limit']
   pid = Process.spawn(env, 'bin/rails', 'server', '-b', '127.0.0.1', '-p', PORT.to_s,
-                      '-P', File.join(OUTPUT, "#{LABEL}.pid"), :chdir => CHECKOUT, :out => log, :err => log)
+                      '-P', File.join(OUTPUT, "#{LABEL}.pid"), chdir: CHECKOUT, out: log, err: log)
   driver = nil
-  result = {'id' => test_case['id'], 'states' => {}, 'exports' => {}}
+  result = { 'id' => test_case['id'], 'states' => {}, 'exports' => {} }
   begin
     deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 40
     loop do
@@ -205,18 +205,18 @@ cases.each do |test_case|
     options = Selenium::WebDriver::Chrome::Options.new
     options.binary = '/usr/bin/chromium'
     %w[--headless=new --no-sandbox --disable-dev-shm-usage --force-device-scale-factor=1].each {|arg| options.add_argument(arg)}
-    driver = Selenium::WebDriver.for(:chrome, :options => options,
-                                     :service => Selenium::WebDriver::Service.chrome(:path => '/usr/bin/chromedriver'))
-    driver.execute_cdp('Emulation.setDeviceMetricsOverride', :width => test_case['viewport'][0], :height => test_case['viewport'][1], :deviceScaleFactor => 1, :mobile => false)
+    driver = Selenium::WebDriver.for(:chrome, options: options,
+                                     service: Selenium::WebDriver::Service.chrome(path: '/usr/bin/chromedriver'))
+    driver.execute_cdp('Emulation.setDeviceMetricsOverride', width: test_case['viewport'][0], height: test_case['viewport'][1], deviceScaleFactor: 1, mobile: false)
     if test_case['user'] != 'anonymous'
       driver.navigate.to("#{ORIGIN}/login")
       driver.find_element(:id, 'username').send_keys(test_case['user'])
       driver.find_element(:id, 'password').send_keys('visual-password')
       driver.find_element(:css, 'input[name=login]').click
-      Selenium::WebDriver::Wait.new(:timeout => 20).until {!driver.current_url.include?('/login')}
+      Selenium::WebDriver::Wait.new(timeout: 20).until {!driver.current_url.include?('/login')}
     end
     driver.navigate.to(ORIGIN + test_case['path'])
-    result['states']['screen'] = capture(driver, directory, 'screen', :print => test_case['print'])
+    result['states']['screen'] = capture(driver, directory, 'screen', print: test_case['print'])
     ids = result['states']['screen']['rows'].select {|row| row['kind'] == 'issue'}.map {|row| row['id']}
     result['issue_set_matches'] = ids.sort == test_case['expected_issue_ids'].sort
     result['issue_order_matches'] = !test_case['expected_issue_order'] || ids == test_case['expected_issue_order']
@@ -224,7 +224,7 @@ cases.each do |test_case|
     export_files(driver, directory, 'export', result) if test_case['exports']
     test_case['actions'].each do |action|
       perform(driver, action)
-      result['states'][action] = capture(driver, directory, action, :print => test_case['print'])
+      result['states'][action] = capture(driver, directory, action, print: test_case['print'])
     end
     export_files(driver, directory, 'final-export', result) if test_case['group'] == 'G14'
     if test_case['group'] == 'G17'

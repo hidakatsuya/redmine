@@ -9,16 +9,16 @@ module Redmine
         summary = !record.leaf?
         new(
           **common_attributes(record, depth, parent_row_key, row_key),
-          :expandable => expandable?(record, gantt),
-          :subject => record.subject,
-          :schedule => schedule_for(record, gantt, summary),
-          :issue => record,
-          :summary => summary,
-          :closed => record.closed?,
-          :overdue => record.overdue?,
-          :behind_schedule => record.behind_schedule?,
-          :behind_start_date => behind_start_date?(record, gantt, record.done_ratio, record.due_before),
-          :over_end_date => over_end_date?(record, gantt, record.done_ratio, record.due_before)
+          expandable: expandable?(record, gantt),
+          subject: record.subject,
+          schedule: schedule_for(record, gantt, summary),
+          issue: record,
+          summary: summary,
+          closed: record.closed?,
+          overdue: record.overdue?,
+          behind_schedule: record.behind_schedule?,
+          behind_start_date: behind_start_date?(record, gantt, record.done_ratio, record.due_before),
+          over_end_date: over_end_date?(record, gantt, record.done_ratio, record.due_before)
         )
       end
 
@@ -92,8 +92,8 @@ module Redmine
 
         label = record.status.name.dup
         label << " #{record.done_ratio}%" unless record.disabled_core_fields.include?('done_ratio')
-        Schedule.build(:gantt => gantt, :start_on => record.start_date, :end_on => record.due_before,
-                       :progress => record.done_ratio, :markers => summary, :label => label)
+        Schedule.build(gantt: gantt, start_on: record.start_date, end_on: record.due_before,
+                       progress: record.done_ratio, markers: summary, label: label)
       end
       private_class_method :schedule_for
     end

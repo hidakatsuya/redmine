@@ -3,9 +3,9 @@
 module Gantts
   module ChartHelper
     ROW_SUBJECT_CLASSES = {
-      :project => 'project-name',
-      :version => 'version-name',
-      :issue => 'issue-subject'
+      project: 'project-name',
+      version: 'version-name',
+      issue: 'issue-subject'
     }.freeze
 
     SELECTED_COLUMN_WIDTH = 50
@@ -13,8 +13,8 @@ module Gantts
     def gantt_chart_attributes(chart, project: nil)
       selected_columns_width = chart.selected_columns.size * SELECTED_COLUMN_WIDTH
       data_attributes = {
-        :controller => 'gantt--chart',
-        :action => %w(
+        controller: 'gantt--chart',
+        action: %w(
           gantt--options:toggle-display@document->gantt--chart#handleOptionsDisplay
           gantt--options:toggle-relations@document->gantt--chart#handleOptionsRelations
           gantt--options:toggle-progress@document->gantt--chart#handleOptionsProgress
@@ -40,17 +40,17 @@ module Gantts
         "--gantt-selected-columns-template: #{chart.selected_columns.map { "#{SELECTED_COLUMN_WIDTH}px" }.join(' ')}",
         "--gantt-subject-width: #{chart.sidebar_subject_width}px", "--gantt-timeline-width: #{chart.timeline_width}px"
       ].join('; ')
-      {:class => ['gantt', {'is-showing-columns': chart.show_selected_columns?}], :style => styles,
-       :data => data_attributes.merge('gantt-project-id': project&.id)}
+      { class: ['gantt', { 'is-showing-columns': chart.show_selected_columns? }], style: styles,
+       data: data_attributes.merge('gantt-project-id': project&.id) }
     end
 
     def gantt_expander(row)
       if row.expandable?
-        tag.button sprite_icon('angle-down', :rtl => true),
-                   :type => 'button', :class => ['gantt__expander', 'icon', 'icon-expanded'],
-                   :aria => {:expanded => true}, :data => {:action => 'click->gantt--subjects#toggleRow'}
+        tag.button sprite_icon('angle-down', rtl: true),
+                   type: 'button', class: ['gantt__expander', 'icon', 'icon-expanded'],
+                   aria: { expanded: true }, data: { action: 'click->gantt--subjects#toggleRow' }
       else
-        tag.span '', :class => 'gantt__expander-placeholder', :aria => {:hidden => true}
+        tag.span '', class: 'gantt__expander-placeholder', aria: { hidden: true }
       end
     end
 
@@ -58,7 +58,7 @@ module Gantts
       [
         'gantt__scale-segment',
         "gantt__scale-segment--#{segment.kind.to_s.tr('_', '-')}",
-        {'is-non-working-day': segment.non_working_day}
+        { 'is-non-working-day': segment.non_working_day }
       ]
     end
 
@@ -73,16 +73,16 @@ module Gantts
 
     def gantt_row_attributes(row)
       {
-        :id => "gantt-row-#{row.row_key}",
-        :class => ['gantt__row', "gantt__row--#{row.kind}"],
-        :style => gantt_row_style(row),
-        :data => {
+        id: "gantt-row-#{row.row_key}",
+        class: ['gantt__row', "gantt__row--#{row.kind}"],
+        style: gantt_row_style(row),
+        data: {
           'gantt--chart-target' => 'row',
           'gantt--subjects-target' => 'row',
-          :row_key => row.row_key,
-          :parent_row_key => row.parent_row_key.to_s,
-          :kind => row.kind,
-          :progress_state => gantt_progress_state(row)
+          row_key: row.row_key,
+          parent_row_key: row.parent_row_key.to_s,
+          kind: row.kind,
+          progress_state: gantt_progress_state(row)
         }
       }
     end
@@ -115,12 +115,12 @@ module Gantts
 
     def gantt_row_subject_attributes(row)
       {
-        :id => row.row_key,
-        :class => [
+        id: row.row_key,
+        class: [
           'gantt__subject',
           "gantt__subject--#{row.kind}",
           ROW_SUBJECT_CLASSES.fetch(row.kind),
-          {'is-open': row.expandable?, hascontextmenu: row.context_menu?}
+          { 'is-open': row.expandable?, hascontextmenu: row.context_menu? }
         ],
       }
     end

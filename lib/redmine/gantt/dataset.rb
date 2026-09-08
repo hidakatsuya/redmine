@@ -13,9 +13,9 @@ module Redmine
       # Returns issues that will be rendered
       def issues
         @issues ||= query.issues(
-          :order => ["#{::Project.table_name}.lft ASC", "#{::Issue.table_name}.id ASC"],
-          :include => [:tracker, :parent],
-          :limit => max_rows
+          order: ["#{::Project.table_name}.lft ASC", "#{::Issue.table_name}.id ASC"],
+          include: [:tracker, :parent],
+          limit: max_rows
         )
       end
 
@@ -27,7 +27,7 @@ module Redmine
         if issues.any?
           issue_ids = issues.map(&:id)
           @relations = ::IssueRelation.
-            where(:issue_from_id => issue_ids, :issue_to_id => issue_ids, :relation_type => Redmine::Gantt::DRAW_TYPES.keys).
+            where(issue_from_id: issue_ids, issue_to_id: issue_ids, relation_type: Redmine::Gantt::DRAW_TYPES.keys).
             group_by(&:issue_from_id)
         else
           @relations = {}
@@ -43,7 +43,7 @@ module Redmine
           # All issues projects and their visible ancestors
           @projects = ::Project.visible.
             joins("LEFT JOIN #{::Project.table_name} child ON #{::Project.table_name}.lft <= child.lft AND #{::Project.table_name}.rgt >= child.rgt").
-            where(:child => {:id => ids}).
+            where(child: { id: ids }).
             order("#{::Project.table_name}.lft ASC").
             distinct.
             to_a
@@ -107,7 +107,7 @@ module Redmine
       end
 
       def each_row(project: nil)
-        return enum_for(__method__, :project => project) unless block_given?
+        return enum_for(__method__, project: project) unless block_given?
 
         each_project do |record, depth, limit|
           next if project && record.id != project.id

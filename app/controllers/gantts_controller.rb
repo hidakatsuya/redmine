@@ -34,9 +34,9 @@ class GanttsController < ApplicationController
     retrieve_query
     @query.group_by = nil
     @gantt = Redmine::Gantt.new(
-      :query => (@query if @query.valid?), :project => @project,
-      :year => params[:year], :month => params[:month],
-      :zoom => params[:zoom], :months => params[:months]
+      query: (@query if @query.valid?), project: @project,
+      year: params[:year], month: params[:month],
+      zoom: params[:zoom], months: params[:months]
     )
 
     basename = (@project ? "#{@project.identifier}-" : '') + 'gantt'

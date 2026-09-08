@@ -26,7 +26,7 @@ class Redmine::GanttTest < Redmine::HelperTest
 
   test 'initialization accepts explicit display parameters and saves preferences' do
     User.current = User.find(1)
-    gantt = Redmine::Gantt.new(:query => nil, :year => '2026', :month => '6', :zoom => '3', :months => '2')
+    gantt = Redmine::Gantt.new(query: nil, year: '2026', month: '6', zoom: '3', months: '2')
 
     assert_equal Date.new(2026, 6, 1), gantt.date_from
     assert_equal Date.new(2026, 7, 31), gantt.date_to
@@ -36,19 +36,19 @@ class Redmine::GanttTest < Redmine::HelperTest
   end
 
   test 'omitted row limit uses the setting and explicit nil disables it' do
-    with_settings :gantt_items_limit => '42' do
-      assert_equal 42, Redmine::Gantt.new(:query => nil).max_rows
-      assert_nil Redmine::Gantt.new(:query => nil, :max_rows => nil).max_rows
+    with_settings gantt_items_limit: '42' do
+      assert_equal 42, Redmine::Gantt.new(query: nil).max_rows
+      assert_nil Redmine::Gantt.new(query: nil, max_rows: nil).max_rows
     end
   end
 
   test 'invalid display parameters retain the existing defaults' do
-    gantt = Redmine::Gantt.new(:query => nil, :year => '2026', :month => '13', :zoom => '5', :months => '0')
+    gantt = Redmine::Gantt.new(query: nil, year: '2026', month: '13', zoom: '5', months: '0')
 
     assert_equal Date.new(2026, 1, 1), gantt.date_from
     assert_equal 2, gantt.zoom
     assert_equal 6, gantt.months
-    assert_raises(ArgumentError) {Redmine::Gantt.new(:query => nil, :unknown => 'value')}
+    assert_raises(ArgumentError) {Redmine::Gantt.new(query: nil, unknown: 'value')}
   end
 
   def today
@@ -58,8 +58,8 @@ class Redmine::GanttTest < Redmine::HelperTest
 
   def create_gantt(project=Project.generate!, options={})
     @project = project
-    query = IssueQuery.new(:project => @project, :name => 'Gantt')
-    @gantt = Redmine::Gantt.new(:query => query, :project => @project, **options.except(:date_from, :date_to))
+    query = IssueQuery.new(project: @project, name: 'Gantt')
+    @gantt = Redmine::Gantt.new(query: query, project: @project, **options.except(:date_from, :date_to))
     @gantt.instance_variable_set(:@date_from, options[:date_from] || (today - 14))
     @gantt.instance_variable_set(:@date_to, options[:date_to] || (today + 14))
   end
@@ -67,8 +67,8 @@ class Redmine::GanttTest < Redmine::HelperTest
 
   test '#number_of_rows with one project should return the number of rows just for that project' do
     p1, p2 = Project.generate!, Project.generate!
-    Issue.generate!(:project => p1)
-    Issue.generate!(:project => p2)
+    Issue.generate!(project: p1)
+    Issue.generate!(project: p2)
     create_gantt(p1)
 
     assert_equal 2, @gantt.number_of_rows
@@ -86,12 +86,12 @@ class Redmine::GanttTest < Redmine::HelperTest
 
   test '#number_of_rows should not exceed max_rows option' do
     project = Project.generate!
-    5.times { Issue.generate!(:project => project) }
+    5.times { Issue.generate!(project: project) }
 
     create_gantt(project)
     assert_equal 6, @gantt.number_of_rows
 
-    create_gantt(project, :max_rows => 3)
+    create_gantt(project, max_rows: 3)
     assert_equal 3, @gantt.number_of_rows
   end
 
@@ -103,7 +103,7 @@ class Redmine::GanttTest < Redmine::HelperTest
 
   test '#number_of_rows_on_project should count issues without a version' do
     create_gantt
-    @project.issues << Issue.generate!(:project => @project, :fixed_version => nil)
+    @project.issues << Issue.generate!(project: @project, fixed_version: nil)
 
     assert_equal 2, @gantt.number_of_rows_on_project(@project)
   end
@@ -112,19 +112,19 @@ class Redmine::GanttTest < Redmine::HelperTest
     create_gantt
     version = Version.generate!
     @project.versions << version
-    @project.issues << Issue.generate!(:project => @project, :fixed_version => version)
+    @project.issues << Issue.generate!(project: @project, fixed_version: version)
 
     assert_equal 3, @gantt.number_of_rows_on_project(@project)
   end
 
   def test_sort_issues_no_date
     project = Project.generate!
-    issue1 = Issue.generate!(:subject => 'test', :project => project)
-    issue2 = Issue.generate!(:subject => 'test', :project => project)
+    issue1 = Issue.generate!(subject: 'test', project: project)
+    issue2 = Issue.generate!(subject: 'test', project: project)
     assert issue1.root_id < issue2.root_id
-    child1 = Issue.generate!(:parent_issue_id => issue1.id, :subject => 'child', :project => project)
-    child2 = Issue.generate!(:parent_issue_id => issue1.id, :subject => 'child', :project => project)
-    child3 = Issue.generate!(:parent_issue_id => child1.id, :subject => 'child', :project => project)
+    child1 = Issue.generate!(parent_issue_id: issue1.id, subject: 'child', project: project)
+    child2 = Issue.generate!(parent_issue_id: issue1.id, subject: 'child', project: project)
+    child3 = Issue.generate!(parent_issue_id: child1.id, subject: 'child', project: project)
     assert_equal child1.root_id, child2.root_id
     assert child1.lft < child2.lft
     assert child3.lft < child2.lft
@@ -137,10 +137,10 @@ class Redmine::GanttTest < Redmine::HelperTest
 
   def test_sort_issues_root_only
     project = Project.generate!
-    issue1 = Issue.generate!(:subject => 'test', :project => project)
-    issue2 = Issue.generate!(:subject => 'test', :project => project)
-    issue3 = Issue.generate!(:subject => 'test', :project => project, :start_date => (today - 1))
-    issue4 = Issue.generate!(:subject => 'test', :project => project, :start_date => (today - 2))
+    issue1 = Issue.generate!(subject: 'test', project: project)
+    issue2 = Issue.generate!(subject: 'test', project: project)
+    issue3 = Issue.generate!(subject: 'test', project: project, start_date: (today - 1))
+    issue4 = Issue.generate!(subject: 'test', project: project, start_date: (today - 2))
     issues = [issue4, issue3, issue2, issue1]
 
     Redmine::Gantt.sort_issues!(issues)
@@ -150,15 +150,15 @@ class Redmine::GanttTest < Redmine::HelperTest
 
   def test_sort_issues_tree
     project = Project.generate!
-    issue1 = Issue.generate!(:subject => 'test', :project => project)
-    issue2 = Issue.generate!(:subject => 'test', :project => project, :start_date => (today - 2))
-    issue1_child1 = Issue.generate!(:parent_issue_id => issue1.id, :subject => 'child', :project => project)
-    issue1_child2 = Issue.generate!(:parent_issue_id => issue1.id, :subject => 'child', :project => project,
-                                    :start_date => (today - 10))
-    issue1_child1_child1 = Issue.generate!(:parent_issue_id => issue1_child1.id, :subject => 'child', :project => project,
-                                           :start_date => (today - 8))
-    issue1_child1_child2 = Issue.generate!(:parent_issue_id => issue1_child1.id, :subject => 'child', :project => project,
-                                           :start_date => (today - 9))
+    issue1 = Issue.generate!(subject: 'test', project: project)
+    issue2 = Issue.generate!(subject: 'test', project: project, start_date: (today - 2))
+    issue1_child1 = Issue.generate!(parent_issue_id: issue1.id, subject: 'child', project: project)
+    issue1_child2 = Issue.generate!(parent_issue_id: issue1.id, subject: 'child', project: project,
+                                    start_date: (today - 10))
+    issue1_child1_child1 = Issue.generate!(parent_issue_id: issue1_child1.id, subject: 'child', project: project,
+                                           start_date: (today - 8))
+    issue1_child1_child2 = Issue.generate!(parent_issue_id: issue1_child1.id, subject: 'child', project: project,
+                                           start_date: (today - 9))
     assert_equal [[today - 10, issue1.id], [today - 9, issue1_child1.id], [today - 8, issue1_child1_child1.id]],
                  Redmine::Gantt.sort_issue_logic(issue1_child1_child1)
     assert_equal [[today - 10, issue1.id], [today - 9, issue1_child1.id], [today - 9, issue1_child1_child2.id]],
@@ -174,10 +174,10 @@ class Redmine::GanttTest < Redmine::HelperTest
   def test_sort_versions
     project = Project.generate!
     versions = []
-    versions << Version.create!(:project => project, :name => 'test1')
-    versions << Version.create!(:project => project, :name => 'test2', :effective_date => '2013-10-25')
-    versions << Version.create!(:project => project, :name => 'test3')
-    versions << Version.create!(:project => project, :name => 'test4', :effective_date => '2013-10-02')
+    versions << Version.create!(project: project, name: 'test1')
+    versions << Version.create!(project: project, name: 'test2', effective_date: '2013-10-25')
+    versions << Version.create!(project: project, name: 'test3')
+    versions << Version.create!(project: project, name: 'test4', effective_date: '2013-10-02')
 
     assert_equal versions.sort, Redmine::Gantt.sort_versions!(versions.dup)
   end

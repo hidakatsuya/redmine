@@ -9,16 +9,16 @@ module Redmine
         percent = record.visible_fixed_issues.completed_percent
         new(
           **common_attributes(record, depth, parent_row_key, row_key),
-          :expandable => gantt.dataset.version_issues(display_project || record.project, record).any?,
-          :subject => record.to_s_with_project,
-          :schedule => schedule_for(record, gantt, percent),
-          :version => record,
-          :completed_percent => percent,
-          :closed => !record.open?,
-          :overdue => record.overdue?,
-          :behind_schedule => record.behind_schedule?,
-          :behind_start_date => behind_start_date?(record, gantt, percent, record.due_date),
-          :over_end_date => over_end_date?(record, gantt, percent, record.due_date)
+          expandable: gantt.dataset.version_issues(display_project || record.project, record).any?,
+          subject: record.to_s_with_project,
+          schedule: schedule_for(record, gantt, percent),
+          version: record,
+          completed_percent: percent,
+          closed: !record.open?,
+          overdue: record.overdue?,
+          behind_schedule: record.behind_schedule?,
+          behind_start_date: behind_start_date?(record, gantt, percent, record.due_date),
+          over_end_date: over_end_date?(record, gantt, percent, record.due_date)
         )
       end
 
@@ -76,8 +76,8 @@ module Redmine
 
         label = "#{record} #{percent.to_f.round}%"
         label = "#{record.project} - #{label}" unless gantt.project == record.project
-        Schedule.build(:gantt => gantt, :start_on => record.start_date, :end_on => record.due_date,
-                       :progress => percent, :markers => true, :label => label)
+        Schedule.build(gantt: gantt, start_on: record.start_date, end_on: record.due_date,
+                       progress: percent, markers: true, label: label)
       end
       private_class_method :schedule_for
     end

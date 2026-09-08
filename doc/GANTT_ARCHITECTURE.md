@@ -12,7 +12,7 @@ HTMLでは `Chart → ProjectSection → 型別Row → Schedule` の順に表示
 | ファイル・クラス | 役割 |
 |---|---|
 | `app/controllers/gantts_controller.rb` / `GanttsController` | プロジェクト・保存済みクエリを取得し、グループ化を解除。必要なHTTPパラメータだけをGanttへ渡し、HTML/PDF/PNGへ振り分ける。 |
-| `lib/redmine/gantt.rb` / `Redmine::Gantt` | 表示期間・ズーム・上限の正規化、既存のユーザー設定の保存、前後ページのパラメータ生成。Dataset・Chart・出力の入口。 |
+| `lib/redmine/gantt.rb` / `Redmine::Gantt` | 表示期間・ズーム・上限の正規化、既存のユーザー設定の保存、Dataset・Chart・出力の入口。 |
 
 初期化は次の7個のキーワード引数で明示する。位置引数や汎用 `options` は使わない。
 
@@ -94,14 +94,14 @@ Turboでセクションを更新する際は、祖先の集計、共有バージ
 |---|---|
 | `app/views/gantts/show.html.erb` | 画面タイトル、クエリエラー、フォーム、チャート、サイドバー、必要なスタイルを配置。 |
 | `app/views/gantts/_query_form.html.erb` | フィルタ、表示列、関連線・進捗線、期間、ズームの操作フォーム。 |
-| `app/views/gantts/chart/_chart.html.erb` | ヘッダー、情報列、背景グリッド、セクション一覧、SVGレイヤー、前後リンクを配置。 |
+| `app/views/gantts/_chart.html.erb` | ヘッダー、情報列、背景グリッド、セクション一覧、SVGレイヤー、前後リンクを配置。 |
 | `app/views/gantts/chart/_project_section.html.erb` | `gantt-project-ID` の更新可能なHTML境界。each_rowで型別部分テンプレートを描画。 |
 | `app/views/gantts/chart/_project.html.erb` | プロジェクトの件名・追加列・タイムライン。 |
 | `app/views/gantts/chart/_version.html.erb` | バージョンの件名・追加列・タイムライン。 |
 | `app/views/gantts/chart/_issue.html.erb` | チケットの件名・アイコン・選択用チェックボックス・追加列・タイムライン。 |
 | `app/views/gantts/chart/_schedule.html.erb` | 全行型共通のバー、遅延・完了部分、端点、ラベル、操作領域。 |
 | `app/helpers/gantts/chart_helper.rb` / `Gantts::ChartHelper` | ViewModelからHTML属性・CSS変数・Stimulusデータ・アイコンを組み立てる。 |
-| `app/helpers/gantt_helper.rb` / `GanttHelper` | ズームリンクとChartHelperの取り込み。 |
+| `app/helpers/gantt_helper.rb` / `GanttHelper` | 前後・月・ズーム・出力リンクに使うパラメータ生成、ズームリンク、ChartHelperの取り込み。 |
 | `app/assets/stylesheets/gantt.css` | Grid構造、固定情報列、バー・目盛り、印刷レイアウト。 |
 | `app/assets/stylesheets/context_menu.css` | Redmine共通の選択表示。ガントの件名は不透明な青と白い文字、バーは半透明の選択色。 |
 

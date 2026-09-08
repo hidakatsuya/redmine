@@ -43,7 +43,7 @@ module Redmine
             gc.font(font_path) if font_path.present?
             # Subjects
             gc.stroke('transparent')
-            subjects(:image => gc, :top => (headers_height + 20), :indent => 4, :format => :image)
+            subjects(image: gc, top: (headers_height + 20), indent: 4, format: :image)
             # Months headers
             month_f = @date_from
             left = subject_width
@@ -130,8 +130,8 @@ module Redmine
             # content
             top = headers_height + 20
             gc.stroke('transparent')
-            lines(:image => gc, :top => top, :zoom => zoom,
-                  :subject_width => subject_width, :format => :image)
+            lines(image: gc, top: top, zoom: zoom,
+                  subject_width: subject_width, format: :image)
             # today red line
             if User.current.today.between?(@date_from, date_to)
               gc.stroke('red')

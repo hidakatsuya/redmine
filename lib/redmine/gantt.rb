@@ -27,12 +27,12 @@ module Redmine
     # Relation types that are rendered
     DRAW_TYPES = {
       IssueRelation::TYPE_BLOCKS   => {
-        :landscape_margin => 16,
-        :color => '#fa5252' # oc-red-6
+        landscape_margin: 16,
+        color: '#fa5252' # oc-red-6
       },
       IssueRelation::TYPE_PRECEDES => {
-        :landscape_margin => 20,
-        :color => '#228be6' # oc-blue-6
+        landscape_margin: 20,
+        color: '#228be6' # oc-blue-6
       }
     }.freeze
 
@@ -75,43 +75,22 @@ module Redmine
     end
 
     def chart
-      @chart ||= Redmine::Gantt::Chart.build(self, :query => @query)
-    end
-
-    def common_params
-      {:controller => 'gantts', :action => 'show', :project_id => @project}
-    end
-
-    def params
-      common_params.merge({:zoom => zoom, :year => year_from,
-                           :month => month_from, :months => months})
-    end
-
-    def params_previous
-      common_params.merge({:year => (date_from << months).year,
-                           :month => (date_from << months).month,
-                           :zoom => zoom, :months => months})
-    end
-
-    def params_next
-      common_params.merge({:year => (date_from >> months).year,
-                           :month => (date_from >> months).month,
-                           :zoom => zoom, :months => months})
+      @chart ||= Redmine::Gantt::Chart.build(self, query: @query)
     end
 
     def dataset
-      @dataset ||= Redmine::Gantt::Dataset.new(:query => query, :max_rows => max_rows)
+      @dataset ||= Redmine::Gantt::Dataset.new(query: query, max_rows: max_rows)
     end
 
     def project_section(project)
-      Redmine::Gantt::ProjectSection.build(self, :project => project)
+      Redmine::Gantt::ProjectSection.build(self, project: project)
     end
 
     delegate :issues, :projects, :relations, :project_issues, :project_versions, :version_issues,
-             :number_of_rows, :number_of_rows_on_project, :to => :dataset
+             :number_of_rows, :number_of_rows_on_project, to: :dataset
 
     class << self
-      delegate :sort_issues!, :sort_versions!, :sort_issue_logic, :to => :'Redmine::Gantt::Dataset'
+      delegate :sort_issues!, :sort_versions!, :sort_issue_logic, to: :'Redmine::Gantt::Dataset'
     end
 
     def to_pdf

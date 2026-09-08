@@ -32,9 +32,9 @@ module Redmine
                       when ::Version then Version
                       when ::Issue then Issue
                       end
-          yield row_class.build(:record => record, :gantt => @gantt, :depth => row_depth,
-                          :parent_row_key => parent_key, :row_key => row_key,
-                          :display_project => project)
+          yield row_class.build(record: record, gantt: @gantt, depth: row_depth,
+                          parent_row_key: parent_key, row_key: row_key,
+                          display_project: project)
         end
       end
     end

@@ -10,7 +10,7 @@ module Redmine
 
         attr_reader :truncated
 
-        delegate :date_from, :date_to, :months, :zoom, :project, :max_rows, :to => :@gantt
+        delegate :date_from, :date_to, :months, :zoom, :project, :max_rows, to: :@gantt
 
         def initialize(gantt)
           @gantt = gantt
@@ -26,15 +26,15 @@ module Redmine
         end
 
         def subjects(options)
-          render_rows(options.merge(:only => :subjects))
+          render_rows(options.merge(only: :subjects))
         end
 
         def lines(options)
-          render_rows(options.merge(:only => :lines))
+          render_rows(options.merge(only: :lines))
         end
 
         def render_rows(options)
-          options = {:top => 0, :top_increment => 20, :indent_increment => 20}.merge(options)
+          options = { top: 0, top_increment: 20, indent_increment: 20 }.merge(options)
           indent = options.fetch(:indent, 4)
           count = 0
           @dataset.each_row do |record, depth|
@@ -53,9 +53,9 @@ module Redmine
         end
 
         def coordinates(start_date, end_date, progress, zoom)
-          Schedule.offsets(:date_from => date_from, :date_to => date_to,
-                           :start_on => start_date, :end_on => end_date,
-                           :progress => progress, :today => User.current.today).
+          Schedule.offsets(date_from: date_from, date_to: date_to,
+                           start_on: start_date, end_on: end_date,
+                           progress: progress, today: User.current.today).
             transform_values {|offset| (offset * zoom).floor}
         end
 

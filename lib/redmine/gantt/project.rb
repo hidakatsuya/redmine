@@ -8,12 +8,12 @@ module Redmine
       def self.build(record:, gantt:, depth:, parent_row_key:, row_key: nil, display_project: nil)
         new(
           **common_attributes(record, depth, parent_row_key, row_key),
-          :expandable => gantt.dataset.projects.any? {|project| project.parent_id == record.id} ||
+          expandable: gantt.dataset.projects.any? {|project| project.parent_id == record.id} ||
             gantt.dataset.project_issues(record).any? || gantt.dataset.project_versions(record).any?,
-          :subject => record.name,
-          :schedule => schedule_for(record, gantt),
-          :project => record,
-          :overdue => record.overdue?
+          subject: record.name,
+          schedule: schedule_for(record, gantt),
+          project: record,
+          overdue: record.overdue?
         )
       end
 
@@ -47,8 +47,8 @@ module Redmine
       def self.schedule_for(record, gantt)
         return unless record.start_date && record.due_date
 
-        Schedule.build(:gantt => gantt, :start_on => record.start_date, :end_on => record.due_date,
-                       :progress => nil, :markers => true, :label => record.name)
+        Schedule.build(gantt: gantt, start_on: record.start_date, end_on: record.due_date,
+                       progress: nil, markers: true, label: record.name)
       end
       private_class_method :schedule_for
     end

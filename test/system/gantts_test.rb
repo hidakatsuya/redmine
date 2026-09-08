@@ -235,7 +235,7 @@ class GanttsTest < ApplicationSystemTestCase
     issue1_tooltip.hover
 
     within issue1_tooltip do
-      assert_selector 'span.tip', :text => issue1_subject_row.first('a.issue').text, :visible => false
+      assert_selector 'span.tip', text: issue1_subject_row.first('a.issue').text, visible: false
     end
 
     # Context menu for issue subject
@@ -257,7 +257,7 @@ class GanttsTest < ApplicationSystemTestCase
 
   test 'printing keeps rows on the same continuous plane as relation lines' do
     visit_gantt
-    page.driver.browser.execute_cdp('Emulation.setEmulatedMedia', :media => 'print')
+    page.driver.browser.execute_cdp('Emulation.setEmulatedMedia', media: 'print')
     page.execute_script("window.dispatchEvent(new Event('beforeprint'))")
 
     assert_selector '.gantt.is-printing'
@@ -274,12 +274,12 @@ class GanttsTest < ApplicationSystemTestCase
     end
     assert_selector '#gantt_draw_area path', minimum: 1
 
-    page.driver.browser.execute_cdp('Emulation.setEmulatedMedia', :media => '')
+    page.driver.browser.execute_cdp('Emulation.setEmulatedMedia', media: '')
     page.execute_script("window.dispatchEvent(new Event('afterprint'))")
     assert_no_selector '.gantt.is-printing'
     assert_equal 'static', page.evaluate_script("getComputedStyle(document.querySelector('.gantt__row')).position")
   ensure
-    page.driver.browser.execute_cdp('Emulation.setEmulatedMedia', :media => '')
+    page.driver.browser.execute_cdp('Emulation.setEmulatedMedia', media: '')
   end
 
   private
