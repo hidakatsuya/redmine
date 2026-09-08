@@ -46,6 +46,10 @@ module Redmine
         20
       end
 
+      def row_count
+        sections.sum(&:row_count)
+      end
+
       def truncated?
         @truncated
       end
@@ -140,7 +144,7 @@ module Redmine
 
         def append_day_segments(segments, date_from, date_to, layer, kind)
           (date_from..date_to).each do |date|
-            label = kind == :day_number ? date.day.to_s : ::I18n.t('date.day_names')[date.wday].first
+            label = kind == :day_number ? date.day.to_s : ::I18n.t('date.abbr_day_names')[date.wday].first
             segments << ScaleSegment.new(:layer => layer, :label => label, :start_on => date,
                                          :start_offset => (date - date_from).to_i, :span => 1,
                                          :kind => kind, :non_working_day => @gantt.non_working_week_days.include?(date.cwday)).freeze

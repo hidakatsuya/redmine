@@ -17,7 +17,7 @@
               <div class="gantt__column-header"
                    data-controller="gantt--column"
                    data-gantt--column-index-value="<%= index %>">
-                <%= column.caption %>
+                <%= tag.span column.caption, class: 'gantt__cell-value' %>
                 <span class="gantt__column-resizer"
                       data-action="pointerdown->gantt--column#startResize"
                       aria-hidden="true"></span>

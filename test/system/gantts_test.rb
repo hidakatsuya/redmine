@@ -182,6 +182,23 @@ class GanttsTest < ApplicationSystemTestCase
     assert_equal [1, 1, 1], borders
   end
 
+  test 'short charts add the legacy blank space only once' do
+    visit_gantt
+    dimensions = page.evaluate_script(<<~JS)
+      (() => {
+        const body = document.querySelector('.gantt__body')
+        const rows = body.querySelectorAll('.gantt__row')
+        return {height: body.offsetHeight, rows: rows.length}
+      })()
+    JS
+
+    assert_equal dimensions['rows'] * 20 + 270, dimensions['height']
+
+    find('#gantt-row-project-1 .gantt__expander').click
+    assert_selector '.gantt__row.is-hidden', visible: false
+    assert_equal dimensions['height'], page.evaluate_script("document.querySelector('.gantt__body').offsetHeight")
+  end
+
   test 'context menu and tooltip interactions' do
     visit_gantt
 

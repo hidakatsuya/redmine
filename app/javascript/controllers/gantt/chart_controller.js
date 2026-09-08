@@ -96,7 +96,6 @@ export default class extends Controller {
       row.style.setProperty("--gantt-print-top", `${padding + height}px`)
       height += row.offsetHeight
     })
-    this.bodyTarget.style.setProperty("--gantt-print-height", `${height}px`)
     // Flow pagination can move rows independently of the single SVG overlay.
     // Print both on one continuous coordinate plane, as the legacy chart did.
     this.element.classList.add("is-printing")

@@ -34,6 +34,7 @@ module Gantts
       }
       styles = [
         "--gantt-row-height: #{chart.row_height}px", "--gantt-header-rows: #{chart.header_layers}",
+        "--gantt-row-count: #{chart.row_count}",
         "--gantt-day-width: #{chart.day_width}px", "--gantt-selected-columns-width: #{selected_columns_width}px",
         "--gantt-selected-columns-count: #{chart.selected_columns.size}",
         "--gantt-selected-columns-template: #{chart.selected_columns.map { "#{SELECTED_COLUMN_WIDTH}px" }.join(' ')}",

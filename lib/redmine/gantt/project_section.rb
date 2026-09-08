@@ -3,7 +3,7 @@
 module Redmine
   class Gantt
     class ProjectSection
-      attr_reader :project
+      attr_reader :project, :row_count
 
       def self.build(gantt, project:)
         entry = gantt.dataset.each_project.find {|record, _depth, _limit| record.id == project.id}
@@ -13,7 +13,7 @@ module Redmine
       end
 
       def initialize(gantt, project, depth, limit)
-        @gantt, @project, @depth, @limit = gantt, project, depth, limit
+        @gantt, @project, @depth, @row_count = gantt, project, depth, limit
         freeze
       end
 
@@ -26,7 +26,7 @@ module Redmine
       def each_row
         return enum_for(__method__) unless block_given?
 
-        @gantt.dataset.project_rows(project, @depth).take(@limit).each do |record, row_depth, row_key, parent_key|
+        @gantt.dataset.project_rows(project, @depth).take(row_count).each do |record, row_depth, row_key, parent_key|
           row_class = case record
                       when ::Project then Project
                       when ::Version then Version

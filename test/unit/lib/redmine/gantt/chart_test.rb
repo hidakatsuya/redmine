@@ -96,6 +96,18 @@ class Redmine::Gantt::ChartTest < ActiveSupport::TestCase
     end
   end
 
+  test 'weekday labels use the localized abbreviation as the legacy chart does' do
+    I18n.with_locale(:ar) do
+      chart = Redmine::Gantt::Chart.build(build_gantt(:zoom => 3), :query => @query)
+      days = chart.scale_layers.last.segments.first(7)
+
+      days.each do |day|
+        assert_equal I18n.t('date.abbr_day_names')[day.start_on.wday].first, day.label
+      end
+      assert_operator days.map(&:label).uniq.size, :>, 1
+    end
+  end
+
   private
 
   def build_chart

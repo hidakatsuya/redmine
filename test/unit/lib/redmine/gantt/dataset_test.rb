@@ -52,6 +52,17 @@ class Redmine::Gantt::DatasetTest < ActiveSupport::TestCase
     Redmine::Gantt::Version.expects(:build).never
 
     assert_equal 2, @gantt.chart.sections.size
+    assert_equal 6, @gantt.chart.row_count
+  end
+
+  test 'row limit warning is retained when the final row exactly reaches the limit' do
+    [5, 6, 7].each do |limit|
+      gantt = Redmine::Gantt.new(:max_rows => limit)
+      gantt.query = @gantt.query
+
+      assert_equal [limit, 6].min, gantt.chart.rows.size
+      assert_equal limit <= 6, gantt.chart.truncated?
+    end
   end
 
   test 'existing sections keep their dataset after query reassignment' do

@@ -86,7 +86,8 @@ module Redmine
       end
 
       def truncated?
-        !!(max_rows && projects.sum {|project| number_of_rows_on_project(project)} > max_rows)
+        count = projects.sum {|project| number_of_rows_on_project(project)}
+        !!(max_rows && count.positive? && count >= max_rows)
       end
 
       # Apply the global row budget before choosing a section. A project-only

@@ -29,6 +29,7 @@
 
 .gantt__viewport {
   overflow: auto;
+  inline-size: max-content;
   max-inline-size: 100%;
   border: 1px solid var(--gantt-header-border);
   background: var(--gantt-surface);
@@ -105,6 +106,8 @@
   font-size: 0.8em;
   font-weight: normal;
 }
+
+.gantt__column-header .gantt__cell-value { text-overflow: ellipsis; }
 
 .gantt__column-header {
   position: relative;
@@ -197,7 +200,8 @@
   inline-size: calc(var(--gantt-information-width) + var(--gantt-timeline-width));
   position: relative;
   padding-block: 8px 262px;
-  min-block-size: 206px;
+  min-block-size: calc(var(--gantt-row-count) * var(--gantt-row-height) + 270px);
+  box-sizing: border-box;
 }
 
 .gantt__sidebar-background {
@@ -289,7 +293,7 @@
 .gantt__scale-segment span {
   inline-size: 100%;
   overflow: hidden;
-  text-overflow: ellipsis;
+  text-overflow: clip;
   white-space: nowrap;
 }
 
@@ -416,12 +420,14 @@
 .gantt__scale-segment--day-name { font-size: 0.7em; }
 
 @media print {
-  .gantt__viewport { max-block-size: none; overflow: visible; border: 0; }
+  /* Let the browser shrink the document to the chart's intrinsic width. */
+  body.controller-gantts { min-inline-size: max-content; }
+  .gantt__viewport { inline-size: max-content; max-inline-size: none; max-block-size: none; overflow: visible; }
   .gantt__splitter, .gantt__column-resizer { display: none; }
-  .gantt.is-printing .gantt__body { block-size: var(--gantt-print-height); box-sizing: content-box; }
+  .gantt.is-printing .gantt__body { display: block; }
   .gantt.is-printing .gantt__row { position: absolute; inset-block-start: var(--gantt-print-top); }
+  .gantt__sidebar-background { position: absolute; inset-block: 0; margin-block: 0; }
   .gantt__header,
-  .gantt__sidebar-background,
   .gantt__header-information,
   .gantt__row-information { position: static; }
 }

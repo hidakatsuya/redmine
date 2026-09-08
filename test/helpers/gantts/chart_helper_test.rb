@@ -42,7 +42,7 @@ class Gantts::ChartHelperTest < Redmine::HelperTest
   end
 
   test 'builds chart styles including selected column dimensions' do
-    chart = stub(:selected_columns => [stub, stub], :row_height => 20, :header_layers => 2, :day_width => 4,
+    chart = stub(:selected_columns => [stub, stub], :row_height => 20, :row_count => 3, :header_layers => 2, :day_width => 4,
                  :sidebar_subject_width => 330, :timeline_width => 120, :relations => [], :show_selected_columns? => true,
                  :show_relations? => false, :show_progress_line? => true)
 

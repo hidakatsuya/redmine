@@ -21,6 +21,7 @@ display key in each project, while issue keys remain stable.
 
   gantt.project_section(project)  # nil when outside the displayed dataset
   section.each_row { |row| ... }  # build and consume each HTML ViewModel
+  section.row_count              # bounded count without constructing ViewModels
 
 The lookup preserves the full query and global row budget. It does not build
 the other projects' ViewModels, but still loads the query's bounded issue set
@@ -55,6 +56,9 @@ Browser printing uses the HTML chart and is distinct from PDF export.
 Before printing, visible rows are positioned on a continuous vertical plane so
 page fragmentation cannot move them independently of the SVG relation overlay.
 After printing, the normal flow layout is restored.
+The document takes the chart's intrinsic width when printing so the browser can
+shrink it as it did the old table. The chart keeps its initial row count for
+minimum height, including when rows are collapsed.
 
 Verification
 ------------
