@@ -77,20 +77,18 @@ module Gantts
       "--gantt-depth: #{row.depth}"
     end
 
-    def gantt_row_attributes(row)
-      {
-        id: "gantt-row-#{row.row_key}",
-        class: ['gantt__row', "gantt__row--#{row.kind}"],
-        style: gantt_row_style(row),
-        data: {
-          'gantt--chart-target': 'row',
-          'gantt--subjects-target': 'row',
-          row_key: row.row_key,
-          parent_row_key: row.parent_row_key.to_s,
-          kind: row.kind,
-          progress_state: gantt_row_progress_state(row)
-        }
-      }
+    def gantt_row_tag(row, &)
+      tag.div id: "gantt-row-#{row.row_key}",
+              class: ['gantt__row', "gantt__row--#{row.kind}"],
+              style: gantt_row_style(row),
+              data: {
+                'gantt--chart-target': 'row',
+                'gantt--subjects-target': 'row',
+                row_key: row.row_key,
+                parent_row_key: row.parent_row_key.to_s,
+                kind: row.kind,
+                progress_state: gantt_row_progress_state(row)
+              }, &
     end
 
     def gantt_schedule_bar_style(schedule)
@@ -113,16 +111,14 @@ module Gantts
       tag.span schedule.label, style: "--gantt-label-unit: #{schedule.bar_end_offset || 0}"
     end
 
-    def gantt_row_subject_attributes(row)
-      {
-        id: row.row_key,
-        class: [
-          'gantt__subject',
-          "gantt__subject--#{row.kind}",
-          ROW_SUBJECT_CLASSES.fetch(row.kind),
-          { 'is-open': row.expandable?, hascontextmenu: row.context_menu? }
-        ],
-      }
+    def gantt_row_subject_tag(row, &)
+      tag.div id: row.row_key,
+              class: [
+                'gantt__subject',
+                "gantt__subject--#{row.kind}",
+                ROW_SUBJECT_CLASSES.fetch(row.kind),
+                { 'is-open': row.expandable?, hascontextmenu: row.context_menu? }
+              ], &
     end
 
     def gantt_schedule_bar_tag(row)

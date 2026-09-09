@@ -29,14 +29,14 @@ class Gantts::ChartHelperTest < Redmine::HelperTest
 
     assert_equal '--gantt-depth: 2', gantt_row_style(row)
     assert_equal 'behind-start', gantt_row_progress_state(row)
-    row_tag = tag.div(**gantt_row_attributes(row)) {'Row'}
+    row_tag = gantt_row_tag(row) {'Row'}
     assert_include 'id="gantt-row-issue-1"', row_tag
     assert_include 'class="gantt__row gantt__row--issue"', row_tag
     assert_include 'data-gantt--chart-target="row"', row_tag
     assert_include 'data-gantt--subjects-target="row"', row_tag
     assert_include 'data-parent-row-key="project-1"', row_tag
     assert_include 'data-progress-state="behind-start"', row_tag
-    subject = tag.div(**gantt_row_subject_attributes(row)) {'Subject'}
+    subject = gantt_row_subject_tag(row) {'Subject'}
     assert_include 'id="issue-1"', subject
     assert_include 'gantt__subject--issue', subject
     assert_include 'hascontextmenu', subject
