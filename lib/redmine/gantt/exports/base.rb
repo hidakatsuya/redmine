@@ -3,6 +3,7 @@
 module Redmine
   class Gantt
     module Exports
+      # Traverses Dataset rows for direct drawing, without HTML row view models.
       class Base
         include ERB::Util
         include Redmine::I18n
@@ -64,7 +65,6 @@ module Redmine
         end
 
         def line_for_project(project, options)
-          # Skip projects that don't have a start_date or due date
           if project.is_a?(::Project) && project.start_date && project.due_date
             label = project.name
             line(project.start_date, project.due_date, nil, true, label, options, project)
@@ -76,7 +76,6 @@ module Redmine
         end
 
         def line_for_version(version, options)
-          # Skip versions that don't have a start_date
           if version.is_a?(::Version) && version.due_date && version.start_date
             label = "#{h(version)} #{h(version.visible_fixed_issues.completed_percent.to_f.round)}%"
             label = h("#{version.project} -") + label unless @project && @project == version.project
@@ -91,7 +90,6 @@ module Redmine
         end
 
         def line_for_issue(issue, options)
-          # Skip issues that don't have a due_before (due_date or version's due_date)
           if issue.is_a?(::Issue) && issue.due_before
             label = issue.status.name.dup
             unless issue.disabled_core_fields.include?('done_ratio')

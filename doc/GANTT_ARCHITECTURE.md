@@ -108,6 +108,11 @@ Turboでセクションを更新する際は、祖先の集計、共有バージ
 | `app/assets/stylesheets/gantt.css` | Grid構造、固定情報列、バー・目盛り、印刷レイアウト。本文には行数に依存しない罫線・リサイズ用の層を重ね、上余白と下の空白まで列境界を連続させる。 |
 | `app/assets/stylesheets/context_menu.css` | Redmine共通の選択表示。ガントの件名は不透明な青と白い文字、バーは半透明の選択色。 |
 
+ChartHelperの名前は `gantt_対象_部品_用途` を基本とし、対象を `chart`・`scale_segment`・`row`・`schedule` で表す。
+`_tag` は部品のタグ生成、`_attributes` はERBが所有するタグの属性、`_style` は共用する位置指定を返す。
+タグヘルパーは原則として単一タグを担当し、入れ子の構造はERBに残す。目盛りセルの月リンクなどはブロックで渡す。
+開閉ボタンは `gantt_row_expander_tag`、バーや端点・右側ラベルは `gantt_schedule_*_tag` とする。
+
 DB取得と行順の判断はDataset、表示用状態はViewModel、HTMLの表現はERB/Helperに置く。
 永続化しないガント専用クラスは `lib/redmine/gantt/` にまとめ、DBモデルは既存の `app/models/` を利用する。
 

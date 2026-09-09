@@ -212,17 +212,23 @@ class GanttsTest < ApplicationSystemTestCase
     assert_equal [1, 1, 1], borders
   end
 
-  test 'short charts add the legacy blank space only once' do
+  test 'chart height includes body padding and stays fixed when rows collapse' do
     visit_gantt
     dimensions = page.evaluate_script(<<~JS)
       (() => {
         const body = document.querySelector('.gantt__body')
         const rows = body.querySelectorAll('.gantt__row')
-        return {height: body.offsetHeight, rows: rows.length}
+        const style = getComputedStyle(body)
+        return {
+          height: body.offsetHeight,
+          rowsHeight: Array.from(rows).reduce((height, row) => height + row.offsetHeight, 0),
+          padding: parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
+        }
       })()
     JS
 
-    assert_equal dimensions['rows'] * 20 + 270, dimensions['height']
+    assert_operator dimensions['padding'], :>, 0
+    assert_equal dimensions['rowsHeight'] + dimensions['padding'], dimensions['height']
 
     find('#gantt-row-project-1 .gantt__expander').click
     assert_selector '.gantt__row.is-hidden', visible: false

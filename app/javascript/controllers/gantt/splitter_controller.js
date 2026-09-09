@@ -2,6 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 const MIN_WIDTH = 100
 
+// Resizes the subject column from header or body handles using the shared CSS width.
 export default class extends Controller {
   startResize(event) {
     event.preventDefault()

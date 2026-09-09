@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Gantts
+  # Adapts view models to ERB attributes, CSS coordinates and Stimulus input data.
   module ChartHelper
     RELATION_STYLES = {
       IssueRelation::TYPE_BLOCKS => { landscape_margin: 16, color: '#fa5252' }.freeze,
@@ -15,7 +16,7 @@ module Gantts
 
     SELECTED_COLUMN_WIDTH = 50
 
-    def gantt_chart_attributes(chart, project: nil)
+    def gantt_chart_tag(chart, project: nil, &)
       selected_columns_width = chart.selected_columns.size * SELECTED_COLUMN_WIDTH
       data_attributes = {
         controller: 'gantt--chart',
@@ -30,12 +31,12 @@ module Gantts
           beforeprint@window->gantt--chart#handleBeforePrint
           afterprint@window->gantt--chart#handleAfterPrint
         ).join(' '),
-        'gantt--chart-issue-relation-types-value' => RELATION_STYLES.to_json,
-        'gantt--chart-relations-value' => chart.relations.map(&:to_h).to_json,
-        'gantt--chart-column-widths-value' => chart.selected_columns.map { SELECTED_COLUMN_WIDTH }.to_json,
-        'gantt--chart-show-selected-columns-value' => chart.show_selected_columns? ? 'true' : 'false',
-        'gantt--chart-show-relations-value' => chart.show_relations? ? 'true' : 'false',
-        'gantt--chart-show-progress-value' => chart.show_progress_line? ? 'true' : 'false'
+        'gantt--chart-issue-relation-types-value': RELATION_STYLES.to_json,
+        'gantt--chart-relations-value': chart.relations.map(&:to_h).to_json,
+        'gantt--chart-column-widths-value': chart.selected_columns.map { SELECTED_COLUMN_WIDTH }.to_json,
+        'gantt--chart-show-selected-columns-value': chart.show_selected_columns? ? 'true' : 'false',
+        'gantt--chart-show-relations-value': chart.show_relations? ? 'true' : 'false',
+        'gantt--chart-show-progress-value': chart.show_progress_line? ? 'true' : 'false'
       }
       styles = [
         "--gantt-row-height: #{chart.row_height}px", "--gantt-header-rows: #{chart.header_layers}",
@@ -45,11 +46,11 @@ module Gantts
         "--gantt-selected-columns-template: #{chart.selected_columns.map { "#{SELECTED_COLUMN_WIDTH}px" }.join(' ')}",
         "--gantt-subject-width: #{chart.sidebar_subject_width}px", "--gantt-timeline-width: #{chart.timeline_width}px"
       ].join('; ')
-      { class: ['gantt', { 'is-showing-columns': chart.show_selected_columns? }], style: styles,
-       data: data_attributes.merge('gantt-project-id': project&.id) }
+      tag.div class: ['gantt', { 'is-showing-columns': chart.show_selected_columns? }], style: styles,
+              data: data_attributes.merge('gantt-project-id': project&.id), &
     end
 
-    def gantt_expander(row)
+    def gantt_row_expander_tag(row)
       if row.expandable?
         tag.button sprite_icon('angle-down', rtl: true),
                    type: 'button', class: ['gantt__expander', 'icon', 'icon-expanded'],
@@ -59,12 +60,12 @@ module Gantts
       end
     end
 
-    def gantt_scale_segment_css_classes(segment)
-      [
+    def gantt_scale_segment_tag(segment, &)
+      tag.div class: [
         'gantt__scale-segment',
         "gantt__scale-segment--#{segment.kind.to_s.tr('_', '-')}",
         { 'is-non-working-day': segment.non_working_day }
-      ]
+      ], style: gantt_scale_segment_style(segment), title: segment.title, &
     end
 
     def gantt_scale_segment_style(segment)
@@ -82,40 +83,34 @@ module Gantts
         class: ['gantt__row', "gantt__row--#{row.kind}"],
         style: gantt_row_style(row),
         data: {
-          'gantt--chart-target' => 'row',
-          'gantt--subjects-target' => 'row',
+          'gantt--chart-target': 'row',
+          'gantt--subjects-target': 'row',
           row_key: row.row_key,
           parent_row_key: row.parent_row_key.to_s,
           kind: row.kind,
-          progress_state: gantt_progress_state(row)
+          progress_state: gantt_row_progress_state(row)
         }
       }
     end
 
-    def gantt_schedule_style(schedule)
+    def gantt_schedule_bar_style(schedule)
       return unless schedule&.visible?
 
       ["--gantt-start-unit: #{schedule.bar_start_offset}", "--gantt-end-unit: #{schedule.bar_end_offset}"].join('; ')
     end
 
-    def gantt_marker_style(offset)
-      "--gantt-marker-unit: #{offset}"
+    def gantt_schedule_marker_tag(row, side)
+      return unless row.schedule&.public_send("#{side}_marker?")
+
+      tag.div class: [*gantt_schedule_base_classes(row), 'gantt__marker', "gantt__marker--#{side}",
+                      side == :start ? 'starting' : 'ending'],
+              style: "--gantt-marker-unit: #{row.schedule.public_send("#{side}_offset")}"
     end
 
-    def gantt_label_style(schedule)
-      "--gantt-label-unit: #{schedule.bar_end_offset || 0}"
-    end
+    def gantt_schedule_label_tag(schedule)
+      return unless schedule
 
-    def gantt_progress_style(schedule, day_width:)
-      return unless schedule&.progress?
-
-      ["--gantt-start-unit: #{schedule.bar_start_offset}", "--gantt-end-unit: #{(schedule.progress_offset * day_width).floor.to_f / day_width}"].join('; ')
-    end
-
-    def gantt_late_style(schedule)
-      return unless schedule&.late?
-
-      ["--gantt-start-unit: #{schedule.bar_start_offset}", "--gantt-end-unit: #{schedule.late_offset}"].join('; ')
+      tag.span schedule.label, style: "--gantt-label-unit: #{schedule.bar_end_offset || 0}"
     end
 
     def gantt_row_subject_attributes(row)
@@ -130,27 +125,32 @@ module Gantts
       }
     end
 
-    def gantt_bar_classes(row)
-      [*gantt_bar_base_classes(row), 'gantt__bar', 'task_todo']
+    def gantt_schedule_bar_tag(row)
+      return unless row.schedule&.visible?
+
+      tag.div class: [*gantt_schedule_base_classes(row), 'gantt__bar', 'task_todo'],
+              id: "task-todo-#{row.row_key}", style: gantt_schedule_bar_style(row.schedule),
+              data: { 'gantt--chart-target': 'todoBar', row_key: row.row_key }
     end
 
-    def gantt_done_bar_classes(row)
-      [*gantt_bar_base_classes(row), 'gantt__bar', 'gantt__bar--done', 'task_done']
+    def gantt_schedule_done_bar_tag(row, day_width:)
+      return unless row.schedule&.progress?
+
+      end_offset = (row.schedule.progress_offset * day_width).floor.to_f / day_width
+      tag.div class: [*gantt_schedule_base_classes(row), 'gantt__bar', 'gantt__bar--done', 'task_done'],
+              id: "task-done-#{row.row_key}",
+              style: "--gantt-start-unit: #{row.schedule.bar_start_offset}; --gantt-end-unit: #{end_offset}",
+              data: { 'gantt--chart-target': 'doneBar', row_key: row.row_key }
     end
 
-    def gantt_late_bar_classes(row)
-      [*gantt_bar_base_classes(row), 'gantt__bar', 'gantt__bar--late', 'task_late']
+    def gantt_schedule_late_bar_tag(row)
+      return unless row.schedule&.late?
+
+      tag.div class: [*gantt_schedule_base_classes(row), 'gantt__bar', 'gantt__bar--late', 'task_late'],
+              style: "--gantt-start-unit: #{row.schedule.bar_start_offset}; --gantt-end-unit: #{row.schedule.late_offset}"
     end
 
-    def gantt_marker_classes(row, side)
-      [*gantt_bar_base_classes(row), 'gantt__marker', "gantt__marker--#{side}", side == :start ? 'starting' : 'ending']
-    end
-
-    def gantt_bar_dom_id(row, state)
-      "#{state}-#{row.row_key}"
-    end
-
-    def gantt_progress_state(row)
+    def gantt_row_progress_state(row)
       return 'none' if row.project?
       return 'closed' if row.closed?
       return 'over-end' if row.over_end_date?
@@ -161,7 +161,7 @@ module Gantts
 
     private
 
-    def gantt_bar_base_classes(row)
+    def gantt_schedule_base_classes(row)
       kind =
         if row.issue?
           row.summary? ? 'parent' : 'leaf'

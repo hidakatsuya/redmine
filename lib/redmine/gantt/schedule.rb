@@ -2,6 +2,8 @@
 
 module Redmine
   class Gantt
+    # Timeline bar geometry shared by HTML and exports. Offsets are days from the
+    # chart start; bar endpoints are clipped to the visible period, with exclusive ends.
     class Schedule
       attr_reader :start_on, :end_on, :label, :start_offset, :end_offset,
                   :bar_start_offset, :bar_end_offset, :progress_offset, :late_offset
@@ -69,8 +71,6 @@ module Redmine
       def end_marker?
         @end_marker
       end
-
-      private_class_method :new
     end
   end
 end

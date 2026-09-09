@@ -2,6 +2,7 @@
 
 module Redmine
   class Gantt
+    # Shared record selection and display hierarchy for HTML and PDF/PNG outputs.
     class Dataset
       RELATION_TYPES = [IssueRelation::TYPE_BLOCKS, IssueRelation::TYPE_PRECEDES].freeze
 
@@ -12,7 +13,6 @@ module Redmine
         @max_rows = max_rows
       end
 
-      # Returns issues that will be rendered
       def issues
         @issues ||= query.issues(
           order: ["#{::Project.table_name}.lft ASC", "#{::Issue.table_name}.id ASC"],
@@ -21,8 +21,7 @@ module Redmine
         )
       end
 
-      # Returns a hash of the relations between the issues that are present on the gantt
-      # and that should be displayed, grouped by issue ids.
+      # Both endpoints must be in the query result; group connections by source issue.
       def relations
         return @relations if @relations
 
@@ -36,7 +35,6 @@ module Redmine
         end
       end
 
-      # Return all the project nodes that will be displayed
       def projects
         return @projects if @projects
 
@@ -54,13 +52,11 @@ module Redmine
         end
       end
 
-      # Returns the issues that belong to +project+
       def project_issues(project)
         @issues_by_project ||= issues.group_by(&:project)
         @issues_by_project[project] || []
       end
 
-      # Returns the distinct versions of the issues that belong to +project+
       def project_versions(project)
         @project_versions ||= {}
         @project_versions[project&.id] ||= begin
@@ -69,7 +65,6 @@ module Redmine
         end
       end
 
-      # Returns the issues that belong to +project+ and are assigned to +version+
       def version_issues(project, version)
         @version_issues ||= {}
         @version_issues[[project&.id, version&.id]] ||=
@@ -120,6 +115,7 @@ module Redmine
         end
       end
 
+      # Subject-tree order: project, unversioned issues, then versions and their issues.
       def project_rows(project, depth)
         return enum_for(__method__, project, depth) unless block_given?
 
@@ -138,7 +134,6 @@ module Redmine
         end
       end
 
-      # Singleton class method is public
       class << self
         def sort_issues!(issues)
           issues.sort_by! {|issue| sort_issue_logic(issue)}

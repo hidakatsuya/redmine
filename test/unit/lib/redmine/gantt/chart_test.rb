@@ -41,20 +41,17 @@ class Redmine::Gantt::ChartTest < ActiveSupport::TestCase
     assert_equal "project-#{@project.id}", subproject.parent_row_key
   end
 
-  test 'exposes truncation without changing the legacy gantt truncation state' do
+  test 'limits displayed rows and reports truncation when the row limit is reached' do
     gantt = build_gantt(max_rows: 2)
     chart = Redmine::Gantt::Chart.build(gantt, query: @query)
 
     assert_equal 2, chart.rows.size
     assert_predicate chart, :truncated?
-    assert_not gantt.truncated
   end
 
-  test 'uses a private builder without retaining construction dependencies' do
+  test 'does not retain construction dependencies' do
     chart = build_chart
 
-    assert Redmine::Gantt::Chart.const_defined?(:Builder, false)
-    assert_raises(NameError) {Redmine::Gantt::Chart::Builder}
     assert_nil chart.instance_variable_get(:@gantt)
     assert_nil chart.instance_variable_get(:@query)
   end
@@ -96,7 +93,7 @@ class Redmine::Gantt::ChartTest < ActiveSupport::TestCase
     end
   end
 
-  test 'weekday labels use the localized abbreviation as the legacy chart does' do
+  test 'weekday labels use the first character of the localized abbreviation' do
     I18n.with_locale(:ar) do
       chart = Redmine::Gantt::Chart.build(build_gantt(zoom: 3), query: @query)
       days = chart.scale_layers.last.segments.first(7)

@@ -1,8 +1,9 @@
+<%# Chart frame: fixed information columns beside the scrollable calendar; row partials live in chart/. %>
 <% if gantt.chart.truncated? %>
   <p class="warning"><%= l(:notice_gantt_chart_truncated, max: gantt.max_rows) %></p>
 <% end %>
 
-<div <%= tag.attributes(gantt_chart_attributes(gantt.chart, project: @project)) %>>
+<%= gantt_chart_tag(gantt.chart, project: @project) do %>
   <div class="gantt__viewport" data-gantt--chart-target="viewport">
     <%= form_tag({}, data: {cm_url: issues_context_menu_path}, class: 'gantt__layout') %>
       <%= hidden_field_tag 'back_url', url_for(params: request.query_parameters), id: nil %>
@@ -32,9 +33,7 @@
             <% gantt.chart.scale_layers.each do |layer| %>
               <div class="gantt__scale-row gantt__scale-row--<%= layer.index %>">
                 <% layer.segments.each do |segment| %>
-                  <%= tag.div class: gantt_scale_segment_css_classes(segment),
-                              style: gantt_scale_segment_style(segment),
-                              title: segment.title do %>
+                  <%= gantt_scale_segment_tag(segment) do %>
                     <% if segment.kind == :month %>
                       <%= link_to segment.label,
                                   gantt_params(gantt, date: segment.start_on),
@@ -93,7 +92,7 @@
       </div>
     </form>
   </div>
-</div>
+<% end %>
 
 <span class="pagination">
   <ul class="pages">

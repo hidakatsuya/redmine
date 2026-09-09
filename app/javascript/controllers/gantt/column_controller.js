@@ -2,6 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 const MIN_WIDTH = 20
 
+// Resizes an extra information column from header or body handles; Chart applies the shared width.
 export default class extends Controller {
   static values = { index: Number }
 

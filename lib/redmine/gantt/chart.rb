@@ -2,15 +2,75 @@
 
 module Redmine
   class Gantt
+    # HTML view model for the header, project sections and cross-row connections.
     class Chart
       DEFAULT_SUBJECT_WIDTH = 330
-      Relation = Struct.new(:from_row_key, :to_row_key, :type, keyword_init: true)
-      ScaleLayer = Struct.new(:index, :segments, keyword_init: true)
-      ScaleSegment = Struct.new(:layer, :label, :start_on, :start_offset, :span, :kind, :non_working_day, :title, keyword_init: true)
 
-      attr_reader :date_from, :date_to, :zoom, :day_width, :header_layers, :sections, :relations,
-                  :scale_layers, :selected_columns, :timeline_width, :sidebar_subject_width,
-                  :today_offset
+      # Connects two issue bars in the browser's SVG overlay.
+      Relation = Struct.new(
+        # Source row whose bar end anchors the line.
+        :from_row_key,
+        # Target row whose bar start receives the arrow.
+        :to_row_key,
+        # IssueRelation type used to select the line style.
+        :type,
+        keyword_init: true
+      )
+
+      # One horizontal band of the calendar header (month, week or day).
+      ScaleLayer = Struct.new(
+        # Zero-based vertical position, with months at the top.
+        :index,
+        # Header cells in chronological order.
+        :segments,
+        keyword_init: true
+      )
+
+      # One calendar header cell; the lowest band's cells also define grid columns.
+      ScaleSegment = Struct.new(
+        # Header band containing this cell.
+        :layer,
+        # Visible month, week number, day number or weekday abbreviation.
+        :label,
+        # First date of the cell, also used by month navigation links.
+        :start_on,
+        # Days from the chart start to the cell's left edge (zero-based).
+        :start_offset,
+        # Cell width in days, converted to pixels by CSS.
+        :span,
+        # Rendering variant: :month, :week, :day_number or :day_name.
+        :kind,
+        # Whether the day cell and its grid column receive non-working-day shading.
+        :non_working_day,
+        # Optional tooltip containing the full month name and year.
+        :title,
+        keyword_init: true
+      )
+
+      # First date shown on the timeline.
+      attr_reader :date_from
+      # Last date shown on the timeline, inclusive.
+      attr_reader :date_to
+      # Detail level (1-4), controlling header bands and horizontal scale.
+      attr_reader :zoom
+      # Pixels per day on screen.
+      attr_reader :day_width
+      # Number of header bands, used to size the information-column headings.
+      attr_reader :header_layers
+      # ProjectSection objects in display order; each supplies its own rows.
+      attr_reader :sections
+      # Connections between issue bars, passed to the SVG renderer.
+      attr_reader :relations
+      # Calendar header bands, from months down to the finest visible scale.
+      attr_reader :scale_layers
+      # Query columns beside the subject, also retained when columns are hidden.
+      attr_reader :selected_columns
+      # Full timeline width in pixels, including the horizontally scrolled area.
+      attr_reader :timeline_width
+      # Initial subject-column width in pixels, before browser resizing.
+      attr_reader :sidebar_subject_width
+      # Today's right edge in days from date_from, or nil outside the timeline.
+      attr_reader :today_offset
 
       def self.build(gantt, query:)
         new(**Builder.new(gantt, query: query).build)
@@ -70,6 +130,7 @@ module Redmine
         !today_offset.nil?
       end
 
+      # Assembles the calendar header and sections without retaining row view models.
       class Builder
         def initialize(gantt, query:)
           @gantt = gantt
@@ -101,6 +162,7 @@ module Redmine
 
         private
 
+        # Only connect issue bars admitted by the chart-wide row limit.
         def build_relations
           visible_keys = @gantt.dataset.each_row.filter_map do |record, _depth, key, _parent|
             key if record.is_a?(::Issue)
@@ -114,6 +176,7 @@ module Redmine
           end.freeze
         end
 
+        # Calendar cells above the timeline; zoom selects month/week/day bands.
         def build_scale_segments(date_from, date_to, zoom)
           segments = []
           month = date_from
@@ -131,6 +194,7 @@ module Redmine
           segments.freeze
         end
 
+        # Week-number cells start on Mondays; an initial partial week has no label.
         def append_week_segments(segments, date_from, date_to, layer)
           week = date_from.cwday == 1 ? date_from : date_from + (7 - date_from.cwday + 1)
           while week <= date_to
@@ -142,6 +206,7 @@ module Redmine
           end
         end
 
+        # Day-number and weekday bands share the same daily grid positions.
         def append_day_segments(segments, date_from, date_to, layer, kind)
           (date_from..date_to).each do |date|
             label = kind == :day_number ? date.day.to_s : ::I18n.t('date.abbr_day_names')[date.wday].first
@@ -157,6 +222,7 @@ module Redmine
           end.freeze
         end
 
+        # The subject already contains tracker and issue ID, so they are not extra columns.
         def selected_columns
           @query.inline_columns.reject {|column| Redmine::Gantt::UNAVAILABLE_COLUMNS.include?(column.name)}.freeze
         end
@@ -169,9 +235,6 @@ module Redmine
           (User.current.today - date_from + 1).to_i if User.current.today.between?(date_from, date_to)
         end
       end
-
-      private_constant :Builder
-      private_class_method :new
     end
   end
 end

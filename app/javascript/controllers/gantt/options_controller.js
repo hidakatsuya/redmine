@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 
+// Bridges query-form checkboxes to Chart events and the existing jQuery column selector.
 export default class extends Controller {
   static targets = ["display", "relations", "progress"]
 

@@ -3,9 +3,9 @@
 module Redmine
   class Gantt
     module Exports
+      # Draws the downloadable PDF with ITCPDF; browser printing uses HTML/CSS instead.
       class PDF < Base
-        # Some utility methods for the PDF export
-        # @private
+        # Fixed page layout in PDF units, separate from resizable screen columns.
         class Layout
           MAX_CHARACTERS_FOR_SUBJECT = 45
           TOTAL_WIDTH = 280
@@ -66,10 +66,8 @@ module Redmine
             left = subject_width
             height = header_height
             if self.date_from.cwday == 1
-              # self.date_from is monday
               week_f = self.date_from
             else
-              # find next monday after self.date_from
               week_f = self.date_from + (7 - self.date_from.cwday + 1)
               width = (7 - self.date_from.cwday + 1) * zoom-1
               pdf.SetY(y_start + header_height)

@@ -3,6 +3,7 @@
 module Redmine
   class Gantt
     module Exports
+      # Draws downloadable images with MiniMagick, independently of the browser layout.
       class Image < Base
         def render(format='PNG')
           date_to = (@date_from >> @months) - 1
@@ -10,7 +11,6 @@ module Redmine
           show_days = @zoom > 2
           subject_width = 400
           header_height = 18
-          # width of one day in pixels
           zoom = @zoom * 2
           g_width = (@date_to - @date_from + 1) * zoom
           g_height = 20 * number_of_rows + 30
@@ -69,10 +69,8 @@ module Redmine
               left = subject_width
               height = header_height
               if @date_from.cwday == 1
-                # date_from is monday
                 week_f = date_from
               else
-                # find next monday after date_from
                 week_f = @date_from + (7 - @date_from.cwday + 1)
                 width = (7 - @date_from.cwday + 1) * zoom
                 gc.fill('white')
@@ -116,7 +114,6 @@ module Redmine
                 left += width
               end
             end
-            # border
             gc.fill('transparent')
             gc.stroke('grey')
             gc.strokewidth(1)
@@ -127,7 +124,6 @@ module Redmine
             gc.draw('rectangle %d,%d %d,%d' % [
               0, 0, subject_width + g_width, g_height + headers_height - 1
             ])
-            # content
             top = headers_height + 20
             gc.stroke('transparent')
             lines(image: gc, top: top, zoom: zoom,

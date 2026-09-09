@@ -3,6 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 const RELATION_STROKE_WIDTH = 2
 const SVG_NS = "http://www.w3.org/2000/svg"
 
+// Coordinates layout changes and draws cross-row SVG lines over the timeline.
 export default class extends Controller {
   static targets = [
     "body",
@@ -135,6 +136,7 @@ export default class extends Controller {
     if (this.showRelationsValue) this.#drawRelations(svg)
   }
 
+  // Arrows join the source bar end to the target bar start, routing around nearby bars.
   #drawRelations(svg) {
     const bars = this.#elementsByRowKey(this.todoBarTargets)
 
@@ -168,6 +170,7 @@ export default class extends Controller {
     })
   }
 
+  // The zigzag progress line connects each row's completion point around the today line.
   #drawProgressLine(svg, width) {
     if (!this.hasTodayLineTarget) return
 

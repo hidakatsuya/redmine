@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 
+// Folds the subject tree using display row keys, including version and project parents.
 export default class extends Controller {
   static targets = ["row"]
 
@@ -20,6 +21,7 @@ export default class extends Controller {
     this.dispatch("row-toggled", { prefix: "gantt", bubbles: true })
   }
 
+  // Dataset emits parents before descendants, so visibility can flow down the tree.
   #applyVisibility() {
     const state = new Map()
 

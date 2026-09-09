@@ -2,8 +2,18 @@
 
 module Redmine
   class Gantt
+    # Common view data for the subject tree, extra columns and timeline of one row.
     class Row
-      attr_reader :row_key, :depth, :parent_row_key, :subject, :schedule
+      # Stable DOM identity used by folding and SVG connections.
+      attr_reader :row_key
+      # Indentation level in the subject tree.
+      attr_reader :depth
+      # Display parent for folding, which may differ from the record's DB parent.
+      attr_reader :parent_row_key
+      # Text in the left-hand subject cell.
+      attr_reader :subject
+      # Timeline bar data, or nil when the row has no usable schedule.
+      attr_reader :schedule
 
       def initialize(row_key:, depth:, parent_row_key:, expandable:, subject:, schedule:)
         @row_key = row_key

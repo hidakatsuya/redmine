@@ -18,7 +18,17 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 module Redmine
-  # Simple class to handle gantt chart data
+  # Entry point created by GanttsController for one query and display period.
+  #
+  # Components below live in lib/redmine/gantt/ unless a path is given:
+  # - Dataset: records, hierarchy, row order and limits shared by all outputs.
+  # - Chart -> ProjectSection -> Project/Version/Issue (Row): HTML view models.
+  # - Schedule: bar endpoints and progress positions in day units.
+  # - app/views/gantts/_chart.html.erb: chart layout; chart/ holds row/bar partials.
+  # - app/helpers/gantt_helper.rb / gantts/chart_helper.rb: navigation and DOM attributes.
+  # - app/javascript/controllers/gantt/: options, folding, resizing and SVG lines.
+  # - app/assets/stylesheets/gantt.css: screen layout and browser printing.
+  # - Exports::PDF/Image: direct drawing via Dataset and Schedule, separate from HTML.
   class Gantt
     include ERB::Util
     include Redmine::I18n

@@ -2,6 +2,7 @@
 
 module Redmine
   class Gantt
+    # One project and its version/issue rows; child projects have separate sections.
     class ProjectSection
       attr_reader :project, :row_count
 
