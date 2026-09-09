@@ -1,11 +1,12 @@
 <%# Timeline portion shared by all row types: bar layers, endpoint diamonds, label and issue hit area. %>
 <% if row.schedule&.visible? %>
   <%= gantt_schedule_bar_tag(row) %>
-  <%= gantt_schedule_late_bar_tag(row) %>
-  <%= gantt_schedule_done_bar_tag(row, day_width: chart.day_width) %>
 
-  <%= gantt_schedule_marker_tag(row, :start) %>
-  <%= gantt_schedule_marker_tag(row, :end) %>
+  <%= gantt_schedule_late_bar_tag(row) if row.schedule.late? %>
+  <%= gantt_schedule_done_bar_tag(row, day_width: chart.day_width) if row.schedule.progress? %>
+
+  <%= gantt_schedule_start_marker_tag(row) if row.schedule.start_marker? %>
+  <%= gantt_schedule_end_marker_tag(row) if row.schedule.end_marker? %>
 
   <% if row.context_menu? %>
     <div class="tooltip hascontextmenu gantt__bar-hitbox"

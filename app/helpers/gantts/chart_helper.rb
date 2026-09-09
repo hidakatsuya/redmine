@@ -50,16 +50,6 @@ module Gantts
               data: data_attributes.merge('gantt-project-id': project&.id), &
     end
 
-    def gantt_row_expander_tag(row)
-      if row.expandable?
-        tag.button sprite_icon('angle-down', rtl: true),
-                   type: 'button', class: ['gantt__expander', 'icon', 'icon-expanded'],
-                   aria: { expanded: true }, data: { action: 'click->gantt--subjects#toggleRow' }
-      else
-        tag.span '', class: 'gantt__expander-placeholder', aria: { hidden: true }
-      end
-    end
-
     def gantt_scale_segment_tag(segment, &)
       tag.div class: [
         'gantt__scale-segment',
@@ -71,10 +61,6 @@ module Gantts
     def gantt_scale_segment_style(segment)
       ["--gantt-segment-start: #{segment.start_offset}", "--gantt-segment-span: #{segment.span}",
        "--gantt-scale-layer: #{segment.layer}"].join('; ')
-    end
-
-    def gantt_row_style(row)
-      "--gantt-depth: #{row.depth}"
     end
 
     def gantt_row_tag(row, &)
@@ -91,26 +77,6 @@ module Gantts
               }, &
     end
 
-    def gantt_schedule_bar_style(schedule)
-      return unless schedule&.visible?
-
-      ["--gantt-start-unit: #{schedule.bar_start_offset}", "--gantt-end-unit: #{schedule.bar_end_offset}"].join('; ')
-    end
-
-    def gantt_schedule_marker_tag(row, side)
-      return unless row.schedule&.public_send("#{side}_marker?")
-
-      tag.div class: [*gantt_schedule_base_classes(row), 'gantt__marker', "gantt__marker--#{side}",
-                      side == :start ? 'starting' : 'ending'],
-              style: "--gantt-marker-unit: #{row.schedule.public_send("#{side}_offset")}"
-    end
-
-    def gantt_schedule_label_tag(schedule)
-      return unless schedule
-
-      tag.span schedule.label, style: "--gantt-label-unit: #{schedule.bar_end_offset || 0}"
-    end
-
     def gantt_row_subject_tag(row, &)
       tag.div id: row.row_key,
               class: [
@@ -121,29 +87,18 @@ module Gantts
               ], &
     end
 
-    def gantt_schedule_bar_tag(row)
-      return unless row.schedule&.visible?
-
-      tag.div class: [*gantt_schedule_base_classes(row), 'gantt__bar', 'task_todo'],
-              id: "task-todo-#{row.row_key}", style: gantt_schedule_bar_style(row.schedule),
-              data: { 'gantt--chart-target': 'todoBar', row_key: row.row_key }
+    def gantt_row_expander_tag(row)
+      if row.expandable?
+        tag.button sprite_icon('angle-down', rtl: true),
+                   type: 'button', class: ['gantt__expander', 'icon', 'icon-expanded'],
+                   aria: { expanded: true }, data: { action: 'click->gantt--subjects#toggleRow' }
+      else
+        tag.span '', class: 'gantt__expander-placeholder', aria: { hidden: true }
+      end
     end
 
-    def gantt_schedule_done_bar_tag(row, day_width:)
-      return unless row.schedule&.progress?
-
-      end_offset = (row.schedule.progress_offset * day_width).floor.to_f / day_width
-      tag.div class: [*gantt_schedule_base_classes(row), 'gantt__bar', 'gantt__bar--done', 'task_done'],
-              id: "task-done-#{row.row_key}",
-              style: "--gantt-start-unit: #{row.schedule.bar_start_offset}; --gantt-end-unit: #{end_offset}",
-              data: { 'gantt--chart-target': 'doneBar', row_key: row.row_key }
-    end
-
-    def gantt_schedule_late_bar_tag(row)
-      return unless row.schedule&.late?
-
-      tag.div class: [*gantt_schedule_base_classes(row), 'gantt__bar', 'gantt__bar--late', 'task_late'],
-              style: "--gantt-start-unit: #{row.schedule.bar_start_offset}; --gantt-end-unit: #{row.schedule.late_offset}"
+    def gantt_row_style(row)
+      "--gantt-depth: #{row.depth}"
     end
 
     def gantt_row_progress_state(row)
@@ -153,6 +108,43 @@ module Gantts
       return 'behind-start' if row.behind_start_date?
 
       'todo'
+    end
+
+    def gantt_schedule_bar_tag(row)
+      tag.div class: [*gantt_schedule_base_classes(row), 'gantt__bar', 'task_todo'],
+              id: "task-todo-#{row.row_key}", style: gantt_schedule_bar_style(row.schedule),
+              data: { 'gantt--chart-target': 'todoBar', row_key: row.row_key }
+    end
+
+    def gantt_schedule_late_bar_tag(row)
+      tag.div class: [*gantt_schedule_base_classes(row), 'gantt__bar', 'gantt__bar--late', 'task_late'],
+              style: "--gantt-start-unit: #{row.schedule.bar_start_offset}; --gantt-end-unit: #{row.schedule.late_offset}"
+    end
+
+    def gantt_schedule_done_bar_tag(row, day_width:)
+      end_offset = (row.schedule.progress_offset * day_width).floor.to_f / day_width
+      tag.div class: [*gantt_schedule_base_classes(row), 'gantt__bar', 'gantt__bar--done', 'task_done'],
+              id: "task-done-#{row.row_key}",
+              style: "--gantt-start-unit: #{row.schedule.bar_start_offset}; --gantt-end-unit: #{end_offset}",
+              data: { 'gantt--chart-target': 'doneBar', row_key: row.row_key }
+    end
+
+    def gantt_schedule_start_marker_tag(row)
+      tag.div class: [*gantt_schedule_base_classes(row), 'gantt__marker', 'gantt__marker--start', 'starting'],
+              style: "--gantt-marker-unit: #{row.schedule.start_offset}"
+    end
+
+    def gantt_schedule_end_marker_tag(row)
+      tag.div class: [*gantt_schedule_base_classes(row), 'gantt__marker', 'gantt__marker--end', 'ending'],
+              style: "--gantt-marker-unit: #{row.schedule.end_offset}"
+    end
+
+    def gantt_schedule_label_tag(schedule)
+      tag.span schedule.label, style: "--gantt-label-unit: #{schedule.bar_end_offset || 0}"
+    end
+
+    def gantt_schedule_bar_style(schedule)
+      ["--gantt-start-unit: #{schedule.bar_start_offset}", "--gantt-end-unit: #{schedule.bar_end_offset}"].join('; ')
     end
 
     private
