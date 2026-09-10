@@ -7,6 +7,23 @@ class Gantts::ChartHelperTest < Redmine::HelperTest
 
   Segment = Struct.new(:layer, :label, :start_offset, :span, :kind, :non_working_day, :title, keyword_init: true)
 
+  test 'renders each issue value with its column classes and escapes plain text' do
+    column = stub(css_classes: ['status', { 'custom&field': true, unused: false }])
+    first_issue = stub
+    second_issue = stub
+    stubs(:column_content).with(column, first_issue).returns('<first>')
+    stubs(:column_content).with(column, second_issue).returns(tag.span('Second'))
+
+    first = Nokogiri::HTML.fragment(gantt_column_value_tag(column, first_issue)).at_css('div')
+    second = Nokogiri::HTML.fragment(gantt_column_value_tag(column, second_issue)).at_css('div')
+
+    assert_equal 'gantt__cell-value status custom&field', first['class']
+    assert_equal first['class'], second['class']
+    assert_equal '<first>', first.text
+    assert_nil first.at_css('first')
+    assert_equal 'Second', second.at_css('span').text
+  end
+
   test 'wraps view-provided scale content with calendar classes and position' do
     segment = Segment.new(layer: 2, label: 'Mon', start_offset: 3, span: 1,
                           kind: :day_name, non_working_day: true)
@@ -18,6 +35,23 @@ class Gantts::ChartHelperTest < Redmine::HelperTest
     assert_equal gantt_scale_segment_style(segment), cell['style']
     assert_equal '--gantt-segment-start: 3; --gantt-segment-span: 1; --gantt-scale-layer: 2',
                  gantt_scale_segment_style(segment)
+  end
+
+  test 'keeps issue state classes local to each subject and escapes its title' do
+    row = stub(subject: 'A "subject" <tag>', overdue?: true, behind_schedule?: true,
+               closed?: true, behind_start_date?: true, over_end_date?: true)
+    html = gantt_issue_subject_tag(row) { tag.a 'Issue', href: '/issues/1' }
+    subject = Nokogiri::HTML.fragment(html).at_css('span')
+
+    assert_equal 'gantt__subject-text issue-overdue issue-behind-schedule issue-closed behind-start-date over-end-date',
+                 subject['class']
+    assert_equal row.subject, subject['title']
+    assert_equal '/issues/1', subject.at_css('a')['href']
+
+    other = stub(subject: 'Other', overdue?: false, behind_schedule?: false,
+                 closed?: false, behind_start_date?: false, over_end_date?: false)
+    subject = Nokogiri::HTML.fragment(gantt_issue_subject_tag(other) {'Other'}).at_css('span')
+    assert_equal 'gantt__subject-text', subject['class']
   end
 
   test 'builds subject wrapper, semantic classes, row styles, and progress states' do

@@ -56,7 +56,7 @@
         <div class="gantt__sidebar-background" aria-hidden="true"></div>
         <div class="gantt__grid" aria-hidden="true">
           <% gantt.chart.scale_layers.last.segments.each do |segment| %>
-            <%= tag.div class: ['gantt__grid-column', {'is-non-working-day': segment.non_working_day}],
+            <%= tag.div class: segment.non_working_day ? 'gantt__grid-column is-non-working-day' : 'gantt__grid-column',
                         style: gantt_scale_segment_style(segment) %>
           <% end %>
         </div>

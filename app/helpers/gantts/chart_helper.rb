@@ -51,16 +51,14 @@ module Gantts
     end
 
     def gantt_scale_segment_tag(segment, &)
-      tag.div class: [
-        'gantt__scale-segment',
-        "gantt__scale-segment--#{segment.kind.to_s.tr('_', '-')}",
-        { 'is-non-working-day': segment.non_working_day }
-      ], style: gantt_scale_segment_style(segment), title: segment.title, &
+      classes = "gantt__scale-segment gantt__scale-segment--#{segment.kind.to_s.tr('_', '-')}"
+      classes << ' is-non-working-day' if segment.non_working_day
+      tag.div class: classes, style: gantt_scale_segment_style(segment), title: segment.title, &
     end
 
     def gantt_scale_segment_style(segment)
-      ["--gantt-segment-start: #{segment.start_offset}", "--gantt-segment-span: #{segment.span}",
-       "--gantt-scale-layer: #{segment.layer}"].join('; ')
+      "--gantt-segment-start: #{segment.start_offset}; --gantt-segment-span: #{segment.span}; " \
+        "--gantt-scale-layer: #{segment.layer}"
     end
 
     def gantt_row_tag(row, &)
@@ -97,8 +95,25 @@ module Gantts
       end
     end
 
+    def gantt_issue_subject_tag(row, &)
+      classes = +'gantt__subject-text'
+      classes << ' issue-overdue' if row.overdue?
+      classes << ' issue-behind-schedule' if row.behind_schedule?
+      classes << ' issue-closed' if row.closed?
+      classes << ' behind-start-date' if row.behind_start_date?
+      classes << ' over-end-date' if row.over_end_date?
+      tag.span class: classes, title: row.subject, &
+    end
+
     def gantt_row_style(row)
       "--gantt-depth: #{row.depth}"
+    end
+
+    def gantt_column_value_tag(column, issue)
+      # Column classes are shared by every issue row in this rendering.
+      @gantt_column_value_classes ||= {}
+      classes = @gantt_column_value_classes[column] ||= class_names('gantt__cell-value', column.css_classes)
+      tag.div column_content(column, issue), class: classes
     end
 
     def gantt_row_progress_state(row)
