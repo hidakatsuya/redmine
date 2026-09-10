@@ -63,7 +63,7 @@ module Gantts
 
     def gantt_row_tag(row, &)
       tag.div id: "gantt-row-#{row.row_key}",
-              class: ['gantt__row', "gantt__row--#{row.kind}"],
+              class: "gantt__row gantt__row--#{row.kind}",
               style: gantt_row_style(row),
               data: {
                 'gantt--chart-target': 'row',
@@ -76,13 +76,10 @@ module Gantts
     end
 
     def gantt_row_subject_tag(row, &)
-      tag.div id: row.row_key,
-              class: [
-                'gantt__subject',
-                "gantt__subject--#{row.kind}",
-                ROW_SUBJECT_CLASSES.fetch(row.kind),
-                { 'is-open': row.expandable?, hascontextmenu: row.context_menu? }
-              ], &
+      classes = "gantt__subject gantt__subject--#{row.kind} #{ROW_SUBJECT_CLASSES.fetch(row.kind)}"
+      classes << ' is-open' if row.expandable?
+      classes << ' hascontextmenu' if row.context_menu?
+      tag.div id: row.row_key, class: classes, &
     end
 
     def gantt_row_expander_tag(row)
@@ -159,7 +156,7 @@ module Gantts
     end
 
     def gantt_schedule_bar_style(schedule)
-      ["--gantt-start-unit: #{schedule.bar_start_offset}", "--gantt-end-unit: #{schedule.bar_end_offset}"].join('; ')
+      "--gantt-start-unit: #{schedule.bar_start_offset}; --gantt-end-unit: #{schedule.bar_end_offset}"
     end
 
     private
