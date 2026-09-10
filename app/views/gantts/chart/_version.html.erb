@@ -27,6 +27,18 @@
   </div>
 
   <div class="gantt__timeline-cell">
-    <%= render partial: 'gantts/chart/schedule', locals: {row: row, chart: chart} %>
+    <% if row.schedule %>
+      <% if row.schedule.visible? %>
+        <%= gantt_schedule_bar_tag(row) %>
+
+        <%= gantt_schedule_late_bar_tag(row) if row.schedule.late? %>
+        <%= gantt_schedule_done_bar_tag(row, day_width: chart.day_width) if row.schedule.progress? %>
+
+        <%= gantt_schedule_start_marker_tag(row) if row.schedule.start_marker? %>
+        <%= gantt_schedule_end_marker_tag(row) if row.schedule.end_marker? %>
+      <% end %>
+
+      <div class="gantt__label"><%= gantt_schedule_label_tag(row.schedule) %></div>
+    <% end %>
   </div>
 <% end %>

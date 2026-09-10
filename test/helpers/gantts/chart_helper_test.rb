@@ -87,9 +87,11 @@ class Gantts::ChartHelperTest < Redmine::HelperTest
     ].each do |start_on, end_on, endpoints|
       schedule = Redmine::Gantt::Schedule.build(gantt: gantt, start_on: start_on, end_on: end_on,
                                                progress: nil, markers: true, label: 'Project')
-      row = stub(schedule: schedule, issue?: false, kind: :project, row_key: 'project-1', context_menu?: false)
+      row = stub(schedule: schedule, issue?: false, project?: true, kind: :project,
+                 row_key: 'project-1', parent_row_key: nil, depth: 0, context_menu?: false,
+                 expandable?: false, overdue?: false, subject: 'Project', project: projects(:projects_001))
 
-      html = render partial: 'gantts/chart/schedule', locals: { row: row, chart: stub(day_width: 4) }
+      html = render partial: 'gantts/chart/project', locals: { row: row, chart: stub(day_width: 4, selected_columns: []) }
       fragment = Nokogiri::HTML.fragment(html)
       [:start, :end].each do |side|
         marker = fragment.at_css("div.task.project.gantt__marker--#{side}")
