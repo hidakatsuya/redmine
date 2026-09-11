@@ -111,14 +111,14 @@ end
 group :test do
   gem "rails-dom-testing", '>= 2.3.0'
   gem 'mocha', '>= 2.0.1'
-  gem 'simplecov', '~> 1.1.1', :require => false
+  gem 'simplecov', '~> 1.2.0', :require => false
   gem "ffi", platforms: [:mingw, :x64_mingw, :mswin]
   # For running system tests
   gem 'puma'
   gem "capybara", ">= 3.39"
   gem 'selenium-webdriver', '>= 4.11.0'
   # RuboCop
-  gem 'rubocop', '~> 1.90.0', require: false
+  gem 'rubocop', '~> 1.91.0', require: false
   gem 'rubocop-performance', '~> 1.27.0', require: false
   gem 'rubocop-rails', '~> 2.37.0', require: false
   gem 'bundle-audit', require: false
