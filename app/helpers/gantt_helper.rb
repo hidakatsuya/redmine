@@ -50,6 +50,9 @@ module GanttHelper
       # - `gantt--subjects` reports tree expand/collapse.
       # - Window resize triggers a redraw of progress lines and relations.
       action: %w(
+        pointermove->gantt--chart#handlePointerMove
+        pointerleave->gantt--chart#clearRowHighlight
+        scroll@window->gantt--chart#handleWindowScroll:capture
         gantt--options:toggle-display@document->gantt--chart#handleOptionsDisplay
         gantt--options:toggle-relations@document->gantt--chart#handleOptionsRelations
         gantt--options:toggle-progress@document->gantt--chart#handleOptionsProgress

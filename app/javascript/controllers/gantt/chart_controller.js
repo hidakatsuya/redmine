@@ -18,6 +18,11 @@ export default class extends Controller {
   #drawLeft = 0
   #drawPaper = null
   #drawPaperGroup = null
+  #highlightRows = []
+  #highlights = []
+  #highlightedRow = null
+  #pointer = null
+  #highlightGeometry = null
 
   initialize() {
     this.$ = window.jQuery
@@ -30,9 +35,16 @@ export default class extends Controller {
 
     this.#drawProgressLineAndRelations()
     this.#drawSelectedColumns()
+    this.#setupRowHighlight()
   }
 
   disconnect() {
+    this.#highlights.forEach((highlight) => highlight.remove())
+    this.#highlights = []
+    this.#highlightRows = []
+    this.#highlightedRow = null
+    this.#pointer = null
+    this.#highlightGeometry = null
     if (this.#drawPaper) {
       this.#drawPaper.remove()
       this.#drawPaper = null
@@ -60,6 +72,101 @@ export default class extends Controller {
   handleSubjectTreeChanged() {
     this.#drawProgressLineAndRelations()
     this.#drawSelectedColumns()
+    this.#indexHighlightRows()
+  }
+
+  handlePointerMove(event) {
+    if (event.pointerType === "touch" || event.target.closest(".tip, .ui-resizable-handle")) {
+      this.clearRowHighlight()
+      return
+    }
+
+    this.#pointer = {clientX: event.clientX, clientY: event.clientY}
+
+    // Cache pane geometry so moving the bands does not force layout on the next pointer event.
+    if (!this.#highlightGeometry) {
+      this.#highlightGeometry = [this.subjectsContainerTarget, this.ganttAreaTarget].map((area) => ({
+        top: area.getBoundingClientRect().top,
+        height: area.clientHeight,
+        scrollTop: area.scrollTop
+      }))
+    }
+    const bounds = this.#highlightGeometry[event.target.closest("#gantt_area") ? 1 : 0]
+    const top = event.clientY - bounds.top + bounds.scrollTop
+    let low = 0
+    let high = this.#highlightRows.length
+
+    // Search displayed row positions, not record IDs: a shared version can appear more than once.
+    while (low < high) {
+      const middle = (low + high) >>> 1
+      if (this.#highlightRows[middle].top <= top) low = middle + 1
+      else high = middle
+    }
+
+    const row = this.#highlightRows[low - 1]
+    if (!row || top >= row.top + row.height || event.clientY >= bounds.top + bounds.height) {
+      this.clearRowHighlight()
+      return
+    }
+    if (row === this.#highlightedRow) return
+
+    this.#highlightedRow = row
+    this.#highlights.forEach((highlight) => {
+      highlight.style.transform = `translateY(${row.top}px)`
+      highlight.style.blockSize = `${row.height}px`
+      highlight.hidden = false
+    })
+  }
+
+  clearRowHighlight() {
+    this.#pointer = null
+    this.#highlightGeometry = null
+    if (!this.#highlightedRow) return
+
+    this.#highlightedRow = null
+    this.#highlights.forEach((highlight) => { highlight.hidden = true })
+  }
+
+  handleWindowScroll() {
+    this.#highlightGeometry = null
+    if (!this.#pointer) return
+
+    const target = document.elementFromPoint(this.#pointer.clientX, this.#pointer.clientY)
+    if (target && this.element.contains(target)) {
+      this.handlePointerMove({...this.#pointer, target})
+    } else {
+      this.clearRowHighlight()
+    }
+  }
+
+  #setupRowHighlight() {
+    const containers = [
+      this.subjectsContainerTarget,
+      ...this.element.querySelectorAll(".gantt_selected_column_container"),
+      this.ganttAreaTarget.querySelector("form")
+    ]
+    this.#highlights = containers.map((container) => {
+      const highlight = document.createElement("div")
+      highlight.className = "gantt_row_highlight"
+      highlight.hidden = true
+      highlight.setAttribute("aria-hidden", "true")
+      if (container.parentElement === this.ganttAreaTarget) {
+        highlight.style.inlineSize = this.drawAreaTarget.style.width
+      }
+      container.prepend(highlight)
+      return highlight
+    })
+    this.#indexHighlightRows()
+  }
+
+  #indexHighlightRows() {
+    this.clearRowHighlight()
+    this.#highlightRows = Array.from(
+      this.subjectsContainerTarget.querySelectorAll(".gantt_subjects form > div[data-collapse-expand]")
+    ).filter((subject) => subject.style.display !== "none").map((subject) => ({
+      top: parseFloat(subject.style.insetBlockStart),
+      height: JSON.parse(subject.dataset.collapseExpand).top_increment
+    }))
   }
 
   handleOptionsDisplay(event) {
@@ -135,6 +242,7 @@ export default class extends Controller {
   }
 
   #drawSelectedColumns() {
+    this.#highlightGeometry = null
     const $selectedColumns = this.$("td.gantt_selected_column")
     const $subjectsContainer = this.$(".gantt_subjects_container")
 
