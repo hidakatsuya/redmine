@@ -135,14 +135,14 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
     setup_subjects
     @output_buffer = @gantt.subjects
     assert_select "div.project-name a", /#{@project.name}/
-    assert_select 'div.project-name[style*="inset-inline-start:4px"]'
+    assert_select 'div.project-name[style*="padding-inline-start:4px"]'
   end
 
   test "#subjects version should be rendered" do
     setup_subjects
     @output_buffer = @gantt.subjects
     assert_select "div.version-name a", /#{@version.name}/
-    assert_select 'div.version-name[style*="inset-inline-start:24px"]'
+    assert_select 'div.version-name[style*="padding-inline-start:24px"]'
   end
 
   test "#subjects version without assigned issues should not be rendered" do
@@ -160,7 +160,7 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
     @output_buffer = @gantt.subjects
     assert_select "div.issue-subject", /#{@issue.subject}/
     # subject 62px: 44px + 18px(collapse/expand icon's width)
-    assert_select 'div.issue-subject[style*="inset-inline-start:62px"]'
+    assert_select 'div.issue-subject[style*="padding-inline-start:62px"]'
   end
 
   test "#subjects issue assigned to a shared version of another project should be rendered" do
@@ -205,13 +205,13 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
                         )
     @output_buffer = @gantt.subjects
     # parent task 44px
-    assert_select 'div.issue-subject[style*="inset-inline-start:44px"]', /#{@issue.subject}/
+    assert_select 'div.issue-subject[style*="padding-inline-start:44px"]', /#{@issue.subject}/
     # children 64px
-    assert_select 'div.issue-subject[style*="inset-inline-start:64px"]', /child1/
+    assert_select 'div.issue-subject[style*="padding-inline-start:64px"]', /child1/
     # children 76px: 64px + 18px(collapse/expand icon's width)
-    assert_select 'div.issue-subject[style*="inset-inline-start:82px"]', /child2/
+    assert_select 'div.issue-subject[style*="padding-inline-start:82px"]', /child2/
     # grandchild 96px: 84px + 18px(collapse/expand icon's width)
-    assert_select 'div.issue-subject[style*="inset-inline-start:102px"]', /grandchild/, @output_buffer
+    assert_select 'div.issue-subject[style*="padding-inline-start:102px"]', /grandchild/, @output_buffer
   end
 
   test "#lines" do
@@ -255,6 +255,32 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
     # :column => assigned_to
     @output_buffer = @gantt.selected_column_content({:column => @gantt.query.columns.last})
     assert_select "div.issue_assigned_to#assigned_to_issue_#{issue.id}"
+  end
+
+  test "#render_object_row should render chart rows without bars" do
+    setup_subjects
+    @issue.update_columns(:start_date => nil, :due_date => nil)
+    @version.update_columns(:effective_date => nil)
+    # The row counter is normally initialized by render.
+    @gantt.instance_variable_set(:@number_of_rows, 0)
+    options = {:format => :html, :only => :lines, :top => 44, :top_increment => 20, :g_width => 120}
+
+    [@project, @version, @issue].each do |object|
+      @gantt.render_object_row(object, options)
+    end
+
+    @output_buffer = @gantt.instance_variable_get(:@lines)
+    assert_select 'div.gantt_row', 3
+    [@project, @version, @issue].each_with_index do |object, index|
+      assert_select 'div.gantt_row[data-number-of-rows=?]', index.to_s, 1 do |rows|
+        assert_equal "#{object.class.name.downcase}-#{object.id}", rows.first['data-collapse-expand']
+        assert_match(/inset-block-start:\s*#{44 + index * 20}px/, rows.first['style'])
+      end
+    end
+    assert_select 'div.task_todo', 0
+    assert_select 'div.gantt_row[style*="width:120px"]', 3
+    assert_equal 3, @gantt.number_of_rows
+    assert_equal 104, options[:top]
   end
 
   test "#subject_for_project" do
@@ -319,7 +345,7 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
     create_gantt
     @output_buffer = @gantt.subject('subject', :format => :html, :indent => 40)
     # subject 52px: 40px(indent) + 12px(collapse/expand icon's width)
-    assert_select 'div[style*="inset-inline-start:58px"]'
+    assert_select 'div[style*="padding-inline-start:58px"]'
   end
 
   test "#line_for_project" do
@@ -479,18 +505,43 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
     assert_select "div.label", :text => 'line'
   end
 
-  test "#column_content_for_issue" do
+  test "#column_content_for" do
     create_gantt
     @gantt.query.column_names = [:assigned_to]
+    @gantt.stubs(:number_of_rows).returns(7)
+    options = {:column => @gantt.query.columns.last, :top => 64, :format => :html}
+
+    # Issue
     issue = Issue.generate!
     issue.update(:assigned_to_id => issue.assignable_users.first.id)
     @project.issues << issue
-    # :column => assigned_to
-    options = {:column => @gantt.query.columns.last, :top => 64, :format => :html}
-    @output_buffer = @gantt.column_content_for_issue(issue, options)
+    @output_buffer = @gantt.column_content_for(issue, options)
 
     assert_select "div.issue_assigned_to#assigned_to_issue_#{issue.id}"
     assert_includes @output_buffer, column_content(options[:column], issue)
+
+    # Project
+    @output_buffer = @gantt.column_content_for(@project, options)
+
+    assert_select 'div.gantt_row[data-number-of-rows="7"]', :count => 1, :text => '' do |rows|
+      row = rows.first
+      assert_nil row['id']
+      assert_equal "project-#{@project.id}", row['data-collapse-expand']
+      assert_includes row['data-action'], 'pointerenter->gantt--chart#highlightRow'
+      assert_includes row['data-action'], 'pointerleave->gantt--chart#highlightRow'
+    end
+
+    # Version
+    version = Version.generate!(:project => @project)
+    @output_buffer = @gantt.column_content_for(version, options)
+
+    assert_select 'div.gantt_row[data-number-of-rows="7"]', :count => 1, :text => '' do |rows|
+      row = rows.first
+      assert_nil row['id']
+      assert_equal "version-#{version.id}", row['data-collapse-expand']
+      assert_includes row['data-action'], 'pointerenter->gantt--chart#highlightRow'
+      assert_includes row['data-action'], 'pointerleave->gantt--chart#highlightRow'
+    end
   end
 
   def test_sort_issues_no_date

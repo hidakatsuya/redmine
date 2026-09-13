@@ -283,8 +283,20 @@ module Redmine
       def render_object_row(object, options)
         class_name = object.class.name.downcase
         send(:"subject_for_#{class_name}", object, options) unless options[:only] == :lines || options[:only] == :selected_columns
-        send(:"line_for_#{class_name}", object, options) unless options[:only] == :subjects || options[:only] == :selected_columns
-        column_content_for_issue(object, options) if options[:only] == :selected_columns && options[:column].present? && object.is_a?(Issue)
+        unless options[:only] == :subjects || options[:only] == :selected_columns
+          if options[:format] == :html
+            @lines << view.content_tag(
+              :div, '', :class => 'gantt_row',
+              :style => "inset-block-start:#{options[:top]}px;width:#{options[:g_width]}px;",
+              :data => {
+                :collapse_expand => "#{class_name}-#{object.id}", :number_of_rows => number_of_rows,
+                :action => 'pointerenter->gantt--chart#highlightRow pointerleave->gantt--chart#highlightRow'
+              }
+            )
+          end
+          send(:"line_for_#{class_name}", object, options)
+        end
+        column_content_for(object, options) if options[:only] == :selected_columns && options[:column].present?
         options[:top] += options[:top_increment]
         @number_of_rows += 1
         if @max_rows && @number_of_rows >= @max_rows
@@ -354,17 +366,18 @@ module Redmine
         end
       end
 
-      def column_content_for_issue(issue, options)
+      def column_content_for(object, options)
         if options[:format] == :html
           data_options = {}
-          data_options[:collapse_expand] = "issue-#{issue.id}"
+          data_options[:collapse_expand] = "#{object.class.name.downcase}-#{object.id}"
           data_options[:number_of_rows] = number_of_rows
+          data_options[:action] = 'pointerenter->gantt--chart#highlightRow pointerleave->gantt--chart#highlightRow'
           style = "position: absolute;inset-block-start: #{options[:top]}px; font-size: 0.8em;"
           content =
             view.content_tag(
-              :div, view.column_content(options[:column], issue),
-              :style => style, :class => "issue_#{options[:column].name}",
-              :id => "#{options[:column].name}_issue_#{issue.id}",
+              :div, object.is_a?(Issue) ? view.column_content(options[:column], object) : '',
+              :style => style, :class => "gantt_row #{object.class.name.downcase}_#{options[:column].name}",
+              :id => ("#{options[:column].name}_issue_#{object.id}" if object.is_a?(Issue)),
               :data => data_options
             )
           @columns[options[:column].name] << content if @columns.has_key?(options[:column].name)
@@ -813,6 +826,7 @@ module Redmine
               :obj_id => "#{object.class}-#{object.id}".downcase,
             },
             :number_of_rows => number_of_rows,
+            :action => 'pointerenter->gantt--chart#highlightRow pointerleave->gantt--chart#highlightRow',
           }
         end
         if has_children
@@ -827,8 +841,8 @@ module Redmine
             params[:indent] += 18
           end
         end
-        style = "position: absolute;inset-block-start:#{params[:top]}px;inset-inline-start:#{params[:indent]}px;"
-        style += "width:#{params[:subject_width] - params[:indent]}px;" if params[:subject_width]
+        tag_options[:class] = [tag_options[:class], 'gantt_row'].compact.join(' ')
+        style = "position: absolute;inset-block-start:#{params[:top]}px;padding-inline-start:#{params[:indent]}px;"
         tag_options[:style] = style
         output = view.content_tag(:div, content, tag_options)
         @subjects << output
@@ -874,6 +888,7 @@ module Redmine
         if object
           data_options[:collapse_expand] = "#{object.class}-#{object.id}".downcase
           data_options[:number_of_rows] = number_of_rows
+          data_options[:action] = 'pointerenter->gantt--chart#highlightRow pointerleave->gantt--chart#highlightRow'
         end
         css = "task " +
           case object

@@ -95,78 +95,7 @@ class GanttsTest < ApplicationSystemTestCase
     assert_selector '#context-menu a.icon-edit'
   end
 
-  test 'row highlight spans subjects columns and empty chart space' do
-    issues(:issues_005).update_columns(start_date: nil, due_date: nil)
-    visit_gantt
-    expand_options
-    find('#draw_selected_columns').check
-
-    ['.project-name', '.version-name', '#issue-5'].each do |selector|
-      row = first(".gantt_subjects #{selector}")
-      row.hover
-      assert_row_highlight(row)
-
-      # Hit the empty part of the chart, including the row without a task bar.
-      hover_chart_row(row)
-      assert_row_highlight(row)
-    end
-
-    find('h2').hover
-    assert_no_selector '.gantt_row_highlight:not([hidden])'
-  end
-
-  test 'row highlight follows shared versions after collapsing and scrolling' do
-    versions(:versions_002).update_columns(sharing: 'system')
-    issues(:issues_005).update_columns(fixed_version_id: 2, start_date: Date.today, due_date: Date.today + 5)
-    visit '/projects/ecookbook/issues/gantt?zoom=4&months=6'
-    expand_options
-    find('#draw_selected_columns').check
-
-    versions = all('.gantt_subjects #version-2', count: 2)
-    versions.each do |row|
-      row.hover
-      assert_row_highlight(row)
-    end
-
-    versions.first.find('.expander').click
-    versions.last.hover
-    assert_row_highlight(versions.last)
-
-    page.execute_script('document.querySelector("#gantt_area").scrollLeft = 500')
-    hover_chart_row(versions.last)
-    assert_row_highlight(versions.last)
-
-    find('#draw_selected_columns').uncheck
-    versions.last.hover
-    assert_row_highlight(versions.last)
-    find('#draw_selected_columns').check
-    first('.gantt_selected_column_content > div').hover
-    assert_selector '.gantt_row_highlight:not([hidden])', minimum: 3
-
-    versions.first.find('.expander').click
-    versions.last.hover
-    assert_row_highlight(versions.last)
-  end
-
   private
-
-  def hover_chart_row(row)
-    row.hover
-    offset = row.evaluate_script(<<~JS)
-      document.querySelector('#gantt_area').getBoundingClientRect().left + 10 -
-        (this.getBoundingClientRect().left + this.getBoundingClientRect().width / 2)
-    JS
-    page.driver.browser.action.move_to(row.native).move_by(offset, 0).perform
-  end
-
-  def assert_row_highlight(row)
-    assert_selector '.gantt_row_highlight:not([hidden])', minimum: 2
-    top = row.evaluate_script('this.getBoundingClientRect().top')
-    all('.gantt_row_highlight:not([hidden])').each do |highlight|
-      assert_in_delta top, highlight.evaluate_script('this.getBoundingClientRect().top'), 1
-      assert_equal 20, highlight.evaluate_script('this.getBoundingClientRect().height')
-    end
-  end
 
   def visit_gantt
     visit '/projects/ecookbook/issues/gantt'

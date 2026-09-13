@@ -50,9 +50,6 @@ module GanttHelper
       # - `gantt--subjects` reports tree expand/collapse.
       # - Window resize triggers a redraw of progress lines and relations.
       action: %w(
-        pointermove->gantt--chart#handlePointerMove
-        pointerleave->gantt--chart#clearRowHighlight
-        scroll@window->gantt--chart#handleWindowScroll:capture
         gantt--options:toggle-display@document->gantt--chart#handleOptionsDisplay
         gantt--options:toggle-relations@document->gantt--chart#handleOptionsRelations
         gantt--options:toggle-progress@document->gantt--chart#handleOptionsProgress
@@ -82,8 +79,7 @@ module GanttHelper
 
   def gantt_subjects_tag(&)
     data_attributes = {
-      controller: 'gantt--subjects',
-      action: 'gantt--column:resize-column-subjects@document->gantt--subjects#handleResizeColumn'
+      controller: 'gantt--subjects'
     }
     tag.div(class: "gantt_subjects", data: data_attributes, &)
   end

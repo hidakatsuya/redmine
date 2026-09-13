@@ -81,14 +81,23 @@ table.gantt-table td {
   inline-size: 100%;
 }
 
-.gantt_row_highlight {
+.gantt_row,
+.gantt_subjects .gantt_row,
+.gantt_selected_column_content .gantt_row {
   position: absolute;
-  inset-block-start: 0;
   inset-inline-start: 0;
   inline-size: 100%;
-  min-inline-size: 100%;
-  background-color: var(--oc-yellow-0);
-  opacity: 0.8;
+  block-size: 20px;
+  box-sizing: border-box;
+}
+
+.gantt_row_hover {
+  background-color: rgba(var(--oc-yellow-1-rgb), 0.5);
+}
+
+/* Let pointer events reach the rows and bars beneath these drawing-only overlays. */
+#gantt_draw_area,
+#today_line {
   pointer-events: none;
 }
 
