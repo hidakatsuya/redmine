@@ -231,6 +231,8 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
     @project.issues << @issue
     @output_buffer = @gantt.lines
 
+    assert_select 'div.gantt_row_highlight[data-gantt-row-highlight]', 3
+    assert_select 'div.gantt_row_highlight > *', 0
     assert_select "div.project.task_todo"
     assert_select "div.project.starting"
     assert_select "div.project.ending"
@@ -257,30 +259,24 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
     assert_select "div.issue_assigned_to#assigned_to_issue_#{issue.id}"
   end
 
-  test "#render_object_row should render chart rows without bars" do
+  test "#render should render chart highlights without bars" do
     setup_subjects
     @issue.update_columns(:start_date => nil, :due_date => nil)
     @version.update_columns(:effective_date => nil)
-    # The row counter is normally initialized by render.
-    @gantt.instance_variable_set(:@number_of_rows, 0)
-    options = {:format => :html, :only => :lines, :top => 44, :top_increment => 20, :g_width => 120}
+    @gantt.render(:only => :lines, :top => 44, :g_width => 120)
 
-    [@project, @version, @issue].each do |object|
-      @gantt.render_object_row(object, options)
-    end
-
-    @output_buffer = @gantt.instance_variable_get(:@lines)
-    assert_select 'div.gantt_row', 3
+    @output_buffer = @gantt.lines
+    assert_select 'div[data-gantt-row-highlight]', 3
     [@project, @version, @issue].each_with_index do |object, index|
-      assert_select 'div.gantt_row[data-number-of-rows=?]', index.to_s, 1 do |rows|
+      assert_select 'div[data-gantt-row-highlight][data-number-of-rows=?]', index.to_s, 1 do |rows|
         assert_equal "#{object.class.name.downcase}-#{object.id}", rows.first['data-collapse-expand']
         assert_match(/inset-block-start:\s*#{44 + index * 20}px/, rows.first['style'])
       end
     end
     assert_select 'div.task_todo', 0
-    assert_select 'div.gantt_row[style*="width:120px"]', 3
+    assert_select 'div.gantt_row_highlight > *', 0
+    assert_select 'div[data-gantt-row-highlight][style*="width:120px"]', 3
     assert_equal 3, @gantt.number_of_rows
-    assert_equal 104, options[:top]
   end
 
   test "#subject_for_project" do
@@ -523,7 +519,7 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
     # Project
     @output_buffer = @gantt.column_content_for(@project, options)
 
-    assert_select 'div.gantt_row[data-number-of-rows="7"]', :count => 1, :text => '' do |rows|
+    assert_select 'div[data-gantt-row-highlight][data-number-of-rows="7"]', :count => 1, :text => '' do |rows|
       row = rows.first
       assert_nil row['id']
       assert_equal "project-#{@project.id}", row['data-collapse-expand']
@@ -535,7 +531,7 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
     version = Version.generate!(:project => @project)
     @output_buffer = @gantt.column_content_for(version, options)
 
-    assert_select 'div.gantt_row[data-number-of-rows="7"]', :count => 1, :text => '' do |rows|
+    assert_select 'div[data-gantt-row-highlight][data-number-of-rows="7"]', :count => 1, :text => '' do |rows|
       row = rows.first
       assert_nil row['id']
       assert_equal "version-#{version.id}", row['data-collapse-expand']

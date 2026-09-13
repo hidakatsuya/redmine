@@ -286,10 +286,11 @@ module Redmine
         unless options[:only] == :subjects || options[:only] == :selected_columns
           if options[:format] == :html
             @lines << view.content_tag(
-              :div, '', :class => 'gantt_row',
+              :div, '', :class => 'gantt_row_highlight',
               :style => "inset-block-start:#{options[:top]}px;width:#{options[:g_width]}px;",
               :data => {
                 :collapse_expand => "#{class_name}-#{object.id}", :number_of_rows => number_of_rows,
+                :gantt_row_highlight => true,
                 :action => 'pointerenter->gantt--chart#highlightRow pointerleave->gantt--chart#highlightRow'
               }
             )
@@ -371,12 +372,13 @@ module Redmine
           data_options = {}
           data_options[:collapse_expand] = "#{object.class.name.downcase}-#{object.id}"
           data_options[:number_of_rows] = number_of_rows
+          data_options[:gantt_row_highlight] = true
           data_options[:action] = 'pointerenter->gantt--chart#highlightRow pointerleave->gantt--chart#highlightRow'
           style = "position: absolute;inset-block-start: #{options[:top]}px; font-size: 0.8em;"
           content =
             view.content_tag(
               :div, object.is_a?(Issue) ? view.column_content(options[:column], object) : '',
-              :style => style, :class => "gantt_row #{object.class.name.downcase}_#{options[:column].name}",
+              :style => style, :class => "#{object.class.name.downcase}_#{options[:column].name}",
               :id => ("#{options[:column].name}_issue_#{object.id}" if object.is_a?(Issue)),
               :data => data_options
             )
@@ -826,6 +828,7 @@ module Redmine
               :obj_id => "#{object.class}-#{object.id}".downcase,
             },
             :number_of_rows => number_of_rows,
+            :gantt_row_highlight => true,
             :action => 'pointerenter->gantt--chart#highlightRow pointerleave->gantt--chart#highlightRow',
           }
         end
@@ -841,7 +844,6 @@ module Redmine
             params[:indent] += 18
           end
         end
-        tag_options[:class] = [tag_options[:class], 'gantt_row'].compact.join(' ')
         style = "position: absolute;inset-block-start:#{params[:top]}px;padding-inline-start:#{params[:indent]}px;"
         tag_options[:style] = style
         output = view.content_tag(:div, content, tag_options)

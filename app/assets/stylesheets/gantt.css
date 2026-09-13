@@ -81,9 +81,9 @@ table.gantt-table td {
   inline-size: 100%;
 }
 
-.gantt_row,
-.gantt_subjects .gantt_row,
-.gantt_selected_column_content .gantt_row {
+.gantt_row_highlight,
+.gantt_subjects [data-gantt-row-highlight],
+.gantt_selected_column_content [data-gantt-row-highlight] {
   position: absolute;
   inset-inline-start: 0;
   inline-size: 100%;

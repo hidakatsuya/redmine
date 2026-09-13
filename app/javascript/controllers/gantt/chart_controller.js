@@ -46,7 +46,7 @@ export default class extends Controller {
   highlightRow(event) {
     const row = event.currentTarget
 
-    const selector = `.gantt_row[data-number-of-rows="${CSS.escape(row.dataset.numberOfRows)}"]`
+    const selector = `[data-gantt-row-highlight][data-number-of-rows="${CSS.escape(row.dataset.numberOfRows)}"]`
     this.element.querySelectorAll(selector).forEach((element) => {
       element.classList.toggle("gantt_row_hover", event.type === "pointerenter")
     })
