@@ -24,7 +24,7 @@ export default class extends Controller {
       const $element = this.$(element)
       const json = $element.data("collapse-expand")
       const numberOfRows = $element.data("number-of-rows")
-      const barsSelector = `#gantt_area form > div[data-collapse-expand='${json.obj_id}'][data-number-of-rows='${numberOfRows}']`
+      const rowsSelector = `#gantt_area form > .gantt_row[data-collapse-expand='${json.obj_id}'][data-number-of-rows='${numberOfRows}']`
       const selectedColumnsSelector = `td.gantt_selected_column div[data-collapse-expand='${json.obj_id}'][data-number-of-rows='${numberOfRows}']`
 
       if (outOfHierarchy || this.#readIndent($element) <= subjectInlineStart) {
@@ -35,7 +35,7 @@ export default class extends Controller {
         const newTopVal = this.#readBlockStart($element) + totalHeight * (targetShown ? -1 : 1)
 
         this.#setBlockStart($element, newTopVal)
-        this.$([barsSelector, selectedColumnsSelector].join()).each((__, el) => {
+        this.$([rowsSelector, selectedColumnsSelector].join()).each((__, el) => {
           this.#setBlockStart(this.$(el), newTopVal)
         })
 
@@ -51,15 +51,13 @@ export default class extends Controller {
       }
 
       if (isShown === targetShown) {
-        this.$(barsSelector).each((__, task) => {
-          const $task = this.$(task)
+        this.$(rowsSelector).each((__, row) => {
+          const $row = this.$(row)
 
           if (!isShown && willOpen) {
-            this.#setBlockStart($task, targetTop + totalHeight)
+            this.#setBlockStart($row, targetTop + totalHeight)
           }
-          if (!$task.hasClass("tooltip")) {
-            $task.toggle(willOpen)
-          }
+          $row.toggle(willOpen)
         })
 
         this.$(selectedColumnsSelector).each((__, attr) => {

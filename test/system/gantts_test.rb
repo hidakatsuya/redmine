@@ -26,7 +26,7 @@ class GanttsTest < ApplicationSystemTestCase
   end
 
   test 'related issues toggle displays and hides relation arrows' do
-    visit_gantt
+    visit '/projects/ecookbook/issues/gantt?zoom=4'
     expand_options
 
     assert_selector '#gantt_draw_area path', minimum: 1
@@ -38,10 +38,11 @@ class GanttsTest < ApplicationSystemTestCase
     find('#draw_relations').check
 
     assert_selector '#gantt_draw_area path', minimum: 1
+    assert_drawing_stable_after_scroll
   end
 
   test 'progress line toggle draws zigzag line' do
-    visit_gantt
+    visit '/projects/ecookbook/issues/gantt?zoom=4'
     expand_options
 
     find('#draw_relations').uncheck
@@ -50,6 +51,7 @@ class GanttsTest < ApplicationSystemTestCase
     find('#draw_progress_line').check
 
     assert_selector '#gantt_draw_area path', minimum: 1
+    assert_drawing_stable_after_scroll
   end
 
   test 'selected columns can be resized by dragging' do
@@ -69,7 +71,7 @@ class GanttsTest < ApplicationSystemTestCase
     visit_gantt
 
     issue1_subject_row = find('#issue-1')
-    issue1_task_bar = find('div.tooltip[data-collapse-expand="issue-1"]')
+    issue1_task_bar = find('.gantt_row[data-collapse-expand="issue-1"] > div.tooltip')
 
     # Tooltip for issue task bar
     issue1_task_bar.hover
@@ -96,6 +98,20 @@ class GanttsTest < ApplicationSystemTestCase
   end
 
   private
+
+  def assert_drawing_stable_after_scroll
+    paths_before = all('#gantt_draw_area path').pluck('d')
+    scroll_left = page.evaluate_script(<<~JS)
+      (() => {
+        const area = document.querySelector('#gantt_area')
+        area.scrollLeft = 300
+        window.dispatchEvent(new Event('resize'))
+        return area.scrollLeft
+      })()
+    JS
+    assert_operator scroll_left, :>, 0
+    assert_equal paths_before, all('#gantt_draw_area path').pluck('d')
+  end
 
   def visit_gantt
     visit '/projects/ecookbook/issues/gantt'

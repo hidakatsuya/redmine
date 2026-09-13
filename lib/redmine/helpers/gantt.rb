@@ -283,19 +283,7 @@ module Redmine
       def render_object_row(object, options)
         class_name = object.class.name.downcase
         send(:"subject_for_#{class_name}", object, options) unless options[:only] == :lines || options[:only] == :selected_columns
-        unless options[:only] == :subjects || options[:only] == :selected_columns
-          if options[:format] == :html
-            @lines << view.content_tag(
-              :div, '', :class => 'gantt_row',
-              :style => "inset-block-start:#{options[:top]}px;width:#{options[:g_width]}px;",
-              :data => {
-                :collapse_expand => "#{class_name}-#{object.id}", :number_of_rows => number_of_rows,
-                :action => 'pointerenter->gantt--chart#highlightRow pointerleave->gantt--chart#highlightRow'
-              }
-            )
-          end
-          send(:"line_for_#{class_name}", object, options)
-        end
+        send(:"line_for_#{class_name}", object, options) unless options[:only] == :subjects || options[:only] == :selected_columns
         column_content_for(object, options) if options[:only] == :selected_columns && options[:column].present?
         options[:top] += options[:top_increment]
         @number_of_rows += 1
@@ -328,10 +316,14 @@ module Redmine
       end
 
       def line_for_project(project, options)
-        # Skip projects that don't have a start_date or due date
-        if project.is_a?(Project) && project.start_date && project.due_date
+        return unless project.is_a?(Project)
+
+        # Skip bars for projects that don't have a start_date or due date
+        if project.start_date && project.due_date
           label = project.name
           line(project.start_date, project.due_date, nil, true, label, options, project)
+        elsif options[:format] == :html
+          empty_line(options, project)
         end
       end
 
@@ -340,13 +332,17 @@ module Redmine
       end
 
       def line_for_version(version, options)
-        # Skip versions that don't have a start_date
-        if version.is_a?(Version) && version.due_date && version.start_date
+        return unless version.is_a?(Version)
+
+        # Skip bars for versions that don't have a start_date
+        if version.due_date && version.start_date
           label = "#{h(version)} #{h(version.visible_fixed_issues.completed_percent.to_f.round)}%"
           label = h("#{version.project} -") + label unless @project && @project == version.project
           line(version.start_date, version.due_date,
                version.visible_fixed_issues.completed_percent,
                true, label, options, version)
+        elsif options[:format] == :html
+          empty_line(options, version)
         end
       end
 
@@ -355,14 +351,18 @@ module Redmine
       end
 
       def line_for_issue(issue, options)
-        # Skip issues that don't have a due_before (due_date or version's due_date)
-        if issue.is_a?(Issue) && issue.due_before
+        return unless issue.is_a?(Issue)
+
+        # Skip bars for issues that don't have a due_before (due_date or version's due_date)
+        if issue.due_before
           label = issue.status.name.dup
           unless issue.disabled_core_fields.include?('done_ratio')
             label << " #{issue.done_ratio}%"
           end
           markers = !issue.leaf?
           line(issue.start_date, issue.due_before, issue.done_ratio, markers, label, options, issue)
+        elsif options[:format] == :html
+          empty_line(options, issue)
         end
       end
 
@@ -394,6 +394,10 @@ module Redmine
         options[:g_width] ||= (self.date_to - self.date_from + 1) * options[:zoom]
         coords = coordinates(start_date, end_date, done_ratio, options[:zoom])
         send :"#{options[:format]}_task", options, coords, markers, label, object
+      end
+
+      def empty_line(options, object=nil)
+        line(nil, nil, nil, false, nil, options, object)
       end
 
       # Generates a gantt image
@@ -888,7 +892,6 @@ module Redmine
         if object
           data_options[:collapse_expand] = "#{object.class}-#{object.id}".downcase
           data_options[:number_of_rows] = number_of_rows
-          data_options[:action] = 'pointerenter->gantt--chart#highlightRow pointerleave->gantt--chart#highlightRow'
         end
         css = "task " +
           case object
@@ -905,7 +908,7 @@ module Redmine
         if coords[:bar_start] && coords[:bar_end]
           width = coords[:bar_end] - coords[:bar_start] - 2
           style = +""
-          style << "inset-block-start:#{params[:top]}px;"
+          style << "inset-block-start:0px;"
           style << "inset-inline-start:#{coords[:bar_start]}px;"
           style << "width:#{width}px;"
           html_id = "task-todo-issue-#{object.id}" if object.is_a?(Issue)
@@ -920,23 +923,21 @@ module Redmine
               content_opt[:data] = {"rels" => rels.to_json}
             end
           end
-          content_opt[:data].merge!(data_options)
           output << view.content_tag(:div, '&nbsp;'.html_safe, content_opt)
           if coords[:bar_late_end]
             width = coords[:bar_late_end] - coords[:bar_start] - 2
             style = +""
-            style << "inset-block-start:#{params[:top]}px;"
+            style << "inset-block-start:0px;"
             style << "inset-inline-start:#{coords[:bar_start]}px;"
             style << "width:#{width}px;"
             output << view.content_tag(:div, '&nbsp;'.html_safe,
                                        :style => style,
-                                       :class => "#{css} task_late",
-                                       :data => data_options)
+                                       :class => "#{css} task_late")
           end
           if coords[:bar_progress_end]
             width = coords[:bar_progress_end] - coords[:bar_start] - 2
             style = +""
-            style << "inset-block-start:#{params[:top]}px;"
+            style << "inset-block-start:0px;"
             style << "inset-inline-start:#{coords[:bar_start]}px;"
             style << "width:#{width}px;"
             html_id = "task-done-issue-#{object.id}" if object.is_a?(Issue)
@@ -944,63 +945,69 @@ module Redmine
             output << view.content_tag(:div, '&nbsp;'.html_safe,
                                        :style => style,
                                        :class => "#{css} task_done",
-                                       :id => html_id,
-                                       :data => data_options)
+                                       :id => html_id)
           end
         end
         # Renders the markers
         if markers
           if coords[:start]
             style = +""
-            style << "inset-block-start:#{params[:top]}px;"
+            style << "inset-block-start:0px;"
             style << "inset-inline-start:#{coords[:start]}px;"
             style << "width:15px;"
             output << view.content_tag(:div, '&nbsp;'.html_safe,
                                        :style => style,
-                                       :class => "#{css} marker starting",
-                                       :data => data_options)
+                                       :class => "#{css} marker starting")
           end
           if coords[:end]
             style = +""
-            style << "inset-block-start:#{params[:top]}px;"
+            style << "inset-block-start:0px;"
             style << "inset-inline-start:#{coords[:end]}px;"
             style << "width:15px;"
             output << view.content_tag(:div, '&nbsp;'.html_safe,
                                        :style => style,
-                                       :class => "#{css} marker ending",
-                                       :data => data_options)
+                                       :class => "#{css} marker ending")
           end
         end
         # Renders the label on the right
         if label
           style = +""
-          style << "inset-block-start:#{params[:top]}px;"
+          style << "inset-block-start:0px;"
           style << "inset-inline-start:#{(coords[:bar_end] || 0) + 8}px;"
           style << "width:15px;"
           output << view.content_tag(:div, label,
                                      :style => style,
-                                     :class => "#{css} label",
-                                     :data => data_options)
+                                     :class => "#{css} label")
         end
         # Renders the tooltip
         if object.is_a?(Issue) && coords[:bar_start] && coords[:bar_end]
           s = view.content_tag(:span,
                                view.render_issue_tooltip(object).html_safe,
-                               :class => "tip")
+                               :class => "tip",
+                               :data => {
+                                 :action => 'pointerenter->gantt--chart#clearRowHighlight pointerleave->gantt--chart#restoreRowHighlight'
+                               })
           s += view.content_tag(:input, nil, :type => 'checkbox', :name => 'ids[]',
                                 :value => object.id, :style => 'display:none;',
                                 :class => 'toggle-selection')
           style = +""
           style << "position: absolute;"
-          style << "inset-block-start:#{params[:top]}px;"
+          style << "inset-block-start:0px;"
           style << "inset-inline-start:#{coords[:bar_start]}px;"
           style << "width:#{coords[:bar_end] - coords[:bar_start]}px;"
           style << "height:12px;"
           output << view.content_tag(:div, s.html_safe,
                                      :style => style,
-                                     :class => "tooltip hascontextmenu",
-                                     :data => data_options)
+                                     :class => "tooltip hascontextmenu")
         end
+        output = view.content_tag(
+          :div, output.html_safe,
+          :class => 'gantt_row',
+          :style => "inset-block-start:#{params[:top]}px;width:#{params[:g_width]}px;",
+          :data => data_options.merge(
+            :action => 'pointerenter->gantt--chart#highlightRow pointerleave->gantt--chart#highlightRow'
+          )
+        )
         @lines << output
         output
       end

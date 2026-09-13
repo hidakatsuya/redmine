@@ -244,6 +244,17 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
     assert_select "div.task_todo"
     assert_select "div.task.label", /#{@issue.done_ratio}/
     assert_select "div.tooltip", /#{@issue.subject}/
+    assert_select 'div.gantt_row', 3 do |rows|
+      rows.each do |row|
+        assert_includes row['data-action'], 'pointerenter->gantt--chart#highlightRow'
+        assert_select row, '> div', :minimum => 1 do |parts|
+          parts.each do |part|
+            assert_includes part['style'], 'inset-block-start:0px;'
+            assert_nil part['data-action']
+          end
+        end
+      end
+    end
   end
 
   test "#selected_column_content" do
@@ -257,19 +268,13 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
     assert_select "div.issue_assigned_to#assigned_to_issue_#{issue.id}"
   end
 
-  test "#render_object_row should render chart rows without bars" do
+  test "#render should render chart rows without bars" do
     setup_subjects
     @issue.update_columns(:start_date => nil, :due_date => nil)
     @version.update_columns(:effective_date => nil)
-    # The row counter is normally initialized by render.
-    @gantt.instance_variable_set(:@number_of_rows, 0)
-    options = {:format => :html, :only => :lines, :top => 44, :top_increment => 20, :g_width => 120}
+    @gantt.render(:only => :lines, :top => 44, :g_width => 120)
 
-    [@project, @version, @issue].each do |object|
-      @gantt.render_object_row(object, options)
-    end
-
-    @output_buffer = @gantt.instance_variable_get(:@lines)
+    @output_buffer = @gantt.lines
     assert_select 'div.gantt_row', 3
     [@project, @version, @issue].each_with_index do |object, index|
       assert_select 'div.gantt_row[data-number-of-rows=?]', index.to_s, 1 do |rows|
@@ -280,7 +285,6 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
     assert_select 'div.task_todo', 0
     assert_select 'div.gantt_row[style*="width:120px"]', 3
     assert_equal 3, @gantt.number_of_rows
-    assert_equal 104, options[:top]
   end
 
   test "#subject_for_project" do
@@ -354,6 +358,15 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
     @project.stubs(:due_date).returns(today + 7)
     @output_buffer = @gantt.line_for_project(@project, :format => :html)
     assert_select "div.project.label", :text => @project.name
+    @project.stubs(:start_date).returns(nil)
+    @output_buffer = @gantt.line_for_project(@project, :format => :html)
+    assert_select 'div.gantt_row', :count => 1, :text => ''
+    assert_select 'div.gantt_row > *', 0
+
+    @gantt.expects(:empty_line).never
+    [:pdf, :image].each do |format|
+      assert_nil @gantt.line_for_project(@project, :format => format)
+    end
   end
 
   test "#line_for_version" do
@@ -365,6 +378,15 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
     @output_buffer = @gantt.line_for_version(version, :format => :html)
     assert_select "div.version.label", :text => /Foo/
     assert_select "div.version.label", :text => /30%/
+    version.stubs(:due_date).returns(nil)
+    @output_buffer = @gantt.line_for_version(version, :format => :html)
+    assert_select 'div.gantt_row', :count => 1, :text => ''
+    assert_select 'div.gantt_row > *', 0
+
+    @gantt.expects(:empty_line).never
+    [:pdf, :image].each do |format|
+      assert_nil @gantt.line_for_version(version, :format => format)
+    end
   end
 
   test "#line_for_issue" do
@@ -374,6 +396,15 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
     assert_select "div.task.label", :text => /#{issue.status.name}/
     assert_select "div.task.label", :text => /30%/
     assert_select "div.tooltip", /#{issue.subject}/
+    issue.stubs(:due_before).returns(nil)
+    @output_buffer = @gantt.line_for_issue(issue, :format => :html)
+    assert_select 'div.gantt_row', :count => 1, :text => ''
+    assert_select 'div.gantt_row > *', 0
+
+    @gantt.expects(:empty_line).never
+    [:pdf, :image].each do |format|
+      assert_nil @gantt.line_for_issue(issue, :format => format)
+    end
   end
 
   test "#line todo line should start from the starting point on the left" do

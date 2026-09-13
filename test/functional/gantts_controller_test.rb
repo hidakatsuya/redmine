@@ -367,7 +367,7 @@ class GanttsControllerTest < Redmine::ControllerTest
   end
 
   def assert_chart_row(selector, row:, style_substring:)
-    matcher = "#gantt_area #{selector}[data-number-of-rows=?][style*=?]"
+    matcher = "#gantt_area .gantt_row[data-number-of-rows=?] > #{selector}[style*=?]"
     assert_select matcher, row, style_substring, minimum: 1
   end
 
