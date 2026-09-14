@@ -33,8 +33,8 @@ export default class extends Controller {
       const $element = this.$(element)
       const json = $element.data("collapse-expand")
       const numberOfRows = $element.data("number-of-rows")
-      const barsSelector = `#gantt_area form > div[data-collapse-expand='${json.obj_id}'][data-number-of-rows='${numberOfRows}']`
-      const selectedColumnsSelector = `td.gantt_selected_column div[data-collapse-expand='${json.obj_id}'][data-number-of-rows='${numberOfRows}']`
+      const barsSelector = `#gantt_area .gantt-timeline-body form > .gantt_row[data-collapse-expand='${json.obj_id}'][data-number-of-rows='${numberOfRows}']`
+      const selectedColumnsSelector = `.gantt_selected_column .gantt_row[data-collapse-expand='${json.obj_id}'][data-number-of-rows='${numberOfRows}']`
 
       if (outOfHierarchy || this.#readInlineStart($element) <= subjectInlineStart) {
         outOfHierarchy = true
@@ -95,7 +95,9 @@ export default class extends Controller {
 
   #readInlineStart(el) {
     const node = el.jquery ? el[0] : el
-    return parseFloat(window.getComputedStyle(node).getPropertyValue("inset-inline-start"))
+    const style = window.getComputedStyle(node)
+    return parseFloat(style.getPropertyValue("inset-inline-start")) +
+      parseFloat(style.getPropertyValue("padding-inline-start"))
   }
 
   #readBlockStart(el) {
@@ -106,7 +108,7 @@ export default class extends Controller {
   #setBlockStart(el, value) {
     const node = el.jquery ? el[0] : el
     const px = typeof value === "number" ? `${value}px` : value
-    node.style.setProperty("inset-block-start", px)
+    node.style.setProperty("--gantt-row-top", px)
   }
 
   #setIconState(element, open) {
