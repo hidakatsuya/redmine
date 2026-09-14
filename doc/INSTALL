@@ -20,9 +20,10 @@ Optional:
   available in PATH)
 * ImageMagick (to enable thumbnail generation and Gantt export to PNG images)
 * Ghostscript (to enable thumbnail generation for PDF attachments)
-* Pandoc, to enable previews for Microsoft Office (.docx, .xlsx, .pptx) and
-  LibreOffice Writer (.odt) documents. Version 3.8.3 or later is recommended.
-  Older versions of Pandoc supports only .docx and .odt documents.
+* Pandoc, to enable previews for Microsoft Office (.docx, .xlsx, .pptx),
+  LibreOffice Writer (.odt) and Rich Text Format (.rtf) documents.
+  Version 3.8.3 or later is recommended. Older versions of Pandoc supports
+  only .docx and .odt documents (.rtf requires 2.14.2 or later).
 
 Supported browsers:
 The current version of Firefox, Safari, Chrome, Chromium and Microsoft Edge.
@@ -116,6 +117,29 @@ Copy config/additional_environment.rb.example to config/additional_environment.r
 if you need to override Rails environment settings such as log level,
 SSL enforcement, or custom Active Job adapters. Restart the application
 after editing this file.
+
+== Boot cache
+
+Redmine uses bootsnap to speed up its startup. On the first start it writes
+a cache of compiled Ruby files and resolved load paths under tmp/cache, and
+later starts reuse it. The cache can be deleted at any time by running:
+  bin/rails tmp:cache:clear
+
+It is rebuilt on the next start.
+
+If tmp/cache is on slow storage, such as a network file system, reading the
+cache can take longer than the work it saves, and startup gets slower
+instead of faster. In that case, move the cache to local storage by setting
+the environment variable BOOTSNAP_CACHE_DIR to a directory that the user
+running Redmine can write to, for example:
+  BOOTSNAP_CACHE_DIR=/var/cache/redmine bin/rails server -e production
+
+The cache then lives in a "bootsnap" subdirectory there, which
+`bin/rails tmp:cache:clear` does not remove; delete it yourself when you
+want to clear the cache.
+
+Alternatively, start Redmine without the cache by setting DISABLE_BOOTSNAP=1:
+  DISABLE_BOOTSNAP=1 bin/rails server -e production
 
 == Database server configuration
 
