@@ -1,0 +1,47 @@
+<%= gantt_row_tag(row) do %>
+  <div class="gantt__row-information gantt__sidebar-grid">
+    <div class="gantt__subject-cell">
+      <%= gantt_row_subject_tag(row) do %>
+        <%= gantt_row_expander_tag(row) %>
+
+        <%= gantt_issue_subject_tag(row) do %>
+          <%= sprite_icon('issue') unless row.issue.assigned_to -%>
+          <%= assignee_avatar(row.issue.assigned_to, size: 13, class: 'icon-avatar') -%>
+          <%= link_to_issue(row.issue) -%>
+          <%= tag.input type: 'checkbox', name: 'ids[]', value: row.issue.id,
+                        style: 'display:none;', class: 'toggle-selection' %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <% chart.selected_columns.each do |column| %>
+      <div class="gantt__column-cell">
+        <%= gantt_column_value_tag(column, row.issue) %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="gantt__timeline-cell">
+    <% if row.schedule %>
+      <% if row.schedule.visible? %>
+        <%= gantt_schedule_bar_tag(row) %>
+
+        <%= gantt_schedule_late_bar_tag(row) if row.schedule.late? %>
+        <%= gantt_schedule_done_bar_tag(row, day_width: chart.day_width) if row.schedule.progress? %>
+
+        <%= gantt_schedule_start_marker_tag(row) if row.schedule.start_marker? %>
+        <%= gantt_schedule_end_marker_tag(row) if row.schedule.end_marker? %>
+
+        <div class="tooltip hascontextmenu gantt__bar-hitbox"
+             style="<%= gantt_schedule_bar_style(row.schedule) %>"
+             data-row-key="<%= row.row_key %>">
+          <span class="tip"><%= render_issue_tooltip(row.issue) %></span>
+          <%= tag.input type: 'checkbox', name: 'ids[]', value: row.issue.id,
+                        style: 'display:none;', class: 'toggle-selection' %>
+        </div>
+      <% end %>
+
+      <div class="gantt__label"><%= gantt_schedule_label_tag(row.schedule) %></div>
+    <% end %>
+  </div>
+<% end %>

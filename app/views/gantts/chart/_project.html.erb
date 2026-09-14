@@ -1,0 +1,32 @@
+<%= gantt_row_tag(row) do %>
+  <div class="gantt__row-information gantt__sidebar-grid">
+    <div class="gantt__subject-cell">
+      <%= gantt_row_subject_tag(row) do %>
+        <%= gantt_row_expander_tag(row) %>
+
+        <%= tag.span class: ['gantt__subject-text', {'project-overdue': row.overdue?}],
+                     title: row.subject do %>
+          <%= sprite_icon('projects') -%>
+          <%= link_to_project(row.project) %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <% chart.selected_columns.each do %>
+      <div class="gantt__column-cell"></div>
+    <% end %>
+  </div>
+
+  <div class="gantt__timeline-cell">
+    <% if row.schedule %>
+      <% if row.schedule.visible? %>
+        <%= gantt_schedule_bar_tag(row) %>
+
+        <%= gantt_schedule_start_marker_tag(row) if row.schedule.start_marker? %>
+        <%= gantt_schedule_end_marker_tag(row) if row.schedule.end_marker? %>
+      <% end %>
+
+      <div class="gantt__label"><%= gantt_schedule_label_tag(row.schedule) %></div>
+    <% end %>
+  </div>
+<% end %>

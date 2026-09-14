@@ -1,0 +1,76 @@
+Gantt chart implementation
+==========================
+
+Redmine::Gantt handles request parameters and user preferences. It is
+also the entry point for HTML, PDF and PNG. The implementation lives under
+lib/redmine/gantt; the chart entry partial is app/views/gantts/_chart.html.erb,
+with component partials under app/views/gantts/chart. Navigation parameters belong
+in GanttHelper, presentation
+attributes and icons in Gantts::ChartHelper, and browser interaction in the
+Stimulus controllers under app/javascript/controllers/gantt.
+
+Data and display sections
+-------------------------
+
+Dataset owns the IssueQuery result, visible project ancestors, versions,
+relations, ordering and global row limit. each_project yields a project, its
+depth and its available row budget. each_row yields the record, depth, display
+key and parent key. HTML and both exports use this traversal.
+
+ProjectSection represents one project's own rows, including its versions and
+issues. Subprojects are separate sections. Shared versions have a different
+display key in each project, while issue keys remain stable.
+
+  gantt.project_section(project)  # nil when outside the displayed dataset
+  section.each_row { |row| ... }  # build and consume each HTML ViewModel
+  section.row_count              # bounded count without constructing ViewModels
+
+The lookup preserves the full query and global row budget. It does not build
+the other projects' ViewModels, but still loads the query's bounded issue set
+to establish global membership. It is not a separately filtered project query.
+
+Chart contains layout, scale, relations and sections. Sections capture the
+request context, then build frozen typed rows during rendering. They do not
+retain every derived row until the response is complete. The rows convenience
+methods materialize arrays; rendering should use each_row instead.
+
+The source records and their associations are ordinary Active Record objects.
+These objects are request-local, not deeply immutable or suitable for caching
+between requests or users. Pass query and project as initialization keywords. To change the search
+context, construct a new Gantt instead of mutating its query or project.
+
+Each section has its own HTML wrapper (gantt-project-ID). A future partial
+update must also refresh affected ancestor aggregates, shared versions, and
+cross-project relation metadata. A change to membership or the global row limit
+may affect other sections. No Turbo endpoint or mutation API is introduced here.
+
+Outputs
+-------
+
+Schedule calculates date offsets without rounding fractional days. Each output
+converts them to pixels or PDF units and rounds there. PDF and PNG use the same
+date calculation without constructing HTML rows.
+
+Exports::PDF retains ITCPDF pagination and drawing. Exports::Image retains
+MiniMagick drawing and configuration. Exports::Base supplies the common row
+traversal and labels. PNG remains available only when MiniMagick is loaded.
+Browser printing uses the HTML chart and is distinct from PDF export.
+Before printing, visible rows are positioned on a continuous vertical plane so
+page fragmentation cannot move them independently of the SVG relation overlay.
+After printing, the normal flow layout is restored.
+The document takes the chart's intrinsic width when printing so the browser can
+shrink it as it did the old table. The chart keeps its initial row count for
+minimum height, including when rows are collapsed.
+
+Verification
+------------
+
+Run the Gantt unit, helper, controller and system tests. For visual changes,
+compare both screen and browser-print output against the original chart with
+identical data, dates, zoom, columns, relation/progress options and print settings.
+For export changes, compare rendered PDF pages and PNG pixels, including multiple
+pages and shared versions. For memory changes, use identical database snapshots
+and fresh server processes; compare response time, allocations, full-GC RSS and
+peak RSS. Allocation counts alone do not establish a memory improvement.
+
+A Japanese component guide is available in doc/GANTT_ARCHITECTURE.md.

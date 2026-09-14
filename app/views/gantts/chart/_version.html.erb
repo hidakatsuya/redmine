@@ -1,0 +1,44 @@
+<%= gantt_row_tag(row) do %>
+  <div class="gantt__row-information gantt__sidebar-grid">
+    <div class="gantt__subject-cell">
+      <%= gantt_row_subject_tag(row) do %>
+        <%= gantt_row_expander_tag(row) %>
+
+        <%= tag.span class: [
+              'gantt__subject-text',
+              {
+                'version-behind-schedule': row.behind_schedule?,
+                'version-overdue': row.overdue?,
+                'version-closed': row.closed?,
+                'behind-start-date': row.behind_start_date?,
+                'over-end-date': row.over_end_date?
+              }
+            ],
+            title: row.subject do %>
+          <%= sprite_icon('package') -%>
+          <%= link_to_version(row.version) %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <% chart.selected_columns.each do %>
+      <div class="gantt__column-cell"></div>
+    <% end %>
+  </div>
+
+  <div class="gantt__timeline-cell">
+    <% if row.schedule %>
+      <% if row.schedule.visible? %>
+        <%= gantt_schedule_bar_tag(row) %>
+
+        <%= gantt_schedule_late_bar_tag(row) if row.schedule.late? %>
+        <%= gantt_schedule_done_bar_tag(row, day_width: chart.day_width) if row.schedule.progress? %>
+
+        <%= gantt_schedule_start_marker_tag(row) if row.schedule.start_marker? %>
+        <%= gantt_schedule_end_marker_tag(row) if row.schedule.end_marker? %>
+      <% end %>
+
+      <div class="gantt__label"><%= gantt_schedule_label_tag(row.schedule) %></div>
+    <% end %>
+  </div>
+<% end %>
