@@ -33,11 +33,34 @@ export default class extends Controller {
   }
 
   disconnect() {
+    this.clearRowHighlight()
     if (this.#drawPaper) {
       this.#drawPaper.remove()
       this.#drawPaper = null
       this.#drawPaperGroup = null
     }
+  }
+
+  highlightRow(event) {
+    this.#setRowHighlight(event.currentTarget, event.type === "pointerenter")
+  }
+
+  clearRowHighlight() {
+    this.element.querySelectorAll(".gantt_row_hover").forEach((row) => {
+      row.classList.remove("gantt_row_hover")
+    })
+  }
+
+  restoreRowHighlight(event) {
+    const row = event.currentTarget.closest(".gantt_row")
+    if (row?.contains(event.relatedTarget)) this.#setRowHighlight(row, true)
+  }
+
+  #setRowHighlight(row, highlighted) {
+    const selector = `.gantt_row[data-number-of-rows="${CSS.escape(row.dataset.numberOfRows)}"]`
+    this.element.querySelectorAll(selector).forEach((element) => {
+      element.classList.toggle("gantt_row_hover", highlighted)
+    })
   }
 
   showSelectedColumnsValueChanged() {
@@ -182,6 +205,13 @@ export default class extends Controller {
     return relations
   }
 
+  #taskPosition(task) {
+    // Task coordinates are relative to their row; drawing uses the chart's coordinates.
+    const rowPosition = task.parent().position()
+    const position = task.position()
+    return { top: rowPosition.top + position.top, left: rowPosition.left + position.left }
+  }
+
   #drawRelations() {
     const relations = this.#relationsArray
 
@@ -192,11 +222,13 @@ export default class extends Controller {
       if (issueFrom.length === 0 || issueTo.length === 0) return
       if (!issueTo.is(":visible")) return
 
+      const fromPosition = this.#taskPosition(issueFrom)
+      const toPosition = this.#taskPosition(issueTo)
       const issueHeight = issueFrom.height()
-      const issueFromTop = issueFrom.position().top + issueHeight / 2 - this.#drawTop
-      const issueFromRight = issueFrom.position().left + issueFrom.width()
-      const issueToTop = issueTo.position().top + issueHeight / 2 - this.#drawTop
-      const issueToLeft = issueTo.position().left
+      const issueFromTop = fromPosition.top + issueHeight / 2 - this.#drawTop
+      const issueFromRight = fromPosition.left + issueFrom.width()
+      const issueToTop = toPosition.top + issueHeight / 2 - this.#drawTop
+      const issueToLeft = toPosition.left
       const relationConfig = this.issueRelationTypesValue[relation.rel_type] || {}
       const color = relationConfig.color || "#000"
       const landscapeMargin = relationConfig.landscape_margin || 0
@@ -318,7 +350,7 @@ export default class extends Controller {
       if (!$element.is(":visible")) return true
 
       const topPosition = $element.position().top - this.#drawTop
-      const elementHeight = $element.height() / 9
+      const elementHeight = parseFloat($element.css("line-height")) / 9
       const elementTopUpper = topPosition - elementHeight
       const elementTopCenter = topPosition + elementHeight * 3
       const elementTopLower = topPosition + elementHeight * 8
@@ -341,7 +373,7 @@ export default class extends Controller {
             none_stroke: true
           })
         } else if (issueDone.length > 0) {
-          const doneLeft = issueDone.first().position().left + issueDone.first().width()
+          const doneLeft = this.#taskPosition(issueDone.first()).left + issueDone.first().width()
           lines.push({ left: doneLeft, top: elementTopCenter })
         } else if (isBehindStart) {
           lines.push({ left: 0, top: elementTopUpper, is_left_edge: true })
@@ -355,7 +387,7 @@ export default class extends Controller {
           let todoLeft = todayLeft
           const issueTodo = this.$(`#task-todo-${$element.attr("id")}`)
           if (issueTodo.length > 0) {
-            todoLeft = issueTodo.first().position().left
+            todoLeft = this.#taskPosition(issueTodo.first()).left
           }
           lines.push({ left: Math.min(todayLeft, todoLeft), top: elementTopCenter })
         }

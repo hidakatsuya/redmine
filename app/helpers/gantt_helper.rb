@@ -79,8 +79,7 @@ module GanttHelper
 
   def gantt_subjects_tag(&)
     data_attributes = {
-      controller: 'gantt--subjects',
-      action: 'gantt--column:resize-column-subjects@document->gantt--subjects#handleResizeColumn'
+      controller: 'gantt--subjects'
     }
     tag.div(class: "gantt_subjects", data: data_attributes, &)
   end

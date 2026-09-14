@@ -56,7 +56,7 @@ class GanttsControllerTest < Redmine::ControllerTest
     end
 
     # Assert context menu on issues subject and gantt bar
-    assert_select 'div[class=?]', 'issue-subject hascontextmenu'
+    assert_select 'div.issue-subject.hascontextmenu'
     assert_select 'div.tooltip.hascontextmenu' do
       assert_select 'img[class="gravatar avatar"]'
     end
@@ -367,7 +367,7 @@ class GanttsControllerTest < Redmine::ControllerTest
   end
 
   def assert_chart_row(selector, row:, style_substring:)
-    matcher = "#gantt_area #{selector}[data-number-of-rows=?][style*=?]"
+    matcher = "#gantt_area .gantt_row[data-number-of-rows=?] > #{selector}[style*=?]"
     assert_select matcher, row, style_substring, minimum: 1
   end
 
