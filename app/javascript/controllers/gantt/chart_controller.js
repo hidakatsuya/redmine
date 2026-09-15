@@ -135,24 +135,20 @@ export default class extends Controller {
   }
 
   #drawSelectedColumns() {
-    const $selectedColumns = this.$("td.gantt_selected_column")
+    const selectedColumns = this.element.querySelectorAll(".gantt_selected_column")
     const $subjectsContainer = this.$(".gantt_subjects_container")
 
     const isMobileDevice = typeof window.isMobile === "function" && window.isMobile()
 
     if (this.showSelectedColumnsValue) {
       if (isMobileDevice) {
-        $selectedColumns.each((_, element) => {
-          this.$(element).hide()
-        })
+        selectedColumns.forEach((element) => { element.hidden = true })
       } else {
         $subjectsContainer.addClass("draw_selected_columns")
-        $selectedColumns.show()
+        selectedColumns.forEach((element) => { element.hidden = false })
       }
     } else {
-      $selectedColumns.each((_, element) => {
-        this.$(element).hide()
-      })
+      selectedColumns.forEach((element) => { element.hidden = true })
       $subjectsContainer.removeClass("draw_selected_columns")
     }
   }
@@ -193,10 +189,12 @@ export default class extends Controller {
       if (!issueTo.is(":visible")) return
 
       const issueHeight = issueFrom.height()
-      const issueFromTop = issueFrom.position().top + issueHeight / 2 - this.#drawTop
-      const issueFromRight = issueFrom.position().left + issueFrom.width()
-      const issueToTop = issueTo.position().top + issueHeight / 2 - this.#drawTop
-      const issueToLeft = issueTo.position().left
+      const issueFromPosition = this.#taskPosition(issueFrom)
+      const issueToPosition = this.#taskPosition(issueTo)
+      const issueFromTop = issueFromPosition.top + issueHeight / 2 - this.#drawTop
+      const issueFromRight = issueFromPosition.left + issueFrom.width()
+      const issueToTop = issueToPosition.top + issueHeight / 2 - this.#drawTop
+      const issueToLeft = issueToPosition.left
       const relationConfig = this.issueRelationTypesValue[relation.rel_type] || {}
       const color = relationConfig.color || "#000"
       const landscapeMargin = relationConfig.landscape_margin || 0
@@ -341,7 +339,7 @@ export default class extends Controller {
             none_stroke: true
           })
         } else if (issueDone.length > 0) {
-          const doneLeft = issueDone.first().position().left + issueDone.first().width()
+          const doneLeft = this.#taskPosition(issueDone.first()).left + issueDone.first().width()
           lines.push({ left: doneLeft, top: elementTopCenter })
         } else if (isBehindStart) {
           lines.push({ left: 0, top: elementTopUpper, is_left_edge: true })
@@ -355,7 +353,7 @@ export default class extends Controller {
           let todoLeft = todayLeft
           const issueTodo = this.$(`#task-todo-${$element.attr("id")}`)
           if (issueTodo.length > 0) {
-            todoLeft = issueTodo.first().position().left
+            todoLeft = this.#taskPosition(issueTodo.first()).left
           }
           lines.push({ left: Math.min(todayLeft, todoLeft), top: elementTopCenter })
         }
@@ -391,6 +389,19 @@ export default class extends Controller {
           fill: "none"
         })
       }
+    }
+  }
+
+  #taskPosition(task) {
+    const position = task.position()
+    const row = task.closest(".gantt_row")
+
+    if (row.length === 0) return position
+
+    const rowPosition = row.position()
+    return {
+      top: rowPosition.top + position.top,
+      left: rowPosition.left + position.left
     }
   }
 }

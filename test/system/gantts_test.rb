@@ -11,18 +11,18 @@ class GanttsTest < ApplicationSystemTestCase
     visit_gantt
     expand_options
 
-    assert_no_selector 'td#status'
-    assert_no_selector 'td#priority'
-    assert_no_selector 'td#assigned_to'
-    assert_no_selector 'td#updated_on'
+    assert_no_selector 'div#status'
+    assert_no_selector 'div#priority'
+    assert_no_selector 'div#assigned_to'
+    assert_no_selector 'div#updated_on'
 
     find('#draw_selected_columns').check
 
     assert_selector 'div.gantt_subjects_container.draw_selected_columns'
-    assert_selector 'td#status'
-    assert_selector 'td#priority'
-    assert_selector 'td#assigned_to'
-    assert_selector 'td#updated_on'
+    assert_selector 'div#status'
+    assert_selector 'div#priority'
+    assert_selector 'div#assigned_to'
+    assert_selector 'div#updated_on'
   end
 
   test 'related issues toggle displays and hides relation arrows' do
@@ -107,11 +107,11 @@ class GanttsTest < ApplicationSystemTestCase
   end
 
   def column_width(id)
-    page.evaluate_script("document.querySelector('td##{id}').offsetWidth")
+    page.evaluate_script("document.querySelector('div##{id}').offsetWidth")
   end
 
   def drag_column_resizer(column_id, distance)
-    handle = find("td##{column_id} .ui-resizable-e")
+    handle = find("div##{column_id} .ui-resizable-e")
     page.driver.browser.action.click_and_hold(handle.native).move_by(distance, 0).release.perform
   end
 end

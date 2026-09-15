@@ -19,115 +19,214 @@
 }
 
 /***** Gantt chart *****/
-table.gantt-table {
+.gantt-chart {
+  display: flex;
   inline-size: 100%;
-  border-collapse: collapse;
+  block-size: var(--gantt-total-height);
+  overflow: hidden;
   /* Force LTR for Gantt even in RTL locales because column resizing, relation lines, and the progress line don't work in RTL yet. */
   direction: ltr;
 }
 
-table.gantt-table td {
-  padding: 0;
+.gantt-chart [hidden] {
+  display: none !important;
 }
 
-.gantt_hdr {
-  position: absolute;
-  inset-block-start: 0;
-  block-size: 16px;
-  border-block: 1px solid var(--oc-gray-4);
+.gantt_subjects_column,
+.gantt_selected_column {
+  position: relative;
+  flex: 0 0 var(--gantt-column-width);
+  inline-size: var(--gantt-column-width);
+  min-inline-size: 0;
+}
+
+.gantt-chart .ui-resizable-e {
+  cursor: ew-resize;
+}
+
+.gantt-pane {
+  block-size: 100%;
   border-inline-start: 1px solid var(--oc-gray-4);
-  text-align: center;
+  box-sizing: border-box;
   overflow: hidden;
 }
 
-#gantt_area .gantt_hdr {
-  border-inline-start: 0;
+.gantt_subjects_container:not(.draw_selected_columns),
+.gantt_selected_column_container {
   border-inline-end: 1px solid var(--oc-gray-4);
 }
 
-.gantt_subjects_container:not(.draw_selected_columns) .gantt_hdr,
-.last_gantt_selected_column .gantt_hdr {
+.gantt-pane-header {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  block-size: var(--gantt-headers-height);
+  border-block: 1px solid var(--oc-gray-4);
+  box-sizing: border-box;
+  background: var(--oc-gray-1);
+  font-size: 0.8em;
+  overflow: hidden;
+}
+
+.gantt-selected-column-header {
+  padding-inline: 3px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gantt-pane-body {
+  position: relative;
+  block-size: calc(100% - var(--gantt-headers-height));
+}
+
+.gantt-timeline {
+  position: relative;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  block-size: 100%;
+  overflow: auto;
+}
+
+.gantt-timeline-canvas {
+  position: relative;
+  inline-size: var(--gantt-chart-width);
+  min-block-size: 100%;
+}
+
+.gantt-timeline-header-background {
+  position: absolute;
+  inset: 0 0 auto;
+  block-size: var(--gantt-headers-height);
+  border-block: 1px solid var(--oc-gray-4);
+  box-sizing: border-box;
+  background: var(--oc-gray-1);
+}
+
+.gantt-period {
+  position: absolute;
+  z-index: 1;
+  inset-block-start: var(--gantt-period-top);
+  inset-inline-start: var(--gantt-period-start);
+  inline-size: var(--gantt-period-width);
+  block-size: var(--gantt-period-height);
   border-inline-end: 1px solid var(--oc-gray-4);
+  border-block-end: 1px solid var(--oc-gray-4);
+  text-align: center;
+  box-sizing: content-box;
+  overflow: hidden;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
-.last_gantt_selected_column .gantt_selected_column_container,
-.gantt_subjects_container .gantt_subjects * {
-  z-index: 10;
+.gantt-period a {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
 }
 
-.gantt_subjects_column + td {
-  padding: 0;
+.gantt-period-day,
+.gantt-period-day-number {
+  font-size: 0.7em;
 }
 
-.gantt_hdr.nwday {
+.gantt-period-non-working {
   background-color: var(--oc-gray-1);
   color: var(--oc-gray-6);
 }
 
-.gantt_subjects,
-.gantt_selected_column_content.gantt_hdr {
-  font-size: 0.8em;
-  position: relative;
-  z-index: 1;
+.gantt-timeline-body {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: var(--gantt-headers-height);
+  inset-inline-start: 0;
+  inline-size: var(--gantt-chart-width);
+  block-size: calc(var(--gantt-content-height) + 24px);
 }
 
-.gantt_subjects div,
-.gantt_selected_column_content div {
+.gantt_subjects,
+.gantt_selected_column_content {
+  position: relative;
+  block-size: 100%;
+  font-size: 0.8em;
+}
+
+.gantt_subjects form,
+.gantt_selected_column_content,
+.gantt-timeline-body form {
+  position: relative;
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.gantt_row {
+  position: absolute;
+  inset-block-start: var(--gantt-row-top);
+  inset-inline-start: 0;
+  inline-size: 100%;
+  block-size: 20px;
+  box-sizing: border-box;
+}
+
+.gantt_subjects .gantt_row {
+  padding-inline-start: var(--gantt-row-indent);
   line-height: 16px;
-  block-size: 16px;
   overflow: hidden;
   white-space: nowrap;
-  text-overflow: clip;
-  inline-size: 100%;
+}
+
+.gantt_selected_column_content .gantt_row {
+  padding-inline-start: 3px;
+  line-height: 16px;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .gantt_subjects div.issue-subject:hover {
   background-color: var(--oc-yellow-0);
 }
 
-.gantt_selected_column_content > div {
-  padding-inline-start: 3px;
-  box-sizing: border-box;
-}
-
-.gantt_hdr_selected_column_name {
+#today_line {
   position: absolute;
-  inset-block-start: 50%;
-  inline-size: 100%;
-  transform: translateY(-50%);
-  -webkit-transform: translateY(-50%);
-  font-size: 0.8em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  inset-block-start: 1px;
+  inset-inline-start: var(--gantt-today-start);
+  inline-size: 10px;
+  block-size: var(--gantt-content-height);
+  border-inline-start: 1px dashed red;
+  pointer-events: none;
 }
 
-td.gantt_selected_column {
-  inline-size: 50px;
+#gantt_draw_area {
+  position: absolute;
+  inset-block-start: 1px;
+  inset-inline-start: 0;
+  inline-size: var(--gantt-chart-width);
+  block-size: var(--gantt-content-height);
+  pointer-events: none;
 }
 
-td.gantt_selected_column .gantt_hdr,
-.gantt_selected_column_container {
-  inline-size: 49px;
-}
-
-td.gantt_watcher_users_column div.issue_watcher_users ul {
+.gantt_watcher_users_column div.issue_watcher_users ul {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-td.gantt_watcher_users_column div.issue_watcher_users ul li {
+.gantt_watcher_users_column div.issue_watcher_users ul li {
   display: inline;
 }
 
-td.gantt_watcher_users_column div.issue_watcher_users ul li:not(:last-child)::after {
+.gantt_watcher_users_column div.issue_watcher_users ul li:not(:last-child)::after {
   content: ', ';
   white-space: pre;
 }
 
 .task {
   position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: var(--gantt-task-start);
+  inline-size: var(--gantt-task-width);
   block-size: 8px;
   font-size: 0.8em;
   color: var(--oc-gray-6);
@@ -137,8 +236,20 @@ td.gantt_watcher_users_column div.issue_watcher_users ul li:not(:last-child)::af
   white-space: nowrap;
 }
 
+.gantt_row > .tooltip {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: var(--gantt-task-start);
+  inline-size: var(--gantt-task-width);
+  block-size: 12px;
+}
+
+.gantt-chart .toggle-selection {
+  display: none;
+}
+
 .task.label {
-  inline-size: 100%;
+  inline-size: var(--gantt-task-width);
 }
 
 .task.label.project,

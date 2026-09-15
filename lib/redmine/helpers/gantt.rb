@@ -284,7 +284,7 @@ module Redmine
         class_name = object.class.name.downcase
         send(:"subject_for_#{class_name}", object, options) unless options[:only] == :lines || options[:only] == :selected_columns
         send(:"line_for_#{class_name}", object, options) unless options[:only] == :subjects || options[:only] == :selected_columns
-        column_content_for_issue(object, options) if options[:only] == :selected_columns && options[:column].present? && object.is_a?(Issue)
+        column_content_for(object, options) if options[:only] == :selected_columns && options[:column].present?
         options[:top] += options[:top_increment]
         @number_of_rows += 1
         if @max_rows && @number_of_rows >= @max_rows
@@ -316,10 +316,14 @@ module Redmine
       end
 
       def line_for_project(project, options)
+        return unless project.is_a?(Project)
+
         # Skip projects that don't have a start_date or due date
-        if project.is_a?(Project) && project.start_date && project.due_date
+        if project.start_date && project.due_date
           label = project.name
           line(project.start_date, project.due_date, nil, true, label, options, project)
+        elsif options[:format] == :html
+          empty_line(options, project)
         end
       end
 
@@ -328,13 +332,17 @@ module Redmine
       end
 
       def line_for_version(version, options)
+        return unless version.is_a?(Version)
+
         # Skip versions that don't have a start_date
-        if version.is_a?(Version) && version.due_date && version.start_date
+        if version.due_date && version.start_date
           label = "#{h(version)} #{h(version.visible_fixed_issues.completed_percent.to_f.round)}%"
           label = h("#{version.project} -") + label unless @project && @project == version.project
           line(version.start_date, version.due_date,
                version.visible_fixed_issues.completed_percent,
                true, label, options, version)
+        elsif options[:format] == :html
+          empty_line(options, version)
         end
       end
 
@@ -343,33 +351,42 @@ module Redmine
       end
 
       def line_for_issue(issue, options)
+        return unless issue.is_a?(Issue)
+
         # Skip issues that don't have a due_before (due_date or version's due_date)
-        if issue.is_a?(Issue) && issue.due_before
+        if issue.due_before
           label = issue.status.name.dup
           unless issue.disabled_core_fields.include?('done_ratio')
             label << " #{issue.done_ratio}%"
           end
           markers = !issue.leaf?
           line(issue.start_date, issue.due_before, issue.done_ratio, markers, label, options, issue)
+        elsif options[:format] == :html
+          empty_line(options, issue)
         end
       end
 
-      def column_content_for_issue(issue, options)
+      def column_content_for(object, options)
         if options[:format] == :html
-          data_options = {}
-          data_options[:collapse_expand] = "issue-#{issue.id}"
-          data_options[:number_of_rows] = number_of_rows
-          style = "position: absolute;inset-block-start: #{options[:top]}px; font-size: 0.8em;"
+          data_options = {
+            :collapse_expand => "#{object.class.name.downcase}-#{object.id}",
+            :number_of_rows => number_of_rows
+          }
           content =
             view.content_tag(
-              :div, view.column_content(options[:column], issue),
-              :style => style, :class => "issue_#{options[:column].name}",
-              :id => "#{options[:column].name}_issue_#{issue.id}",
+              :div, object.is_a?(Issue) ? view.column_content(options[:column], object) : '',
+              :style => css_variables('gantt-row-top': "#{options[:top] || 0}px"),
+              :class => "gantt_row #{object.class.name.downcase}_#{options[:column].name}",
+              :id => ("#{options[:column].name}_issue_#{object.id}" if object.is_a?(Issue)),
               :data => data_options
             )
           @columns[options[:column].name] << content if @columns.has_key?(options[:column].name)
           content
         end
+      end
+
+      def column_content_for_issue(issue, options)
+        column_content_for(issue, options)
       end
 
       def subject(label, options, object=nil)
@@ -381,6 +398,19 @@ module Redmine
         options[:g_width] ||= (self.date_to - self.date_from + 1) * options[:zoom]
         coords = coordinates(start_date, end_date, done_ratio, options[:zoom])
         send :"#{options[:format]}_task", options, coords, markers, label, object
+      end
+
+      def empty_line(options, object)
+        @lines << view.content_tag(
+          :div,
+          '',
+          :class => 'gantt_row',
+          :style => css_variables('gantt-row-top': "#{options[:top] || 0}px"),
+          :data => {
+            :collapse_expand => "#{object.class}-#{object.id}".downcase,
+            :number_of_rows => number_of_rows
+          }
+        )
       end
 
       # Generates a gantt image
@@ -750,7 +780,7 @@ module Redmine
           s << view.assignee_avatar(issue.assigned_to, :size => 13, :class => 'icon-avatar')
           s << view.link_to_issue(issue).html_safe
           s << view.content_tag(:input, nil, :type => 'checkbox', :name => 'ids[]',
-                                :value => issue.id, :style => 'display:none;',
+                                :value => issue.id,
                                 :class => 'toggle-selection')
           view.content_tag(:span, s, :class => css_classes).html_safe
         when Version
@@ -827,9 +857,11 @@ module Redmine
             params[:indent] += 18
           end
         end
-        style = "position: absolute;inset-block-start:#{params[:top]}px;inset-inline-start:#{params[:indent]}px;"
-        style += "width:#{params[:subject_width] - params[:indent]}px;" if params[:subject_width]
-        tag_options[:style] = style
+        tag_options[:class] = [tag_options[:class], 'gantt_row'].compact.join(' ')
+        tag_options[:style] = css_variables(
+          'gantt-row-top': "#{params[:top] || 0}px",
+          'gantt-row-indent': "#{params[:indent]}px"
+        )
         output = view.content_tag(:div, content, tag_options)
         @subjects << output
         output
@@ -889,10 +921,7 @@ module Redmine
         # Renders the task bar, with progress and late
         if coords[:bar_start] && coords[:bar_end]
           width = coords[:bar_end] - coords[:bar_start] - 2
-          style = +""
-          style << "inset-block-start:#{params[:top]}px;"
-          style << "inset-inline-start:#{coords[:bar_start]}px;"
-          style << "width:#{width}px;"
+          style = task_style(coords[:bar_start], width)
           html_id = "task-todo-issue-#{object.id}" if object.is_a?(Issue)
           html_id = "task-todo-version-#{object.id}" if object.is_a?(Version)
           content_opt = {:style => style,
@@ -909,10 +938,7 @@ module Redmine
           output << view.content_tag(:div, '&nbsp;'.html_safe, content_opt)
           if coords[:bar_late_end]
             width = coords[:bar_late_end] - coords[:bar_start] - 2
-            style = +""
-            style << "inset-block-start:#{params[:top]}px;"
-            style << "inset-inline-start:#{coords[:bar_start]}px;"
-            style << "width:#{width}px;"
+            style = task_style(coords[:bar_start], width)
             output << view.content_tag(:div, '&nbsp;'.html_safe,
                                        :style => style,
                                        :class => "#{css} task_late",
@@ -920,10 +946,7 @@ module Redmine
           end
           if coords[:bar_progress_end]
             width = coords[:bar_progress_end] - coords[:bar_start] - 2
-            style = +""
-            style << "inset-block-start:#{params[:top]}px;"
-            style << "inset-inline-start:#{coords[:bar_start]}px;"
-            style << "width:#{width}px;"
+            style = task_style(coords[:bar_start], width)
             html_id = "task-done-issue-#{object.id}" if object.is_a?(Issue)
             html_id = "task-done-version-#{object.id}" if object.is_a?(Version)
             output << view.content_tag(:div, '&nbsp;'.html_safe,
@@ -936,20 +959,14 @@ module Redmine
         # Renders the markers
         if markers
           if coords[:start]
-            style = +""
-            style << "inset-block-start:#{params[:top]}px;"
-            style << "inset-inline-start:#{coords[:start]}px;"
-            style << "width:15px;"
+            style = task_style(coords[:start], 15)
             output << view.content_tag(:div, '&nbsp;'.html_safe,
                                        :style => style,
                                        :class => "#{css} marker starting",
                                        :data => data_options)
           end
           if coords[:end]
-            style = +""
-            style << "inset-block-start:#{params[:top]}px;"
-            style << "inset-inline-start:#{coords[:end]}px;"
-            style << "width:15px;"
+            style = task_style(coords[:end], 15)
             output << view.content_tag(:div, '&nbsp;'.html_safe,
                                        :style => style,
                                        :class => "#{css} marker ending",
@@ -958,10 +975,7 @@ module Redmine
         end
         # Renders the label on the right
         if label
-          style = +""
-          style << "inset-block-start:#{params[:top]}px;"
-          style << "inset-inline-start:#{(coords[:bar_end] || 0) + 8}px;"
-          style << "width:15px;"
+          style = task_style((coords[:bar_end] || 0) + 8, 15)
           output << view.content_tag(:div, label,
                                      :style => style,
                                      :class => "#{css} label",
@@ -973,21 +987,34 @@ module Redmine
                                view.render_issue_tooltip(object).html_safe,
                                :class => "tip")
           s += view.content_tag(:input, nil, :type => 'checkbox', :name => 'ids[]',
-                                :value => object.id, :style => 'display:none;',
+                                :value => object.id,
                                 :class => 'toggle-selection')
-          style = +""
-          style << "position: absolute;"
-          style << "inset-block-start:#{params[:top]}px;"
-          style << "inset-inline-start:#{coords[:bar_start]}px;"
-          style << "width:#{coords[:bar_end] - coords[:bar_start]}px;"
-          style << "height:12px;"
+          style = task_style(coords[:bar_start], coords[:bar_end] - coords[:bar_start])
           output << view.content_tag(:div, s.html_safe,
                                      :style => style,
                                      :class => "tooltip hascontextmenu",
                                      :data => data_options)
         end
+        output = view.content_tag(
+          :div,
+          output.html_safe,
+          :class => 'gantt_row',
+          :style => css_variables('gantt-row-top': "#{params[:top] || 0}px"),
+          :data => data_options
+        )
         @lines << output
         output
+      end
+
+      def task_style(start, width)
+        css_variables(
+          'gantt-task-start': "#{start}px",
+          'gantt-task-width': "#{width}px"
+        )
+      end
+
+      def css_variables(variables)
+        variables.map {|name, value| "--#{name}:#{value}"}.join(';')
       end
 
       def pdf_task(params, coords, markers, label, object)
