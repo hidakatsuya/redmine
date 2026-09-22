@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# rubocop:disable all
 
 require 'bundler/setup'
 require 'rails'
@@ -13,4 +14,3 @@ class GanttVisualClock < Rails::Railtie
     Setting.gantt_items_limit = ENV['GANTT_VISUAL_LIMIT'] if ENV['GANTT_VISUAL_LIMIT']
   end
 end
-

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# rubocop:disable all
 
 # Run only against the dedicated visual-test database, after schema loading.
 require 'active_record/fixtures'
@@ -114,4 +115,3 @@ manifest = {:projects => projects.transform_values(&:id), :issues => records.tra
             :versions => {:basic => version.id, :shared => shared.id}, :custom_field => cf.id}
 File.write(ENV.fetch('GANTT_VISUAL_MANIFEST'), JSON.pretty_generate(manifest))
 puts "Prepared #{records.size} issues for visual cases"
-
