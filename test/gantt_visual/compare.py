@@ -225,12 +225,20 @@ for case in cases:
     entry['status'] = 'failure' if entry['failures'] else 'baseline-limitation' if entry['limitations'] else ('review' if any(i.get('changed_pixels') or i.get('sizes', [0, 0])[0] != i.get('sizes', [0, 0])[1] for i in entry['images']) else 'identical')
     results.append(entry)
 (root / 'results.json').write_text(json.dumps(results, ensure_ascii=False, indent=2))
-out = ['<!doctype html><meta charset="utf-8"><title>Gantt 回帰テスト</title><style>body{font:14px system-ui;margin:24px}table{border-collapse:collapse}td,th{padding:6px;border:1px solid #ccc}img{max-width:100%}.pair{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}details{margin:12px 0}a{color:#0560af}.failure{color:#b00}.review{color:#875b00}</style><h1>ガント回帰テスト</h1><p>画面・印刷の許容判断は人間の確認待ちです。失敗は意味、操作、出力内容の不一致を示します。</p><p>画面・エクスポート・印刷を同じ形式の旧実装と比較。差分は閾値なし。ピンク色は変化した画素。画像リンクで原寸表示。</p><p><a href="cases.json">ケース定義</a> / <a href="results.json">機械判定</a></p><table><tr><th>ケース</th><th>状態</th><th>画像数</th><th>完全一致</th></tr>']
-labels = {"failure": "失敗", "review": "目視確認待ち", "baseline-limitation": "旧版にも印刷欠落", "identical": "一致"}
+metadata_path = root / 'run-metadata.json'
+metadata = json.loads(metadata_path.read_text()) if metadata_path.exists() else {}
+metadata_items = ''.join(
+    f'<li><strong>{html.escape(str(key))}:</strong> {html.escape(str(value))}</li>'
+    for key, value in metadata.items()
+)
+out = ['<!doctype html><meta charset="utf-8"><title>Gantt visual regression report</title><style>body{font:14px system-ui;margin:24px}table{border-collapse:collapse}td,th{padding:6px;border:1px solid #ccc}img{max-width:100%}.pair{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}details{margin:12px 0}a{color:#0560af}.failure{color:#b00}.review{color:#875b00}</style><h1>Gantt visual regression report</h1>']
+if metadata_items:
+    out.append(f'<h2>Test environment</h2><ul>{metadata_items}</ul>')
+out.append('<h2>Case summary</h2><table><tr><th>Case and coverage</th><th>Images</th><th>Pixel-identical images</th></tr>')
 case_titles = {case['id']: case.get('title', case['id']) for case in cases}
 case_labels = {case_id: case_id if title == case_id else f'{case_id}: {title}' for case_id, title in case_titles.items()}
 for r in results:
-    out.append(f'<tr><td><a href="#{r["id"]}">{html.escape(case_labels[r["id"]])}</a></td><td class="{r["status"]}">{labels[r["status"]]}</td><td>{len(r["images"])}</td><td>{sum(i.get("changed_pixels") == 0 and i["sizes"][0] == i["sizes"][1] for i in r["images"])}</td></tr>')
+    out.append(f'<tr><td><a href="#{r["id"]}">{html.escape(case_labels[r["id"]])}</a></td><td>{len(r["images"])}</td><td>{sum(i.get("changed_pixels") == 0 and i["sizes"][0] == i["sizes"][1] for i in r["images"])}</td></tr>')
 out.append('</table>')
 for r in results:
     out.append(f'<h2 id="{r["id"]}">{html.escape(case_labels[r["id"]])}</h2><pre>{html.escape(chr(10).join(r["failures"] + r["limitations"]))}</pre>')
@@ -239,7 +247,7 @@ for r in results:
     for i in r['images']:
         out.append(f'<details><summary>{html.escape(i["name"])} — {i.get("changed_pixels", "error")} changed pixels ({i.get("ratio", 0):.3%}) size={i.get("sizes", "")} content={i.get("content_boxes", "")}</summary><div class="pair">')
         for key in ['expected', 'actual', 'diff']:
-            if key in i: out.append(f'<div>{dict(expected="変更前", actual="変更後", diff="差分")[key]}<a href="{i[key]}"><img loading="lazy" src="{i[key]}"></a></div>')
+            if key in i: out.append(f'<div>{dict(expected="Baseline", actual="Candidate", diff="Difference")[key]}<a href="{i[key]}"><img loading="lazy" src="{i[key]}"></a></div>')
         out.append('</div></details>')
 (root / 'report.html').write_text(''.join(out))
 for r in results:

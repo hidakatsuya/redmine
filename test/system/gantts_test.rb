@@ -56,6 +56,29 @@ class GanttsTest < ApplicationSystemTestCase
     assert_selector '.gantt_selected_column_content .gantt-row.gantt-column-row', minimum: 1
   end
 
+  test 'row highlight spans subjects selected columns and timeline' do
+    issues(:issues_005).update_columns(:start_date => nil, :due_date => nil)
+    visit_gantt
+    expand_options
+    find('#draw_selected_columns').check
+
+    ['.project-name', '.version-name', '#issue-5'].each do |selector|
+      subject_row = find(".gantt_subjects #{selector}", match: :first)
+      subject_row.hover
+      assert_subject_row_spans_pane subject_row
+      assert_row_highlight subject_row, minimum: 3
+
+      timeline_row = find(
+        ".gantt-timeline-row[data-number-of-rows='#{subject_row['data-number-of-rows']}']"
+      )
+      hover_visible_timeline_row timeline_row
+      assert_row_highlight subject_row, minimum: 3
+    end
+
+    find('h2').hover
+    assert_no_selector '.gantt-row-hover'
+  end
+
   test 'related issues toggle displays and hides relation arrows' do
     visit_gantt
     expand_options
@@ -118,6 +141,16 @@ class GanttsTest < ApplicationSystemTestCase
     within issue1_task_bar do
       assert_selector 'span.tip', text: issue1_subject_row.first('a.issue').text
     end
+    assert_row_highlight issue1_subject_row
+
+    issue1_task_bar.find('span.tip').hover
+    assert_row_highlight issue1_subject_row
+
+    find('.gantt-pane-header').hover
+    assert_no_selector '.gantt-row-hover'
+
+    issue1_subject_row.hover
+    assert_row_highlight issue1_subject_row
 
     # Context menu for issue subject
     issue1_subject_row.right_click
@@ -137,6 +170,46 @@ class GanttsTest < ApplicationSystemTestCase
   end
 
   private
+
+  def assert_row_highlight(row, minimum: 2)
+    number = row['data-number-of-rows']
+    highlighted = all(".gantt-row-hover[data-number-of-rows='#{number}']", minimum: minimum)
+    top = row.evaluate_script('this.getBoundingClientRect().top')
+
+    highlighted.each do |highlight|
+      assert_in_delta top, highlight.evaluate_script('this.getBoundingClientRect().top'), 1
+      assert_equal 20, highlight.evaluate_script('this.getBoundingClientRect().height')
+    end
+  end
+
+  def assert_subject_row_spans_pane(row)
+    bounds = row.evaluate_script(<<~JAVASCRIPT)
+      (() => {
+        const row = this.getBoundingClientRect()
+        const pane = this.closest('.gantt-pane-body').getBoundingClientRect()
+        return {
+          rowLeft: row.left,
+          rowRight: row.right,
+          paneLeft: pane.left,
+          paneRight: pane.right
+        }
+      })()
+    JAVASCRIPT
+
+    assert_in_delta bounds['paneLeft'], bounds['rowLeft'], 0.5
+    assert_in_delta bounds['paneRight'], bounds['rowRight'], 0.5
+  end
+
+  def hover_visible_timeline_row(row)
+    point = row.evaluate_script(<<~JAVASCRIPT)
+      (() => {
+        const timeline = document.querySelector('.gantt-timeline').getBoundingClientRect()
+        const row = this.getBoundingClientRect()
+        return [timeline.left + 10, row.top + (row.height / 2)]
+      })()
+    JAVASCRIPT
+    page.driver.browser.action.move_to_location(*point).perform
+  end
 
   def visit_gantt
     visit '/projects/ecookbook/issues/gantt'
