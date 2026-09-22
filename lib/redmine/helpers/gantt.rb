@@ -845,9 +845,6 @@ module Redmine
           'gantt-row-top': "#{params[:top] || 0}px",
           'gantt-row-indent': "#{params[:indent]}px"
         }
-        if params[:subject_width]
-          row_variables['gantt-row-width'] = "#{params[:subject_width] - params[:indent]}px"
-        end
         tag_options[:style] = css_variables(row_variables)
         output = view.content_tag(:div, content, tag_options)
         @subjects << output

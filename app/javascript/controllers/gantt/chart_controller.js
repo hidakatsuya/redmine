@@ -31,11 +31,35 @@ export default class extends Controller {
   }
 
   disconnect() {
+    this.clearRowHighlight()
+
     if (this.#drawPaper) {
       this.#drawPaper.remove()
       this.#drawPaper = null
       this.#drawPaperGroup = null
     }
+  }
+
+  highlightRow(event) {
+    const row = event.target.closest(".gantt-row")
+    if (!row) return
+
+    this.#setRowHighlight(row, true)
+  }
+
+  unhighlightRow(event) {
+    const row = event.target.closest(".gantt-row")
+    if (!row) return
+
+    if (!row.contains(event.relatedTarget)) {
+      this.#setRowHighlight(row, false)
+    }
+  }
+
+  clearRowHighlight() {
+    this.element.querySelectorAll(".gantt-row-hover").forEach((row) => {
+      row.classList.remove("gantt-row-hover")
+    })
   }
 
   showSelectedColumnsValueChanged() {
@@ -70,6 +94,15 @@ export default class extends Controller {
 
   handleOptionsProgress(event) {
     this.showProgressValue = !!(event.detail && event.detail.enabled)
+  }
+
+  #setRowHighlight(row, highlighted) {
+    const rowNumber = row.dataset.numberOfRows
+    const selector = `.gantt-row[data-number-of-rows="${rowNumber}"]`
+
+    this.element.querySelectorAll(selector).forEach((element) => {
+      element.classList.toggle("gantt-row-hover", highlighted)
+    })
   }
 
   #drawProgressLineAndRelations() {

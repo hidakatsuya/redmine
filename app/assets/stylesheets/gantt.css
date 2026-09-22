@@ -192,8 +192,9 @@
 }
 
 .gantt-subject-row {
-  inset-inline-start: var(--gantt-row-indent);
-  inline-size: var(--gantt-row-width);
+  inset-inline-start: 0;
+  inline-size: 100%;
+  padding-inline-start: var(--gantt-row-indent);
   line-height: 16px;
   overflow: hidden;
   white-space: nowrap;
@@ -208,8 +209,8 @@
   white-space: nowrap;
 }
 
-.gantt_subjects div.issue-subject:hover {
-  background-color: var(--oc-yellow-0);
+.gantt-row-hover {
+  background-color: rgba(var(--oc-yellow-1-rgb), 0.5);
 }
 
 .gantt-timeline-row {
