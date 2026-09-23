@@ -48,6 +48,17 @@ class GanttsTest < ApplicationSystemTestCase
     assert_selector timeline_issue, visible: :visible
   end
 
+  test 'row highlight spans subjects selected columns and timeline' do
+    visit_gantt
+    expand_options
+    find('#draw_selected_columns').check
+
+    find('.gantt-timeline-body .gantt-row[data-gantt-row-key="issue-1"] .tooltip').hover
+
+    assert_selector '[data-gantt-column="subjects"] .gantt-row.gantt-row-hover[data-gantt-row-key="issue-1"]'
+    assert_selector '[data-gantt-column="status"] .gantt-row.gantt-row-hover[data-gantt-row-key="issue-1"]'
+  end
+
   test 'related issues toggle displays and hides relation arrows' do
     visit_gantt
     expand_options
@@ -61,7 +72,6 @@ class GanttsTest < ApplicationSystemTestCase
     find('#draw_relations').check
 
     assert_selector '.gantt-relations path', minimum: 1
-
 
     # Relation arrows should keep the same position when redrawn after horizontal scrolling.
     paths_before_scroll = all('.gantt-relations path').pluck(:d)
@@ -110,7 +120,6 @@ class GanttsTest < ApplicationSystemTestCase
       issue_link_text = issue1_subject_row.first('a.issue', visible: :all).text
       assert_selector '.tip', text: issue_link_text
     end
-
     # Context menu for issue subject
     issue1_subject_row.right_click
 
