@@ -33,6 +33,9 @@ class GanttsControllerTest < Redmine::ControllerTest
     end
     assert_response :success
 
+    assert_select '.gantt-chart[data-action*="mouseover->gantt--chart#highlightRow"]'
+    assert_select '.gantt-chart[data-action*="mouseout->gantt--chart#unhighlightRow"]'
+
     # query form
     assert_select 'form#query_form' do
       assert_select 'div#query_form_with_buttons.hide-when-print' do
