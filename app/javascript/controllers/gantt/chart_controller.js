@@ -131,7 +131,7 @@ export default class extends Controller {
   }
 
   #drawSelectedColumns() {
-    const selectedColumns = this.element.querySelectorAll(".gantt-column:not([data-gantt-column='subjects'])")
+    const selectedColumns = this.element.querySelectorAll(".gantt-selected-column")
 
     const isMobileDevice = typeof window.isMobile === "function" && window.isMobile()
 

@@ -68,6 +68,7 @@ class GanttsControllerTest < Redmine::ControllerTest
       assert_select '> header', 1
       assert_select '> div.gantt-pane-body[data-controller=gantt--subjects] > form > div.gantt-row[data-gantt-row-key]', minimum: 1
     end
+    assert_select 'div.gantt-chart > div.gantt-column.gantt-selected-column[data-gantt-column]', minimum: 1
     assert_select 'div.gantt-chart > div.gantt-timeline > div.gantt-timeline-canvas' do
       assert_select '> header', 1
       assert_select '> div.gantt-timeline-body > form > div.gantt-row[data-gantt-row-key]', minimum: 1

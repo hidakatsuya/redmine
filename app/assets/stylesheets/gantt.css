@@ -69,7 +69,7 @@
   overflow: hidden;
 }
 
-.gantt-column:not([data-gantt-column="subjects"]) .gantt-pane > header {
+.gantt-selected-column .gantt-pane > header {
   padding-inline: 3px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -189,7 +189,7 @@
   white-space: nowrap;
 }
 
-.gantt-column:not([data-gantt-column="subjects"]) .gantt-row {
+.gantt-selected-column .gantt-row {
   inset-inline-start: 0;
   inline-size: 100%;
   padding-inline-start: 3px;
@@ -408,7 +408,7 @@
 
   /* Preserve the row offset when using normal flow. */
   [data-gantt-column="subjects"] .gantt-pane-body form,
-  .gantt-column:not([data-gantt-column="subjects"]) .gantt-pane-body,
+  .gantt-selected-column .gantt-pane-body,
   .gantt-timeline-body form {
     padding-block-start: var(--gantt-content-top);
   }
