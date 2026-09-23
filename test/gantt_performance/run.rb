@@ -159,14 +159,16 @@ def navigation_result(driver, url, server_log_path, log_offset, server_pid)
     const issueIds = [...new Set(Array.from(document.querySelectorAll('a.issue'), link =>
       Number(new URL(link.href).pathname.match(/\/issues\/(\d+)/)?.[1])
     ).filter(Number.isFinite))].sort((a, b) => a - b)
-    const subjects = document.querySelectorAll('.gantt_subjects [data-number-of-rows]')
+    const subjects = document.querySelectorAll(
+      '[data-gantt-column="subjects"] .gantt-pane-body > form > .gantt-row, .gantt_subjects [data-number-of-rows]'
+    )
     const chart = document.querySelector('.gantt-chart, table.gantt-table')
     return {
       navigation,
       fcp_ms: fcp?.startTime,
       issue_ids: issueIds,
       logical_rows: subjects.length,
-      svg_paths: document.querySelectorAll('#gantt_draw_area path').length,
+      svg_paths: document.querySelectorAll('.gantt-relations path, #gantt_draw_area path').length,
       body_html_characters: document.documentElement.outerHTML.length,
       chart_html_characters: chart?.outerHTML.length || 0
     }
