@@ -235,20 +235,12 @@ module GanttHelper
       controller: 'gantt--column',
       action: 'resize@window->gantt--column#handleWindowResize',
       'gantt--column-min-width-value': min_width,
-      'gantt--column-column-value': column_name
+      'gantt-column': column_name
     }
-    options[:class] = ["gantt_#{column_name}_column", options[:class]]
+    options[:class] = ['gantt-column', options[:class]]
 
     options[:style] = gantt_css_variables('gantt-column-width': options.delete(:width)) if options[:width]
 
     tag.div(**options, &)
-  end
-
-  def gantt_subjects_tag(&)
-    data_attributes = {
-      controller: 'gantt--subjects',
-      action: 'gantt--column:resize-column-subjects@document->gantt--subjects#handleResizeColumn'
-    }
-    tag.div(class: "gantt_subjects", data: data_attributes, &)
   end
 end

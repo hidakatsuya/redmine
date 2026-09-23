@@ -37,8 +37,10 @@ async (page) => {
   let cases = await readJson("cases.json")
   if (filter) cases = cases.filter(testCase => new RegExp(filter).test(testCase.id))
 
+  const timelineSelector = ".gantt-timeline, #gantt_area"
+
   const waitUntilStable = async () => {
-    await page.locator("#gantt_area").waitFor({state: "visible", timeout: 30000})
+    await page.locator(timelineSelector).first().waitFor({state: "visible", timeout: 30000})
     await page.evaluate(async () => {
       await document.fonts.ready
       await Promise.all(Array.from(document.images).map(image => image.complete ? Promise.resolve() : new Promise(resolve => {
@@ -50,12 +52,17 @@ async (page) => {
   }
 
   const snapshot = async () => page.evaluate(() => {
-    const nodes = Array.from(document.querySelectorAll(".gantt_subjects > form > div, .gantt_subjects > div"))
+    const nodes = Array.from(document.querySelectorAll(
+      '[data-gantt-column="subjects"] .gantt-pane-body > form > .gantt-row, .gantt_subjects > form > div, .gantt_subjects > div'
+    ))
     let project = null
     const rows = nodes.map(element => {
-      if (!element.dataset.collapseExpand) return null
-      const value = JSON.parse(element.dataset.collapseExpand)
-      const key = value.obj_id || value
+      let key = element.dataset.ganttRowKey
+      if (!key && element.dataset.collapseExpand) {
+        const value = JSON.parse(element.dataset.collapseExpand)
+        key = value.obj_id || value
+      }
+      if (!key) return null
       const [kind, rawId] = String(key).split("-")
       const id = Number(rawId)
       if (kind === "project") project = id
@@ -72,14 +79,14 @@ async (page) => {
       title: document.title,
       url: location.href,
       warning: Boolean(document.querySelector(".warning")),
-      paths: document.querySelectorAll("#gantt_draw_area path").length,
-      today: Boolean(document.querySelector("#today_line")),
+      paths: document.querySelectorAll(".gantt-relations path, #gantt_draw_area path").length,
+      today: Boolean(document.querySelector(".gantt-today, #today_line")),
       selected: Array.from(document.querySelectorAll('input[name="ids[]"]:checked')).map(element => Number(element.value)),
       menu: Boolean(document.querySelector("#context-menu a.icon-edit")),
-      subjectWidth: document.querySelector(".gantt_subjects_column")?.getBoundingClientRect().width,
-      columnWidth: document.querySelector(".gantt_selected_column")?.getBoundingClientRect().width,
+      subjectWidth: document.querySelector('[data-gantt-column="subjects"], .gantt_subjects_column')?.getBoundingClientRect().width,
+      columnWidth: document.querySelector('.gantt-column:not([data-gantt-column="subjects"]), .gantt_selected_column')?.getBoundingClientRect().width,
       timeline: (() => {
-        const element = document.querySelector("#gantt_area")
+        const element = document.querySelector(".gantt-timeline, #gantt_area")
         return element ? {
           clientWidth: element.clientWidth,
           scrollWidth: element.scrollWidth,
@@ -87,23 +94,25 @@ async (page) => {
         } : null
       })(),
       parentMarkers: (() => {
-        const area = document.querySelector("#gantt_area")
+        const area = document.querySelector(".gantt-timeline, #gantt_area")
         if (!area) return []
         const body = area.querySelector(".gantt-timeline-body")
         const legacyHeader = area.querySelector(":scope > .gantt_hdr")
         const bodyTop = body ? body.getBoundingClientRect().top : legacyHeader.getBoundingClientRect().bottom
-        return Array.from(area.querySelectorAll(".task.parent.marker"))
+        return Array.from(area.querySelectorAll(".gantt-task-parent.gantt-task-marker, .task.parent.marker"))
           .filter(element => element.getClientRects().length)
           .map(element => {
-            const rowTasks = Array.from(area.querySelectorAll(
+            const row = element.closest(".gantt-row")
+            const rowTasks = row ? Array.from(row.querySelectorAll(".gantt-task")) : Array.from(area.querySelectorAll(
               `.task[data-collapse-expand='${element.dataset.collapseExpand}'][data-number-of-rows='${element.dataset.numberOfRows}']`
             ))
-            const task = rowTasks.find(candidate => !candidate.classList.contains("marker"))
+            const task = rowTasks.find(candidate => !candidate.classList.contains("marker") && !candidate.classList.contains("gantt-task-marker"))
             const top = Math.round(element.getBoundingClientRect().top - bodyTop)
             const taskTop = task ? Math.round(task.getBoundingClientRect().top - bodyTop) : null
+            const rowIndex = row && body ? Array.from(body.querySelectorAll(":scope > form > .gantt-row")).indexOf(row) : -1
             return {
-              row: element.dataset.numberOfRows,
-              edge: element.classList.contains("starting") ? "start" : "end",
+              row: rowIndex >= 0 ? String(rowIndex) : element.dataset.numberOfRows,
+              edge: element.classList.contains("gantt-task-start") || element.classList.contains("starting") ? "start" : "end",
               top,
               taskTop,
               taskOffset: taskTop === null ? null : top - taskTop
@@ -115,10 +124,10 @@ async (page) => {
   })
 
   const captureTimelineEdges = async (directory, name) => {
-    const area = page.locator("#gantt_area")
+    const area = page.locator(timelineSelector).first()
     const timeline = await area.evaluate(element => {
       return {
-        hasTasks: Array.from(element.querySelectorAll(".task")).some(task => task.getClientRects().length),
+        hasTasks: Array.from(element.querySelectorAll(".gantt-task, .task")).some(task => task.getClientRects().length),
         original: element.scrollLeft,
         scrollable: element.scrollWidth > element.clientWidth + 1
       }
@@ -190,13 +199,13 @@ async (page) => {
       case "scroll":
       case "scroll-to-bars":
       case "scroll-to-ends": {
-        await page.locator("#gantt_area").evaluate((element, operation) => {
+        await page.locator(timelineSelector).first().evaluate((element, operation) => {
           if (operation === "scroll") {
             element.scrollLeft = 250
           } else if (operation === "scroll-to-ends") {
             element.scrollLeft = Number.MAX_SAFE_INTEGER
           } else {
-            const task = element.querySelector(".task")
+            const task = element.querySelector(".gantt-task, .task")
             element.scrollLeft = task ? Math.max(0, task.offsetLeft - element.clientWidth / 3) : 0
           }
         }, action)
@@ -205,7 +214,9 @@ async (page) => {
       case "narrow": await page.setViewportSize({width: 1000, height: 1000}); break
       case "resize-subject":
       case "resize-column": {
-        const selector = action === "resize-subject" ? "[data-gantt--column-column-value=subjects] .ui-resizable-e" : ".gantt_selected_column .ui-resizable-e"
+        const selector = action === "resize-subject"
+          ? "[data-gantt-column=subjects] .ui-resizable-e, [data-gantt--column-column-value=subjects] .ui-resizable-e"
+          : ".gantt-column:not([data-gantt-column=subjects]) .ui-resizable-e, .gantt_selected_column .ui-resizable-e"
         const handle = page.locator(selector).first()
         const box = await handle.boundingBox()
         if (!box) throw new Error(`${action}: resize handle is not visible`)
@@ -217,15 +228,15 @@ async (page) => {
       }
       case "collapse-project":
       case "expand-project":
-        await page.locator(".gantt_subjects .project-name .expander").first().click(); break
+        await page.locator('[data-gantt-column="subjects"] .gantt-row[data-gantt-row-type="project"] .expander, .gantt_subjects .project-name .expander').first().click(); break
       case "collapse-version":
       case "expand-version":
-        await page.locator(".gantt_subjects .version-name .expander").first().click(); break
+        await page.locator('[data-gantt-column="subjects"] .gantt-row[data-gantt-row-type="version"] .expander, .gantt_subjects .version-name .expander').first().click(); break
       case "collapse-parent":
       case "expand-parent":
-        await page.locator(`#issue-${manifest.issues.parent} .expander`).click(); break
+        await page.locator(`[data-gantt-column="subjects"] .gantt-row[data-gantt-row-key="issue-${manifest.issues.parent}"] .expander, #issue-${manifest.issues.parent} .expander`).click(); break
       case "collapse-first-parent":
-        await page.locator(".gantt_subjects .issue-subject.open .expander").first().click(); break
+        await page.locator('[data-gantt-column="subjects"] .gantt-row[data-gantt-row-type="issue"].is-expanded .expander, .gantt_subjects .issue-subject.open .expander').first().click(); break
       case "next": await page.locator(".pagination .next a").click(); break
       case "previous": await page.locator(".pagination .previous a").click(); break
       case "zoom-in": await page.locator("a.icon-zoom-in").click(); break
@@ -239,8 +250,8 @@ async (page) => {
       case "bar-menu":
       case "multi-select": {
         const id = manifest.issues["basic-open"]
-        const subject = page.locator(`#issue-${id}`)
-        const bar = page.locator(`#gantt_area .tooltip[data-collapse-expand='issue-${id}']`).first()
+        const subject = page.locator(`[data-gantt-column="subjects"] .gantt-row[data-gantt-row-key="issue-${id}"], #issue-${id}`).first()
+        const bar = page.locator(`.gantt-timeline .gantt-row[data-gantt-row-key="issue-${id}"] .tooltip, #gantt_area .tooltip[data-collapse-expand='issue-${id}']`).first()
         await page.locator("h2").click()
         if (action === "tooltip") {
           await bar.hover()
@@ -249,7 +260,8 @@ async (page) => {
           await (action === "subject-menu" ? subject : bar).click({button: "right"})
           await page.locator("#context-menu a.icon-edit").waitFor({state: "visible"})
         } else {
-          const other = page.locator(`#issue-${manifest.issues["basic-long"]}`)
+          const otherId = manifest.issues["basic-long"]
+          const other = page.locator(`[data-gantt-column="subjects"] .gantt-row[data-gantt-row-key="issue-${otherId}"], #issue-${otherId}`).first()
           await subject.click()
           await other.click({modifiers: ["ControlOrMeta"]})
         }
