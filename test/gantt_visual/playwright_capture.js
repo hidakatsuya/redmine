@@ -126,21 +126,29 @@ async (page) => {
   const captureTimelineEdges = async (directory, name) => {
     const area = page.locator(timelineSelector).first()
     const timeline = await area.evaluate(element => {
+      const maxScroll = Math.max(0, element.scrollWidth - element.clientWidth)
       return {
+        clientWidth: element.clientWidth,
         hasTasks: Array.from(element.querySelectorAll(".gantt-task, .task")).some(task => task.getClientRects().length),
         original: element.scrollLeft,
-        scrollable: element.scrollWidth > element.clientWidth + 1
+        maxScroll
       }
     })
-    if (!timeline.scrollable || !timeline.hasTasks) return
+    const minimumUsefulScroll = Math.max(16, timeline.clientWidth * 0.1)
+    if (!timeline.hasTasks || timeline.maxScroll < minimumUsefulScroll) return
 
+    const capturedPositions = [timeline.original]
     const screenshotAt = async (suffix, position) => {
       await area.evaluate((element, left) => { element.scrollLeft = left }, position)
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      const actualPosition = await area.evaluate(element => element.scrollLeft)
+      if (capturedPositions.some(captured => Math.abs(captured - actualPosition) <= 1)) return
+
       await page.screenshot({path: `${directory}/${name}-${suffix}.png`, fullPage: false, animations: "disabled"})
+      capturedPositions.push(actualPosition)
     }
     await screenshotAt("timeline-start", 0)
-    await screenshotAt("timeline-end", Number.MAX_SAFE_INTEGER)
+    await screenshotAt("timeline-end", timeline.maxScroll)
     await area.evaluate((element, left) => { element.scrollLeft = left }, timeline.original)
   }
 
