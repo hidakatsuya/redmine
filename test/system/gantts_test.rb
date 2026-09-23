@@ -53,7 +53,7 @@ class GanttsTest < ApplicationSystemTestCase
     expand_options
     find('#draw_selected_columns').check
 
-    assert_selector '.gantt-column:not([data-gantt-column="subjects"]) .gantt-pane-body .gantt-row[data-gantt-row-key]', minimum: 1
+    assert_selector '.gantt-selected-column .gantt-pane-body .gantt-row[data-gantt-row-key]', minimum: 1
   end
 
   test 'tree toggle updates the same logical rows across every pane' do

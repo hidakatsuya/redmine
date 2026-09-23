@@ -84,7 +84,7 @@ async (page) => {
       selected: Array.from(document.querySelectorAll('input[name="ids[]"]:checked')).map(element => Number(element.value)),
       menu: Boolean(document.querySelector("#context-menu a.icon-edit")),
       subjectWidth: document.querySelector('[data-gantt-column="subjects"], .gantt_subjects_column')?.getBoundingClientRect().width,
-      columnWidth: document.querySelector('.gantt-column:not([data-gantt-column="subjects"]), .gantt_selected_column')?.getBoundingClientRect().width,
+      columnWidth: document.querySelector('.gantt-selected-column, .gantt_selected_column')?.getBoundingClientRect().width,
       timeline: (() => {
         const element = document.querySelector(".gantt-timeline, #gantt_area")
         return element ? {
@@ -216,7 +216,7 @@ async (page) => {
       case "resize-column": {
         const selector = action === "resize-subject"
           ? "[data-gantt-column=subjects] .ui-resizable-e, [data-gantt--column-column-value=subjects] .ui-resizable-e"
-          : ".gantt-column:not([data-gantt-column=subjects]) .ui-resizable-e, .gantt_selected_column .ui-resizable-e"
+          : ".gantt-selected-column .ui-resizable-e, .gantt_selected_column .ui-resizable-e"
         const handle = page.locator(selector).first()
         const box = await handle.boundingBox()
         if (!box) throw new Error(`${action}: resize handle is not visible`)
