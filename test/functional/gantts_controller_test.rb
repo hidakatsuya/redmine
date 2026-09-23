@@ -66,9 +66,17 @@ class GanttsControllerTest < Redmine::ControllerTest
     # through data attributes rather than pane-specific row classes.
     assert_select 'div.gantt-chart > div.gantt-column[data-gantt-column=subjects] > section.gantt-pane' do
       assert_select '> header', 1
-      assert_select '> div.gantt-pane-body[data-controller=gantt--subjects] > form > div.gantt-row[data-gantt-row-key]', minimum: 1
+      assert_select(
+        '> div.gantt-pane-body[data-controller=gantt--subjects] > form > div.gantt-row' \
+          '[data-gantt-row-key][data-gantt--subjects-target=row]',
+        minimum: 1
+      )
     end
-    assert_select 'div.gantt-chart > div.gantt-column.gantt-selected-column[data-gantt-column]', minimum: 1
+    assert_select(
+      'div.gantt-chart > div.gantt-column.gantt-selected-column' \
+        '[data-gantt-column][data-gantt--chart-target=selectedColumn]',
+      minimum: 1
+    )
     assert_select 'div.gantt-chart > div.gantt-timeline > div.gantt-timeline-canvas' do
       assert_select '> header', 1
       assert_select '> div.gantt-timeline-body > form > div.gantt-row[data-gantt-row-key]', minimum: 1

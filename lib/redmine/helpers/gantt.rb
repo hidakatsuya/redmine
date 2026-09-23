@@ -877,7 +877,11 @@ module Redmine
         end
         tag_options[:class] << 'gantt-row'
         tag_options[:class] = tag_options[:class].join(' ')
-        tag_options[:data] = params[:gantt_row] if object
+        if object
+          tag_options[:data] = params[:gantt_row].to_h.merge(
+            'gantt--subjects-target': 'row'
+          )
+        end
         row_variables = {
           'gantt-row-top': "#{params[:top] || 0}px",
           'gantt-row-indent': "#{params[:indent]}px"
