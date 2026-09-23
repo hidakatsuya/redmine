@@ -1,12 +1,14 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
+  static targets = ["row"]
+
   handleEntryClick(event) {
     const subject = event.currentTarget.closest(".gantt-row")
     if (!subject) return
 
     const chart = this.element.closest(".gantt-chart")
-    const subjectRows = Array.from(this.element.querySelectorAll(".gantt-row"))
+    const subjectRows = this.rowTargets
     const subjectKey = subject.dataset.ganttRowKey
     const descendantKeys = new Set([subjectKey])
     const descendants = []

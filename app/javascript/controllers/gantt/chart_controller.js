@@ -4,7 +4,7 @@ const RELATION_STROKE_WIDTH = 2
 const SVG_NS = "http://www.w3.org/2000/svg"
 
 export default class extends Controller {
-  static targets = ["relations", "today"]
+  static targets = ["relations", "selectedColumn", "today"]
 
   static values = {
     issueRelationTypes: Object,
@@ -131,18 +131,16 @@ export default class extends Controller {
   }
 
   #drawSelectedColumns() {
-    const selectedColumns = this.element.querySelectorAll(".gantt-selected-column")
-
     const isMobileDevice = typeof window.isMobile === "function" && window.isMobile()
 
     if (this.showSelectedColumnsValue) {
       if (isMobileDevice) {
-        selectedColumns.forEach((element) => { element.hidden = true })
+        this.selectedColumnTargets.forEach((element) => { element.hidden = true })
       } else {
-        selectedColumns.forEach((element) => { element.hidden = false })
+        this.selectedColumnTargets.forEach((element) => { element.hidden = false })
       }
     } else {
-      selectedColumns.forEach((element) => { element.hidden = true })
+      this.selectedColumnTargets.forEach((element) => { element.hidden = true })
     }
   }
 

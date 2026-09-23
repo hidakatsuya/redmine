@@ -30,7 +30,9 @@
       next if Redmine::Helpers::Gantt::UNAVAILABLE_COLUMNS.include?(column.name)
       column_name = column.name.to_s.tr('.', '_')
   %>
-    <%= gantt_column_tag(column_name, min_width: 20, width: '50px', class: 'gantt-selected-column', hidden: !query.draw_selected_columns) do %>
+    <%= gantt_column_tag(column_name, min_width: 20, width: '50px', class: 'gantt-selected-column',
+                         hidden: !query.draw_selected_columns,
+                         data: {'gantt--chart-target': 'selectedColumn'}) do %>
       <section class="gantt-pane">
         <header><%= column.caption %></header>
         <div class="gantt-pane-body">

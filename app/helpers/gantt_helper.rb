@@ -231,12 +231,12 @@ module GanttHelper
   end
 
   def gantt_column_tag(column_name, min_width: nil, **options, &)
-    options[:data] = {
+    options[:data] = options.fetch(:data, {}).merge(
       controller: 'gantt--column',
       action: 'resize@window->gantt--column#handleWindowResize',
       'gantt--column-min-width-value': min_width,
       'gantt-column': column_name
-    }
+    )
     options[:class] = ['gantt-column', options[:class]]
 
     options[:style] = gantt_css_variables('gantt-column-width': options.delete(:width)) if options[:width]
