@@ -32,6 +32,38 @@
   display: none !important;
 }
 
+/* PoC: a viewport header mirroring the original column widths and scroll. */
+.gantt-sticky-header {
+  position: fixed;
+  z-index: 40;
+  overflow: hidden;
+  direction: ltr;
+  background: var(--oc-gray-1);
+  box-shadow: 0 2px 4px rgba(var(--oc-black-rgb), 0.15);
+}
+
+.gantt-sticky-header[hidden],
+.gantt-sticky-header [hidden] {
+  display: none !important;
+}
+
+.gantt-sticky-header > .gantt-column,
+.gantt-sticky-header-timeline {
+  position: absolute;
+  inset-block-start: 0;
+  block-size: 100%;
+  overflow: hidden;
+}
+
+.gantt-sticky-header .gantt-pane,
+.gantt-sticky-header .gantt-timeline-canvas {
+  block-size: 100%;
+}
+
+.gantt-sticky-header .gantt-period-spans-body {
+  block-size: 100%;
+}
+
 .gantt-column {
   position: relative;
   flex: 0 0 var(--gantt-column-width);
@@ -386,6 +418,10 @@
 }
 
 @media print {
+  .gantt-sticky-header {
+    display: none !important;
+  }
+
   /* Include the full timeline in the browser print layout. */
   body.controller-gantts.action-show #wrapper {
     overflow: visible;

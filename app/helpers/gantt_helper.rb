@@ -197,7 +197,7 @@ module GanttHelper
 
   def gantt_chart_tag(query, layout, &block)
     data_attributes = {
-      controller: 'gantt--chart',
+      controller: 'gantt--chart gantt--sticky-header',
       # Events emitted by child controllers the chart listens to.
       # - `gantt--options` toggles checkboxes under Options.
       # - `gantt--subjects` reports tree expand/collapse.
