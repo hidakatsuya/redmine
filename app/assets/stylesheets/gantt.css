@@ -49,6 +49,8 @@
   direction: ltr;
   background: var(--oc-gray-1);
   box-shadow: 0 2px 4px rgba(var(--oc-black-rgb), 0.15);
+  /* Keep the shadow below the header, clipping its top and sides. */
+  clip-path: inset(0 0 -6px);
 }
 
 .gantt-sticky-header[hidden],
