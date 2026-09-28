@@ -46,7 +46,7 @@
   position: relative;
   block-size: 100%;
   overflow: hidden;
-  box-shadow: 0 5px 6px -4px rgba(var(--oc-black-rgb), 0.25);
+  box-shadow: 0 5px 6px -4px rgba(var(--oc-black-rgb), 0.20);
 }
 
 .gantt-sticky-header[hidden],
