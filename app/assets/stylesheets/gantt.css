@@ -41,7 +41,7 @@
   direction: ltr;
   /* Mask scrolling rows in the space above the copied header. */
   background: var(--oc-white);
-  box-shadow: 0 4px 4px -4px rgba(var(--oc-black-rgb), 0.15);
+  box-shadow: 0 5px 6px -4px rgba(var(--oc-black-rgb), 0.25);
 }
 
 .gantt-sticky-header[hidden],
@@ -64,6 +64,16 @@
 
 .gantt-sticky-header .gantt-period-spans-body {
   block-size: 100%;
+}
+
+.gantt-sticky-header-timeline::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset-inline: 0;
+  inset-block-end: 0;
+  border-block-end: 1px solid var(--oc-gray-4);
+  pointer-events: none;
 }
 
 .gantt-column {
