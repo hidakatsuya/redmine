@@ -83,9 +83,11 @@ export default class extends Controller {
     const chart = this.element.getBoundingClientRect()
     const header = this.sourceHeader.getBoundingClientRect()
     const content = this.element.closest("#content").getBoundingClientRect()
+    const canvas = this.timeline.firstElementChild.getBoundingClientRect()
+    const top = parseFloat(getComputedStyle(this.overlay).getPropertyValue("--gantt-sticky-top")) || 0
     const left = Math.max(0, chart.left, content.left)
-    const right = Math.min(document.documentElement.clientWidth, chart.right, content.right)
-    const visible = header.top < 0 && chart.bottom > 0 && right > left
+    const right = Math.min(document.documentElement.clientWidth, chart.right, content.right, canvas.right)
+    const visible = header.top < top && chart.bottom > top && right > left
     if (!visible) {
       this.overlay.hidden = true
       return
@@ -95,7 +97,7 @@ export default class extends Controller {
     const columnRects = this.columns.map(({ source }) => source.getBoundingClientRect())
     const timeline = this.timeline.getBoundingClientRect()
     const timelineWidth = this.timeline.clientWidth
-    const canvasWidth = this.timeline.firstElementChild.getBoundingClientRect().width
+    const canvasWidth = canvas.width
     const scrollLeft = this.timeline.scrollLeft
     const style = getComputedStyle(this.element)
     this.overlay.hidden = false
@@ -103,7 +105,7 @@ export default class extends Controller {
     this.overlay.style.fontFamily = style.fontFamily
     this.overlay.style.setProperty("--gantt-headers-height", `${header.height}px`)
     this.overlay.style.left = `${left}px`
-    this.overlay.style.top = `${Math.min(0, chart.bottom - header.height)}px`
+    this.overlay.style.top = `${Math.min(top, chart.bottom - header.height)}px`
     this.overlay.style.width = `${right - left}px`
     this.overlay.style.height = `${header.height}px`
 

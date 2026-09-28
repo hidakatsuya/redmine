@@ -851,6 +851,10 @@
     inset-block-start: 64px;
   }
 
+  .gantt-sticky-header {
+    --gantt-sticky-top: 64px;
+  }
+
   /* Prevent content from being hidden behind #sticky-issue-header and project-jump when scrolling via anchor links. */
   .controller-issues.action-show div.wiki a[name],
   .controller-issues.action-show #history div[id^="note-"],
