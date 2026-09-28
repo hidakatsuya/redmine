@@ -10,7 +10,6 @@ export default class extends Controller {
   #canvasCopy = null
   #content = null
   #frame = null
-  #resizeObserver = null
   #wheelListener = null
 
   connect() {
@@ -19,9 +18,6 @@ export default class extends Controller {
     // The body-level copy is outside this controller's scope.
     this.#wheelListener = this.#handleWheel.bind(this)
     this.#timelineCopy.addEventListener("wheel", this.#wheelListener, { passive: false })
-    this.#resizeObserver = new ResizeObserver(() => this.scheduleUpdate())
-    const observedElements = [this.element, this.timelineTarget, this.timelineHeaderTarget, ...this.columnTargets]
-    observedElements.forEach((element) => this.#resizeObserver.observe(element))
     this.scheduleUpdate()
   }
 
@@ -76,7 +72,6 @@ export default class extends Controller {
 
   disconnect() {
     this.#timelineCopy?.removeEventListener("wheel", this.#wheelListener)
-    this.#resizeObserver?.disconnect()
     if (this.#frame) cancelAnimationFrame(this.#frame)
     this.#overlay?.remove()
     this.#frame = null

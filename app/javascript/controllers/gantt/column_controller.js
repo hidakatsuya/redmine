@@ -45,6 +45,7 @@ export default class extends Controller {
       resize: (_event, ui) => {
         this.element.style.setProperty("--gantt-column-width", `${ui.size.width}px`)
         this.element.style.removeProperty("width")
+        this.dispatch("resize")
       }
     }
 

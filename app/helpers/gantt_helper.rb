@@ -203,7 +203,7 @@ module GanttHelper
       # - `gantt--subjects` reports tree expand/collapse.
       # - Mouse events synchronize the hovered row across the chart panes.
       # - Window resize triggers a redraw of progress lines and relations.
-      # - Captured scroll events and window resize update the fixed header.
+      # - Column layout changes, captured scroll events and window resize update the fixed header.
       action: %w(
         gantt--options:toggle-display@document->gantt--chart#handleOptionsDisplay
         gantt--options:toggle-relations@document->gantt--chart#handleOptionsRelations
@@ -212,6 +212,8 @@ module GanttHelper
         mouseover->gantt--chart#highlightRow
         mouseout->gantt--chart#unhighlightRow
         resize@window->gantt--chart#handleWindowResize
+        gantt--column:resize->gantt--sticky-header#scheduleUpdate
+        gantt--chart:columns-changed->gantt--sticky-header#scheduleUpdate
         scroll@document->gantt--sticky-header#scheduleUpdate:capture:passive
         resize@window->gantt--sticky-header#scheduleUpdate
       ).join(' '),
