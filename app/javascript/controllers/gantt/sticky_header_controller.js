@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 // PoC: keep a separate header outside the chart's overflow containers.
 export default class extends Controller {
-  static targets = ["timeline", "timelineCanvas", "timelineHeader", "column", "columnHeader", "start"]
+  static targets = ["timeline", "timelineCanvas", "timelineHeader", "column", "columnHeader"]
 
   #overlay = null
   #columns = []
@@ -11,11 +11,6 @@ export default class extends Controller {
   #content = null
   #frame = null
   #wheelListener = null
-  #visibilityObserver = null
-  #headerPassed = false
-  #chartVisible = false
-  #top = 0
-  #gap = 0
 
   connect() {
     this.#content = this.element.closest("#content")
@@ -23,34 +18,7 @@ export default class extends Controller {
     // The body-level copy is outside this controller's scope.
     this.#wheelListener = this.#handleWheel.bind(this)
     this.#timelineCopy.addEventListener("wheel", this.#wheelListener, { passive: false })
-    this.#observeVisibility()
-  }
-
-  handleWindowResize() {
-    this.#observeVisibility()
     this.scheduleUpdate()
-  }
-
-  #observeVisibility() {
-    this.#visibilityObserver?.disconnect()
-    const style = getComputedStyle(this.#overlay)
-    this.#top = parseFloat(style.getPropertyValue("--gantt-sticky-top")) || 0
-    this.#gap = parseFloat(style.getPropertyValue("--gantt-sticky-gap")) || 0
-    this.#headerPassed = false
-    this.#chartVisible = false
-    this.#visibilityObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.target === this.startTarget) {
-          // Being outside the viewport below the chart must not activate the copy.
-          this.#headerPassed = entry.boundingClientRect.bottom <= entry.rootBounds.top
-        } else {
-          this.#chartVisible = entry.isIntersecting
-        }
-      })
-      this.scheduleUpdate()
-    }, { rootMargin: `${-(this.#top + this.#gap)}px 0px 0px 0px`, threshold: 0 })
-    this.#visibilityObserver.observe(this.startTarget)
-    this.#visibilityObserver.observe(this.element)
   }
 
   #createOverlay() {
@@ -104,7 +72,6 @@ export default class extends Controller {
 
   disconnect() {
     this.#timelineCopy?.removeEventListener("wheel", this.#wheelListener)
-    this.#visibilityObserver?.disconnect()
     if (this.#frame) cancelAnimationFrame(this.#frame)
     this.#overlay?.remove()
     this.#frame = null
@@ -119,19 +86,21 @@ export default class extends Controller {
     return header
   }
 
-  #update() {
-    if (!this.#headerPassed || !this.#chartVisible) {
-      this.#overlay.hidden = true
-      return
-    }
+  #shouldShowFixedHeader(chart, header, fixedTop, visibleWidth) {
+    return header.top < fixedTop && chart.bottom > fixedTop && visibleWidth > 0
+  }
 
+  #update() {
     const chart = this.element.getBoundingClientRect()
     const header = this.timelineHeaderTarget.getBoundingClientRect()
     const content = this.#content.getBoundingClientRect()
     const canvas = this.timelineCanvasTarget.getBoundingClientRect()
+    const overlayStyle = getComputedStyle(this.#overlay)
+    const top = parseFloat(overlayStyle.getPropertyValue("--gantt-sticky-top")) || 0
+    const gap = parseFloat(overlayStyle.getPropertyValue("--gantt-sticky-gap"))
     const left = Math.max(0, chart.left, content.left)
     const right = Math.min(document.documentElement.clientWidth, chart.right, content.right, canvas.right)
-    if (right <= left) {
+    if (!this.#shouldShowFixedHeader(chart, header, top + gap, right - left)) {
       this.#overlay.hidden = true
       return
     }
@@ -148,9 +117,9 @@ export default class extends Controller {
     this.#overlay.style.fontFamily = style.fontFamily
     this.#overlay.style.setProperty("--gantt-headers-height", `${header.height}px`)
     this.#overlay.style.left = `${left}px`
-    this.#overlay.style.top = `${Math.min(this.#top, chart.bottom - header.height - this.#gap)}px`
+    this.#overlay.style.top = `${Math.min(top, chart.bottom - header.height - gap)}px`
     this.#overlay.style.width = `${right - left}px`
-    this.#overlay.style.height = `${header.height + this.#gap}px`
+    this.#overlay.style.height = `${header.height + gap}px`
 
     this.#columns.forEach(({ copy }, index) => {
       const rect = columnRects[index]

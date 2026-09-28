@@ -13,7 +13,6 @@
 <% end %>
 
 <%= gantt_chart_tag(@query, layout) do %>
-  <span class="gantt-sticky-header-start" data-gantt--sticky-header-target="start" aria-hidden="true"></span>
   <%= gantt_column_tag('subjects', min_width: 100, width: 'var(--gantt-subject-width)') do %>
     <section class="gantt-pane">
       <header aria-hidden="true" data-gantt--sticky-header-target="columnHeader"></header>

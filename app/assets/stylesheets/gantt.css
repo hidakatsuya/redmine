@@ -19,7 +19,6 @@
 
 /***** Gantt chart *****/
 .gantt-chart {
-  position: relative;
   display: flex;
   align-items: flex-start;
   inline-size: 100%;
@@ -34,14 +33,6 @@
 }
 
 /* PoC: a viewport header mirroring the original column widths and scroll. */
-.gantt-sticky-header-start {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline: 0;
-  block-size: 1px;
-  pointer-events: none;
-}
-
 /* Responsive CSS can override this default regardless of asset order. */
 :where(.gantt-sticky-header) {
   --gantt-sticky-gap: 20px;

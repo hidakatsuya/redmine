@@ -215,7 +215,7 @@ module GanttHelper
         gantt--column:resize->gantt--sticky-header#scheduleUpdate
         gantt--chart:columns-changed->gantt--sticky-header#scheduleUpdate
         scroll@document->gantt--sticky-header#scheduleUpdate:capture:passive
-        resize@window->gantt--sticky-header#handleWindowResize
+        resize@window->gantt--sticky-header#scheduleUpdate
       ).join(' '),
       'gantt--chart-issue-relation-types-value': Redmine::Helpers::Gantt::DRAW_TYPES.to_json,
       'gantt--chart-show-selected-columns-value': query.draw_selected_columns ? 'true' : 'false',
