@@ -176,8 +176,6 @@ export default class extends Controller {
     } else {
       this.selectedColumnTargets.forEach((element) => { element.hidden = true })
     }
-
-    this.dispatch("columns-changed")
   }
 
   get #relationsArray() {
