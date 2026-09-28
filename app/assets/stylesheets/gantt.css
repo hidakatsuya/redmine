@@ -42,12 +42,18 @@
   pointer-events: none;
 }
 
+/* Responsive CSS can override this default regardless of asset order. */
+:where(.gantt-sticky-header) {
+  --gantt-sticky-gap: 20px;
+}
+
 .gantt-sticky-header {
   position: fixed;
   z-index: 40;
   overflow: hidden;
   direction: ltr;
-  background: var(--oc-gray-1);
+  /* Mask scrolling rows in the space above the copied header. */
+  background: var(--oc-white);
   box-shadow: 0 2px 4px rgba(var(--oc-black-rgb), 0.15);
   /* Keep the shadow below the header, clipping its top and sides. */
   clip-path: inset(0 0 -6px);
@@ -61,8 +67,8 @@
 .gantt-sticky-header > .gantt-column,
 .gantt-sticky-header-timeline {
   position: absolute;
-  inset-block-start: 0;
-  block-size: 100%;
+  inset-block-start: var(--gantt-sticky-gap);
+  block-size: var(--gantt-headers-height);
   overflow: hidden;
 }
 

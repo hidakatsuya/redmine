@@ -853,6 +853,7 @@
 
   .gantt-sticky-header {
     --gantt-sticky-top: 64px;
+    --gantt-sticky-gap: 16px;
   }
 
   /* Prevent content from being hidden behind #sticky-issue-header and project-jump when scrolling via anchor links. */

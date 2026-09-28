@@ -15,6 +15,7 @@ export default class extends Controller {
   #headerPassed = false
   #chartVisible = false
   #top = 0
+  #gap = 0
 
   connect() {
     this.#content = this.element.closest("#content")
@@ -32,7 +33,9 @@ export default class extends Controller {
 
   #observeVisibility() {
     this.#visibilityObserver?.disconnect()
-    this.#top = parseFloat(getComputedStyle(this.#overlay).getPropertyValue("--gantt-sticky-top")) || 0
+    const style = getComputedStyle(this.#overlay)
+    this.#top = parseFloat(style.getPropertyValue("--gantt-sticky-top")) || 0
+    this.#gap = parseFloat(style.getPropertyValue("--gantt-sticky-gap")) || 0
     this.#headerPassed = false
     this.#chartVisible = false
     this.#visibilityObserver = new IntersectionObserver((entries) => {
@@ -45,7 +48,7 @@ export default class extends Controller {
         }
       })
       this.scheduleUpdate()
-    }, { rootMargin: `${-this.#top}px 0px 0px 0px`, threshold: 0 })
+    }, { rootMargin: `${-(this.#top + this.#gap)}px 0px 0px 0px`, threshold: 0 })
     this.#visibilityObserver.observe(this.startTarget)
     this.#visibilityObserver.observe(this.element)
   }
@@ -145,9 +148,9 @@ export default class extends Controller {
     this.#overlay.style.fontFamily = style.fontFamily
     this.#overlay.style.setProperty("--gantt-headers-height", `${header.height}px`)
     this.#overlay.style.left = `${left}px`
-    this.#overlay.style.top = `${Math.min(this.#top, chart.bottom - header.height)}px`
+    this.#overlay.style.top = `${Math.min(this.#top, chart.bottom - header.height - this.#gap)}px`
     this.#overlay.style.width = `${right - left}px`
-    this.#overlay.style.height = `${header.height}px`
+    this.#overlay.style.height = `${header.height + this.#gap}px`
 
     this.#columns.forEach(({ copy }, index) => {
       const rect = columnRects[index]
