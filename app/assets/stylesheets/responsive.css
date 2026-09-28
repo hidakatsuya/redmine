@@ -851,7 +851,8 @@
     inset-block-start: 64px;
   }
 
-  .gantt-sticky-header {
+  .gantt-sticky-header,
+  .gantt-sticky-header-background {
     display: none;
   }
 

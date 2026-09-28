@@ -5,6 +5,7 @@ export default class extends Controller {
   static targets = ["timeline", "timelineCanvas", "timelineHeader", "column", "columnHeader"]
 
   #overlay = null
+  #background = null
   #columns = []
   #timelineCopy = null
   #canvasCopy = null
@@ -22,6 +23,9 @@ export default class extends Controller {
   }
 
   #createOverlay() {
+    this.#background = document.createElement("div")
+    this.#background.className = "gantt-sticky-header-background"
+    this.#background.hidden = true
     this.#overlay = document.createElement("div")
     this.#overlay.className = "gantt-sticky-header"
     this.#overlay.hidden = true
@@ -48,7 +52,7 @@ export default class extends Controller {
     this.#canvasCopy.appendChild(this.#cloneHeader(this.timelineHeaderTarget))
     this.#timelineCopy.appendChild(this.#canvasCopy)
     this.#overlay.appendChild(this.#timelineCopy)
-    document.body.appendChild(this.#overlay)
+    document.body.append(this.#background, this.#overlay)
     this.#columns.forEach(({ source, copy }) => {
       window.jQuery(copy).resizable({
         handles: "e",
@@ -86,6 +90,7 @@ export default class extends Controller {
     if (this.#frame) cancelAnimationFrame(this.#frame)
     this.#columns.forEach(({ copy }) => window.jQuery(copy).resizable("destroy"))
     this.#overlay?.remove()
+    this.#background?.remove()
     this.#frame = null
   }
 
@@ -105,6 +110,7 @@ export default class extends Controller {
   #update() {
     if (typeof window.isMobile === "function" && window.isMobile()) {
       this.#overlay.hidden = true
+      this.#background.hidden = true
       return
     }
 
@@ -115,9 +121,11 @@ export default class extends Controller {
     const overlayStyle = getComputedStyle(this.#overlay)
     const gap = parseFloat(overlayStyle.getPropertyValue("--gantt-sticky-gap"))
     const left = Math.max(0, chart.left, content.left)
-    const right = Math.min(document.documentElement.clientWidth, chart.right, content.right, canvas.right)
+    const chartRight = Math.min(document.documentElement.clientWidth, chart.right, content.right)
+    const right = Math.min(chartRight, canvas.right)
     if (!this.#shouldShowFixedHeader(chart, header, gap, right - left)) {
       this.#overlay.hidden = true
+      this.#background.hidden = true
       return
     }
 
@@ -136,6 +144,11 @@ export default class extends Controller {
     this.#overlay.style.top = `${Math.min(0, chart.bottom - header.height - gap)}px`
     this.#overlay.style.width = `${right - left}px`
     this.#overlay.style.height = `${header.height + gap}px`
+    this.#background.hidden = false
+    this.#background.style.left = this.#overlay.style.left
+    this.#background.style.top = this.#overlay.style.top
+    this.#background.style.width = `${chartRight - left}px`
+    this.#background.style.height = this.#overlay.style.height
 
     this.#columns.forEach(({ copy }, index) => {
       const rect = columnRects[index]
