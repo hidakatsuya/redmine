@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 // PoC: keep a separate header outside the chart's overflow containers.
 export default class extends Controller {
-  static targets = ["timeline", "timelineCanvas", "timelineHeader", "column", "columnHeader"]
+  static targets = ["timeline", "timelineCanvas", "timelineHeader", "column", "columnHeader", "start"]
 
   #overlay = null
   #columns = []
@@ -11,6 +11,10 @@ export default class extends Controller {
   #content = null
   #frame = null
   #wheelListener = null
+  #visibilityObserver = null
+  #headerPassed = false
+  #chartVisible = false
+  #top = 0
 
   connect() {
     this.#content = this.element.closest("#content")
@@ -18,7 +22,32 @@ export default class extends Controller {
     // The body-level copy is outside this controller's scope.
     this.#wheelListener = this.#handleWheel.bind(this)
     this.#timelineCopy.addEventListener("wheel", this.#wheelListener, { passive: false })
+    this.#observeVisibility()
+  }
+
+  handleWindowResize() {
+    this.#observeVisibility()
     this.scheduleUpdate()
+  }
+
+  #observeVisibility() {
+    this.#visibilityObserver?.disconnect()
+    this.#top = parseFloat(getComputedStyle(this.#overlay).getPropertyValue("--gantt-sticky-top")) || 0
+    this.#headerPassed = false
+    this.#chartVisible = false
+    this.#visibilityObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.target === this.startTarget) {
+          // Being outside the viewport below the chart must not activate the copy.
+          this.#headerPassed = entry.boundingClientRect.bottom <= entry.rootBounds.top
+        } else {
+          this.#chartVisible = entry.isIntersecting
+        }
+      })
+      this.scheduleUpdate()
+    }, { rootMargin: `${-this.#top}px 0px 0px 0px`, threshold: 0 })
+    this.#visibilityObserver.observe(this.startTarget)
+    this.#visibilityObserver.observe(this.element)
   }
 
   #createOverlay() {
@@ -72,6 +101,7 @@ export default class extends Controller {
 
   disconnect() {
     this.#timelineCopy?.removeEventListener("wheel", this.#wheelListener)
+    this.#visibilityObserver?.disconnect()
     if (this.#frame) cancelAnimationFrame(this.#frame)
     this.#overlay?.remove()
     this.#frame = null
@@ -87,15 +117,18 @@ export default class extends Controller {
   }
 
   #update() {
+    if (!this.#headerPassed || !this.#chartVisible) {
+      this.#overlay.hidden = true
+      return
+    }
+
     const chart = this.element.getBoundingClientRect()
     const header = this.timelineHeaderTarget.getBoundingClientRect()
     const content = this.#content.getBoundingClientRect()
     const canvas = this.timelineCanvasTarget.getBoundingClientRect()
-    const top = parseFloat(getComputedStyle(this.#overlay).getPropertyValue("--gantt-sticky-top")) || 0
     const left = Math.max(0, chart.left, content.left)
     const right = Math.min(document.documentElement.clientWidth, chart.right, content.right, canvas.right)
-    const visible = header.top < top && chart.bottom > top && right > left
-    if (!visible) {
+    if (right <= left) {
       this.#overlay.hidden = true
       return
     }
@@ -112,7 +145,7 @@ export default class extends Controller {
     this.#overlay.style.fontFamily = style.fontFamily
     this.#overlay.style.setProperty("--gantt-headers-height", `${header.height}px`)
     this.#overlay.style.left = `${left}px`
-    this.#overlay.style.top = `${Math.min(top, chart.bottom - header.height)}px`
+    this.#overlay.style.top = `${Math.min(this.#top, chart.bottom - header.height)}px`
     this.#overlay.style.width = `${right - left}px`
     this.#overlay.style.height = `${header.height}px`
 
