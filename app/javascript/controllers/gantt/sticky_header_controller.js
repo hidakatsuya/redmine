@@ -4,32 +4,32 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["timeline", "timelineCanvas", "timelineHeader", "column", "columnHeader"]
 
-  #overlay = null
-  #background = null
+  #fixedHeader = null
+  #headerContent = null
   #columns = []
   #timelineCopy = null
   #canvasCopy = null
-  #content = null
+  #pageContent = null
   #frame = null
   #wheelListener = null
 
   connect() {
-    this.#content = this.element.closest("#content")
-    this.#createOverlay()
+    this.#pageContent = this.element.closest("#content")
+    this.#createFixedHeader()
     // The body-level copy is outside this controller's scope.
     this.#wheelListener = this.#handleWheel.bind(this)
     this.#timelineCopy.addEventListener("wheel", this.#wheelListener, { passive: false })
     this.scheduleUpdate()
   }
 
-  #createOverlay() {
-    this.#background = document.createElement("div")
-    this.#background.className = "gantt-sticky-header-background"
-    this.#background.hidden = true
-    this.#overlay = document.createElement("div")
-    this.#overlay.className = "gantt-sticky-header"
-    this.#overlay.hidden = true
-    this.#overlay.style.cssText = this.element.style.cssText
+  #createFixedHeader() {
+    this.#fixedHeader = document.createElement("div")
+    this.#fixedHeader.className = "gantt-sticky-header"
+    this.#fixedHeader.hidden = true
+    this.#fixedHeader.style.cssText = this.element.style.cssText
+    this.#headerContent = document.createElement("div")
+    this.#headerContent.className = "gantt-sticky-header-content"
+    this.#fixedHeader.appendChild(this.#headerContent)
 
     const headers = this.columnHeaderTargets
     this.#columns = this.columnTargets.map((source, index) => {
@@ -41,7 +41,7 @@ export default class extends Controller {
       pane.className = "gantt-pane"
       pane.appendChild(this.#cloneHeader(headers[index]))
       copy.appendChild(pane)
-      this.#overlay.appendChild(copy)
+      this.#headerContent.appendChild(copy)
       return { source, copy }
     })
 
@@ -51,8 +51,8 @@ export default class extends Controller {
     this.#canvasCopy.className = "gantt-timeline-canvas"
     this.#canvasCopy.appendChild(this.#cloneHeader(this.timelineHeaderTarget))
     this.#timelineCopy.appendChild(this.#canvasCopy)
-    this.#overlay.appendChild(this.#timelineCopy)
-    document.body.append(this.#background, this.#overlay)
+    this.#headerContent.appendChild(this.#timelineCopy)
+    document.body.appendChild(this.#fixedHeader)
     this.#columns.forEach(({ source, copy }) => {
       window.jQuery(copy).resizable({
         handles: "e",
@@ -89,8 +89,7 @@ export default class extends Controller {
     this.#timelineCopy?.removeEventListener("wheel", this.#wheelListener)
     if (this.#frame) cancelAnimationFrame(this.#frame)
     this.#columns.forEach(({ copy }) => window.jQuery(copy).resizable("destroy"))
-    this.#overlay?.remove()
-    this.#background?.remove()
+    this.#fixedHeader?.remove()
     this.#frame = null
   }
 
@@ -109,23 +108,21 @@ export default class extends Controller {
 
   #update() {
     if (typeof window.isMobile === "function" && window.isMobile()) {
-      this.#overlay.hidden = true
-      this.#background.hidden = true
+      this.#fixedHeader.hidden = true
       return
     }
 
     const chart = this.element.getBoundingClientRect()
     const header = this.timelineHeaderTarget.getBoundingClientRect()
-    const content = this.#content.getBoundingClientRect()
+    const pageContent = this.#pageContent.getBoundingClientRect()
     const canvas = this.timelineCanvasTarget.getBoundingClientRect()
-    const overlayStyle = getComputedStyle(this.#overlay)
-    const gap = parseFloat(overlayStyle.getPropertyValue("--gantt-sticky-gap"))
-    const left = Math.max(0, chart.left, content.left)
-    const chartRight = Math.min(document.documentElement.clientWidth, chart.right, content.right)
+    const fixedHeaderStyle = getComputedStyle(this.#fixedHeader)
+    const gap = parseFloat(fixedHeaderStyle.getPropertyValue("--gantt-sticky-gap"))
+    const left = Math.max(0, chart.left, pageContent.left)
+    const chartRight = Math.min(document.documentElement.clientWidth, chart.right, pageContent.right)
     const right = Math.min(chartRight, canvas.right)
     if (!this.#shouldShowFixedHeader(chart, header, gap, right - left)) {
-      this.#overlay.hidden = true
-      this.#background.hidden = true
+      this.#fixedHeader.hidden = true
       return
     }
 
@@ -136,19 +133,15 @@ export default class extends Controller {
     const canvasWidth = canvas.width
     const scrollLeft = this.timelineTarget.scrollLeft
     const style = getComputedStyle(this.element)
-    this.#overlay.hidden = false
-    this.#overlay.style.fontSize = style.fontSize
-    this.#overlay.style.fontFamily = style.fontFamily
-    this.#overlay.style.setProperty("--gantt-headers-height", `${header.height}px`)
-    this.#overlay.style.left = `${left}px`
-    this.#overlay.style.top = `${Math.min(0, chart.bottom - header.height - gap)}px`
-    this.#overlay.style.width = `${right - left}px`
-    this.#overlay.style.height = `${header.height + gap}px`
-    this.#background.hidden = false
-    this.#background.style.left = this.#overlay.style.left
-    this.#background.style.top = this.#overlay.style.top
-    this.#background.style.width = `${chartRight - left}px`
-    this.#background.style.height = this.#overlay.style.height
+    this.#fixedHeader.hidden = false
+    this.#fixedHeader.style.fontSize = style.fontSize
+    this.#fixedHeader.style.fontFamily = style.fontFamily
+    this.#fixedHeader.style.setProperty("--gantt-headers-height", `${header.height}px`)
+    this.#fixedHeader.style.left = `${left}px`
+    this.#fixedHeader.style.top = `${Math.min(0, chart.bottom - header.height - gap)}px`
+    this.#fixedHeader.style.width = `${chartRight - left}px`
+    this.#fixedHeader.style.height = `${header.height + gap}px`
+    this.#headerContent.style.width = `${right - left}px`
 
     this.#columns.forEach(({ copy }, index) => {
       const rect = columnRects[index]

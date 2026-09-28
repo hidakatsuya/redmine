@@ -33,30 +33,28 @@
 }
 
 /* PoC: a viewport header mirroring the original column widths and scroll. */
-.gantt-sticky-header-background {
-  position: fixed;
-  z-index: 39;
-  background: var(--oc-white);
-}
-
 .gantt-sticky-header {
   --gantt-sticky-gap: 20px;
   position: fixed;
   z-index: 40;
-  overflow: hidden;
   direction: ltr;
-  /* Mask scrolling rows in the space above the copied header. */
+  /* Mask scrolling rows above the header and beyond the timeline. */
   background: var(--oc-white);
+}
+
+.gantt-sticky-header-content {
+  position: relative;
+  block-size: 100%;
+  overflow: hidden;
   box-shadow: 0 5px 6px -4px rgba(var(--oc-black-rgb), 0.25);
 }
 
 .gantt-sticky-header[hidden],
-.gantt-sticky-header-background[hidden],
 .gantt-sticky-header [hidden] {
   display: none !important;
 }
 
-.gantt-sticky-header > .gantt-column,
+.gantt-sticky-header-content > .gantt-column,
 .gantt-sticky-header-timeline {
   position: absolute;
   inset-block-start: var(--gantt-sticky-gap);
@@ -438,8 +436,7 @@
 }
 
 @media print {
-  .gantt-sticky-header,
-  .gantt-sticky-header-background {
+  .gantt-sticky-header {
     display: none !important;
   }
 
