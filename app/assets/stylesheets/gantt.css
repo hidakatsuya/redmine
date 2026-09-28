@@ -45,9 +45,7 @@
   direction: ltr;
   /* Mask scrolling rows in the space above the copied header. */
   background: var(--oc-white);
-  box-shadow: 0 2px 4px rgba(var(--oc-black-rgb), 0.15);
-  /* Keep the shadow below the header, clipping its top and sides. */
-  clip-path: inset(0 0 -6px);
+  box-shadow: 0 4px 4px -4px rgba(var(--oc-black-rgb), 0.15);
 }
 
 .gantt-sticky-header[hidden],
