@@ -27,6 +27,16 @@ export default class extends Controller {
     this.mobileModeValue = this.#isMobile()
   }
 
+  handleResize(event) {
+    this.#resizeTo(event.detail.width)
+  }
+
+  #resizeTo(width) {
+    this.element.style.setProperty("--gantt-column-width", `${width}px`)
+    this.element.style.removeProperty("width")
+    this.dispatch("resize")
+  }
+
   mobileModeValueChanged(current, old) {
     if (current == old) return
 
@@ -42,11 +52,7 @@ export default class extends Controller {
       handles: "e",
       minWidth: this.minWidthValue,
       zIndex: 30,
-      resize: (_event, ui) => {
-        this.element.style.setProperty("--gantt-column-width", `${ui.size.width}px`)
-        this.element.style.removeProperty("width")
-        this.dispatch("resize")
-      }
+      resize: (_event, ui) => this.#resizeTo(ui.size.width)
     }
 
     this.#$element.resizable(options)

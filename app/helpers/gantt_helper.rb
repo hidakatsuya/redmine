@@ -241,7 +241,10 @@ module GanttHelper
     options[:data] = options.fetch(:data, {}).merge(
       controller: 'gantt--column',
       'gantt--sticky-header-target': 'column',
-      action: 'resize@window->gantt--column#handleWindowResize',
+      action: %w(
+        resize@window->gantt--column#handleWindowResize
+        gantt--sticky-header:resize-column->gantt--column#handleResize
+      ).join(' '),
       'gantt--column-min-width-value': min_width,
       'gantt-column': column_name
     )

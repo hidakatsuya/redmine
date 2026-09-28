@@ -49,6 +49,17 @@ export default class extends Controller {
     this.#timelineCopy.appendChild(this.#canvasCopy)
     this.#overlay.appendChild(this.#timelineCopy)
     document.body.appendChild(this.#overlay)
+    this.#columns.forEach(({ source, copy }) => {
+      window.jQuery(copy).resizable({
+        handles: "e",
+        minWidth: Number(source.getAttribute("data-gantt--column-min-width-value")),
+        zIndex: 30,
+        resize: (_event, ui) => {
+          this.dispatch("resize-column", { target: source, detail: { width: ui.size.width } })
+          copy.style.removeProperty("width")
+        }
+      })
+    })
   }
 
   scheduleUpdate() {
@@ -73,6 +84,7 @@ export default class extends Controller {
   disconnect() {
     this.#timelineCopy?.removeEventListener("wheel", this.#wheelListener)
     if (this.#frame) cancelAnimationFrame(this.#frame)
+    this.#columns.forEach(({ copy }) => window.jQuery(copy).resizable("destroy"))
     this.#overlay?.remove()
     this.#frame = null
   }

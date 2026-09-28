@@ -83,7 +83,8 @@
   min-inline-size: 0;
 }
 
-.gantt-chart .ui-resizable-e {
+.gantt-chart .ui-resizable-e,
+.gantt-sticky-header .ui-resizable-e {
   cursor: ew-resize;
 }
 
