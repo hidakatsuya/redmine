@@ -91,16 +91,20 @@ export default class extends Controller {
   }
 
   #update() {
+    if (typeof window.isMobile === "function" && window.isMobile()) {
+      this.#overlay.hidden = true
+      return
+    }
+
     const chart = this.element.getBoundingClientRect()
     const header = this.timelineHeaderTarget.getBoundingClientRect()
     const content = this.#content.getBoundingClientRect()
     const canvas = this.timelineCanvasTarget.getBoundingClientRect()
     const overlayStyle = getComputedStyle(this.#overlay)
-    const top = parseFloat(overlayStyle.getPropertyValue("--gantt-sticky-top")) || 0
     const gap = parseFloat(overlayStyle.getPropertyValue("--gantt-sticky-gap"))
     const left = Math.max(0, chart.left, content.left)
     const right = Math.min(document.documentElement.clientWidth, chart.right, content.right, canvas.right)
-    if (!this.#shouldShowFixedHeader(chart, header, top + gap, right - left)) {
+    if (!this.#shouldShowFixedHeader(chart, header, gap, right - left)) {
       this.#overlay.hidden = true
       return
     }
@@ -117,7 +121,7 @@ export default class extends Controller {
     this.#overlay.style.fontFamily = style.fontFamily
     this.#overlay.style.setProperty("--gantt-headers-height", `${header.height}px`)
     this.#overlay.style.left = `${left}px`
-    this.#overlay.style.top = `${Math.min(top, chart.bottom - header.height - gap)}px`
+    this.#overlay.style.top = `${Math.min(0, chart.bottom - header.height - gap)}px`
     this.#overlay.style.width = `${right - left}px`
     this.#overlay.style.height = `${header.height + gap}px`
 

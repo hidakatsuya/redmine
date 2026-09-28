@@ -33,12 +33,8 @@
 }
 
 /* PoC: a viewport header mirroring the original column widths and scroll. */
-/* Responsive CSS can override this default regardless of asset order. */
-:where(.gantt-sticky-header) {
-  --gantt-sticky-gap: 20px;
-}
-
 .gantt-sticky-header {
+  --gantt-sticky-gap: 20px;
   position: fixed;
   z-index: 40;
   overflow: hidden;
