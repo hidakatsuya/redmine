@@ -48,6 +48,11 @@ class IssuesController < ApplicationController
     retrieve_query(IssueQuery, use_session)
 
     if @query.valid?
+      if (request.format.csv? || request.format.pdf?) && !export_allowed?(:export_issues, @query.base_scope)
+        deny_access
+        return
+      end
+
       respond_to do |format|
         format.html do
           @issue_count = @query.issue_count
@@ -95,6 +100,11 @@ class IssuesController < ApplicationController
   end
 
   def show
+    if request.format.pdf? && !User.current.allowed_to?(:export_issues, @project)
+      deny_access
+      return
+    end
+
     if !api_request? || include_in_api_response?('journals')
       @journals = @issue.visible_journals_with_index
       @journals.reverse! if User.current.wants_comments_in_reverse_order?
@@ -405,6 +415,7 @@ class IssuesController < ApplicationController
       call_hook(:controller_issues_bulk_edit_before_save, {:params => params, :issue => issue})
       if issue.save
         saved_issues << issue
+        call_hook(:controller_issues_bulk_edit_after_save, { :params => params, :issue => issue, :journal => journal })
       else
         unsaved_issues << orig_issue
       end

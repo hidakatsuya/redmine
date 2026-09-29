@@ -823,6 +823,46 @@ class IssuesControllerTest < Redmine::ControllerTest
     assert_equal Setting.issue_list_default_columns.size + 2, lines[0].split(',').size
   end
 
+  def test_index_without_export_issues_permission_should_hide_export_links_and_deny_export_requests
+    @request.session[:user_id] = 2
+    Role.find_by_name('Manager').remove_permission! :export_issues
+
+    get :index, :params => {:project_id => 1}
+    assert_response :success
+    assert_select 'p.other-formats a.csv', 0
+    assert_select 'p.other-formats a.pdf', 0
+    assert_select 'p.other-formats a.atom'
+    assert_select '#csv-export-options', 0
+
+    get :index, :params => {:project_id => 1, :format => 'csv'}
+    assert_response :forbidden
+
+    get :index, :params => {:project_id => 1, :format => 'pdf'}
+    assert_response :forbidden
+  end
+
+  def test_index_should_require_export_issues_permission_on_every_project_of_the_issues
+    # User 2 is Developer on project 2 and has visible issues there
+    @request.session[:user_id] = 2
+    Role.find_by_name('Developer').remove_permission! :export_issues
+
+    get :index
+    assert_response :success
+    assert_select 'p.other-formats a.csv', 0
+    assert_select 'p.other-formats a.pdf', 0
+
+    get :index, :params => {:format => 'csv'}
+    assert_response :forbidden
+
+    get :index, :params => {:project_id => 1}
+    assert_response :success
+    assert_select 'p.other-formats a.csv'
+    assert_select 'p.other-formats a.pdf'
+
+    get :index, :params => {:project_id => 1, :format => 'csv'}
+    assert_response :success
+  end
+
   def test_index_csv_filename_without_query_name_param
     get :index, :params => {:format => 'csv'}
     assert_response :success
@@ -2817,6 +2857,16 @@ class IssuesControllerTest < Redmine::ControllerTest
     assert_response :success
     assert_select '.assigned-to' do
       assert_select 'a[href="/groups/10"]'
+      # The link already contains the group icon
+      assert_select '.avatar', 0
+    end
+  end
+
+  def test_show_should_display_avatar_of_the_assigned_user
+    get(:show, :params => {:id => 2})
+    assert_response :success
+    assert_select '.assigned-to .value' do
+      assert_select '.avatar.s16 + a[href="/users/3"]'
     end
   end
 
@@ -3120,6 +3170,19 @@ class IssuesControllerTest < Redmine::ControllerTest
     assert_response :success
     assert_equal 'application/pdf', @response.media_type
     assert @response.body.starts_with?('%PDF')
+  end
+
+  def test_show_without_export_issues_permission_should_hide_pdf_link_and_deny_pdf_request
+    @request.session[:user_id] = 2
+    Role.find_by_name('Manager').remove_permission! :export_issues
+
+    get :show, :params => {:id => 1}
+    assert_response :success
+    assert_select 'p.other-formats a.pdf', 0
+    assert_select 'p.other-formats a.atom'
+
+    get :show, :params => {:id => 1, :format => 'pdf'}
+    assert_response :forbidden
   end
 
   def test_export_to_pdf_with_utf8_u_fffd
@@ -7752,6 +7815,43 @@ class IssuesControllerTest < Redmine::ControllerTest
     assert_equal '125', issue.custom_value_for(2).value
     assert_equal 'Bulk editing', journal.notes
     assert_equal 1, journal.details.size
+  end
+
+  def test_bulk_update_should_call_after_save_hook
+    @request.session[:user_id] = 2
+    contexts = []
+    @controller.stubs(:call_hook).with do |hook, context|
+      contexts << context if hook == :controller_issues_bulk_edit_after_save
+      true
+    end
+    post(
+      :bulk_update,
+      :params => {
+        :ids => [1, 2],
+        :notes => 'Bulk editing',
+        :issue => {
+          :priority_id => 7
+        }
+      }
+    )
+
+    assert_equal [1, 2], contexts.map {|c| c[:issue].id}.sort
+    assert_equal ['Bulk editing'], contexts.map {|c| c[:journal].notes}.uniq
+  end
+
+  def test_bulk_update_should_not_call_after_save_hook_when_save_fails
+    @request.session[:user_id] = 2
+    @controller.expects(:call_hook).with(:controller_issues_bulk_edit_after_save, anything).never
+    @controller.stubs(:call_hook).with(:controller_issues_bulk_edit_before_save, anything)
+    post(
+      :bulk_update,
+      :params => {
+        :ids => [1, 2],
+        :issue => {
+          :start_date => 'foo'
+        }
+      }
+    )
   end
 
   def test_bulk_update_with_group_assignee

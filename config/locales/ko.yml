@@ -490,7 +490,6 @@ ko:
   label_activity: 작업내역
   label_user_activity: "%{value}의 작업내역"
   label_new: 새로 만들기
-  label_logged_as: '로그인계정:'
   label_environment: 환경
   label_authentication: 인증
   label_auth_source: 인증 공급자
@@ -1513,7 +1512,7 @@ ko:
   reaction_text_x_other_users:
     one: 1 other
     other: "%{count} others"
-  text_setting_gravatar_default_initials_html: Users' initials are sent to <a href="https://www.gravatar.com">https://www.gravatar.com</a>
+  text_setting_gravatar_default_initials_html: Users' initials are sent to <a href="%{url}">%{url}</a>
     to generate their avatars.
   permission_view_project: View projects
   permission_search_project: Search projects
@@ -1582,3 +1581,13 @@ ko:
   error_issue_status_in_use_by_issues: This status is used by some issues
   error_issue_status_default_for_trackers: This status is used as the default status by some trackers
   text_users_remove_from_group_confirmation: Are you sure you want to remove the selected user(s) from the group %{group}?
+  webhook_secret_keep_info: The secret of another user is not displayed. Leave this
+    field blank to keep it unchanged.
+  webhook_disabled_info_html: Webhooks are disabled, so none of the webhooks below is
+    triggered. They are still listed here so that they can be reviewed or removed. Webhooks
+    can be enabled in the %{link} settings.
+  permission_export_issues: Export issues
+  permission_export_time_entries: Export time entries
+  label_users_and_groups: Users and groups
+  mail_subject_test_email: Redmine test
+  mail_body_test_email: This is a test email sent by Redmine.

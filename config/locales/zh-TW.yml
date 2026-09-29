@@ -700,7 +700,6 @@
   label_activity: 活動
   label_user_activity: "%{value} 的活動"
   label_new: 建立新的...
-  label_logged_as: 目前登入
   label_environment: 環境
   label_authentication: 驗證
   label_auth_source: 驗證模式
@@ -1510,7 +1509,7 @@
   reaction_text_x_other_users:
     one: 1 位其他用戶
     other: "%{count} 位其他用戶"
-  text_setting_gravatar_default_initials_html: 用戶姓名的首字母縮寫將被送往 <a href="https://www.gravatar.com">https://www.gravatar.com</a>
+  text_setting_gravatar_default_initials_html: 用戶姓名的首字母縮寫將被送往 <a href="%{url}">%{url}</a>
     用以產生其大頭貼.
   permission_view_project: 檢視專案
   permission_search_project: 搜尋專案
@@ -1576,3 +1575,13 @@
   error_issue_status_in_use_by_issues: 這個狀態正被某些議題使用中
   error_issue_status_default_for_trackers: 這個狀態正被某些追蹤標籤設為預設狀態中
   text_users_remove_from_group_confirmation: 您確定要將選取的用戶從 %{group} 群組中移除嗎？
+  webhook_secret_keep_info: The secret of another user is not displayed. Leave this
+    field blank to keep it unchanged.
+  webhook_disabled_info_html: Webhooks are disabled, so none of the webhooks below is
+    triggered. They are still listed here so that they can be reviewed or removed. Webhooks
+    can be enabled in the %{link} settings.
+  permission_export_issues: Export issues
+  permission_export_time_entries: Export time entries
+  label_users_and_groups: Users and groups
+  mail_subject_test_email: Redmine test
+  mail_body_test_email: This is a test email sent by Redmine.

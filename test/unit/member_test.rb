@@ -27,10 +27,58 @@ class MemberTest < ActiveSupport::TestCase
     @jsmith = Member.find(1)
   end
 
+  def test_visible_scope_should_only_include_memberships_in_projects_visible_to_the_user
+    # dlopper is a member of project 1 only and can not see the private project 5
+    user = User.find(3)
+    memberships = Member.visible(user).to_a
+
+    assert_include Member.find(1), memberships
+    assert_equal [], memberships.select {|m| m.project_id == 5}
+    assert memberships.all? {|m| m.project.visible?(user)}
+  end
+
+  def test_visible_scope_should_default_to_current_user
+    User.current = User.find(3)
+    assert_equal Member.visible(User.find(3)).to_a, Member.visible.to_a
+  end
+
+  def test_visible_scope_should_include_all_memberships_in_active_projects_for_admin
+    assert_equal Member.count, Member.visible(User.find(1)).count
+  end
+
+  def test_visible_scope_should_exclude_memberships_in_archived_projects
+    Project.find(1).update_column :status, Project::STATUS_ARCHIVED
+    assert_not_include Member.find(1), Member.visible(User.find(1)).to_a
+  end
+
   def test_sorted_scope_on_project_members
     members = Project.find(1).members.sorted.to_a
     roles = members.map {|m| m.roles.sort.first}
     assert_equal roles, roles.sort
+  end
+
+  def test_like_scope_should_match_users_and_groups
+    assert_equal [1], Project.find(1).memberships.like('Smith').ids
+    assert_equal [9], Project.find(2).memberships.like('B Team').ids
+  end
+
+  def test_like_scope_with_blank_value_should_return_all_the_members
+    project = Project.find(1)
+    assert_equal project.memberships.ids.sort, project.memberships.like('').ids.sort
+  end
+
+  def test_with_role_scope_should_return_the_members_having_the_role
+    assert_equal [2, 4], Project.find(1).memberships.with_role(2).ids.sort
+  end
+
+  def test_with_role_scope_should_return_the_members_having_the_role_inherited
+    # Member 7 has the role 1 inherited from the member 6
+    assert_include 7, Project.find(5).memberships.with_role(1).ids
+  end
+
+  def test_with_role_scope_with_blank_value_should_return_all_the_members
+    project = Project.find(1)
+    assert_equal project.memberships.ids.sort, project.memberships.with_role(nil).ids.sort
   end
 
   def test_create

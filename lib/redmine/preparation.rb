@@ -82,6 +82,7 @@ module Redmine
           map.permission :view_issue_watchers, {}, :read => true
           map.permission :add_issue_watchers, {:watchers => [:new, :create, :append, :autocomplete_for_user, :autocomplete_for_mention]}
           map.permission :delete_issue_watchers, {:watchers => :destroy}
+          map.permission :export_issues, {}, :read => true
           map.permission :import_issues, {}
           # Issue categories
           map.permission :manage_categories, {:projects => :settings, :issue_categories => [:index, :show, :new, :create, :edit, :update, :destroy]}, :require => :member
@@ -100,6 +101,7 @@ module Redmine
                          {:projects => :settings, :project_enumerations => [:update, :destroy]},
                          :require => :member
           map.permission :log_time_for_other_users, :require => :member
+          map.permission :export_time_entries, {}, :read => true
           map.permission :import_time_entries, {}
         end
 

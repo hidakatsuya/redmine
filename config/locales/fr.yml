@@ -629,7 +629,6 @@ fr:
   label_activity: Activité
   label_user_activity: "Activité de %{value}"
   label_new: Nouveau
-  label_logged_as: Connecté en tant que
   label_environment: Environnement
   label_authentication: Authentification
   label_auth_source: Mode d'authentification
@@ -1474,7 +1473,7 @@ fr:
   reaction_text_x_other_users:
     one: 1 autre
     other: "%{count} autres"
-  text_setting_gravatar_default_initials_html: Les initiales des utilisateurs sont envoyées à <a href="https://www.gravatar.com">https://www.gravatar.com</a> pour générer leurs avatars.
+  text_setting_gravatar_default_initials_html: Les initiales des utilisateurs sont envoyées à <a href="%{url}">%{url}</a> pour générer leurs avatars.
   permission_view_project: Voir les projets
   permission_search_project: Rechercher des projets
   permission_view_members: Voir les membres du projet
@@ -1531,3 +1530,13 @@ fr:
   error_issue_status_in_use_by_issues: Ce statut est utilisé par certaines demandes
   error_issue_status_default_for_trackers: Ce statut est utilisé comme statut par défaut par certains trackers
   text_users_remove_from_group_confirmation: Êtes-vous sûr de vouloir retirer le(s) utilisateur(s) sélectionné(s) du groupe %{group} ?
+  webhook_secret_keep_info: The secret of another user is not displayed. Leave this
+    field blank to keep it unchanged.
+  webhook_disabled_info_html: Webhooks are disabled, so none of the webhooks below is
+    triggered. They are still listed here so that they can be reviewed or removed. Webhooks
+    can be enabled in the %{link} settings.
+  permission_export_issues: Export issues
+  permission_export_time_entries: Export time entries
+  label_users_and_groups: Users and groups
+  mail_subject_test_email: Redmine test
+  mail_body_test_email: This is a test email sent by Redmine.

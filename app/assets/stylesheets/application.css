@@ -41,6 +41,9 @@
 :root {
   --fonts-main: "Noto Sans", sans-serif;
   --color-current-marker: var(--oc-indigo-5);
+  /* no match in Open Color, using hex codes */
+  --color-top-menu-background: #234761;
+  --color-header-background: #3A78A3;
 }
 
 html, body { min-block-size: 100vh; }
@@ -86,7 +89,7 @@ pre, code {font-family: Consolas, Menlo, "Liberation Mono", Courier, monospace;}
 }
 
 nav.top-menu {
-  background: #234761; /* no match in Open Color, using hex code */
+  background: var(--color-top-menu-background);
   color: var(--oc-gray-2);
   font-size: 0.75rem;
   padding-inline: 14px;
@@ -115,6 +118,7 @@ nav.top-menu {
     color: var(--oc-white);
     background-color: rgba(255, 255, 255, 0.12);
     text-decoration: none;
+    border-radius: 3px;
 }
 
 .top-menu__links svg.icon-svg, #account .dropdown-trigger .icon-svg {
@@ -125,6 +129,9 @@ nav.top-menu {
 .top-menu__links a:hover svg.icon-svg, #account .dropdown-trigger:hover .icon-svg {
   stroke: var(--oc-white);
 }
+
+/* Reserve the height of the avatar in the account menu so the bar height is the same before/after login */
+.profile-menu {display: flex; align-items: center; min-block-size: 28px;}
 
 #account .dropdown-content .user-info {
   padding-block: 6px;
@@ -142,7 +149,7 @@ nav.top-menu {
 
 #header {
   margin: 0;
-  background: #3A78A3; /* no match in Open Color, using hex code */
+  background: var(--color-header-background);
   color: var(--oc-white);
   padding-block: 0.25rem 0;
   padding-inline: 1.25rem;
@@ -211,7 +218,7 @@ body.has-main-menu #header {
   inset-inline-start: 0;
   inset-inline-end: 0;
   margin-inline-end: 0;
-  padding-block: 2px;
+  padding-block: 0;
   padding-inline: 20px;
   inline-size: auto;
   background: var(--oc-indigo-0);
@@ -220,7 +227,7 @@ body.has-main-menu #header {
   margin: 0;
   padding: 0;
   inline-size: 100%;
-  min-block-size: 28px;
+  min-block-size: 32px;
   white-space: nowrap;
   display: flex;
   align-items: center;
@@ -240,11 +247,12 @@ body.has-main-menu #header {
   text-decoration: none;
   font-size: 0.8125rem;
   margin: 0;
-  padding-block: 7px 5px;
+  /* 9px + 16px line-height + 7px = 32px, the same as the `#main-menu ul` height, so the tab fills the bar and touches the content area */
+  padding-block: 9px 7px;
   padding-inline: 11px;
   background-color: transparent;
   font-weight: normal;
-  line-height: 1.2;
+  line-height: 16px;
   transition: background-color 0.18s ease, color 0.18s ease;
 }
 #main-menu li a:hover {
@@ -921,6 +929,8 @@ div.issue .attributes {margin-block-start: 2em;}
 div.issue .attributes .attribute {padding-inline-start: 180px; clear: inline-start; min-block-size: 1.8em;}
 div.issue .attributes .attribute .label {inline-size: 170px; margin-inline-start: -180px; font-weight: bold; float: inline-start; overflow: clip visible; text-overflow: ellipsis;}
 div.issue .attribute .value {overflow:auto; text-overflow: ellipsis;}
+div.issue .attribute .value .avatar {float: none; margin-block: 0; margin-inline: 0 4px;}
+div.issue .attribute .value a.group svg.icon-svg {margin-inline-end: 4px;}
 div.issue .attribute.string_cf .value .wiki p {margin-block: 0;}
 div.issue .attribute.text_cf .value .wiki p:first-of-type {margin-block-start: 0;}
 div.issue.overdue .due-date .value { color: var(--oc-red-9); }

@@ -475,7 +475,6 @@ gl:
   label_less_than_ago: "hai menos de"
   label_list: Lista
   label_loading: Cargando…
-  label_logged_as: "Identificado como"
   label_login: "Acceder"
   label_logout: "Saír"
   label_max_size: Tamaño máximo
@@ -1502,7 +1501,7 @@ gl:
   reaction_text_x_other_users:
     one: 1 outro
     other: "%{count} outros"
-  text_setting_gravatar_default_initials_html: As iniciais dos usuarios son enviadas a <a href="https://www.gravatar.com">https://www.gravatar.com</a>
+  text_setting_gravatar_default_initials_html: As iniciais dos usuarios son enviadas a <a href="%{url}">%{url}</a>
     para xerar os seus avatares.
   permission_view_project: Ver proxectos
   permission_search_project: Buscar proxectos
@@ -1572,3 +1571,13 @@ gl:
   error_issue_status_default_for_trackers: Este estado está a ser usado como o estado por defecto por algúns tipos de tarefas
   text_users_remove_from_group_confirmation: Are you sure you want to remove the selected
     user(s) from the group %{group}?
+  webhook_secret_keep_info: The secret of another user is not displayed. Leave this
+    field blank to keep it unchanged.
+  webhook_disabled_info_html: Webhooks are disabled, so none of the webhooks below is
+    triggered. They are still listed here so that they can be reviewed or removed. Webhooks
+    can be enabled in the %{link} settings.
+  permission_export_issues: Export issues
+  permission_export_time_entries: Export time entries
+  label_users_and_groups: Users and groups
+  mail_subject_test_email: Redmine test
+  mail_body_test_email: This is a test email sent by Redmine.

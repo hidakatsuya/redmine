@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 ruby '>= 3.3.0', '< 4.1.0'
 
-gem 'rails', '8.1.3.1'
+gem 'rails', '8.1.4'
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', require: false
 gem 'rouge', '~> 5.0'
@@ -15,7 +15,7 @@ gem 'i18n', '~> 1.15.2'
 # Loaded on demand by lib/redmine/export/pdf/itcpdf.rb, keep `require: false`
 gem 'rbpdf', '~> 1.21.4', require: false
 gem 'addressable'
-gem 'rubyzip', '~> 3.6.0'
+gem 'rubyzip', '~> 3.7.0'
 gem 'propshaft', '~> 1.3.0'
 gem 'rack', '>= 3.1.3'
 gem "stimulus-rails", "~> 1.3"
@@ -32,9 +32,6 @@ gem 'net-imap', '~> 0.6.1'
 gem 'net-pop', '~> 0.1.2'
 gem 'net-smtp', '~> 0.5.1'
 gem 'ostruct'
-# json 3.0.0 is not compatible with Rails 8.1.3.1 (https://github.com/rails/rails/pull/58601).
-# TODO: Remove this pin after updating to a Rails version that includes the fix.
-gem 'json', '< 3.0'
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :x64_mingw, :mswin]
@@ -53,7 +50,7 @@ end
 
 # Optional gem for exporting the gantt to a PNG file
 group :minimagick do
-  gem 'mini_magick', '~> 5.3.3'
+  gem 'mini_magick', '~> 5.4.0'
 end
 
 # Include database gems for the adapters found in the database
@@ -113,7 +110,7 @@ end
 group :test do
   gem "rails-dom-testing", '>= 2.3.0'
   gem 'mocha', '>= 2.0.1'
-  gem 'simplecov', '~> 1.2.0', :require => false
+  gem 'simplecov', '~> 1.3.0', :require => false
   gem "ffi", platforms: [:mingw, :x64_mingw, :mswin]
   # For running system tests
   gem 'puma'
@@ -122,7 +119,7 @@ group :test do
   # RuboCop
   gem 'rubocop', '~> 1.91.0', require: false
   gem 'rubocop-performance', '~> 1.27.0', require: false
-  gem 'rubocop-rails', '~> 2.37.0', require: false
+  gem 'rubocop-rails', '~> 2.38.0', require: false
   gem 'bundle-audit', require: false
   # for testing oauth provider capabilities
   gem 'oauth2'

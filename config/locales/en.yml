@@ -278,6 +278,8 @@ en:
   mail_body_security_notification_notify_disabled: "Email address %{value} no longer receives notifications."
   mail_body_settings_updated: "The following settings were changed:"
   mail_body_password_updated: "Your password has been changed."
+  mail_subject_test_email: "Redmine test"
+  mail_body_test_email: "This is a test email sent by Redmine."
   mail_destroy_project_failed: Project %{value} could not be deleted.
   mail_destroy_project_successful: Project %{value} was deleted successfully.
   mail_destroy_project_with_subprojects_successful: Project %{value} and its subprojects were deleted successfully.
@@ -612,6 +614,7 @@ en:
   permission_export_wiki_pages: Export wiki pages
   permission_manage_subtasks: Manage subtasks
   permission_manage_related_issues: Manage related issues
+  permission_export_issues: Export issues
   permission_import_issues: Import issues
   permission_log_time_for_other_users: Log spent time for other users
   permission_view_project: View projects
@@ -633,6 +636,7 @@ en:
 
   label_user: User
   label_user_plural: Users
+  label_users_and_groups: Users and groups
   label_user_new: New user
   label_user_anonymous: Anonymous
   label_project: Project
@@ -707,7 +711,6 @@ en:
   label_activity: Activity
   label_user_activity: "%{value}'s activity"
   label_new: New
-  label_logged_as: Logged in as
   label_environment: Environment
   label_authentication: Authentication
   label_auth_source: Authentication mode
@@ -1112,6 +1115,7 @@ en:
   label_member_management_all_roles: All roles
   label_member_management_selected_roles_only: Only these roles
   label_import_issues: Import issues
+  permission_export_time_entries: Export time entries
   permission_import_time_entries: Import time entries
   label_select_file_to_import: Select the file to import
   label_fields_separator: Field separator
@@ -1388,7 +1392,7 @@ en:
   text_no_subject: no subject
   text_allowed_queries_to_select: Public (to any users) queries only selectable
   text_setting_config_change: You can configure the behaviour in config/configuration.yml. Please restart the application after editing it.
-  text_setting_gravatar_default_initials_html: Users' initials are sent to <a href="https://www.gravatar.com">https://www.gravatar.com</a> to generate their avatars.
+  text_setting_gravatar_default_initials_html: Users' initials are sent to <a href="%{url}">%{url}</a> to generate their avatars.
   text_oauth_admin_permission: Full administrative access. When authorized by an Administrator, this application will be able to read and write all data and impersonate other users.
   text_oauth_admin_permission_info: This application requests full administrative access. If you are an Administrator (or become one in the future), it will be able to read and write all data and impersonate other users on your behalf. If you want to avoid this, authorize it as a user without Administrator privileges instead.
   text_oauth_copy_secret_now: Copy the secret to a safe place now, it will not be shown again.

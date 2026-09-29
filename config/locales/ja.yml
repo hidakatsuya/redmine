@@ -471,6 +471,7 @@ ja:
 
   label_user: ユーザー
   label_user_plural: ユーザー
+  label_users_and_groups: ユーザーとグループ
   label_user_new: 新しいユーザー
   label_user_anonymous: 匿名ユーザー
   label_profile: プロフィール
@@ -534,7 +535,6 @@ ja:
   label_activity: 活動
   label_user_activity: "%{value} の活動"
   label_new: 新しく作成
-  label_logged_as: ログイン中：
   label_environment: 環境
   label_authentication: 認証
   label_auth_source: 認証方式
@@ -1455,7 +1455,7 @@ ja:
   reaction_text_x_other_users:
     one: 他1人
     other: "他%{count}人"
-  text_setting_gravatar_default_initials_html: ユーザーの姓と名それぞれの先頭文字がアイコン生成のために <a href="https://www.gravatar.com">https://www.gravatar.com</a> に送信されます。
+  text_setting_gravatar_default_initials_html: ユーザーの姓と名それぞれの先頭文字がアイコン生成のために <a href="%{url}">%{url}</a> に送信されます。
   permission_view_project: プロジェクトの閲覧
   permission_search_project: プロジェクトの検索
   permission_view_members: プロジェクトのメンバーの閲覧
@@ -1506,3 +1506,12 @@ ja:
   field_private_by_default: デフォルトでプライベート
   error_issue_status_in_use_by_issues: This status is used by some issues
   error_issue_status_default_for_trackers: This status is used as the default status by some trackers
+  webhook_secret_keep_info: The secret of another user is not displayed. Leave this
+    field blank to keep it unchanged.
+  webhook_disabled_info_html: Webhooks are disabled, so none of the webhooks below is
+    triggered. They are still listed here so that they can be reviewed or removed. Webhooks
+    can be enabled in the %{link} settings.
+  permission_export_issues: Export issues
+  permission_export_time_entries: Export time entries
+  mail_subject_test_email: Redmine test
+  mail_body_test_email: This is a test email sent by Redmine.
