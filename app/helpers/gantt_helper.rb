@@ -197,12 +197,13 @@ module GanttHelper
 
   def gantt_chart_tag(query, layout, &block)
     data_attributes = {
-      controller: 'gantt--chart',
+      controller: 'gantt--chart gantt--sticky-header',
       # Events emitted by child controllers the chart listens to.
       # - `gantt--options` toggles checkboxes under Options.
       # - `gantt--subjects` reports tree expand/collapse.
       # - Mouse events synchronize the hovered row across the chart panes.
       # - Window resize triggers a redraw of progress lines and relations.
+      # - Column resizing, captured scroll events and window resize update the fixed header.
       action: %w(
         gantt--options:toggle-display@document->gantt--chart#handleOptionsDisplay
         gantt--options:toggle-relations@document->gantt--chart#handleOptionsRelations
@@ -211,6 +212,9 @@ module GanttHelper
         mouseover->gantt--chart#highlightRow
         mouseout->gantt--chart#unhighlightRow
         resize@window->gantt--chart#handleWindowResize
+        gantt--column:resize->gantt--sticky-header#scheduleUpdate
+        scroll@document->gantt--sticky-header#scheduleUpdate:capture:passive
+        resize@window->gantt--sticky-header#scheduleUpdate
       ).join(' '),
       'gantt--chart-issue-relation-types-value': Redmine::Helpers::Gantt::DRAW_TYPES.to_json,
       'gantt--chart-show-selected-columns-value': query.draw_selected_columns ? 'true' : 'false',
@@ -236,7 +240,11 @@ module GanttHelper
   def gantt_column_tag(column_name, min_width: nil, **options, &)
     options[:data] = options.fetch(:data, {}).merge(
       controller: 'gantt--column',
-      action: 'resize@window->gantt--column#handleWindowResize',
+      'gantt--sticky-header-target': 'column',
+      action: %w(
+        resize@window->gantt--column#handleWindowResize
+        gantt--sticky-header:resize-column->gantt--column#handleResize
+      ).join(' '),
       'gantt--column-min-width-value': min_width,
       'gantt-column': column_name
     )
