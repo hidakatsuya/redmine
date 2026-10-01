@@ -401,37 +401,4 @@
     inline-size: calc(var(--gantt-chart-width) + 1px);
     overflow: visible;
   }
-
-  .gantt-timeline-body {
-    position: relative;
-    inset-block-start: 0;
-  }
-
-  /* Preserve the row offset when using normal flow. */
-  [data-gantt-column="subjects"] .gantt-pane-body form,
-  .gantt-selected-column .gantt-pane-body,
-  .gantt-timeline-body form {
-    padding-block-start: var(--gantt-content-top);
-  }
-
-  /* Allow pane rows to paginate without clipping or splitting. */
-  .gantt-row {
-    position: relative;
-    inset-block-start: auto;
-    break-inside: avoid-page;
-  }
-
-  .gantt-pane,
-  .gantt-timeline-canvas {
-    block-size: auto;
-    min-block-size: calc(var(--gantt-pane-height) + 2px);
-    overflow: visible;
-  }
-
-  .gantt-pane-body,
-  .gantt-pane-body form,
-  .gantt-timeline-body,
-  .gantt-timeline-body form {
-    block-size: auto;
-  }
 }
