@@ -107,6 +107,22 @@ class GanttsTest < ApplicationSystemTestCase
     assert width_after > width_before
   end
 
+  test 'column width is remembered' do
+    visit_gantt
+
+    # Wait for column resizing to initialize before reading the width.
+    assert_selector '.gantt-column[data-gantt-column="subjects"].ui-resizable'
+    default_subject_width = column_width('subjects')
+
+    drag_column_resizer('subjects', 60)
+    resized_subject_width = column_width('subjects')
+    assert resized_subject_width > default_subject_width
+
+    page.refresh
+    assert_selector '.gantt-column[data-gantt-column="subjects"].ui-resizable'
+    assert_equal resized_subject_width, column_width('subjects')
+  end
+
   test 'context menu and tooltip interactions' do
     visit_gantt
 
