@@ -22,6 +22,19 @@ require_relative '../test_helper'
 class GanttHelperTest < Redmine::HelperTest
   include GanttHelper
 
+  test 'column width storage keys include the project scope' do
+    [
+      [stub(id: 1), 'subjects', 'redmine-gantt-column-width-1'],
+      [stub(id: 2), 'subjects', 'redmine-gantt-column-width-2'],
+      [stub(id: 1), 'status', 'redmine-gantt-column-width-1'],
+      [nil, 'subjects', 'redmine-gantt-column-width-global']
+    ].each do |project, column, key|
+      html = gantt_column_tag(column, project: project)
+
+      assert_select_in html, 'div[data-gantt--column-width-store-key-value=?]', key, 1
+    end
+  end
+
   test 'chart layout scales days and selects header rows for each zoom level' do
     # Input zoom level, then expected pixels per day, header rows, and header visibility.
     [
