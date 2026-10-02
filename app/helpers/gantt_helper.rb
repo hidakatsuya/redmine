@@ -253,11 +253,14 @@ module GanttHelper
     end
   end
 
-  def gantt_column_tag(column_name, min_width: nil, **options, &)
+  def gantt_column_tag(column_name, project:, min_width: nil, **options, &)
+    column_width_store_key = ['redmine-gantt-column-width', project&.id || 'global'].join('-')
+
     options[:data] = options.fetch(:data, {}).merge(
       controller: 'gantt--column',
       action: 'resize@window->gantt--column#handleWindowResize',
       'gantt--column-min-width-value': min_width,
+      'gantt--column-width-store-key-value': column_width_store_key,
       'gantt-column': column_name
     )
     options[:class] = ['gantt-column', options[:class]]

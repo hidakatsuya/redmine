@@ -23,9 +23,15 @@
   align-items: flex-start;
   inline-size: 100%;
   margin-block-end: 1em;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   /* Force LTR for Gantt even in RTL locales because column resizing, relation lines, and the progress line don't work in RTL yet. */
   direction: ltr;
+}
+
+/* Avoid flicker by hiding the chart until all column widths are restored. */
+.gantt-chart:has(.gantt-column:not([data-gantt--column-width-restored])) {
+  visibility: hidden;
 }
 
 .gantt-chart [hidden] {
@@ -84,7 +90,7 @@
 .gantt-timeline {
   position: relative;
   flex: 1 1 auto;
-  min-inline-size: 0;
+  min-inline-size: 100px;
   /* Keep the canvas border inside the overflow clipping edge. */
   padding-block-end: 1px;
   overflow-x: auto;
