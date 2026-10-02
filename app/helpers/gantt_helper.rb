@@ -253,16 +253,20 @@ module GanttHelper
     end
   end
 
-  def gantt_column_tag(column_name, min_width: nil, **options, &)
+  def gantt_column_tag(column_name, project:, min_width: nil, **options, &)
+    width = options[:width]
+    width_storage_key = ['redmine-gantt-column-width', project&.id || 'global', column_name].join(':')
     options[:data] = options.fetch(:data, {}).merge(
       controller: 'gantt--column',
-      action: 'resize@window->gantt--column#handleWindowResize',
+      action: 'resize@window->gantt--column#handleWindowResize dblclick->gantt--column#resetWidth',
       'gantt--column-min-width-value': min_width,
+      'gantt--column-width-storage-key-value': width_storage_key,
+      'gantt--column-default-width-value': width,
       'gantt-column': column_name
     )
     options[:class] = ['gantt-column', options[:class]]
 
-    options[:style] = gantt_css_variables('gantt-column-width': options.delete(:width)) if options[:width]
+    options[:style] = gantt_css_variables('gantt-column-width': options.delete(:width)) if width
 
     tag.div(**options, &)
   end
