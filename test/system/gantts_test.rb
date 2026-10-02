@@ -5,6 +5,11 @@ require_relative '../application_system_test_case'
 class GanttsTest < ApplicationSystemTestCase
   setup do
     log_user('jsmith', 'jsmith')
+    page.execute_script(<<~JAVASCRIPT)
+      Object.keys(window.localStorage)
+        .filter(key => key.startsWith('redmine-gantt-column-width:'))
+        .forEach(key => window.localStorage.removeItem(key))
+    JAVASCRIPT
   end
 
   test 'columns display toggle shows status priority assignee updated' do
@@ -154,6 +159,85 @@ class GanttsTest < ApplicationSystemTestCase
     assert width_after > width_before
   end
 
+  test 'subject and selected column widths are restored when revisiting the chart' do
+    visit_gantt
+    expand_options
+    find('#draw_selected_columns').check
+
+    drag_column_resizer('subjects', 60)
+    drag_column_resizer('status', 80)
+    subjects_width = column_width('subjects')
+    status_width = column_width('status')
+
+    visit_gantt
+    expand_options
+    find('#draw_selected_columns').check
+
+    assert_equal subjects_width, column_width('subjects')
+    assert_equal status_width, column_width('status')
+
+    visit '/projects/ecookbook/issues/gantt?set_filter=1&draw_selected_columns=1&c[]=subject&c[]=priority'
+    assert_no_selector '.gantt-column[data-gantt-column="status"]', visible: :all
+
+    visit '/projects/ecookbook/issues/gantt?set_filter=1&draw_selected_columns=1&c[]=subject&c[]=status'
+    assert_selector '.gantt-column[data-gantt-column="status"] .ui-resizable-e'
+    assert_equal status_width, column_width('status')
+  end
+
+  test 'column widths are independent for each project and the global chart' do
+    visit_gantt
+    drag_column_resizer('subjects', 60)
+    first_width = column_width('subjects')
+    first_key = column_width_storage_key('subjects')
+
+    visit '/projects/subproject1/issues/gantt'
+    second_key = column_width_storage_key('subjects')
+    assert_not_equal first_key, second_key
+    drag_column_resizer('subjects', 100)
+    second_width = column_width('subjects')
+
+    visit '/issues/gantt'
+    global_key = column_width_storage_key('subjects')
+    assert_not_equal first_key, global_key
+    assert_not_equal second_key, global_key
+    drag_column_resizer('subjects', 140)
+    global_width = column_width('subjects')
+
+    visit_gantt
+    assert_equal first_width, column_width('subjects')
+    visit '/projects/subproject1/issues/gantt'
+    assert_equal second_width, column_width('subjects')
+    visit '/issues/gantt'
+    assert_equal global_width, column_width('subjects')
+  end
+
+  test 'double clicking a resize handle resets only that column' do
+    visit_gantt
+    expand_options
+    find('#draw_selected_columns').check
+    default_width = column_width('status')
+
+    drag_column_resizer('subjects', 60)
+    drag_column_resizer('status', 80)
+    subjects_width = column_width('subjects')
+    status_width = column_width('status')
+    status_key = column_width_storage_key('status')
+
+    find('.gantt-column[data-gantt-column="status"] header').double_click
+    assert_equal status_width, column_width('status')
+
+    find('.gantt-column[data-gantt-column="status"] .ui-resizable-e').double_click
+    assert_equal default_width, column_width('status')
+    assert_equal subjects_width, column_width('subjects')
+    assert_nil page.evaluate_script('window.localStorage.getItem(arguments[0])', status_key)
+
+    visit_gantt
+    expand_options
+    find('#draw_selected_columns').check
+    assert_equal default_width, column_width('status')
+    assert_equal subjects_width, column_width('subjects')
+  end
+
   test 'context menu and tooltip interactions' do
     visit_gantt
 
@@ -266,7 +350,13 @@ class GanttsTest < ApplicationSystemTestCase
   end
 
   def column_width(id)
+    assert_selector "div.gantt-column[data-gantt-column=\"#{id}\"] .ui-resizable-e"
     page.evaluate_script("document.querySelector('div.gantt-column[data-gantt-column=\"#{id}\"]').offsetWidth")
+  end
+
+  def column_width_storage_key(id)
+    find("div.gantt-column[data-gantt-column=\"#{id}\"] .ui-resizable-e")
+    find("div.gantt-column[data-gantt-column=\"#{id}\"]")['data-gantt--column-width-storage-key-value']
   end
 
   def drag_column_resizer(column_id, distance)
