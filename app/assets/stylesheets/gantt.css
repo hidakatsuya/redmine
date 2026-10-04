@@ -19,17 +19,14 @@
 
 /***** Gantt chart *****/
 .gantt-chart {
-  --gantt-subject-width: 330px;
-  --gantt-selected-column-width: 50px;
   --gantt-header-height: 18px;
-  --gantt-content-top: 8px;
   --gantt-row-height: 20px;
-  /* Preserve the extra body space from the original chart. */
-  --gantt-extra-rows: 6;
-  --gantt-bottom-padding: 150px;
-  --gantt-min-content-height: 206px;
   --gantt-headers-height: calc(var(--gantt-header-rows) * var(--gantt-header-height));
-  --gantt-content-height: max(calc((var(--gantt-row-count) + var(--gantt-extra-rows)) * var(--gantt-row-height) + var(--gantt-bottom-padding)), var(--gantt-min-content-height));
+  /* Preserve the extra six rows, 150px of body space, and minimum height from the original chart. */
+  --gantt-content-height: max(
+    calc((var(--gantt-row-count) + 6) * var(--gantt-row-height) + 150px),
+    206px
+  );
   --gantt-pane-height: calc(var(--gantt-headers-height) + var(--gantt-content-height));
   display: flex;
   align-items: flex-start;
@@ -45,7 +42,7 @@
 }
 
 .gantt-column {
-  --gantt-default-column-width: var(--gantt-selected-column-width);
+  --gantt-default-column-width: 50px;
   position: relative;
   flex: 0 0 var(--gantt-column-width, var(--gantt-default-column-width));
   inline-size: var(--gantt-column-width, var(--gantt-default-column-width));
@@ -53,7 +50,7 @@
 }
 
 [data-gantt-column="subjects"] {
-  --gantt-default-column-width: calc(var(--gantt-subject-width) + 1px);
+  --gantt-default-column-width: 331px;
 }
 
 .gantt-column-resize-handle {
@@ -205,7 +202,7 @@
 
 .gantt-row {
   position: absolute;
-  inset-block-start: calc(var(--gantt-content-top) + var(--gantt-row-index) * var(--gantt-row-height));
+  inset-block-start: calc(8px + var(--gantt-row-index) * var(--gantt-row-height));
   block-size: var(--gantt-row-height);
   box-sizing: border-box;
 }

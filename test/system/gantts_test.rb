@@ -62,7 +62,6 @@ class GanttsTest < ApplicationSystemTestCase
     find('#draw_selected_columns').check
     page.execute_script(<<~JAVASCRIPT)
       const chart = document.querySelector('.gantt-chart');
-      chart.style.setProperty('--gantt-content-top', '12px');
       chart.style.setProperty('--gantt-row-height', '24px');
       chart.style.setProperty('--gantt-header-height', '22px');
     JAVASCRIPT
