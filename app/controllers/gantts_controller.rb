@@ -46,7 +46,11 @@ class GanttsController < ApplicationController
     basename = (@project ? "#{@project.identifier}-" : '') + 'gantt'
 
     respond_to do |format|
-      format.html {render :action => "show", :layout => !request.xhr?}
+      format.html do
+        render :action => "show", :layout => !request.xhr?,
+               :locals => {:gantt => @gantt, :query => @query,
+                           :project => @project, :export_allowed => @export_allowed}
+      end
       if @gantt.respond_to?(:to_image)
         format.png do
           send_data(@gantt.to_image,

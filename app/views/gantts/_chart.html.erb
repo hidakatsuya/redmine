@@ -1,3 +1,4 @@
+<%# locals: (gantt:, query:, export_allowed:) %>
 <%
   layout = GanttHelper::ChartLayout.new(gantt)
   gantt.render(
@@ -10,7 +11,7 @@
   <p class="warning"><%= l(:notice_gantt_chart_truncated, max: gantt.max_rows) %></p>
 <% end %>
 
-<%= gantt_chart_tag(@query, layout) do %>
+<%= gantt_chart_tag(query, layout) do %>
   <%= gantt_column_tag('subjects', min_width: 100) do %>
     <section class="gantt-pane">
       <header aria-hidden="true"></header>
@@ -114,7 +115,7 @@
   </ul>
 </span>
 
-<% if @export_allowed %>
+<% if export_allowed %>
 <% other_formats_links do |f| %>
   <%= f.link_to_with_query_parameters 'PDF', gantt.params %>
   <%= f.link_to_with_query_parameters('PNG', gantt.params) if gantt.respond_to?('to_image') %>
