@@ -224,7 +224,7 @@ module GanttHelper
     end
   end
 
-  def gantt_column_tag(column_name, min_width: nil, **options, &)
+  def gantt_column_tag(column_name, min_width: nil, **options, &block)
     options[:data] = options.fetch(:data, {}).merge(
       controller: 'gantt--column',
       action: 'resize@window->gantt--column#handleWindowResize',
@@ -233,8 +233,21 @@ module GanttHelper
     )
     options[:class] = ['gantt-column', options[:class]]
 
-    options[:style] = gantt_css_variables('gantt-column-width': options.delete(:width)) if options[:width]
-
-    tag.div(**options, &)
+    tag.div(**options) do
+      capture(&block) + tag.div(
+        class: 'gantt-column-resize-handle',
+        'aria-hidden': true,
+        data: {
+          'gantt--column-target': 'handle',
+          action: %w(
+            pointerdown->gantt--column#startResize
+            pointermove->gantt--column#resize
+            pointerup->gantt--column#endResize
+            pointercancel->gantt--column#cancelResize
+            lostpointercapture->gantt--column#cancelResize
+          ).join(' ')
+        }
+      )
+    end
   end
 end

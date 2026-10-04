@@ -56,8 +56,20 @@
   --gantt-default-column-width: calc(var(--gantt-subject-width) + 1px);
 }
 
-.gantt-chart .ui-resizable-e {
+.gantt-column-resize-handle {
+  position: absolute;
+  z-index: 30;
+  inset-block: 0;
+  inset-inline-end: -5px;
+  inline-size: 7px;
   cursor: ew-resize;
+  touch-action: none;
+}
+
+.gantt-column-resizing,
+.gantt-column-resizing * {
+  cursor: ew-resize !important;
+  user-select: none !important;
 }
 
 .gantt-pane {
@@ -403,6 +415,10 @@
 }
 
 @media print {
+  .gantt-column-resize-handle {
+    display: none;
+  }
+
   /* Include the full timeline in the browser print layout. */
   body.controller-gantts.action-show #wrapper {
     overflow: visible;

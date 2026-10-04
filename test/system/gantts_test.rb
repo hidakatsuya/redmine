@@ -184,6 +184,83 @@ class GanttsTest < ApplicationSystemTestCase
     assert width_after > width_before
   end
 
+  test 'subject resizing respects the minimum and reports only changed completed drags' do
+    visit_gantt
+    handle = find('[data-gantt-column="subjects"] .gantt-column-resize-handle')
+    page.execute_script(<<~JAVASCRIPT)
+      window.completedWidths = [];
+      document.querySelector('[data-gantt-column="subjects"]').addEventListener('gantt--column:resize-end', event => window.completedWidths.push(event.detail.width));
+    JAVASCRIPT
+    handle.click
+    assert_equal [], page.evaluate_script('window.completedWidths')
+    drag_column_resizer('subjects', -250)
+    assert_equal 100, column_width('subjects')
+    assert_equal [100], page.evaluate_script('window.completedWidths')
+    assert_no_selector 'html.gantt-column-resizing'
+  end
+
+  test 'cancelled and disconnected resizing restores width and clears drag state' do
+    visit_gantt
+    initial_width = column_width('subjects')
+    handle = find('[data-gantt-column="subjects"] .gantt-column-resize-handle')
+    page.execute_script(<<~JAVASCRIPT)
+      window.completedWidths = [];
+      const column = document.querySelector('[data-gantt-column="subjects"]');
+      column.addEventListener('gantt--column:resize-end', event => window.completedWidths.push(event.detail.width));
+      column.addEventListener('pointerdown', event => window.dragPointerId = event.pointerId);
+    JAVASCRIPT
+    %w[cancel disconnect].each do |operation|
+      page.driver.browser.action.click_and_hold(handle.native).move_by(60, 0).perform
+      assert_operator column_width('subjects'), :>, initial_width
+      if operation == 'cancel'
+        page.execute_script(<<~JAVASCRIPT)
+          document.querySelector('[data-gantt-column="subjects"] .gantt-column-resize-handle').dispatchEvent(new PointerEvent('pointercancel', { pointerId: window.dragPointerId }));
+        JAVASCRIPT
+      else
+        page.execute_script("document.querySelector('[data-gantt-column=subjects]').removeAttribute('data-controller')")
+      end
+      assert_no_selector 'html.gantt-column-resizing'
+      page.driver.browser.action.release.perform
+      assert_equal initial_width, column_width('subjects')
+      assert_equal [], page.evaluate_script('window.completedWidths')
+    end
+  end
+
+  test 'mobile columns disable resizing from connection and during a drag' do
+    page.driver.browser.manage.window.resize_to(800, 900)
+    visit_gantt
+    assert_no_selector '[data-gantt-column="subjects"] .gantt-column-resize-handle'
+    page.driver.browser.manage.window.resize_to(1024, 900)
+    handle = find('[data-gantt-column="subjects"] .gantt-column-resize-handle')
+    page.driver.browser.action.click_and_hold(handle.native).move_by(50, 0).perform
+    assert_selector 'html.gantt-column-resizing'
+    page.driver.browser.manage.window.resize_to(800, 900)
+    assert_no_selector 'html.gantt-column-resizing'
+    assert_no_selector '[data-gantt-column="subjects"] .gantt-column-resize-handle'
+    page.driver.browser.action.release.perform
+    page.driver.browser.manage.window.resize_to(1024, 900)
+    assert_selector '[data-gantt-column="subjects"] .gantt-column-resize-handle'
+    assert_equal '', page.evaluate_script("document.querySelector('[data-gantt-column=subjects]').style.getPropertyValue('--gantt-column-width')")
+  ensure
+    page.driver.browser.manage.window.resize_to(1024, 900)
+  end
+
+  test 'print layout hides resize handles and includes the timeline' do
+    visit_gantt
+    page.driver.browser.execute_cdp('Emulation.setEmulatedMedia', media: 'print')
+    assert_no_selector '.gantt-column-resize-handle'
+    dimensions = page.evaluate_script(<<~JAVASCRIPT)
+      (() => {
+        const timeline = document.querySelector('.gantt-timeline');
+        const canvas = document.querySelector('.gantt-timeline-canvas');
+        return [timeline.getBoundingClientRect().width, canvas.getBoundingClientRect().width];
+      })()
+    JAVASCRIPT
+    assert_in_delta dimensions.last, dimensions.first, 0.5
+  ensure
+    page.driver.browser.execute_cdp('Emulation.setEmulatedMedia', media: '')
+  end
+
   test 'context menu and tooltip interactions' do
     visit_gantt
 
@@ -275,7 +352,7 @@ class GanttsTest < ApplicationSystemTestCase
   end
 
   def gantt_draw_paths
-    all('.gantt-relations path').pluck(:id)
+    all('.gantt-relations path').pluck(:d)
   end
 
   def scroll_gantt_timeline
@@ -300,7 +377,7 @@ class GanttsTest < ApplicationSystemTestCase
   end
 
   def drag_column_resizer(column_id, distance)
-    handle = find("div.gantt-column[data-gantt-column=\"#{column_id}\"] .ui-resizable-e")
+    handle = find("div.gantt-column[data-gantt-column=\"#{column_id}\"] .gantt-column-resize-handle")
     page.driver.browser.action.click_and_hold(handle.native).move_by(distance, 0).release.perform
   end
 end
