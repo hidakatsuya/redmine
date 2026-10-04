@@ -56,6 +56,36 @@ class GanttsTest < ApplicationSystemTestCase
     assert_selector '.gantt-selected-column .gantt-pane-body .gantt-row[data-gantt-row-key]', minimum: 1
   end
 
+  test 'CSS dimensions keep rows and headers aligned after tree changes' do
+    visit_gantt
+    expand_options
+    find('#draw_selected_columns').check
+    page.execute_script(<<~JAVASCRIPT)
+      const chart = document.querySelector('.gantt-chart');
+      chart.style.setProperty('--gantt-content-top', '12px');
+      chart.style.setProperty('--gantt-row-height', '24px');
+      chart.style.setProperty('--gantt-header-height', '22px');
+    JAVASCRIPT
+
+    2.times do
+      geometry = page.evaluate_script(<<~JAVASCRIPT)
+        (() => {
+          const rows = [...document.querySelectorAll('[data-gantt-column="subjects"] .gantt-row')].filter(row => !row.hidden);
+          return rows.map(row => {
+            const key = row.dataset.ganttRowKey;
+            return [...document.querySelectorAll(`.gantt-row[data-gantt-row-key="${key}"]`)].filter(peer => !peer.closest('[hidden]')).map(peer => peer.getBoundingClientRect().top);
+          });
+        })()
+      JAVASCRIPT
+      assert geometry.any?
+      geometry.each do |tops|
+        assert_operator tops.size, :>=, 3
+        tops.each {|top| assert_in_delta tops.first, top, 0.5}
+      end
+      find('[data-gantt-column="subjects"] .gantt-row[data-gantt-row-key="project-1"] .expander').click
+    end
+  end
+
   test 'tree toggle updates the same logical rows across every pane' do
     visit_gantt
     expand_options

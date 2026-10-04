@@ -362,7 +362,7 @@ class Redmine::Helpers::GanttHelperTest < Redmine::HelperTest
   test "#subject should add a positioned div" do
     create_gantt
     @output_buffer = @gantt.subject('subject', :format => :html)
-    assert_select 'div[style*="--gantt-row-top:"]', :text => 'subject'
+    assert_select 'div[style*="--gantt-row-index:"]', :text => 'subject'
   end
 
   test "#subject should use the indent option to move the div to the right" do

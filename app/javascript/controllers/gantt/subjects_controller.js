@@ -36,18 +36,15 @@ export default class extends Controller {
   }
 
   #positionVisibleRows(chart, subjectRows) {
-    const chartStyle = window.getComputedStyle(chart)
-    const contentTop = parseFloat(chartStyle.getPropertyValue("--gantt-content-top")) || 0
-    const rowHeight = parseFloat(window.getComputedStyle(subjectRows[0]).blockSize) || 20
-    let top = contentTop
+    let index = 0
 
     subjectRows.forEach((row) => {
       if (row.hidden) return
 
       chart.querySelectorAll(this.#rowSelector(row.dataset.ganttRowKey)).forEach((matchingRow) => {
-        matchingRow.style.setProperty("--gantt-row-top", `${top}px`)
+        matchingRow.style.setProperty("--gantt-row-index", index)
       })
-      top += rowHeight
+      index += 1
     })
   }
 

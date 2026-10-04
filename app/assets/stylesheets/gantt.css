@@ -19,6 +19,18 @@
 
 /***** Gantt chart *****/
 .gantt-chart {
+  --gantt-subject-width: 330px;
+  --gantt-selected-column-width: 50px;
+  --gantt-header-height: 18px;
+  --gantt-content-top: 8px;
+  --gantt-row-height: 20px;
+  /* Preserve the extra body space from the original chart. */
+  --gantt-extra-rows: 6;
+  --gantt-bottom-padding: 150px;
+  --gantt-min-content-height: 206px;
+  --gantt-headers-height: calc(var(--gantt-header-rows) * var(--gantt-header-height));
+  --gantt-content-height: max(calc((var(--gantt-row-count) + var(--gantt-extra-rows)) * var(--gantt-row-height) + var(--gantt-bottom-padding)), var(--gantt-min-content-height));
+  --gantt-pane-height: calc(var(--gantt-headers-height) + var(--gantt-content-height));
   display: flex;
   align-items: flex-start;
   inline-size: 100%;
@@ -33,10 +45,15 @@
 }
 
 .gantt-column {
+  --gantt-default-column-width: var(--gantt-selected-column-width);
   position: relative;
-  flex: 0 0 var(--gantt-column-width);
-  inline-size: var(--gantt-column-width);
+  flex: 0 0 var(--gantt-column-width, var(--gantt-default-column-width));
+  inline-size: var(--gantt-column-width, var(--gantt-default-column-width));
   min-inline-size: 0;
+}
+
+[data-gantt-column="subjects"] {
+  --gantt-default-column-width: calc(var(--gantt-subject-width) + 1px);
 }
 
 .gantt-chart .ui-resizable-e {
@@ -176,8 +193,8 @@
 
 .gantt-row {
   position: absolute;
-  inset-block-start: var(--gantt-row-top);
-  block-size: 20px;
+  inset-block-start: calc(var(--gantt-content-top) + var(--gantt-row-index) * var(--gantt-row-height));
+  block-size: var(--gantt-row-height);
   box-sizing: border-box;
 }
 

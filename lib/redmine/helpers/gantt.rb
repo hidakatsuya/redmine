@@ -420,7 +420,7 @@ module Redmine
           content =
             view.content_tag(
               :div, value,
-              :style => css_variables('gantt-row-top': "#{options[:top] || 0}px"),
+              :style => css_variables('gantt-row-index': @number_of_rows || 0),
               :class => 'gantt-row',
               :data => row
             )
@@ -883,7 +883,7 @@ module Redmine
           )
         end
         row_variables = {
-          'gantt-row-top': "#{params[:top] || 0}px",
+          'gantt-row-index': @number_of_rows || 0,
           'gantt-row-indent': "#{params[:indent]}px"
         }
         tag_options[:style] = css_variables(row_variables)
@@ -997,7 +997,7 @@ module Redmine
       end
 
       def html_gantt_row(params, content, row:)
-        style = css_variables('gantt-row-top': "#{params[:top] || 0}px")
+        style = css_variables('gantt-row-index': @number_of_rows || 0)
         view.content_tag(
           :div,
           content.to_s.html_safe,

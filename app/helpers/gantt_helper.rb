@@ -34,24 +34,12 @@ module GanttHelper
       keyword_init: true
     )
 
-    # The height of one timeline header row in pixels
-    attr_reader :header_height
-    # The combined height of all visible header rows in pixels
-    attr_reader :headers_height
-    # The gap between the header and the first chart row in pixels
-    attr_reader :content_top
-    # The subject pane width used to render its rows in pixels
-    attr_reader :subject_width
     # The number of pixels representing one day
     attr_reader :zoom
 
     def initialize(gantt)
       @gantt = gantt
       @zoom = 2**gantt.zoom
-      @subject_width = 330
-      @header_height = 18
-      @content_top = 8
-      @headers_height = header_rows * header_height
     end
 
     # The full timeline width in pixels
@@ -62,21 +50,8 @@ module GanttHelper
       end
     end
 
-    def content_height
-      @content_height ||= begin
-        row_height = 20
-        extra_rows = 6
-        bottom_padding = 150
-        minimum_height = 206
-
-        # Preserve the extra space and minimum height from the original template.
-        rows_height = row_height * (@gantt.number_of_rows + extra_rows)
-        [rows_height + bottom_padding, minimum_height].max
-      end
-    end
-
-    def pane_height
-      headers_height + content_height
+    def row_count
+      @gantt.number_of_rows
     end
 
     def months
@@ -161,12 +136,12 @@ module GanttHelper
       @gantt.zoom > 3
     end
 
-    private
-
     def header_rows
       # The month header is always displayed.
       1 + [show_weeks?, show_days?, show_day_numbers?].count(true)
     end
+
+    private
 
     def day_periods(spans_body: false)
       (@gantt.date_from..@gantt.date_to).map do |date|
@@ -239,13 +214,9 @@ module GanttHelper
     }
 
     style = gantt_css_variables(
-      'gantt-subject-width': "#{layout.subject_width + 1}px",
-      'gantt-header-height': "#{layout.header_height}px",
-      'gantt-headers-height': "#{layout.headers_height}px",
-      'gantt-chart-width': "#{layout.chart_width}px",
-      'gantt-content-top': "#{layout.content_top}px",
-      'gantt-content-height': "#{layout.content_height}px",
-      'gantt-pane-height': "#{layout.pane_height}px"
+      'gantt-header-rows': layout.header_rows,
+      'gantt-row-count': layout.row_count,
+      'gantt-chart-width': "#{layout.chart_width}px"
     )
 
     tag.div(class: 'gantt-chart', style: style, data: data_attributes) do

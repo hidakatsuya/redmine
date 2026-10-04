@@ -33,7 +33,7 @@ class GanttHelperTest < Redmine::HelperTest
       layout = chart_layout(zoom: level)
 
       assert_equal pixels, layout.zoom
-      assert_equal rows * layout.header_height, layout.headers_height
+      assert_equal rows, layout.header_rows
       assert_equal weeks, layout.show_weeks?
       assert_equal days, layout.show_days?
       assert_equal day_numbers, layout.show_day_numbers?
@@ -45,16 +45,6 @@ class GanttHelperTest < Redmine::HelperTest
 
     # Leap February has 29 days; zoom level 3 represents each day with 8 pixels.
     assert_equal 232, layout.chart_width
-  end
-
-  test 'content and pane heights account for the rendered rows' do
-    empty = chart_layout(number_of_rows: 0)
-    populated = chart_layout(number_of_rows: 10)
-
-    assert_equal 270, empty.content_height
-    assert_equal 470, populated.content_height
-    assert_equal empty.headers_height + 270, empty.pane_height
-    assert_equal populated.headers_height + 470, populated.pane_height
   end
 
   test 'monthly periods cross a year boundary and include leap February' do

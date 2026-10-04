@@ -1,10 +1,8 @@
 <%
   layout = GanttHelper::ChartLayout.new(gantt)
   gantt.render(
-    top: layout.content_top,
     zoom: layout.zoom,
-    g_width: layout.chart_width,
-    subject_width: layout.subject_width
+    g_width: layout.chart_width
   )
 %>
 
@@ -13,7 +11,7 @@
 <% end %>
 
 <%= gantt_chart_tag(@query, layout) do %>
-  <%= gantt_column_tag('subjects', min_width: 100, width: 'var(--gantt-subject-width)') do %>
+  <%= gantt_column_tag('subjects', min_width: 100) do %>
     <section class="gantt-pane">
       <header aria-hidden="true"></header>
       <div class="gantt-pane-body" data-controller="gantt--subjects">
@@ -30,13 +28,13 @@
       next if Redmine::Helpers::Gantt::UNAVAILABLE_COLUMNS.include?(column.name)
       column_name = column.name.to_s.tr('.', '_')
   %>
-    <%= gantt_column_tag(column_name, min_width: 20, width: '50px', class: 'gantt-selected-column',
+    <%= gantt_column_tag(column_name, min_width: 20, class: 'gantt-selected-column',
                          hidden: !query.draw_selected_columns,
                          data: {'gantt--chart-target': 'selectedColumn'}) do %>
       <section class="gantt-pane">
         <header><%= column.caption %></header>
         <div class="gantt-pane-body">
-          <%= gantt.selected_column_content(column: column, top: layout.content_top, zoom: layout.zoom, g_width: layout.chart_width).html_safe %>
+          <%= gantt.selected_column_content(column: column, zoom: layout.zoom, g_width: layout.chart_width).html_safe %>
         </div>
       </section>
     <% end %>
