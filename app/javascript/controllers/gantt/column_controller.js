@@ -42,6 +42,8 @@ class ColumnWidthStore {
 }
 
 export default class extends Controller {
+  static targets = ["handle"]
+
   static values = {
     minWidth: Number,
     widthStoreKey: String,
@@ -91,10 +93,9 @@ export default class extends Controller {
 
   #setupResizable() {
     const options = {
-      handles: "e",
+      handles: { e: this.handleTarget },
       minWidth: this.minWidthValue,
       disabled: this.mobileModeValue,
-      zIndex: 30,
       resize: (_event, ui) => {
         this.element.style.setProperty("--gantt-column-width", `${ui.size.width}px`)
         this.element.style.removeProperty("width")
