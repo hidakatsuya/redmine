@@ -317,7 +317,7 @@ class Issue < ApplicationRecord
     self.attributes =
       issue.attributes.dup.except(
         "id", "root_id", "parent_id", "lft", "rgt",
-        "created_on", "updated_on", "status_id", "closed_on"
+        "created_on", "updated_on", "status_id", "closed_on", "done_ratio"
       )
     self.custom_field_values =
       issue.custom_field_values.to_h do |v|
@@ -325,6 +325,7 @@ class Issue < ApplicationRecord
       end
     if options[:keep_status]
       self.status = issue.status
+      self.done_ratio = issue.read_attribute(:done_ratio)
     end
     self.author = User.current
     unless options[:attachments] == false
@@ -2005,11 +2006,12 @@ class Issue < ApplicationRecord
   end
 
   # Default assignment based on project or category
+  # Default assignees that are no longer assignable are skipped
   def default_assign
     if assigned_to.nil?
-      if category && category.assigned_to
+      if category && category.assigned_to && assignable_users.include?(category.assigned_to)
         self.assigned_to = category.assigned_to
-      elsif project && project.default_assigned_to
+      elsif project && project.default_assigned_to && assignable_users.include?(project.default_assigned_to)
         self.assigned_to = project.default_assigned_to
       end
     end

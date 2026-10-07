@@ -191,6 +191,32 @@ class IssuesSystemTest < ApplicationSystemTestCase
     assert_no_selector '.add_attachment', :visible => true
   end
 
+  def test_pasting_image_beyond_max_attachments_at_once_should_show_error
+    set_tmp_attachments_directory
+    log_user('jsmith', 'jsmith')
+
+    Redmine::Configuration.with('max_attachments_at_once' => 2) do
+      visit '/projects/ecookbook/issues/new'
+    end
+    paste_image = lambda do
+      page.execute_script(<<~JS)
+        // 1x1 1-bit grayscale PNG image
+        const png = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAACklEQVR42mNgAAAAAgAB5Sfe/AAAAABJRU5ErkJggg=='), c => c.charCodeAt(0));
+        const clipboardData = new DataTransfer();
+        clipboardData.items.add(new File([png], 'image.png', { type: 'image/png' }));
+        const event = new Event('paste', { bubbles: true, cancelable: true });
+        Object.defineProperty(event, 'clipboardData', { value: clipboardData });
+        document.getElementById('issue_description').dispatchEvent(event);
+      JS
+    end
+    2.times { paste_image.call }
+    assert_selector '.attachments_fields > span', :count => 2
+    accept_alert(/maximum number of files that can be attached simultaneously \(2\)/) do
+      paste_image.call
+    end
+    assert_selector '.attachments_fields > span', :count => 2
+  end
+
   def test_create_issue_with_new_target_version
     log_user('jsmith', 'jsmith')
 
@@ -690,6 +716,23 @@ class IssuesSystemTest < ApplicationSystemTestCase
 
     # assert add notes form does not exist anymore for user without required permissions on the new project
     assert page.has_no_css?('#add_notes')
+  end
+
+  def test_attachment_note_link_should_show_history_tab_if_note_is_hidden
+    # Journal 3 added attachment 4 to issue 2. Without notes, it is hidden in the notes tab
+    Journal.find(3).update_column(:notes, '')
+    Journal.create!(:journalized => Issue.find(2), :user_id => 2, :notes => 'A note')
+
+    log_user('jsmith', 'jsmith')
+    visit '/issues/2?tab=notes'
+
+    assert_selector '#tab-notes.selected'
+    assert_no_selector '#note-1'
+
+    find('div.attachments span.attachment-journal a').click
+
+    assert_selector '#tab-history.selected'
+    assert_selector '#note-1'
   end
 
   def test_preview_custom_field_on_bulk_edit_across_projects

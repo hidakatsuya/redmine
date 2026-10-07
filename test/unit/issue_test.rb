@@ -683,6 +683,23 @@ class IssueTest < ActiveSupport::TestCase
     assert_equal user, issue.assigned_to
   end
 
+  def test_default_assigned_to_based_on_category_should_skip_non_assignable_user
+    category = IssueCategory.create!(:project_id => 1, :name => 'With default assignee', :assigned_to_id => 3)
+    Project.find(1).update!(:default_assigned_to_id => 2)
+    User.find(3).lock!
+
+    issue = Issue.generate!(:project_id => 1, :category_id => category.id)
+    assert_equal User.find(2), issue.assigned_to
+  end
+
+  def test_default_assigned_to_based_on_project_should_skip_non_assignable_user
+    Project.find(1).update!(:default_assigned_to_id => 3)
+    Role.find(2).update!(:assignable => false)
+
+    issue = Issue.generate!(:project_id => 1)
+    assert_nil issue.assigned_to
+  end
+
   def test_default_assigned_to_with_required_assignee_should_validate
     category = IssueCategory.create!(:project_id => 1, :name => 'With default assignee', :assigned_to_id => 3)
     Issue.any_instance.stubs(:required_attribute_names).returns(['assigned_to_id'])
@@ -1396,6 +1413,38 @@ class IssueTest < ActiveSupport::TestCase
     assert issue.save
     issue.reload
     assert_equal orig.status, issue.status
+  end
+
+  def test_copy_should_reset_done_ratio_to_default_value
+    with_settings :issue_done_ratio => 'issue_field' do
+      orig = Issue.generate!(:done_ratio => 80)
+
+      issue = Issue.new.copy_from(orig)
+      assert_equal 0, issue.done_ratio
+      assert issue.save
+      assert_equal 0, issue.reload.done_ratio
+    end
+  end
+
+  def test_copy_should_use_default_done_ratio_of_default_status_when_done_ratio_is_based_on_issue_status
+    IssueStatus.find(1).update!(:default_done_ratio => 20)
+    with_settings :issue_done_ratio => 'issue_status' do
+      orig = Issue.generate!(:status_id => 2, :done_ratio => 80)
+
+      issue = Issue.new.copy_from(orig)
+      assert_equal 1, issue.status_id
+      assert_equal 20, issue.done_ratio
+      assert issue.save
+      assert_equal 20, issue.reload.done_ratio
+    end
+  end
+
+  def test_copy_with_keep_status_should_copy_done_ratio
+    orig = Issue.generate!(:status_id => 2, :done_ratio => 80)
+
+    issue = Issue.new.copy_from(orig, :keep_status => true)
+    assert issue.save
+    assert_equal 80, issue.reload.done_ratio
   end
 
   def test_copy_should_add_relation_with_copied_issue
