@@ -17,6 +17,26 @@
   margin-inline-start: 4px;
 }
 
+#query_form_with_buttons .gantt-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  column-gap: 10px;
+  margin-block: 12px 18px;
+}
+
+#query_form_with_buttons .gantt-controls > p {
+  margin-block: 0;
+}
+
+#query_form_with_buttons .gantt-controls > p.contextual {
+  order: 1;
+  margin-inline-start: auto;
+  padding-inline-start: 0;
+  float: none;
+  font-size: 0.75rem;
+}
+
 /***** Gantt chart *****/
 .gantt-chart {
   display: flex;
