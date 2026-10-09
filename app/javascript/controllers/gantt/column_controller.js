@@ -42,6 +42,8 @@ class ColumnWidthStore {
 }
 
 export default class extends Controller {
+  static targets = ["handle"]
+
   static values = {
     minWidth: Number,
     widthStoreKey: String,
@@ -88,11 +90,32 @@ export default class extends Controller {
     return this.element.dataset.ganttColumn
   }
 
+  fitWidth() {
+    const extraPadding = 10
+    let width = 0
+
+    // Temporarily apply this class to measure the content width needed to fit the column.
+    this.element.classList.add("gantt-column-measuring")
+    try {
+      this.element.querySelectorAll(".gantt-pane > header, .gantt-row:not([hidden])").forEach((content) => {
+        width = Math.max(width, content.getBoundingClientRect().width)
+      })
+    } finally {
+      this.element.classList.remove("gantt-column-measuring")
+    }
+
+    width = Math.max(this.minWidthValue, Math.ceil(width) + extraPadding)
+    this.dispatch("resize-start")
+    this.element.style.setProperty("--gantt-column-width", `${width}px`)
+    this.element.style.removeProperty("width")
+    this.dispatch("resize", { detail: { width } })
+    this.#saveWidth(width)
+  }
+
   #setupResizable() {
     const options = {
-      handles: "e",
+      handles: { e: this.handleTarget },
       minWidth: this.minWidthValue,
-      zIndex: 30,
       start: () => {
         this.dispatch("resize-start")
       },

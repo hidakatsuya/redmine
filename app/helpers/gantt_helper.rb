@@ -283,4 +283,15 @@ module GanttHelper
 
     tag.div(**options, &)
   end
+
+  def gantt_column_resize_handle_tag
+    tag.div(
+      class: 'ui-resizable-handle ui-resizable-e',
+      data: {
+        'gantt--column-target': 'handle',
+        action: 'dblclick->gantt--column#fitWidth:prevent'
+      },
+      aria: {hidden: true}
+    )
+  end
 end
