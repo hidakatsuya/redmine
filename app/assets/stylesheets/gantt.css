@@ -39,14 +39,21 @@
 }
 
 .gantt-column {
+  --gantt-default-column-width: 50px;
+
   position: relative;
-  flex: 0 0 var(--gantt-column-width);
-  inline-size: var(--gantt-column-width);
+  flex: 0 0 var(--gantt-column-width, var(--gantt-default-column-width));
+  inline-size: var(--gantt-column-width, var(--gantt-default-column-width));
   min-inline-size: 0;
 }
 
-.gantt-chart .ui-resizable-e {
+.gantt-column[data-gantt-column="subjects"] {
+  --gantt-default-column-width: 331px;
+}
+
+.gantt-chart .gantt-column-resize-handle {
   cursor: ew-resize;
+  z-index: 30;
 }
 
 .gantt-pane {
@@ -203,6 +210,12 @@
   line-height: 16px;
   overflow: hidden;
   white-space: nowrap;
+}
+
+/* Applied temporarily when auto-fitting a column to measure its header and row content widths. */
+.gantt-column-measuring .gantt-pane > header,
+.gantt-column-measuring .gantt-row {
+  inline-size: max-content;
 }
 
 .gantt-row-hover {

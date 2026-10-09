@@ -40,15 +40,12 @@ module GanttHelper
     attr_reader :headers_height
     # The gap between the header and the first chart row in pixels
     attr_reader :content_top
-    # The subject pane width used to render its rows in pixels
-    attr_reader :subject_width
     # The number of pixels representing one day
     attr_reader :zoom
 
     def initialize(gantt)
       @gantt = gantt
       @zoom = 2**gantt.zoom
-      @subject_width = 330
       @header_height = 18
       @content_top = 8
       @headers_height = header_rows * header_height
@@ -239,7 +236,6 @@ module GanttHelper
     }
 
     style = gantt_css_variables(
-      'gantt-subject-width': "#{layout.subject_width + 1}px",
       'gantt-header-height': "#{layout.header_height}px",
       'gantt-headers-height': "#{layout.headers_height}px",
       'gantt-chart-width': "#{layout.chart_width}px",
@@ -265,8 +261,17 @@ module GanttHelper
     )
     options[:class] = ['gantt-column', options[:class]]
 
-    options[:style] = gantt_css_variables('gantt-column-width': options.delete(:width)) if options[:width]
-
     tag.div(**options, &)
+  end
+
+  def gantt_column_resize_handle_tag
+    tag.div(
+      class: 'gantt-column-resize-handle ui-resizable-handle ui-resizable-e',
+      data: {
+        'gantt--column-target': 'handle',
+        action: 'dblclick->gantt--column#handleDoubleClick'
+      },
+      aria: {hidden: true}
+    )
   end
 end
