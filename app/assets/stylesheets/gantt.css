@@ -212,6 +212,12 @@
   white-space: nowrap;
 }
 
+/* Applied temporarily when auto-fitting a column to measure its header and row content widths. */
+.gantt-column-measuring .gantt-pane > header,
+.gantt-column-measuring .gantt-row {
+  inline-size: max-content;
+}
+
 .gantt-row-hover {
   background-color: rgba(var(--oc-yellow-1-rgb), 0.5);
 }
