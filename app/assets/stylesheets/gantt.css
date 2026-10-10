@@ -45,6 +45,17 @@
   min-inline-size: 0;
 }
 
+.gantt-column[data-gantt-column="subjects"] {
+  flex-shrink: 1;
+  min-inline-size: 100px;
+}
+
+/* Preserve the displayed subject width while columns are resized manually. */
+.gantt-chart.is-manually-resized [data-gantt-column="subjects"] {
+  flex: 0 0 var(--gantt-subject-display-width);
+  inline-size: var(--gantt-subject-display-width);
+}
+
 .gantt-chart .ui-resizable-e {
   cursor: ew-resize;
 }
@@ -89,7 +100,7 @@
 
 .gantt-timeline {
   position: relative;
-  flex: 1 1 auto;
+  flex: 1 0 0;
   min-inline-size: 100px;
   /* Keep the canvas border inside the overflow clipping edge. */
   padding-block-end: 1px;
@@ -406,5 +417,10 @@
     flex: 0 0 calc(var(--gantt-chart-width) + 1px);
     inline-size: calc(var(--gantt-chart-width) + 1px);
     overflow: visible;
+  }
+
+  .gantt-chart .gantt-column[data-gantt-column="subjects"] {
+    flex: 0 0 var(--gantt-column-width);
+    inline-size: var(--gantt-column-width);
   }
 }
