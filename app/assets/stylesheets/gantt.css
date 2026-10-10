@@ -23,9 +23,15 @@
   align-items: flex-start;
   inline-size: 100%;
   margin-block-end: 1em;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   /* Force LTR for Gantt even in RTL locales because column resizing, relation lines, and the progress line don't work in RTL yet. */
   direction: ltr;
+}
+
+/* Avoid flicker by hiding the chart until all column widths are restored. */
+.gantt-chart:has(.gantt-column:not([data-gantt--column-width-restored])) {
+  visibility: hidden;
 }
 
 .gantt-chart [hidden] {
@@ -37,6 +43,17 @@
   flex: 0 0 var(--gantt-column-width);
   inline-size: var(--gantt-column-width);
   min-inline-size: 0;
+}
+
+.gantt-column[data-gantt-column="subjects"] {
+  flex-shrink: 1;
+  min-inline-size: 100px;
+}
+
+/* Preserve the displayed subject width while columns are resized manually. */
+.gantt-chart.is-manually-resized [data-gantt-column="subjects"] {
+  flex: 0 0 var(--gantt-subject-display-width);
+  inline-size: var(--gantt-subject-display-width);
 }
 
 .gantt-chart .ui-resizable-e {
@@ -83,8 +100,8 @@
 
 .gantt-timeline {
   position: relative;
-  flex: 1 1 auto;
-  min-inline-size: 0;
+  flex: 1 0 0;
+  min-inline-size: 100px;
   /* Keep the canvas border inside the overflow clipping edge. */
   padding-block-end: 1px;
   overflow-x: auto;
@@ -400,5 +417,10 @@
     flex: 0 0 calc(var(--gantt-chart-width) + 1px);
     inline-size: calc(var(--gantt-chart-width) + 1px);
     overflow: visible;
+  }
+
+  .gantt-chart .gantt-column[data-gantt-column="subjects"] {
+    flex: 0 0 var(--gantt-column-width);
+    inline-size: var(--gantt-column-width);
   }
 }

@@ -221,6 +221,7 @@ module GanttHelper
       # Events emitted by child controllers the chart listens to.
       # - `gantt--options` toggles checkboxes under Options.
       # - `gantt--subjects` reports tree expand/collapse.
+      # - `gantt--column` reports manual column resizing.
       # - Mouse events synchronize the hovered row across the chart panes.
       # - Window resize triggers a redraw of progress lines and relations.
       action: %w(
@@ -228,10 +229,12 @@ module GanttHelper
         gantt--options:toggle-relations@document->gantt--chart#handleOptionsRelations
         gantt--options:toggle-progress@document->gantt--chart#handleOptionsProgress
         gantt--subjects:toggle-tree->gantt--chart#handleSubjectTreeChanged
+        gantt--column:resize-start->gantt--chart#handleColumnResizeStart
         mouseover->gantt--chart#highlightRow
         mouseout->gantt--chart#unhighlightRow
         resize@window->gantt--chart#handleWindowResize
       ).join(' '),
+      'gantt--chart-manually-resized-class': 'is-manually-resized',
       'gantt--chart-issue-relation-types-value': Redmine::Helpers::Gantt::DRAW_TYPES.to_json,
       'gantt--chart-show-selected-columns-value': query.draw_selected_columns ? 'true' : 'false',
       'gantt--chart-show-relations-value': query.draw_relations ? 'true' : 'false',
@@ -253,11 +256,25 @@ module GanttHelper
     end
   end
 
-  def gantt_column_tag(column_name, min_width: nil, **options, &)
-    options[:data] = options.fetch(:data, {}).merge(
+  def gantt_subject_column_tag(project:, &)
+    gantt_column_tag(
+      'subjects', project: project, min_width: 100, width: 'var(--gantt-subject-width)',
+      data: {
+        'gantt--chart-target': 'subjectColumn',
+        action: 'gantt--column:resize->gantt--chart#handleSubjectColumnResize'
+      }, &
+    )
+  end
+
+  def gantt_column_tag(column_name, project:, min_width: nil, **options, &)
+    column_width_store_key = ['redmine-gantt-column-width', project&.id || 'global'].join('-')
+    data_attributes = options.fetch(:data, {})
+
+    options[:data] = data_attributes.merge(
       controller: 'gantt--column',
-      action: 'resize@window->gantt--column#handleWindowResize',
+      action: ['resize@window->gantt--column#handleWindowResize', data_attributes[:action]].compact.join(' '),
       'gantt--column-min-width-value': min_width,
+      'gantt--column-width-store-key-value': column_width_store_key,
       'gantt-column': column_name
     )
     options[:class] = ['gantt-column', options[:class]]
