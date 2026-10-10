@@ -93,9 +93,13 @@ export default class extends Controller {
       handles: "e",
       minWidth: this.minWidthValue,
       zIndex: 30,
+      start: () => {
+        this.dispatch("resize-start")
+      },
       resize: (_event, ui) => {
         this.element.style.setProperty("--gantt-column-width", `${ui.size.width}px`)
         this.element.style.removeProperty("width")
+        this.dispatch("resize", { detail: { width: ui.size.width } })
       },
       stop: (_event, ui) => {
         if (ui.originalSize.width !== ui.size.width) {

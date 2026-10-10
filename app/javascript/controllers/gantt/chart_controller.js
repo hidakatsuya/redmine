@@ -4,7 +4,8 @@ const RELATION_STROKE_WIDTH = 2
 const SVG_NS = "http://www.w3.org/2000/svg"
 
 export default class extends Controller {
-  static targets = ["relations", "selectedColumn", "today"]
+  static targets = ["relations", "selectedColumn", "subjectColumn", "today"]
+  static classes = ["manuallyResized"]
 
   static values = {
     issueRelationTypes: Object,
@@ -17,6 +18,7 @@ export default class extends Controller {
   #drawRight = 0
   #drawPaper = null
   #drawPaperGroup = null
+  #chartWidth = 0
 
   initialize() {
     this.$ = window.jQuery
@@ -25,6 +27,7 @@ export default class extends Controller {
   connect() {
     this.#drawTop = 0
     this.#drawRight = 0
+    this.#chartWidth = this.element.clientWidth
 
     this.#drawProgressLineAndRelations()
     this.#drawSelectedColumns()
@@ -32,6 +35,7 @@ export default class extends Controller {
 
   disconnect() {
     this.clearRowHighlight()
+    this.#resetColumnLayout()
 
     if (this.#drawPaper) {
       this.#drawPaper.remove()
@@ -75,8 +79,25 @@ export default class extends Controller {
   }
 
   handleWindowResize() {
+    const width = this.element.clientWidth
+    if (width !== this.#chartWidth) {
+      this.#resetColumnLayout()
+      this.#chartWidth = width
+    }
     this.#drawProgressLineAndRelations()
     this.#drawSelectedColumns()
+  }
+
+  handleColumnResizeStart() {
+    if (this.element.classList.contains(this.manuallyResizedClass)) return
+
+    const width = this.subjectColumnTarget.getBoundingClientRect().width
+    this.element.style.setProperty("--gantt-subject-display-width", `${width}px`)
+    this.element.classList.add(this.manuallyResizedClass)
+  }
+
+  handleSubjectColumnResize(event) {
+    this.element.style.setProperty("--gantt-subject-display-width", `${event.detail.width}px`)
   }
 
   handleSubjectTreeChanged() {
@@ -94,6 +115,11 @@ export default class extends Controller {
 
   handleOptionsProgress(event) {
     this.showProgressValue = !!(event.detail && event.detail.enabled)
+  }
+
+  #resetColumnLayout() {
+    this.element.classList.remove(this.manuallyResizedClass)
+    this.element.style.removeProperty("--gantt-subject-display-width")
   }
 
   #setRowHighlight(row, highlighted) {
