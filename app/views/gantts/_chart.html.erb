@@ -13,7 +13,7 @@
 <% end %>
 
 <%= gantt_chart_tag(@query, layout) do %>
-  <%= gantt_column_tag('subjects', min_width: 100, width: 'var(--gantt-subject-width)') do %>
+  <%= gantt_subject_column_tag do %>
     <section class="gantt-pane">
       <header aria-hidden="true"></header>
       <div class="gantt-pane-body" data-controller="gantt--subjects">
@@ -23,6 +23,7 @@
         <% end %>
       </div>
     </section>
+    <%= gantt_column_resize_handle_tag %>
   <% end %>
 
   <%
@@ -39,6 +40,7 @@
           <%= gantt.selected_column_content(column: column, top: layout.content_top, zoom: layout.zoom, g_width: layout.chart_width).html_safe %>
         </div>
       </section>
+      <%= gantt_column_resize_handle_tag %>
     <% end %>
   <% end %>
 
