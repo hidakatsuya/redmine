@@ -15,7 +15,7 @@
 <%= gantt_chart_tag(@query, layout) do %>
   <%= gantt_column_tag('subjects', min_width: 100, width: 'var(--gantt-subject-width)') do %>
     <section class="gantt-pane">
-      <header aria-hidden="true"></header>
+      <header aria-hidden="true" data-gantt--sticky-header-target="columnHeader"></header>
       <div class="gantt-pane-body" data-controller="gantt--subjects">
         <%= form_tag({}, data: {cm_url: issues_context_menu_path}) do %>
           <%= hidden_field_tag 'back_url', url_for(params: request.query_parameters), id: nil %>
@@ -34,7 +34,7 @@
                          hidden: !query.draw_selected_columns,
                          data: {'gantt--chart-target': 'selectedColumn'}) do %>
       <section class="gantt-pane">
-        <header><%= column.caption %></header>
+        <header data-gantt--sticky-header-target="columnHeader"><%= column.caption %></header>
         <div class="gantt-pane-body">
           <%= gantt.selected_column_content(column: column, top: layout.content_top, zoom: layout.zoom, g_width: layout.chart_width).html_safe %>
         </div>
@@ -42,9 +42,9 @@
     <% end %>
   <% end %>
 
-  <div class="gantt-timeline">
-    <div class="gantt-timeline-canvas">
-      <header>
+  <div class="gantt-timeline" data-gantt--sticky-header-target="timeline">
+    <div class="gantt-timeline-canvas" data-gantt--sticky-header-target="timelineCanvas">
+      <header data-gantt--sticky-header-target="timelineHeader">
         <div class="gantt-header-row" data-gantt-period="month">
           <% layout.months.each do |period| %>
             <div class="gantt-period<%= ' gantt-period-spans-body' if period.spans_body %><%= ' gantt-period-last' if period.last %>"
