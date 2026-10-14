@@ -75,7 +75,6 @@ export default class extends Controller {
   }
 
   handleWindowResize() {
-    this.#drawProgressLineAndRelations()
     this.#drawSelectedColumns()
   }
 
