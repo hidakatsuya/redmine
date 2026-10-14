@@ -107,6 +107,37 @@ class GanttsTest < ApplicationSystemTestCase
     assert width_after > width_before
   end
 
+  test 'window resizing preserves relation and progress lines while updating selected columns' do
+    visit_gantt
+    expand_options
+    find('#draw_selected_columns').check
+    find('#draw_progress_line').check
+
+    assert_selector '.gantt-relations path', minimum: 1
+    paths_before_resize = all('.gantt-relations path').pluck(:d)
+    page.execute_script("window.ganttPathsBeforeResize = Array.from(document.querySelectorAll('.gantt-relations path'))")
+
+    [[1100, false], [1000, false], [800, true], [375, true], [1100, false]].each do |width, mobile|
+      page.current_window.resize_to(width, 900)
+
+      assert_selector '.gantt-selected-column', visible: mobile ? :hidden : :visible
+      assert_equal paths_before_resize, all('.gantt-relations path').pluck(:d)
+      assert page.evaluate_script('window.ganttPathsBeforeResize.every(path => path.isConnected)')
+    end
+
+    find('.gantt-timeline').scroll_to(200, 0)
+    assert_equal paths_before_resize, all('.gantt-relations path').pluck(:d)
+
+    find('#draw_relations').uncheck
+    find('#draw_progress_line').uncheck
+    assert_no_selector '.gantt-relations path'
+    find('#draw_relations').check
+    find('#draw_progress_line').check
+    assert_equal paths_before_resize, all('.gantt-relations path').pluck(:d)
+  ensure
+    page.current_window.resize_to(1024, 900)
+  end
+
   test 'context menu and tooltip interactions' do
     visit_gantt
 
