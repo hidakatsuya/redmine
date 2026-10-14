@@ -829,6 +829,12 @@
     display: inline;
   }
 
+  .cal .calbody .non-working-date-name {
+    float: none;
+    margin-inline-start: 0.5em;
+    white-space: normal;
+  }
+
   .cal .week-number {
     border: 1px solid var(--oc-gray-4);
     text-align: start;
@@ -879,7 +885,9 @@
   }
   div.issue .next-prev-links .pagination ul.pages li.previous,
   div.issue .next-prev-links .pagination ul.pages li.position,
-  div.issue .next-prev-links .pagination ul.pages li.next {
+  div.issue .next-prev-links .pagination ul.pages li.next,
+  .non-working-dates-year .pagination ul.pages li.previous,
+  .non-working-dates-year .pagination ul.pages li.next {
     display: inline-block;
     inline-size: auto;
     overflow: visible;

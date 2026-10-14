@@ -85,6 +85,8 @@ Rails.application.routes.draw do
         :defaults => {:type => 'TimeEntryImport'}, :as => 'new_time_entries_import'
   get   '/users/imports/new', :to => 'imports#new',
         :defaults => {:type => 'UserImport'}, :as => 'new_users_import'
+  get   '/non_working_dates/imports/new', :to => 'imports#new',
+        :defaults => {:type => 'NonWorkingDateImport'}, :as => 'new_non_working_dates_import'
   post  '/imports', :to => 'imports#create', :as => 'imports'
   get   '/imports/:id', :to => 'imports#show', :as => 'import'
   match '/imports/:id/settings', :to => 'imports#settings', :via => [:get, :post], :as => 'import_settings'
@@ -163,6 +165,8 @@ Rails.application.routes.draw do
         end
       end
     end
+
+    get 'members', :to => 'members#index', :as => 'members'
 
     resource :enumerations, :controller => 'project_enumerations', :only => [:update, :destroy]
 
@@ -371,6 +375,12 @@ Rails.application.routes.draw do
   end
   resources :enumerations, :except => :show
   match 'enumerations/:type', :to => 'enumerations#index', :via => :get
+  match '/non_working_dates/context_menu', :to => 'context_menus/non_working_dates#index', :as => :non_working_dates_context_menu, :via => [:get, :post]
+  resources :non_working_dates, :except => :show do
+    collection do
+      delete 'bulk_destroy'
+    end
+  end
 
   get '(projects/:id)/search', :controller => 'search', :action => 'index', :as => 'search'
 
