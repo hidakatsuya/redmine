@@ -1,9 +1,9 @@
 async (page) => {
   await page.emulateMedia({media: null})
-  const control = await page.evaluate(() => ({
-    origin: location.origin,
-    params: Object.fromEntries(new URLSearchParams(location.search))
-  }))
+  const control = await page.evaluate(() => {
+    const url = new URL(new URLSearchParams(location.search).get('back_url') || location.href)
+    return {origin: url.origin, params: Object.fromEntries(url.searchParams)}
+  })
   const outputRoot = control.params.gantt_visual_output
   const dataUrl = control.params.gantt_visual_data
   const label = control.params.gantt_visual_label
@@ -81,6 +81,14 @@ async (page) => {
       title: document.title,
       url: location.href,
       warning: Boolean(document.querySelector(".warning")),
+      lineGeometry: Array.from(document.querySelectorAll('.gantt-relations path'), path => ({
+        d: path.getAttribute('d'), stroke: path.getAttribute('stroke'), fill: path.getAttribute('fill')
+      })),
+      svgGeometry: (() => {
+        const svg = document.querySelector('.gantt-relations svg')
+        return svg ? ['width', 'height', 'viewBox'].map(name => svg.getAttribute(name)) : null
+      })(),
+      selectedColumnsVisible: Array.from(document.querySelectorAll('.gantt-selected-column'), column => Boolean(column.getClientRects().length)),
       paths: document.querySelectorAll(".gantt-relations path, #gantt_draw_area path").length,
       today: Boolean(document.querySelector(".gantt-today, #today_line")),
       selected: Array.from(document.querySelectorAll('input[name="ids[]"]:checked')).map(element => Number(element.value)),
@@ -201,6 +209,21 @@ async (page) => {
 
   const perform = async (action, directory, testCase) => {
     const before = await snapshot()
+    if (action.startsWith('viewport-')) {
+      await page.setViewportSize({width: Number(action.split('-')[1]), height: 1000})
+      await waitUntilStable()
+      const after = await snapshot()
+      if (JSON.stringify(after.lineGeometry) !== JSON.stringify(before.lineGeometry) ||
+          JSON.stringify(after.svgGeometry) !== JSON.stringify(before.svgGeometry)) {
+        throw new Error(`${action}: line or SVG coordinates changed`)
+      }
+      if (!after.lineGeometry.length) throw new Error(`${action}: no lines exercised`)
+      const mobile = Number(action.split('-')[1]) < 900
+      if (!after.selectedColumnsVisible.length || after.selectedColumnsVisible.some(visible => visible === mobile)) {
+        throw new Error(`${action}: incorrect selected column visibility`)
+      }
+      return
+    }
     switch (action) {
       case "progress-off": await setOption("draw_progress_line", false); break
       case "progress-on": await setOption("draw_progress_line", true); break
@@ -352,6 +375,10 @@ async (page) => {
       await page.goto(origin + testCase.path, {waitUntil: "networkidle"})
       // The login click can leave the pointer over a filter control on the next page.
       if (testCase.expected_visibility) await page.mouse.move(0, 0)
+      if (testCase.group === 'G22') {
+        await page.mouse.move(0, 0)
+        await page.locator('.ui-tooltip').waitFor({state: 'hidden'})
+      }
       const printProfiles = testCase.group === "G17"
       result.states.screen = await capture(directory, "screen", testCase.print, printProfiles)
       const ids = result.states.screen.rows.filter(row => row.kind === "issue").map(row => row.id)
@@ -365,6 +392,10 @@ async (page) => {
         await perform(action, directory, testCase)
         // Keep pointer hover identical when a missing baseline icon prevents the click.
         if (testCase.expected_row_keys) await page.mouse.move(0, 0)
+        if (testCase.group === 'G22') {
+          await page.mouse.move(0, 0)
+          await page.locator('.ui-tooltip').waitFor({state: 'hidden'})
+        }
         result.states[action] = await capture(directory, action, testCase.print, printProfiles)
         if (testCase.expected_visibility) {
           // Check every pane, including selected columns and timeline bars.

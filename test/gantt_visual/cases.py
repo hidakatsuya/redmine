@@ -141,6 +141,17 @@ add('G21-subprojects-limit-1', 'expander-parent', columns=True, exports=False, p
 cases[-1]['expected_issue_ids'] = []
 cases[-1]['expected_row_keys'] = [project_key('expander-parent')]
 cases[-1]['known_missing_project_expanders'] = [project_key('expander-parent')]
+# Window resizing changes the viewport, not the timeline's coordinate system.
+for suffix, project, zoom, actions in [
+    ('zoom-1', 'basic', 1, []),
+    ('zoom-4', 'basic', 4, ['scroll-to-ends']),
+    ('collapsed', 'hierarchy', 3, ['collapse-parent']),
+    ('manual-width', 'basic', 3, ['resize-subject', 'resize-column']),
+    ('many-rows', 'bulk', 2, []),
+]:
+    add(f'G22-resize-{suffix}', project, zoom=zoom, columns=True, progress=True, exports=False, title=f'Window resize: {suffix}',
+        actions=actions + ['viewport-1600', 'viewport-900', 'viewport-899', 'viewport-375', 'viewport-1335'])
+    cases[-1]['print'] = False
 
 (root / 'cases.json').write_text(json.dumps(cases, ensure_ascii=False, indent=2))
 for label in ['expected', 'actual']:

@@ -210,3 +210,53 @@ reachable after the profiler's full GC; they are not total process memory.
 Uninstrumented in-process RSS is supplementary. Use the original browser
 benchmark for page-ready time and Puma RSS. These are local comparisons, not
 concurrent-load tests.
+
+## Window-resize comparison
+
+`seed_resize.rb` and `resize.js` measure the chart controller's synchronous window-resize handler
+using actual Chromium viewport changes. They also record Chromium Task/Script/Layout/RecalcStyle
+execution durations over the measured interval. These are not request timings or end-to-end OS window
+resize latency. No CPU throttling is applied.
+
+Start with a copy of the visual harness's isolated seed DB in a new `tmp/gantt_performance/RUN_ID/`
+directory. Run the seed through Redmined with that dedicated `DATABASE_URL` and
+`GANTT_RESIZE_MANIFEST` pointing to a `resize-manifest.json` served by the local data server:
+
+```sh
+redmined -T env RAILS_ENV=test DATABASE_URL=sqlite3:/redmine/tmp/gantt_performance/RUN_ID/seed.sqlite3 GANTT_RESIZE_MANIFEST=/redmine/tmp/gantt_visual/RUN_ID/resize-manifest.json RUBYOPT=-r/redmine/tmp/gantt_tools/test/gantt_visual/frozen_clock.rb bin/rails runner /redmine/tmp/gantt_tools/test/gantt_performance/seed_resize.rb
+```
+
+The data contains independent 100- and 500-issue projects, adjacent blocking relations, and
+varied progress. No synthetic DOM rows are injected. Use a fixed clock, the same bundle and
+independent production assets. Copy the seed to a fresh DB for each run and set
+`GANTT_VISUAL_LIMIT=1000` when using the visual harness clock.
+
+Run in before-1, after-1, after-2, before-2 order, restarting the app on each run. Each invocation
+uses a fresh browser context, validates every rendered issue ID, warms up with three viewport
+changes, then changes width from 1600 to 745px and back in 45px steps. The duplicate turnaround
+width produces no event, so the expected native resize count is 39 per scenario. The runner
+requires at least 35 events and unchanged path coordinates, and reports actual counts.
+
+Navigate to a control URL using the running app's origin:
+
+```text
+http://127.0.0.1:3000/?data=http://127.0.0.1:8099&output=ABSOLUTE_RESULT_DIRECTORY&run=before-1
+```
+
+Pass `resize.js` as the filename to Playwright MCP's `browser_run_code_unsafe`. The resulting
+JSON records all individual handler samples, browser task durations, rendered rows/IDs/path counts,
+and retained SVG nodes. Use equivalent fresh DB copies for all four runs. Report means/medians,
+actual native event counts, browser/environment versions, and the timing resolution limits.
+
+Summarize the four completed runs with:
+
+```sh
+python3 test/gantt_performance/summarize_resize.py --root tmp/gantt_performance/RUN_ID
+```
+
+The summary requires 39 events per scenario per run, identical rendered issue IDs and path counts,
+and unchanged coordinates. It includes both round means, pooled mean/median/p95, browser task time
+per event, retained path counts and a SHA-256 digest of rendered issue IDs.
+
+The raw `browserCpuMs` field contains CDP execution-duration metrics in milliseconds.
+It is not a measurement of whole-process CPU usage or GPU/compositor time.

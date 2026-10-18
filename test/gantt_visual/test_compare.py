@@ -11,7 +11,7 @@ from PIL import Image
 
 class VisibilityComparisonTest(unittest.TestCase):
     def compare(self, before_bug=False, after_bug=False, *, bad_pane=False, changed_screen=False,
-                project_expanders=False):
+                project_expanders=False, changed_field=None):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             expanded = ['project-1', 'issue-2', 'project-3', 'issue-4']
@@ -43,6 +43,10 @@ class VisibilityComparisonTest(unittest.TestCase):
                         panes[-1]['keys'] = known
                     states[name] = {'rows': rows, 'warning': False, 'paths': 0, 'today': True,
                                     'selected': [], 'parentMarkers': [], 'errors': None, 'visibleByPane': panes}
+                    states[name].update(lineGeometry=[{'d': 'M 0 0 L 10 10'}],
+                                        svgGeometry=['100', '100', '0 0 100 100'], selectedColumnsVisible=[True])
+                    if changed_field and label == 'actual' and name == 'screen':
+                        states[name][changed_field] = []
                     color = 'black' if bug and (name == 'collapse-project' or project_expanders) else 'white'
                     if changed_screen and label == 'actual' and name == 'screen':
                         color = 'red'
@@ -67,6 +71,13 @@ class VisibilityComparisonTest(unittest.TestCase):
 
     def test_mismatched_pane_is_failure(self):
         self.assertEqual('failure', self.compare(True, False, bad_pane=True)['status'])
+
+    def test_changed_line_geometry_is_failure(self):
+        for field in ['lineGeometry', 'svgGeometry', 'selectedColumnsVisible']:
+            with self.subTest(field=field):
+                result = self.compare(changed_field=field)
+                self.assertEqual('failure', result['status'])
+                self.assertIn(f'screen: {field} differs', result['failures'])
 
     def test_unexpected_initial_pixels_are_failure(self):
         self.assertEqual('failure', self.compare(True, False, changed_screen=True)['status'])

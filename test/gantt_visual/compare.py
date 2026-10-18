@@ -161,6 +161,9 @@ for case in cases:
             if all(pair) and pair[0]['warning'] != pair[1]['warning']:
                 entry['failures'].append(f'{name}: truncation warning differs')
             if all(pair):
+                for field in ['lineGeometry', 'svgGeometry', 'selectedColumnsVisible']:
+                    if field in pair[0] and field in pair[1] and pair[0][field] != pair[1][field]:
+                        entry['failures'].append(f'{name}: {field} differs')
                 if pair[0]['paths'] != pair[1]['paths']: entry['failures'].append(f'{name}: relation path count differs')
                 if pair[0]['today'] != pair[1]['today']: entry['failures'].append(f'{name}: today line differs')
                 if all('selected' in s for s in pair) and sorted(set(pair[0]['selected'])) != sorted(set(pair[1]['selected'])):
