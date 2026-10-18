@@ -69,7 +69,26 @@ class MermaidRenderingTest < ApplicationSystemTestCase
       assert_selector '.flash.error', text: 'Failed to render mermaid diagram'
       assert_selector 'pre'
       assert_no_selector 'div.mermaid svg'
+      assert_no_selector 'a.mermaid-download-link', visible: :all
     end
+  end
+
+  def test_should_download_mermaid_diagram_as_png
+    skip unless mermaid_installed?
+
+    issue = Issue.find(1)
+    issue.update_column(:description, "```mermaid\ngraph TD;\nA-->B;\n```")
+
+    log_user('jsmith', 'jsmith')
+    visit "/issues/#{issue.id}"
+
+    within('div.description') do
+      find('div.mermaid svg').hover
+      find('a.mermaid-download-link').click
+    end
+
+    png_signature = "\x89PNG\r\n\x1A\n".b
+    assert_equal png_signature, File.binread(downloaded_file('mermaid-flowchart@2x.png'))[0, 8]
   end
 
   def test_should_render_mermaid_in_description_preview
@@ -84,6 +103,26 @@ class MermaidRenderingTest < ApplicationSystemTestCase
 
       within('div.wiki-preview') do
         assert_selector 'div.mermaid svg'
+      end
+    end
+  end
+
+  def test_should_show_mermaid_source_when_mermaid_js_fails_to_load
+    skip unless mermaid_installed?
+
+    log_user('jsmith', 'jsmith')
+    visit '/projects/ecookbook/issues/new'
+    # The source of Mermaid code blocks is hidden until rendered; it must be
+    # shown again if Mermaid.js cannot be loaded.
+    page.execute_script("window.MermaidAssetUrl = '/nonexistent-mermaid.js';")
+    within('form#issue-form') do
+      fill_in 'Subject', :with => 'mermaid load failure test'
+      fill_in 'Description', :with => "```mermaid\ngraph TD;\nA-->B;\n```"
+      click_link 'Preview'
+
+      within('div.wiki-preview') do
+        assert_selector 'pre.mermaid-failed', text: 'graph TD;'
+        assert_no_selector 'div.mermaid'
       end
     end
   end
