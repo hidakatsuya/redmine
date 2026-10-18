@@ -126,6 +126,32 @@ class GanttsTest < ApplicationSystemTestCase
     assert_selector('.gantt-timeline') { |element| element.evaluate_script('this.scrollLeft') == 100 }
   end
 
+  test 'the original header sticks while the chart is scrolled and restores ancestor overflow afterwards' do
+    visit_gantt
+    assert_selector '.gantt-column.ui-resizable'
+    original_overflow = page.evaluate_script(<<~JS)
+      ['#content', '#wrapper'].map(selector => getComputedStyle(document.querySelector(selector)).overflow)
+    JS
+
+    # Leave enough scroll range to reach the sticky position with the small fixture chart.
+    page.execute_script(<<~JS)
+      const spacer = document.createElement('div');
+      spacer.style.height = '1000px';
+      document.body.appendChild(spacer);
+      window.scrollTo(0, document.querySelector('.gantt-chart').getBoundingClientRect().top + scrollY + 50);
+    JS
+
+    assert_selector('body.gantt-sticky-active .gantt-chart-header') do |header|
+      (header.native.rect.y - page.evaluate_script('window.scrollY') - 20).abs < 1
+    end
+
+    page.execute_script('window.scrollTo(0, 0)')
+    assert_no_selector 'body.gantt-sticky-active'
+    assert_equal original_overflow, page.evaluate_script(<<~JS)
+      ['#content', '#wrapper'].map(selector => getComputedStyle(document.querySelector(selector)).overflow)
+    JS
+  end
+
   test 'column widths are remembered globally' do
     visit_gantt
 

@@ -36,6 +36,37 @@
   display: none !important;
 }
 
+.gantt-chart-header {
+  --gantt-sticky-top: 20px;
+}
+
+@media screen {
+  body.gantt-sticky-active #wrapper {
+    overflow: clip;
+  }
+
+  body.gantt-sticky-active #content {
+    min-inline-size: 0;
+    overflow: visible;
+  }
+
+  body.gantt-sticky-active .gantt-chart-header {
+    position: sticky;
+    inset-block-start: var(--gantt-sticky-top);
+    z-index: 40;
+    background: var(--oc-white);
+  }
+
+  body.gantt-sticky-active .gantt-chart-header::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 100%;
+    block-size: var(--gantt-sticky-top);
+    background: var(--oc-white);
+  }
+}
+
 .gantt-chart-header-content,
 .gantt-chart-body {
   display: flex;

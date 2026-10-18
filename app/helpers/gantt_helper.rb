@@ -217,7 +217,7 @@ module GanttHelper
 
   def gantt_chart_tag(query, layout, &block)
     data_attributes = {
-      controller: 'gantt--chart gantt--scroll',
+      controller: 'gantt--chart gantt--scroll gantt--sticky-header',
       # Events emitted by child controllers the chart listens to.
       # - `gantt--options` toggles checkboxes under Options.
       # - `gantt--subjects` reports tree expand/collapse.
@@ -231,7 +231,11 @@ module GanttHelper
         mouseover->gantt--chart#highlightRow
         mouseout->gantt--chart#unhighlightRow
         resize@window->gantt--chart#handleWindowResize
+        scroll@window->gantt--sticky-header#scheduleUpdate:passive
+        resize@window->gantt--sticky-header#scheduleUpdate
+        afterprint@window->gantt--sticky-header#scheduleUpdate
       ).join(' '),
+      'gantt--sticky-header-active-class': 'gantt-sticky-active',
       'gantt--chart-manually-resized-class': 'is-manually-resized',
       'gantt--chart-issue-relation-types-value': Redmine::Helpers::Gantt::DRAW_TYPES.to_json,
       'gantt--chart-show-selected-columns-value': query.draw_selected_columns ? 'true' : 'false',

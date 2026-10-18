@@ -16,7 +16,7 @@
   columns = query.columns.reject {|column| Redmine::Helpers::Gantt::UNAVAILABLE_COLUMNS.include?(column.name)}
 %>
 <%= gantt_chart_tag(@query, layout) do %>
-  <div class="gantt-chart-header">
+  <div class="gantt-chart-header" data-gantt--sticky-header-target="header">
     <div class="gantt-chart-header-content" data-gantt--scroll-target="header"
          data-action="scroll->gantt--scroll#syncColumns:passive">
       <%= gantt_subject_column_tag(header: true) do %>
