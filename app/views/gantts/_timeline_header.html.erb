@@ -1,0 +1,41 @@
+<header class="gantt-timeline-header-canvas">
+  <div class="gantt-header-row" data-gantt-period="month">
+    <% layout.months.each do |period| %>
+      <div class="gantt-period<%= ' gantt-period-last' if period.last %>"
+           style="<%= gantt_period_style(period) %>">
+        <%= link_to "#{period.date.year}-#{period.date.month}",
+                    gantt.params.merge(year: period.date.year, month: period.date.month),
+                    title: "#{month_name(period.date.month)} #{period.date.year}" %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if layout.show_weeks? %>
+    <div class="gantt-header-row" data-gantt-period="week">
+      <% layout.weeks.each do |period| %>
+        <div class="gantt-period<%= ' gantt-period-last' if period.last %>"
+             style="<%= gantt_period_style(period) %>">
+          <small><%= period.date.cweek if period.date && period.width >= 16 %></small>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if layout.show_day_numbers? %>
+    <div class="gantt-header-row" data-gantt-period="day-number">
+      <% layout.day_numbers.each do |period| %>
+        <div class="gantt-period<%= ' gantt-period-non-working' if period.non_working %><%= ' gantt-period-last' if period.last %>"
+             style="<%= gantt_period_style(period) %>"><%= period.date.day %></div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if layout.show_days? %>
+    <div class="gantt-header-row" data-gantt-period="day">
+      <% layout.days.each do |period| %>
+        <div class="gantt-period<%= ' gantt-period-non-working' if period.non_working %><%= ' gantt-period-last' if period.last %>"
+             style="<%= gantt_period_style(period) %>"><%= day_letter(period.date.cwday) %></div>
+      <% end %>
+    </div>
+  <% end %>
+</header>

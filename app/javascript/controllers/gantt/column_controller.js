@@ -92,18 +92,25 @@ export default class extends Controller {
     return this.element.dataset.ganttColumn
   }
 
+  get #columns() {
+    return this.element.closest(".gantt-chart").querySelectorAll(`[data-gantt-column="${CSS.escape(this.#columnName)}"]`)
+  }
+
   fitWidth() {
     const extraPadding = 10
     let width = 0
 
     // Temporarily apply this class to measure the content width needed to fit the column.
-    this.element.classList.add("gantt-column-measuring")
+    const columns = this.#columns
+    columns.forEach(column => column.classList.add("gantt-column-measuring"))
     try {
-      this.element.querySelectorAll(".gantt-pane > header, .gantt-row:not([hidden])").forEach((content) => {
-        width = Math.max(width, content.getBoundingClientRect().width)
+      columns.forEach(column => {
+        column.querySelectorAll(".gantt-pane > header, .gantt-row:not([hidden])").forEach((content) => {
+          width = Math.max(width, content.getBoundingClientRect().width)
+        })
       })
     } finally {
-      this.element.classList.remove("gantt-column-measuring")
+      columns.forEach(column => column.classList.remove("gantt-column-measuring"))
     }
 
     width = Math.max(this.minWidthValue, Math.ceil(width) + extraPadding)
@@ -134,7 +141,7 @@ export default class extends Controller {
   }
 
   #setWidth(width) {
-    this.element.style.setProperty("--gantt-column-width", `${width}px`)
+    this.#setSharedWidth(width)
     this.element.style.removeProperty("width")
     this.dispatch("resize", { detail: { width } })
   }
@@ -143,10 +150,14 @@ export default class extends Controller {
     const width = this.#columnWidthStore.get(this.#columnName)
 
     if (width !== null && width >= this.minWidthValue) {
-      this.element.style.setProperty("--gantt-column-width", `${width}px`)
+      this.#setSharedWidth(width)
     }
 
     this.data.set("width-restored", "")
+  }
+
+  #setSharedWidth(width) {
+    this.element.closest(".gantt-chart").style.setProperty(`--gantt-column-${this.#columnName}-width`, `${width}px`)
   }
 
   #saveWidth(width) {
