@@ -11,7 +11,7 @@ from PIL import Image
 
 class VisibilityComparisonTest(unittest.TestCase):
     def compare(self, before_bug=False, after_bug=False, *, bad_pane=False, changed_screen=False,
-                project_expanders=False, changed_field=None):
+                project_expanders=False, changed_field=None, audit_error=False):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             expanded = ['project-1', 'issue-2', 'project-3', 'issue-4']
@@ -26,6 +26,8 @@ class VisibilityComparisonTest(unittest.TestCase):
                 case.update(id='G21-subprojects-only', group='G21', expected_row_keys=expanded,
                             actions=['collapse-project', 'expand-project'],
                             known_missing_project_expanders=['project-1'])
+            if audit_error:
+                case['line_spec'] = {'fixture': True}
             (root / 'cases.json').write_text(json.dumps([case]))
             (root / 'manifest.json').write_text('{}')
             for label, bug in [('expected', before_bug), ('actual', after_bug)]:
@@ -47,6 +49,8 @@ class VisibilityComparisonTest(unittest.TestCase):
                                         svgGeometry=['100', '100', '0 0 100 100'], selectedColumnsVisible=[True])
                     if changed_field and label == 'actual' and name == 'screen':
                         states[name][changed_field] = []
+                    if audit_error:
+                        states[name]['lineAudit'] = {'errors': ['arrow misses target bar center']}
                     color = 'black' if bug and (name == 'collapse-project' or project_expanders) else 'white'
                     if changed_screen and label == 'actual' and name == 'screen':
                         color = 'red'
@@ -78,6 +82,12 @@ class VisibilityComparisonTest(unittest.TestCase):
                 result = self.compare(changed_field=field)
                 self.assertEqual('failure', result['status'])
                 self.assertIn(f'screen: {field} differs', result['failures'])
+
+    def test_shared_geometric_error_is_failure_even_when_pixels_match(self):
+        result = self.compare(audit_error=True)
+        self.assertEqual('failure', result['status'])
+        self.assertIn('expected: screen: arrow misses target bar center', result['failures'])
+        self.assertIn('actual: screen: arrow misses target bar center', result['failures'])
 
     def test_unexpected_initial_pixels_are_failure(self):
         self.assertEqual('failure', self.compare(True, False, changed_screen=True)['status'])

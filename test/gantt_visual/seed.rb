@@ -159,8 +159,45 @@ both = IssueQuery.new(:name => 'Visual shared both', :user_id => 1, :visibility 
                      :filters => {'project_id' => {:operator => '=', :values => %w(hierarchy shared).map {|n| projects[n].id.to_s}}})
 both.save!
 queries['shared-both'] = both.id
+# Resize fixtures keep forward, overlapping and upward relations in the first rows.
+projects['resize'] = Project.generate!(:name => 'Visual resize', :identifier => 'visual-resize',
+                                       :enabled_module_names => %w(issue_tracking gantt), :tracker_ids => [1])
+add.call('resize-parent', 'resize', :start_date => Date.new(2026, 9, 3), :due_date => Date.new(2026, 9, 6))
+add.call('resize-child-zero', 'resize', :parent_issue_id => records['resize-parent'].id,
+         :start_date => Date.new(2026, 9, 3), :due_date => Date.new(2026, 9, 5))
+add.call('resize-child-half', 'resize', :parent_issue_id => records['resize-parent'].id,
+         :start_date => Date.new(2026, 9, 4), :due_date => Date.new(2026, 9, 6), :done_ratio => 50)
+add.call('resize-target', 'resize', :start_date => Date.new(2026, 9, 4), :due_date => Date.new(2026, 9, 6), :done_ratio => 20)
+add.call('resize-closed', 'resize', :start_date => Date.new(2026, 9, 2), :due_date => Date.new(2026, 9, 4), :status_id => 5, :done_ratio => 100)
+add.call('resize-future', 'resize', :start_date => Date.new(2026, 9, 8), :due_date => Date.new(2026, 9, 9))
+resize_relations = [
+  ['resize-child-zero', 'resize-target', 'blocks'],
+  ['resize-target', 'resize-child-half', 'blocks'],
+  ['resize-parent', 'resize-target', 'blocks'],
+  ['resize-closed', 'resize-future', 'precedes'],
+]
+# Insert precedes without propagating schedules, keeping the declared dates fixed.
+IssueRelation.insert_all!(resize_relations.map do |from, to, type|
+  {:issue_from_id => records[from].id, :issue_to_id => records[to].id, :relation_type => type, :delay => 0}
+end)
+94.times do |index|
+  add.call(format('resize-extra-%02d', index), 'resize', :start_date => Date.new(2026, 9, 12),
+           :due_date => Date.new(2026, 9, 14), :done_ratio => index % 100)
+end
+line_spec = {
+  :date_from => '2026-09-01', :today => '2026-09-08',
+  :focus_issue => records['resize-target'].id, :parent_issue => records['resize-parent'].id,
+  :issues => records.select {|key, _| key.start_with?('resize-')}.transform_values do |issue|
+    issue.reload
+    {:id => issue.id, :start => issue.start_date.iso8601, :due => issue.due_date.iso8601,
+     :progress => issue.done_ratio, :closed => issue.closed?, :parent => issue.parent_id}
+  end,
+  :relations => resize_relations.map {|from, to, type| {:from => records[from].id, :to => records[to].id, :type => type}}
+}
+
 manifest = {:projects => projects.transform_values(&:id), :issues => records.transform_values(&:id), :queries => queries,
             :issue_projects => records.transform_values(&:project_id),
+            :line_spec => line_spec,
             :versions => {:basic => version.id, :shared => shared.id}.merge(expander_versions.transform_values(&:id)),
             :custom_field => cf.id}
 File.write(ENV.fetch('GANTT_VISUAL_MANIFEST'), JSON.pretty_generate(manifest))

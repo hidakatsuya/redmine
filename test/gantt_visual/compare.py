@@ -43,6 +43,14 @@ for case in cases:
             entry.setdefault('missing_project_expanders', {})[label] = missing
             if missing and missing != known:
                 entry['failures'].append(f'{label}: unexpected missing project expanders: {missing}')
+        if case.get('line_spec'):
+            for name, captured in state.get('states', {}).items():
+                audit = captured.get('lineAudit')
+                if audit is None:
+                    entry['failures'].append(f'{label}: {name}: line correctness audit missing')
+                else:
+                    entry['failures'].extend(f'{label}: {name}: {error}' for error in audit['errors'])
+
         if cid == 'G14-saved':
             for step, month, zoom in [('next', 12, 3), ('previous', 6, 3), ('zoom-in', 6, 4), ('reload', 6, 4)]:
                 query = parse_qs(urlparse(state['states'].get(step, {}).get('url', '')).query)
@@ -250,6 +258,18 @@ for case in cases:
             entry['print_layout'] = {'content_heights': heights, 'ratio': ratio}
             if not 0.95 <= ratio <= 1.05:
                 entry['failures'].append(f'Chrome print chart height differs: {heights[0]}px -> {heights[1]}px ({ratio:.2f}x)')
+    if case.get('line_spec') and all(states):
+        before = states[0].get('states', {})
+        after = states[1].get('states', {})
+        entry['line_correctness'] = {
+            label: {name: state.get('lineAudit', {}).get('errors', ['audit missing'])
+                    for name, state in captured.get('states', {}).items()}
+            for label, captured in zip(['expected', 'actual'], states)
+        }
+        entry['line_geometry_matches'] = set(before) == set(after) and all(
+            all(before[name].get(field) == after[name].get(field)
+                for field in ['lineGeometry', 'svgGeometry']) for name in before
+        )
     entry['status'] = 'failure' if entry['failures'] else 'baseline-limitation' if entry['limitations'] else ('review' if any(i.get('changed_pixels') or i.get('sizes', [0, 0])[0] != i.get('sizes', [0, 0])[1] for i in entry['images']) else 'identical')
     if case.get('expected_visibility') and all(states):
         for name, correct in case['expected_visibility'].items():
@@ -292,6 +312,9 @@ for r in results:
 out.append('</table>')
 for r in results:
     out.append(f'<h2 id="{r["id"]}">{html.escape(case_labels[r["id"]])}</h2><pre>{html.escape(chr(10).join(r["failures"] + r["limitations"]))}</pre>')
+    if 'line_geometry_matches' in r:
+        matches = '一致' if r['line_geometry_matches'] else '不一致'
+        out.append(f'<p>線の座標・SVG寸法の前後比較: {matches}。線の正しさは各側で独立に検査し、問題は上記に表示しています。</p>')
     for label in ['expected', 'actual']:
         for pdf, count in r['pdfs'].get(label, {}).items(): out.append(f'<a href="{label}/{r["id"]}/{pdf}">{label}/{pdf} ({count} pages)</a> · ')
     for i in r['images']:

@@ -162,11 +162,23 @@ async (page) => {
     await area.evaluate((element, left) => { element.scrollLeft = left }, timeline.original)
   }
 
+  let currentCase = null
+  const focusLines = async () => {
+    await page.evaluate(id => {
+      const chart = document.querySelector('.gantt-chart'), area = document.querySelector('.gantt-timeline')
+      chart.scrollLeft = Math.max(0, chart.scrollLeft + area.getBoundingClientRect().right - chart.getBoundingClientRect().right)
+      const task = area.querySelector(`.gantt-task-todo[data-gantt-issue-id="${id}"]`)
+      area.scrollLeft += task.getBoundingClientRect().left - area.getBoundingClientRect().left - Math.min(32, area.clientWidth / 3)
+    }, currentCase.line_spec.focus_issue)
+    await waitUntilStable()
+  }
   const capture = async (directory, name, print, printProfiles = false) => {
     await waitUntilStable()
+    if (currentCase.line_spec) await focusLines()
     await page.screenshot({path: `${directory}/${name}.png`, fullPage: false, animations: "disabled"})
-    await captureTimelineEdges(directory, name)
+    if (!currentCase.line_spec) await captureTimelineEdges(directory, name)
     const state = await snapshot()
+    if (currentCase.line_spec) state.lineAudit = await page.evaluate(spec => window.ganttLineAudit(spec), currentCase.line_spec)
     await saveJson(`${directory}/${name}.json`, state)
     if (print) {
       // A task tooltip can remain hovered after an interaction and be laid out on
@@ -219,7 +231,7 @@ async (page) => {
       }
       if (!after.lineGeometry.length) throw new Error(`${action}: no lines exercised`)
       const mobile = Number(action.split('-')[1]) < 900
-      if (!after.selectedColumnsVisible.length || after.selectedColumnsVisible.some(visible => visible === mobile)) {
+      if (!after.selectedColumnsVisible.length || after.selectedColumnsVisible.some(visible => visible !== (testCase.selected_columns && !mobile))) {
         throw new Error(`${action}: incorrect selected column visibility`)
       }
       return
@@ -275,7 +287,7 @@ async (page) => {
         await page.locator('[data-gantt-column="subjects"] .gantt-row[data-gantt-row-type="version"] .expander, .gantt_subjects .version-name .expander').first().click(); break
       case "collapse-parent":
       case "expand-parent":
-        await page.locator(`[data-gantt-column="subjects"] .gantt-row[data-gantt-row-key="issue-${manifest.issues.parent}"] .expander, #issue-${manifest.issues.parent} .expander`).click(); break
+        await page.locator(`[data-gantt-column="subjects"] .gantt-row[data-gantt-row-key="${testCase.parent_toggle_key || `issue-${manifest.issues.parent}`}"] .expander, #${testCase.parent_toggle_key || `issue-${manifest.issues.parent}`} .expander`).click(); break
       case "collapse-first-parent":
         await page.locator('[data-gantt-column="subjects"] .gantt-row[data-gantt-row-type="issue"].is-expanded .expander, .gantt_subjects .issue-subject.open .expander').first().click(); break
       case "next": await page.locator(".pagination .next a").click(); break
@@ -314,6 +326,9 @@ async (page) => {
       default: throw new Error(`Unknown action: ${action}`)
     }
     await waitUntilStable()
+    if (testCase.line_spec && ['collapse-parent', 'expand-parent'].includes(action)) {
+      testCase.line_spec.collapsedParent = action === 'collapse-parent' ? testCase.line_spec.parent_issue : null
+    }
     const after = await snapshot()
     if (action.startsWith("collapse-") && after.rows.filter(row => row.visible).length >= before.rows.filter(row => row.visible).length) {
       throw new Error(`${action}: descendants were not hidden`)
@@ -359,6 +374,7 @@ async (page) => {
 
   const summaries = []
   for (const testCase of cases) {
+    currentCase = testCase
     const directory = `${outputRoot}/${label}/${testCase.id}`
     const result = {id: testCase.id, states: {}, exports: {}}
     try {
@@ -373,6 +389,7 @@ async (page) => {
         await page.waitForURL(url => !url.pathname.includes("/login"))
       }
       await page.goto(origin + testCase.path, {waitUntil: "networkidle"})
+      if (testCase.line_spec) await page.addScriptTag({url: `${dataUrl}/line_checks.js`})
       // The login click can leave the pointer over a filter control on the next page.
       if (testCase.expected_visibility) await page.mouse.move(0, 0)
       if (testCase.group === 'G22') {

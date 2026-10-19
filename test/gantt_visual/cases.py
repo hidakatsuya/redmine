@@ -10,7 +10,7 @@ cases = []
 
 def add(id, project='basic', *, year=2026, month=6, months=6, zoom=3,
         user='admin', actions=(), exports=True, columns=False, progress=False,
-        limit=None, empty=False, open_only=False, saved=False, title=None, printing=None):
+        limit=None, empty=False, open_only=False, saved=False, title=None, printing=None, issue_keys=None):
     names = ['hierarchy', 'child', 'grandchild', 'private'] if project == 'hierarchy' else (
         ['hierarchy', 'shared'] if project == 'shared-both' else (
         ['hidden-parent', 'hidden-middle', 'hidden-descendant'] if project == 'hidden-parent' else [project]))
@@ -21,6 +21,8 @@ def add(id, project='basic', *, year=2026, month=6, months=6, zoom=3,
     }.get(project, names)
     project_ids = [m['projects'][n] for n in names]
     keys = [k for k, p in m['issue_projects'].items() if p in project_ids]
+    if issue_keys is not None:
+        keys = [key for key in keys if key in issue_keys]
     if user != 'admin' and not user.startswith('visual-'):
         keys = [k for k in keys if k != 'private-project-task' and (user != 'anonymous' or k != 'basic-private')]
     if open_only:
@@ -33,6 +35,9 @@ def add(id, project='basic', *, year=2026, month=6, months=6, zoom=3,
     else:
         params += [('set_filter', '1'), ('f[]', 'project_id'), ('op[project_id]', '=')]
         params += [('v[project_id][]', str(p)) for p in project_ids]
+        if issue_keys is not None:
+            params += [('f[]', 'issue_id'), ('op[issue_id]', '=')]
+            params += [('v[issue_id][]', ','.join(str(m['issues'][key]) for key in issue_keys))]
         if open_only:
             params += [('f[]', 'status_id'), ('op[status_id]', 'o')]
         if empty:
@@ -141,17 +146,24 @@ add('G21-subprojects-limit-1', 'expander-parent', columns=True, exports=False, p
 cases[-1]['expected_issue_ids'] = []
 cases[-1]['expected_row_keys'] = [project_key('expander-parent')]
 cases[-1]['known_missing_project_expanders'] = [project_key('expander-parent')]
-# Window resizing changes the viewport, not the timeline's coordinate system.
-for suffix, project, zoom, actions in [
-    ('zoom-1', 'basic', 1, []),
-    ('zoom-4', 'basic', 4, ['scroll-to-ends']),
-    ('collapsed', 'hierarchy', 3, ['collapse-parent']),
-    ('manual-width', 'basic', 3, ['resize-subject', 'resize-column']),
-    ('many-rows', 'bulk', 2, []),
+# Focus each capture on real lines, and check geometry independently of the baseline.
+resize_core = [key for key in m['line_spec']['issues'] if not key.startswith('resize-extra-')]
+for suffix, zoom, columns, actions in [
+    ('zoom-1', 1, False, []),
+    ('zoom-4', 4, False, []),
+    ('collapsed', 4, False, ['collapse-parent']),
+    ('manual-width', 4, True, ['resize-subject', 'resize-column']),
+    ('many-rows', 4, False, []),
 ]:
-    add(f'G22-resize-{suffix}', project, zoom=zoom, columns=True, progress=True, exports=False, title=f'Window resize: {suffix}',
-        actions=actions + ['viewport-1600', 'viewport-900', 'viewport-899', 'viewport-375', 'viewport-1335'])
-    cases[-1]['print'] = False
+    add(f'G22-resize-{suffix}', 'resize', month=9, months=1, zoom=zoom, columns=columns,
+        progress=True, exports=False, title=f'Window resize: {suffix}',
+        issue_keys=None if suffix == 'many-rows' else resize_core,
+        actions=actions + ['viewport-1600', 'viewport-900', 'viewport-899', 'viewport-375', 'viewport-1335']
+                + (['expand-parent'] if suffix == 'collapsed' else []))
+    cases[-1].update(print=False, line_spec=m['line_spec'], selected_columns=columns,
+                     parent_toggle_key=f"issue-{m['line_spec']['parent_issue']}")
+    cases[-1]['line_spec'] = dict(m['line_spec'], pixelsPerDay=2 ** zoom,
+                                    includedIssueIds=cases[-1]['expected_issue_ids'])
 
 (root / 'cases.json').write_text(json.dumps(cases, ensure_ascii=False, indent=2))
 for label in ['expected', 'actual']:
