@@ -10,15 +10,22 @@ from PIL import Image
 
 
 class VisibilityComparisonTest(unittest.TestCase):
-    def compare(self, before_bug=False, after_bug=False, *, bad_pane=False, changed_screen=False):
+    def compare(self, before_bug=False, after_bug=False, *, bad_pane=False, changed_screen=False,
+                project_expanders=False):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             expanded = ['project-1', 'issue-2', 'project-3', 'issue-4']
             correct = ['project-1']
             known = ['project-1', 'project-3', 'issue-4']
+            if project_expanders:
+                known = expanded
             case = {'id': 'G13-hidden-project', 'group': 'G13',
                     'expected_visibility': {'screen': expanded, 'collapse-project': correct, 'expand-project': expanded},
                     'known_visibility_bug': {'collapse-project': known}}
+            if project_expanders:
+                case.update(id='G21-subprojects-only', group='G21', expected_row_keys=expanded,
+                            actions=['collapse-project', 'expand-project'],
+                            known_missing_project_expanders=['project-1'])
             (root / 'cases.json').write_text(json.dumps([case]))
             (root / 'manifest.json').write_text('{}')
             for label, bug in [('expected', before_bug), ('actual', after_bug)]:
@@ -27,7 +34,8 @@ class VisibilityComparisonTest(unittest.TestCase):
                 states = {}
                 for name, keys in case['expected_visibility'].items():
                     visible = known if name == 'collapse-project' and bug else keys
-                    rows = [{'kind': key.split('-')[0], 'id': int(key.split('-')[1]),
+                    rows = [{'key': key, 'kind': key.split('-')[0], 'id': int(key.split('-')[1]),
+                             'expander': key.startswith('project-') and not (project_expanders and bug and key == 'project-1'),
                              'project': 1 if key in expanded[:2] else 3, 'visible': key in visible}
                             for key in expanded]
                     panes = [{'pane': pane, 'keys': visible[:]} for pane in ['subjects', 'status', 'timeline']]
@@ -35,7 +43,7 @@ class VisibilityComparisonTest(unittest.TestCase):
                         panes[-1]['keys'] = known
                     states[name] = {'rows': rows, 'warning': False, 'paths': 0, 'today': True,
                                     'selected': [], 'parentMarkers': [], 'errors': None, 'visibleByPane': panes}
-                    color = 'black' if name == 'collapse-project' and bug else 'white'
+                    color = 'black' if bug and (name == 'collapse-project' or project_expanders) else 'white'
                     if changed_screen and label == 'actual' and name == 'screen':
                         color = 'red'
                     Image.new('RGB', (2, 2), color).save(output / f'{name}.png')
@@ -62,6 +70,12 @@ class VisibilityComparisonTest(unittest.TestCase):
 
     def test_unexpected_initial_pixels_are_failure(self):
         self.assertEqual('failure', self.compare(True, False, changed_screen=True)['status'])
+
+    def test_project_expanders_in_both_comparison_directions(self):
+        for before, after, status in [(False, False, 'identical'), (True, True, 'baseline-limitation'),
+                                      (True, False, 'expected-difference'), (False, True, 'failure')]:
+            with self.subTest(before=before, after=after):
+                self.assertEqual(status, self.compare(before, after, project_expanders=True)['status'])
 
 
 if __name__ == '__main__':

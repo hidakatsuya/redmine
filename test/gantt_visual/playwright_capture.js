@@ -67,9 +67,11 @@ async (page) => {
       const id = Number(rawId)
       if (kind === "project") project = id
       return {
+        key: String(key),
         kind,
         id,
         project,
+        expander: Boolean(element.querySelector('.expander')),
         visible: Boolean(element.offsetWidth || element.offsetHeight || element.getClientRects().length),
         top: element.getBoundingClientRect().top
       }
@@ -197,7 +199,7 @@ async (page) => {
     if ((await box.isChecked()) !== checked) await box.click()
   }
 
-  const perform = async (action, directory) => {
+  const perform = async (action, directory, testCase) => {
     const before = await snapshot()
     switch (action) {
       case "progress-off": await setOption("draw_progress_line", false); break
@@ -235,8 +237,16 @@ async (page) => {
         break
       }
       case "collapse-project":
-      case "expand-project":
-        await page.locator('[data-gantt-column="subjects"] .gantt-row[data-gantt-row-type="project"] .expander, .gantt_subjects .project-name .expander').first().click(); break
+      case "expand-project": {
+        const selector = testCase.project_toggle_key
+          ? `[data-gantt-column="subjects"] .gantt-row[data-gantt-row-key="${testCase.project_toggle_key}"] .expander`
+          : '[data-gantt-column="subjects"] .gantt-row[data-gantt-row-type="project"] .expander, .gantt_subjects .project-name .expander'
+        const expander = page.locator(selector).first()
+        // Capture the known missing-icon state without accidentally toggling a different project.
+        if (!await expander.count() && testCase.known_missing_project_expanders?.includes(testCase.project_toggle_key)) return
+        await expander.click()
+        break
+      }
       case "collapse-version":
       case "expand-version":
         await page.locator('[data-gantt-column="subjects"] .gantt-row[data-gantt-row-type="version"] .expander, .gantt_subjects .version-name .expander').first().click(); break
@@ -352,7 +362,9 @@ async (page) => {
         result.exports["export.png"] = await downloadExport(directory, "export", "png")
       }
       for (const action of testCase.actions) {
-        await perform(action, directory)
+        await perform(action, directory, testCase)
+        // Keep pointer hover identical when a missing baseline icon prevents the click.
+        if (testCase.expected_row_keys) await page.mouse.move(0, 0)
         result.states[action] = await capture(directory, action, testCase.print, printProfiles)
         if (testCase.expected_visibility) {
           // Check every pane, including selected columns and timeline bars.

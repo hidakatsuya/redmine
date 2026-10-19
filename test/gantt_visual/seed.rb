@@ -110,6 +110,42 @@ projects['hidden-descendant'] = Project.generate!(:name => 'Visual hidden descen
 add.call('hidden-parent-task', 'hidden-parent')
 add.call('hidden-descendant-task', 'hidden-descendant')
 
+# Project rows with and without issues or versions of their own.
+{
+  'expander-parent' => 'Parent project',
+  'expander-issues-only' => 'Project with issues only',
+  'expander-versions-only' => 'Project with an empty version',
+  'expander-version-issues' => 'Project with versioned issues',
+  'expander-shared-version' => 'Project using a shared version',
+  'expander-version-parent' => 'Parent with an empty version',
+  'expander-empty' => 'Empty project',
+  'expander-filtered-parent' => 'Parent with a filtered issue'
+}.each do |key, name|
+  projects[key] = Project.generate!(:name => name, :identifier => "visual-#{key}",
+                                    :enabled_module_names => %w(issue_tracking gantt), :tracker_ids => [1])
+end
+{
+  'expander-middle' => ['expander-parent', 'Intermediate project'],
+  'expander-child' => ['expander-middle', 'Subproject'],
+  'expander-version-child' => ['expander-version-parent', 'Subproject with an issue'],
+  'expander-filtered-child' => ['expander-filtered-parent', 'Subproject with a matching issue']
+}.each do |key, (parent, name)|
+  projects[key] = Project.generate!(:name => name, :identifier => "visual-#{key}", :parent => projects[parent],
+                                    :enabled_module_names => %w(issue_tracking gantt), :tracker_ids => [1])
+end
+expander_versions = {}
+%w(expander-versions-only expander-version-issues expander-version-parent).each do |key|
+  expander_versions[key] = Version.generate!(:project => projects[key], :name => 'Release 1',
+                                            :effective_date => Date.new(2026, 9, 20))
+end
+add.call('expander-child-task', 'expander-child', :subject => 'Subproject issue')
+add.call('expander-issues-only-task', 'expander-issues-only')
+add.call('expander-version-task', 'expander-version-issues', :fixed_version => expander_versions['expander-version-issues'])
+add.call('expander-shared-task', 'expander-shared-version', :fixed_version => shared)
+add.call('expander-version-child-task', 'expander-version-child')
+add.call('expander-filtered-parent-task', 'expander-filtered-parent', :status_id => 5, :done_ratio => 100)
+add.call('expander-filtered-child-task', 'expander-filtered-child')
+
 queries = {}
 projects.each do |name, project|
   ids = name == 'hierarchy' ? %w(hierarchy child grandchild private).map {|n| projects[n].id} : [project.id]
@@ -125,6 +161,7 @@ both.save!
 queries['shared-both'] = both.id
 manifest = {:projects => projects.transform_values(&:id), :issues => records.transform_values(&:id), :queries => queries,
             :issue_projects => records.transform_values(&:project_id),
-            :versions => {:basic => version.id, :shared => shared.id}, :custom_field => cf.id}
+            :versions => {:basic => version.id, :shared => shared.id}.merge(expander_versions.transform_values(&:id)),
+            :custom_field => cf.id}
 File.write(ENV.fetch('GANTT_VISUAL_MANIFEST'), JSON.pretty_generate(manifest))
 puts "Prepared #{records.size} issues for visual cases"

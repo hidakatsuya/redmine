@@ -10,16 +10,21 @@ cases = []
 
 def add(id, project='basic', *, year=2026, month=6, months=6, zoom=3,
         user='admin', actions=(), exports=True, columns=False, progress=False,
-        limit=None, empty=False, open_only=False, saved=False, title=None):
+        limit=None, empty=False, open_only=False, saved=False, title=None, printing=None):
     names = ['hierarchy', 'child', 'grandchild', 'private'] if project == 'hierarchy' else (
         ['hierarchy', 'shared'] if project == 'shared-both' else (
         ['hidden-parent', 'hidden-middle', 'hidden-descendant'] if project == 'hidden-parent' else [project]))
+    names = {
+        'expander-parent': ['expander-parent', 'expander-middle', 'expander-child'],
+        'expander-version-parent': ['expander-version-parent', 'expander-version-child'],
+        'expander-filtered-parent': ['expander-filtered-parent', 'expander-filtered-child'],
+    }.get(project, names)
     project_ids = [m['projects'][n] for n in names]
     keys = [k for k, p in m['issue_projects'].items() if p in project_ids]
     if user != 'admin' and not user.startswith('visual-'):
         keys = [k for k in keys if k != 'private-project-task' and (user != 'anonymous' or k != 'basic-private')]
     if open_only:
-        keys = [k for k in keys if k not in ['basic-closed', 'closed-version']]
+        keys = [k for k in keys if k not in ['basic-closed', 'closed-version', 'expander-filtered-parent-task']]
     if empty:
         keys = []
     params = [('year', year), ('month', month), ('months', months), ('zoom', zoom)]
@@ -42,7 +47,8 @@ def add(id, project='basic', *, year=2026, month=6, months=6, zoom=3,
     cases.append(dict(id=id, title=title or id, group=id[:3], project=project, user=user, path='/issues/gantt?' + urlencode(params),
                       expected_issue_ids=[m['issues'][k] for k in keys],
                       expected_issue_order=[m['issues'][k] for k in order if k in keys] if order else None,
-                      actions=list(actions), exports=exports, print=id[:3] != 'G19', limit=limit, viewport=[1335, 1000]))
+                      actions=list(actions), exports=exports, print=id[:3] != 'G19' if printing is None else printing,
+                      limit=limit, viewport=[1335, 1000]))
 
 add('G01-basic', open_only=True)
 for z in [1, 2, 3, 4]:
@@ -94,6 +100,48 @@ add('G18-ja', user='visual-ja', title='Japanese locale')
 add('G18-ar', user='visual-ar', title='Arabic locale (RTL layout)')
 add('G19-context', actions=['tooltip', 'subject-menu', 'bar-menu', 'multi-select'], exports=False)
 add('G20-print-return', actions=['print-return', 'collapse-project', 'expand-project', 'resize-subject'], exports=False)
+
+# These cases inspect project display states; existing cases retain export/print coverage.
+def project_key(name):
+    return f"project-{m['projects'][name]}"
+
+def issue_key(name):
+    return f"issue-{m['issues'][name]}"
+
+def version_key(version, project):
+    return f"version-{m['versions'][version]}-project-{m['projects'][project]}"
+
+for suffix, project, rows in [
+    ('subprojects-only', 'expander-parent', [project_key('expander-parent'), project_key('expander-middle'),
+                                          project_key('expander-child'), issue_key('expander-child-task')]),
+    ('issues-only', 'expander-issues-only', [project_key('expander-issues-only'), issue_key('expander-issues-only-task')]),
+    ('versions-only', 'expander-versions-only', []),
+    ('version-issues', 'expander-version-issues', [project_key('expander-version-issues'),
+        version_key('expander-version-issues', 'expander-version-issues'), issue_key('expander-version-task')]),
+    ('shared-version', 'expander-shared-version', [project_key('expander-shared-version'),
+        version_key('shared', 'expander-shared-version'), issue_key('expander-shared-task')]),
+    ('version-parent', 'expander-version-parent', [project_key('expander-version-parent'),
+        project_key('expander-version-child'), issue_key('expander-version-child-task')]),
+    ('empty', 'expander-empty', []),
+    ('filtered-parent', 'expander-filtered-parent', [project_key('expander-filtered-parent'),
+        project_key('expander-filtered-child'), issue_key('expander-filtered-child-task')]),
+]:
+    actions = ['collapse-project', 'expand-project'] if suffix == 'subprojects-only' else []
+    add(f'G21-{suffix}', project, columns=True, exports=False, printing=False, actions=actions,
+        open_only=suffix == 'filtered-parent')
+    cases[-1]['expected_row_keys'] = rows
+    if suffix == 'subprojects-only':
+        root_key = project_key('expander-parent')
+        cases[-1]['project_toggle_key'] = root_key
+        cases[-1]['known_missing_project_expanders'] = [root_key, project_key('expander-middle')]
+        cases[-1]['expected_visibility'] = {'screen': rows, 'collapse-project': [root_key], 'expand-project': rows}
+        cases[-1]['known_visibility_bug'] = {'collapse-project': rows}
+
+add('G21-subprojects-limit-1', 'expander-parent', columns=True, exports=False, printing=False, limit=1)
+cases[-1]['expected_issue_ids'] = []
+cases[-1]['expected_row_keys'] = [project_key('expander-parent')]
+cases[-1]['known_missing_project_expanders'] = [project_key('expander-parent')]
+
 (root / 'cases.json').write_text(json.dumps(cases, ensure_ascii=False, indent=2))
 for label in ['expected', 'actual']:
     for test_case in cases:

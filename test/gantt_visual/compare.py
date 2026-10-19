@@ -34,6 +34,15 @@ for case in cases:
         for name in ['issue_set_matches', 'issue_order_matches']:
             if not state.get(name): entry['failures'].append(f'{label}: {name}')
         if state.get('error'): entry['failures'].append(f"{label}: {state['error']}")
+        if 'expected_row_keys' in case:
+            rows = state.get('states', {}).get('screen', {}).get('rows', [])
+            if [row.get('key') for row in rows] != case['expected_row_keys']:
+                entry['failures'].append(f'{label}: unexpected project/version/issue rows')
+            missing = [row['key'] for row in rows if row['kind'] == 'project' and not row.get('expander')]
+            known = case.get('known_missing_project_expanders', [])
+            entry.setdefault('missing_project_expanders', {})[label] = missing
+            if missing and missing != known:
+                entry['failures'].append(f'{label}: unexpected missing project expanders: {missing}')
         if cid == 'G14-saved':
             for step, month, zoom in [('next', 12, 3), ('previous', 6, 3), ('zoom-in', 6, 4), ('reload', 6, 4)]:
                 query = parse_qs(urlparse(state['states'].get(step, {}).get('url', '')).query)
@@ -111,6 +120,15 @@ for case in cases:
             except Exception as e:
                 entry['failures'].append(f'{label}: {pdf.name}: {e}')
     if len(states) == 2 and all(states):
+        if 'expected_row_keys' in case:
+            missing = entry['missing_project_expanders']
+            known = case.get('known_missing_project_expanders', [])
+            if known and missing['expected'] == known and not missing['actual']:
+                entry['expected_pixel_states'] = ['screen'] + case.get('actions', [])
+            elif known and missing['expected'] == missing['actual'] == known:
+                entry['limitations'].append('Both sides omit the known project expanders')
+            elif not missing['expected'] and missing['actual']:
+                entry['failures'].append('Candidate reintroduces missing project expanders')
         expected_pdfs = entry['pdfs'].get('expected', {})
         actual_pdfs = entry['pdfs'].get('actual', {})
         for pdf in sorted(set(expected_pdfs) | set(actual_pdfs)):
@@ -243,16 +261,22 @@ for case in cases:
                     if len(panes) < 3 or any(pane['keys'] != keys for pane in panes):
                         entry['failures'].append(f'{label}: {name}: inconsistent visibility across panes')
             if known and visible == [known, known]:
-                entry['limitations'].append(f'{name}: both sides retain descendants through an inaccessible project')
+                entry['limitations'].append(f'{name}: both sides retain descendants (known collapse bug)')
             elif known and visible == [correct, known]:
                 entry['failures'].append(f'{name}: candidate reintroduces the known visibility bug')
         for image in entry['images']:
-            if image.get('changed_pixels') and not image['name'].startswith(entry.get('expected_difference', 'NO_EXPECTED_DIFFERENCE')):
+            allowed = entry.get('expected_pixel_states', []) + [entry.get('expected_difference', 'NO_EXPECTED_DIFFERENCE')]
+            if image.get('changed_pixels') and not any(image['name'].startswith(name) for name in allowed):
                 entry['failures'].append(f"{image['name']}: unexpected pixel difference")
         if entry.get('expected_difference') and not any(i.get('changed_pixels') for i in entry['images'] if i['name'].startswith(entry['expected_difference'])):
             entry['failures'].append('Corrected visibility has no corresponding pixel difference')
         entry['status'] = ('failure' if entry['failures'] else 'baseline-limitation' if entry['limitations']
                            else 'expected-difference' if entry.get('expected_difference') else 'identical')
+    if entry.get('expected_pixel_states'):
+        if not any(image.get('changed_pixels') for image in entry['images']):
+            entry['failures'].append('Corrected project expanders have no corresponding pixel difference')
+        entry['status'] = ('failure' if entry['failures'] else 'baseline-limitation' if entry['limitations']
+                           else 'expected-difference')
     results.append(entry)
 (root / 'results.json').write_text(json.dumps(results, ensure_ascii=False, indent=2))
 out = ['<!doctype html><meta charset="utf-8"><title>Gantt 回帰テスト</title><style>body{font:14px system-ui;margin:24px}table{border-collapse:collapse}td,th{padding:6px;border:1px solid #ccc}img{max-width:100%}.pair{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}details{margin:12px 0}a{color:#0560af}.failure{color:#b00}.review{color:#875b00}</style><h1>ガント回帰テスト</h1><p>画面・印刷の許容判断は人間の確認待ちです。失敗は意味、操作、出力内容の不一致を示します。</p><p>画面・エクスポート・印刷を同じ形式の旧実装と比較。差分は閾値なし。ピンク色は変化した画素。画像リンクで原寸表示。</p><p><a href="cases.json">ケース定義</a> / <a href="results.json">機械判定</a></p><table><tr><th>ケース</th><th>状態</th><th>画像数</th><th>完全一致</th></tr>']
