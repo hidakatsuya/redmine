@@ -217,7 +217,7 @@ module GanttHelper
 
   def gantt_chart_tag(query, layout, &block)
     data_attributes = {
-      controller: 'gantt--chart',
+      controller: 'gantt--chart gantt--scroll gantt--sticky-header',
       # Events emitted by child controllers the chart listens to.
       # - `gantt--options` toggles checkboxes under Options.
       # - `gantt--subjects` reports tree expand/collapse.
@@ -231,7 +231,11 @@ module GanttHelper
         mouseover->gantt--chart#highlightRow
         mouseout->gantt--chart#unhighlightRow
         resize@window->gantt--chart#handleWindowResize
+        scroll@window->gantt--sticky-header#scheduleUpdate:passive
+        resize@window->gantt--sticky-header#scheduleUpdate
+        afterprint@window->gantt--sticky-header#scheduleUpdate
       ).join(' '),
+      'gantt--sticky-header-active-class': 'gantt-sticky-active',
       'gantt--chart-manually-resized-class': 'is-manually-resized',
       'gantt--chart-issue-relation-types-value': Redmine::Helpers::Gantt::DRAW_TYPES.to_json,
       'gantt--chart-show-selected-columns-value': query.draw_selected_columns ? 'true' : 'false',
@@ -254,9 +258,9 @@ module GanttHelper
     end
   end
 
-  def gantt_subject_column_tag(&)
+  def gantt_subject_column_tag(header: false, &)
     gantt_column_tag(
-      'subjects', min_width: 100, width: 'var(--gantt-subject-width)',
+      'subjects', header: header, min_width: 100, width: 'var(--gantt-subject-width)',
       data: {
         'gantt--chart-target': 'subjectColumn',
         # When the subject column is dragged or auto-fitted on a narrow chart,
@@ -269,7 +273,7 @@ module GanttHelper
     )
   end
 
-  def gantt_column_tag(column_name, min_width: nil, **options, &)
+  def gantt_column_tag(column_name, min_width: nil, header: false, **options, &)
     data_attributes = options.fetch(:data, {})
 
     options[:data] = data_attributes.merge(
@@ -278,9 +282,13 @@ module GanttHelper
       'gantt--column-min-width-value': min_width,
       'gantt-column': column_name
     )
-    options[:class] = ['gantt-column', options[:class]]
+    options[:class] = [header ? 'gantt-header-column' : 'gantt-column', options[:class]]
 
-    options[:style] = gantt_css_variables('gantt-column-width': options.delete(:width)) if options[:width]
+    if options[:width]
+      options[:style] = gantt_css_variables(
+        'gantt-column-width': "var(--gantt-column-#{column_name}-width, #{options.delete(:width)})"
+      )
+    end
 
     tag.div(**options, &)
   end

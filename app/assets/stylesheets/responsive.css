@@ -667,7 +667,7 @@
   }
 
   /* Gantt charts */
-  .gantt-column[data-gantt-column="subjects"] {
+  :is(.gantt-column, .gantt-header-column)[data-gantt-column="subjects"] {
     --gantt-column-width: 60% !important;
   }
 

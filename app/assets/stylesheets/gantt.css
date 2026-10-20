@@ -19,19 +19,16 @@
 
 /***** Gantt chart *****/
 .gantt-chart {
-  display: flex;
-  align-items: flex-start;
   inline-size: 100%;
   /* Reserve space for the horizontal scrollbar so navigation stays in place. */
   min-block-size: calc(var(--gantt-pane-height) + 24px);
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: visible;
   /* Force LTR for Gantt even in RTL locales because column resizing, relation lines, and the progress line don't work in RTL yet. */
   direction: ltr;
 }
 
 /* Avoid flicker by hiding the chart until all column widths are restored. */
-.gantt-chart:has(.gantt-column:not([data-gantt--column-width-restored])) {
+.gantt-chart:has(:is(.gantt-column, .gantt-header-column):not([data-gantt--column-width-restored])) {
   visibility: hidden;
 }
 
@@ -39,14 +36,83 @@
   display: none !important;
 }
 
-.gantt-column {
+.gantt-chart-header {
+  --gantt-sticky-top: 20px;
+}
+
+@media screen {
+  body.gantt-sticky-active #wrapper {
+    overflow: clip;
+  }
+
+  body.gantt-sticky-active #content {
+    min-inline-size: 0;
+    overflow: visible;
+  }
+
+  body.gantt-sticky-active .gantt-chart-header {
+    position: sticky;
+    inset-block-start: var(--gantt-sticky-top);
+    z-index: 40;
+    background: var(--oc-white);
+  }
+
+  body.gantt-sticky-active .gantt-chart-header::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 100%;
+    block-size: var(--gantt-sticky-top);
+    background: var(--oc-white);
+  }
+}
+
+.gantt-chart-header-content,
+.gantt-chart-body {
+  display: flex;
+  align-items: flex-start;
+  inline-size: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.gantt-chart-header-content,
+.gantt-timeline-header-scroll {
+  scrollbar-width: none;
+}
+
+.gantt-timeline-header-scroll {
+  flex: 1 0 0;
+  min-inline-size: 100px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.gantt-timeline-header-canvas {
+  inline-size: calc(var(--gantt-chart-width) + 1px);
+  margin-inline-end: max(0px, calc(var(--gantt-timeline-scroll-width, 0px) - var(--gantt-chart-width) - 1px));
+  block-size: calc(var(--gantt-headers-height) + 1px);
+  border-block-start: 1px solid var(--oc-gray-4);
+  border-inline-end: 1px solid var(--oc-gray-4);
+  box-sizing: border-box;
+  background: var(--oc-gray-1);
+}
+
+.gantt-header-column .gantt-pane {
+  block-size: calc(var(--gantt-headers-height) + 1px);
+  border-block-start: 1px solid var(--oc-gray-4);
+  border-block-end: 0;
+}
+
+.gantt-column,
+.gantt-header-column {
   position: relative;
   flex: 0 0 var(--gantt-column-width);
   inline-size: var(--gantt-column-width);
   min-inline-size: 0;
 }
 
-.gantt-column[data-gantt-column="subjects"] {
+:is(.gantt-column, .gantt-header-column)[data-gantt-column="subjects"] {
   min-inline-size: 100px;
   max-inline-size: max(100px, calc(100% - 100px));
 }
@@ -64,8 +130,8 @@
 }
 
 .gantt-pane {
-  block-size: calc(var(--gantt-pane-height) + 2px);
-  border-block: 1px solid var(--oc-gray-4);
+  block-size: calc(var(--gantt-content-height) + 1px);
+  border-block-end: 1px solid var(--oc-gray-4);
   border-inline-end: 1px solid var(--oc-gray-4);
   box-sizing: border-box;
   overflow: hidden;
@@ -114,19 +180,10 @@
 .gantt-timeline-canvas {
   position: relative;
   inline-size: calc(var(--gantt-chart-width) + 1px);
-  block-size: calc(var(--gantt-pane-height) + 2px);
-  border-block: 1px solid var(--oc-gray-4);
+  block-size: calc(var(--gantt-content-height) + 1px);
+  border-block-end: 1px solid var(--oc-gray-4);
   border-inline-end: 1px solid var(--oc-gray-4);
   box-sizing: border-box;
-}
-
-.gantt-timeline-canvas > header {
-  position: relative;
-  z-index: 1;
-  block-size: var(--gantt-headers-height);
-  border-block-end: 1px solid var(--oc-gray-4);
-  box-sizing: border-box;
-  background: var(--oc-gray-1);
 }
 
 .gantt-header-row {
@@ -149,7 +206,7 @@
   pointer-events: none;
 }
 
-.gantt-header-row:last-child .gantt-period {
+.gantt-header-row:last-child .gantt-period-non-working {
   border-block-end: 0;
 }
 
@@ -157,8 +214,14 @@
   border-inline-end: 0;
 }
 
-.gantt-period-spans-body {
-  block-size: calc(100% + var(--gantt-content-height));
+.gantt-timeline-grid {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  block-size: var(--gantt-content-height);
+}
+
+.gantt-timeline-grid .gantt-period {
   border-block-end: 0;
 }
 
@@ -180,7 +243,7 @@
 .gantt-timeline-body {
   position: absolute;
   z-index: 2;
-  inset-block-start: var(--gantt-headers-height);
+  inset-block-start: 0;
   inset-inline-start: 0;
   inline-size: var(--gantt-chart-width);
   block-size: var(--gantt-content-height);
@@ -416,6 +479,15 @@
 }
 
 @media print {
+  .gantt-timeline-header-canvas {
+    margin-inline-end: 0;
+  }
+
+  .gantt-chart-header-content,
+  .gantt-chart-body {
+    overflow: visible;
+  }
+
   /* Include the full timeline in the browser print layout. */
   body.controller-gantts.action-show #wrapper {
     overflow: visible;
@@ -427,13 +499,14 @@
     overflow: visible;
   }
 
-  .gantt-timeline {
+  .gantt-timeline,
+  .gantt-timeline-header-scroll {
     flex: 0 0 calc(var(--gantt-chart-width) + 1px);
     inline-size: calc(var(--gantt-chart-width) + 1px);
     overflow: visible;
   }
 
-  .gantt-chart .gantt-column[data-gantt-column="subjects"] {
+  .gantt-chart :is(.gantt-column, .gantt-header-column)[data-gantt-column="subjects"] {
     flex: 0 0 var(--gantt-column-width);
     inline-size: var(--gantt-column-width);
     max-inline-size: none;

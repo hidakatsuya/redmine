@@ -107,6 +107,51 @@ class GanttsTest < ApplicationSystemTestCase
     assert width_after > width_before
   end
 
+  test 'header resizing and horizontal scrolling stay aligned with the body' do
+    visit_gantt
+    expand_options
+    find('#draw_selected_columns').check
+
+    width_before = column_width('status')
+    handle = find('.gantt-header-column[data-gantt-column="status"] .ui-resizable-e')
+    page.driver.browser.action.click_and_hold(handle.native).move_by(80, 0).release.perform
+
+    assert column_width('status') > width_before
+    assert_equal column_width('status'), find('.gantt-header-column[data-gantt-column="status"]').native.size.width
+
+    find('.gantt-timeline').scroll_to(200, 0)
+    assert_selector('.gantt-timeline-header-scroll') { |element| element.evaluate_script('this.scrollLeft') == 200 }
+
+    find('.gantt-timeline-header-scroll').scroll_to(100, 0)
+    assert_selector('.gantt-timeline') { |element| element.evaluate_script('this.scrollLeft') == 100 }
+  end
+
+  test 'the original header sticks while the chart is scrolled and restores ancestor overflow afterwards' do
+    visit_gantt
+    assert_selector '.gantt-column.ui-resizable'
+    original_overflow = page.evaluate_script(<<~JS)
+      ['#content', '#wrapper'].map(selector => getComputedStyle(document.querySelector(selector)).overflow)
+    JS
+
+    # Leave enough scroll range to reach the sticky position with the small fixture chart.
+    page.execute_script(<<~JS)
+      const spacer = document.createElement('div');
+      spacer.style.height = '1000px';
+      document.body.appendChild(spacer);
+      window.scrollTo(0, document.querySelector('.gantt-chart').getBoundingClientRect().top + scrollY + 50);
+    JS
+
+    assert_selector('body.gantt-sticky-active .gantt-chart-header') do |header|
+      (header.native.rect.y - page.evaluate_script('window.scrollY') - 20).abs < 1
+    end
+
+    page.execute_script('window.scrollTo(0, 0)')
+    assert_no_selector 'body.gantt-sticky-active'
+    assert_equal original_overflow, page.evaluate_script(<<~JS)
+      ['#content', '#wrapper'].map(selector => getComputedStyle(document.querySelector(selector)).overflow)
+    JS
+  end
+
   test 'column widths are remembered globally' do
     visit_gantt
 
@@ -171,12 +216,65 @@ class GanttsTest < ApplicationSystemTestCase
       })()
     JS
 
-    find('.gantt-column[data-gantt-column="subjects"] .ui-resizable-e').double_click
+    find('.gantt-header-column[data-gantt-column="subjects"] .ui-resizable-e').double_click
     assert_equal expected_width, column_width('subjects')
 
     page.refresh
     assert_selector '.gantt-column[data-gantt-column="subjects"].ui-resizable'
     assert_equal expected_width, column_width('subjects')
+  end
+
+  test 'timeline header stays aligned when a label extends beyond the last day' do
+    visit_gantt
+    assert_selector '.gantt-column.ui-resizable'
+    page.execute_script(<<~JS)
+      const label = document.createElement('span');
+      label.id = 'gantt-overflow-label';
+      label.className = 'gantt-task gantt-task-label';
+      label.textContent = 'Label beyond the last day';
+      label.style.setProperty('--gantt-task-start', 'calc(var(--gantt-chart-width) + 20px)');
+      label.style.width = '200px';
+      document.querySelector('.gantt-timeline-body').appendChild(label);
+    JS
+
+    find('.gantt-timeline').scroll_to(100_000, 0)
+    assert_selector('.gantt-timeline-header-scroll') do |header|
+      header.evaluate_script('this.scrollLeft') == find('.gantt-timeline').evaluate_script('this.scrollLeft')
+    end
+    assert_equal find('.gantt-timeline').evaluate_script('this.scrollWidth'),
+                 find('.gantt-timeline-header-scroll').evaluate_script('this.scrollWidth')
+    assert_selector '#gantt-overflow-label'
+
+    find('.gantt-timeline-header-scroll').scroll_to(0, 0)
+    assert_selector('.gantt-timeline') { |timeline| timeline.evaluate_script('this.scrollLeft').zero? }
+  end
+
+  test 'scroll synchronization does not undo newer movement in the source' do
+    visit_gantt
+    expand_options
+    find('#draw_selected_columns').check
+    drag_column_resizer('subjects', 600)
+
+    [
+      ['.gantt-timeline', '.gantt-timeline-header-scroll'],
+      ['.gantt-timeline-header-scroll', '.gantt-timeline'],
+      ['.gantt-chart-body', '.gantt-chart-header-content'],
+      ['.gantt-chart-header-content', '.gantt-chart-body']
+    ].each do |source, destination|
+      positions = page.driver.browser.execute_async_script(<<~JS, source, destination)
+        const source = document.querySelector(arguments[0]);
+        const destination = document.querySelector(arguments[1]);
+        const done = arguments[2];
+        // The user moves again before the scroll event from the synchronized header arrives.
+        destination.addEventListener('scroll', () => { source.scrollLeft = 250; }, {once: true, capture: true});
+        source.scrollLeft = 200;
+        requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(() => {
+          requestAnimationFrame(() => done([source.scrollLeft, destination.scrollLeft]));
+        })));
+      JS
+
+      assert_equal [250, 250], positions, source
+    end
   end
 
   test 'context menu and tooltip interactions' do

@@ -153,8 +153,9 @@ class GanttsControllerTest < Redmine::ControllerTest
     assert_response :success
 
     # 9 week-end days and 1 non-working date, in both the day number and the day name rows
-    assert_select 'div.gantt-period-non-working', 20
-    assert_select 'div.gantt-period-non-working', :text => '29'
+    assert_select '.gantt-chart-header div.gantt-period-non-working', 20
+    assert_select '.gantt-chart-header div.gantt-period-non-working', :text => '29'
+    assert_select '.gantt-timeline-grid div.gantt-period-non-working', 10
   end
 
   def test_gantt_should_display_relations
