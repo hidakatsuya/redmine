@@ -65,6 +65,9 @@ class GanttsTest < ApplicationSystemTestCase
 
     assert_selector '.gantt-relations path', minimum: 1
 
+    page.execute_script("document.querySelector('.gantt-chart').style.setProperty('--oc-red-6', '#123456')")
+    assert_equal 'rgb(18, 52, 86)', find('.gantt-relations path[fill="none"]', match: :first).native.css_value('stroke')
+
     find('#draw_relations').uncheck
 
     assert_no_selector '.gantt-relations path'
@@ -92,6 +95,9 @@ class GanttsTest < ApplicationSystemTestCase
     find('#draw_progress_line').check
 
     assert_selector '.gantt-relations path', minimum: 1
+
+    today_color = find('.gantt-today').native.css_value('border-inline-start-color')
+    assert_equal today_color, find('.gantt-relations path', match: :first).native.css_value('stroke')
   end
 
   test 'selected columns can be resized by dragging' do

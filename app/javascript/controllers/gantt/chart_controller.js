@@ -258,7 +258,7 @@ export default class extends Controller {
       const issueToTop = this.#taskTop(issueTo) + issueHeight / 2 - this.#drawTop
       const issueToLeft = issueTo.position().left
       const relationConfig = this.issueRelationTypesValue[relation.rel_type] || {}
-      const color = relationConfig.color || "#000"
+      const color = relationConfig.color || "var(--oc-black)"
       const landscapeMargin = relationConfig.landscape_margin || 0
       const issueFromRightRel = issueFromRight + landscapeMargin
       const issueToLeftRel = issueToLeft - landscapeMargin
@@ -435,7 +435,7 @@ export default class extends Controller {
     if (!this.hasTodayTarget) return
 
     const progressLines = this.#progressLinesArray
-    const color = this.$(this.todayTarget).css("border-inline-start-color") || "#ff0000"
+    const color = this.$(this.todayTarget).css("border-inline-start-color") || "var(--oc-red-6)"
 
     for (let index = 1; index < progressLines.length; index += 1) {
       const current = progressLines[index]

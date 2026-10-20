@@ -32,11 +32,11 @@ module Redmine
       DRAW_TYPES = {
         IssueRelation::TYPE_BLOCKS   => {
           :landscape_margin => 16,
-          :color => '#fa5252' # oc-red-6
+          :color => 'var(--oc-red-6)'
         },
         IssueRelation::TYPE_PRECEDES => {
           :landscape_margin => 20,
-          :color => '#228be6' # oc-blue-6
+          :color => 'var(--oc-blue-6)'
         }
       }.freeze
 
@@ -496,7 +496,7 @@ module Redmine
           @months.times do
             width = ((month_f >> 1) - month_f) * zoom
             gc.fill('white')
-            gc.stroke('grey')
+            gc.stroke('#ced4da') # oc-gray-4
             gc.strokewidth(1)
             gc.draw('rectangle %d,%d %d,%d' % [
               left, 0, left + width, height
@@ -522,7 +522,7 @@ module Redmine
               week_f = @date_from + (7 - @date_from.cwday + 1)
               width = (7 - @date_from.cwday + 1) * zoom
               gc.fill('white')
-              gc.stroke('grey')
+              gc.stroke('#ced4da') # oc-gray-4
               gc.strokewidth(1)
               gc.draw('rectangle %d,%d %d,%d' % [
                 left, header_height, left + width, 2 * header_height + g_height - 1
@@ -532,7 +532,7 @@ module Redmine
             while week_f <= date_to
               width = (week_f + 6 <= date_to) ? 7 * zoom : (date_to - week_f + 1) * zoom
               gc.fill('white')
-              gc.stroke('grey')
+              gc.stroke('#ced4da') # oc-gray-4
               gc.strokewidth(1)
               gc.draw('rectangle %d,%d %d,%d' % [
                 left.round, header_height, left.round + width, 2 * header_height + g_height - 1
@@ -553,8 +553,8 @@ module Redmine
             height = g_height + header_height - 1
             (@date_from..date_to).each do |g_date|
               width =  zoom
-              gc.fill(non_working_day?(g_date) ? '#eee' : 'white')
-              gc.stroke('#ddd')
+              gc.fill(non_working_day?(g_date) ? '#f1f3f5' : 'white')
+              gc.stroke('#ced4da') # oc-gray-4
               gc.strokewidth(1)
               gc.draw('rectangle %d,%d %d,%d' % [
                 left, 2 * header_height, left + width, 2 * header_height + g_height - 1
@@ -564,7 +564,7 @@ module Redmine
           end
           # border
           gc.fill('transparent')
-          gc.stroke('grey')
+          gc.stroke('#ced4da') # oc-gray-4
           gc.strokewidth(1)
           gc.draw('rectangle %d,%d %d,%d' % [
             0, 0, subject_width + g_width, headers_height
@@ -580,7 +580,7 @@ module Redmine
                 :subject_width => subject_width, :format => :image)
           # today red line
           if User.current.today.between?(@date_from, date_to)
-            gc.stroke('red')
+            gc.stroke('#fa5252') # oc-red-6
             x = (User.current.today - @date_from + 1) * zoom + subject_width
             gc.draw('line %g,%g %g,%g' % [
               x, headers_height, x, headers_height + g_height - 1
@@ -673,7 +673,11 @@ module Redmine
             width = zoom
             pdf.SetY(y_start + header_height * 2)
             pdf.SetX(left)
-            pdf.SetTextColor(non_working_day?(g_date) ? 150 : 0)
+            if non_working_day?(g_date)
+              pdf.SetTextColor(134, 142, 150) # oc-gray-6
+            else
+              pdf.SetTextColor(0)
+            end
             pdf.RDMCell(width, height, day_num.day.to_s, "LTR", 0, "C")
             left = left + width
             day_num = day_num + 1
@@ -688,7 +692,11 @@ module Redmine
             width = zoom
             pdf.SetY(y_start + header_height * (show_day_num ? 3 : 2))
             pdf.SetX(left)
-            pdf.SetTextColor(non_working_day?(g_date) ? 150 : 0)
+            if non_working_day?(g_date)
+              pdf.SetTextColor(134, 142, 150) # oc-gray-6
+            else
+              pdf.SetTextColor(0)
+            end
             pdf.RDMCell(width, height, day_name(g_date.cwday).first, "LTR", 0, "C")
             left = left + width
           end
@@ -1022,6 +1030,17 @@ module Redmine
         variables.map {|name, value| "--#{name}:#{value}"}.join(';')
       end
 
+      def marker_color(object)
+        case object
+        when Issue
+          [134, 142, 150] # oc-gray-6
+        when Version
+          [33, 37, 41] # oc-gray-9
+        else
+          [34, 139, 230] # oc-blue-6
+        end
+      end
+
       def pdf_task(params, coords, markers, label, object)
         cell_height_ratio = params[:pdf].get_cell_height_ratio
         params[:pdf].set_cell_height_ratio(0.1)
@@ -1033,20 +1052,24 @@ module Redmine
           width = [1, coords[:bar_end] - coords[:bar_start]].max
           params[:pdf].SetY(params[:top] + 1.5)
           params[:pdf].SetX(params[:subject_width] + coords[:bar_start])
-          params[:pdf].SetFillColor(200, 200, 200)
+          if object.is_a?(Issue) && !object.leaf?
+            params[:pdf].SetFillColor(134, 142, 150) # oc-gray-6
+          else
+            params[:pdf].SetFillColor(173, 181, 189) # oc-gray-5
+          end
           params[:pdf].RDMCell(width, height, "", 0, 0, "", 1)
           if coords[:bar_late_end]
             width = [1, coords[:bar_late_end] - coords[:bar_start]].max
             params[:pdf].SetY(params[:top] + 1.5)
             params[:pdf].SetX(params[:subject_width] + coords[:bar_start])
-            params[:pdf].SetFillColor(255, 100, 100)
+            params[:pdf].SetFillColor(255, 107, 107) # oc-red-5
             params[:pdf].RDMCell(width, height, "", 0, 0, "", 1)
           end
           if coords[:bar_progress_end]
             width = [1, coords[:bar_progress_end] - coords[:bar_start]].max
             params[:pdf].SetY(params[:top] + 1.5)
             params[:pdf].SetX(params[:subject_width] + coords[:bar_start])
-            params[:pdf].SetFillColor(90, 200, 90)
+            params[:pdf].SetFillColor(55, 178, 77) # oc-green-7
             params[:pdf].RDMCell(width, height, "", 0, 0, "", 1)
           end
         end
@@ -1055,13 +1078,13 @@ module Redmine
           if coords[:start]
             params[:pdf].SetY(params[:top] + 1)
             params[:pdf].SetX(params[:subject_width] + coords[:start] - 1)
-            params[:pdf].SetFillColor(50, 50, 200)
+            params[:pdf].SetFillColor(*marker_color(object))
             params[:pdf].RDMCell(2, 2, "", 0, 0, "", 1)
           end
           if coords[:end]
             params[:pdf].SetY(params[:top] + 1)
             params[:pdf].SetX(params[:subject_width] + coords[:end] - 1)
-            params[:pdf].SetFillColor(50, 50, 200)
+            params[:pdf].SetFillColor(*marker_color(object))
             params[:pdf].RDMCell(2, 2, "", 0, 0, "", 1)
           end
         end
@@ -1079,7 +1102,11 @@ module Redmine
         height /= 2 if markers
         # Renders the task bar, with progress and late
         if coords[:bar_start] && coords[:bar_end]
-          params[:image].fill('#aaa')
+          if object.is_a?(Issue) && !object.leaf?
+            params[:image].fill('#868e96') # oc-gray-6
+          else
+            params[:image].fill('#adb5bd') # oc-gray-5
+          end
           params[:image].draw('rectangle %d,%d %d,%d' % [
             params[:subject_width] + coords[:bar_start],
             params[:top],
@@ -1087,7 +1114,7 @@ module Redmine
             params[:top] - height
           ])
           if coords[:bar_late_end]
-            params[:image].fill('#f66')
+            params[:image].fill('#ff6b6b') # oc-red-5
             params[:image].draw('rectangle %d,%d %d,%d' % [
               params[:subject_width] + coords[:bar_start],
               params[:top],
@@ -1096,7 +1123,7 @@ module Redmine
             ])
           end
           if coords[:bar_progress_end]
-            params[:image].fill('#00c600')
+            params[:image].fill('#37b24d') # oc-green-7
             params[:image].draw('rectangle %d,%d %d,%d' % [
               params[:subject_width] + coords[:bar_start],
               params[:top],
@@ -1110,7 +1137,7 @@ module Redmine
           if coords[:start]
             x = params[:subject_width] + coords[:start]
             y = params[:top] - height / 2
-            params[:image].fill('blue')
+            params[:image].fill('#%02x%02x%02x' % marker_color(object))
             params[:image].draw('polygon %d,%d %d,%d %d,%d %d,%d' % [
               x - 4, y,
               x, y - 4,
@@ -1121,7 +1148,7 @@ module Redmine
           if coords[:end]
             x = params[:subject_width] + coords[:end]
             y = params[:top] - height / 2
-            params[:image].fill('blue')
+            params[:image].fill('#%02x%02x%02x' % marker_color(object))
             params[:image].draw('polygon %d,%d %d,%d %d,%d %d,%d' % [
               x - 4, y,
               x, y - 4,
