@@ -31,12 +31,10 @@ module Redmine
       # Relation types that are rendered
       DRAW_TYPES = {
         IssueRelation::TYPE_BLOCKS   => {
-          :landscape_margin => 16,
-          :color => 'var(--oc-red-6)'
+          :landscape_margin => 16
         },
         IssueRelation::TYPE_PRECEDES => {
-          :landscape_margin => 20,
-          :color => 'var(--oc-blue-6)'
+          :landscape_margin => 20
         }
       }.freeze
 

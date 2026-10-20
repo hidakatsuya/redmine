@@ -253,6 +253,35 @@
   pointer-events: none;
 }
 
+.gantt-relation {
+  color: var(--oc-black);
+  stroke: currentColor;
+  fill: none;
+}
+
+.gantt-relation-arrow {
+  stroke: none;
+  fill: currentColor;
+}
+
+.gantt-relation-legend {
+  background-color: currentColor;
+}
+
+.gantt-relation-blocks {
+  color: var(--oc-red-6);
+}
+
+.gantt-relation-precedes {
+  color: var(--oc-blue-6);
+}
+
+.gantt-progress-line {
+  stroke: var(--oc-red-6);
+  stroke-width: 2;
+  fill: none;
+}
+
 [data-gantt-column="watcher_users"] div.issue_watcher_users ul {
   margin: 0;
   padding: 0;
