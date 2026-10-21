@@ -258,7 +258,8 @@ export default class extends Controller {
       const issueToTop = this.#taskTop(issueTo) + issueHeight / 2 - this.#drawTop
       const issueToLeft = issueTo.position().left
       const relationConfig = this.issueRelationTypesValue[relation.rel_type] || {}
-      const color = relationConfig.color || "#000"
+      const relationClass = `gantt-relation gantt-relation-${relation.rel_type}`
+      const lineAttributes = { class: relationClass, "stroke-width": RELATION_STROKE_WIDTH }
       const landscapeMargin = relationConfig.landscape_margin || 0
       const issueFromRightRel = issueFromRight + landscapeMargin
       const issueToLeftRel = issueToLeft - landscapeMargin
@@ -272,7 +273,7 @@ export default class extends Controller {
           issueFromRightRel,
           issueFromTop
         ],
-        { stroke: color, "stroke-width": RELATION_STROKE_WIDTH, fill: "none" }
+        lineAttributes
       )
 
       if (issueFromRightRel < issueToLeftRel) {
@@ -285,7 +286,7 @@ export default class extends Controller {
             issueFromRightRel,
             issueToTop
           ],
-          { stroke: color, "stroke-width": RELATION_STROKE_WIDTH, fill: "none" }
+          lineAttributes
         )
         this.#drawPath(
           [
@@ -296,7 +297,7 @@ export default class extends Controller {
             issueToLeft,
             issueToTop
           ],
-          { stroke: color, "stroke-width": RELATION_STROKE_WIDTH, fill: "none" }
+          lineAttributes
         )
       } else {
         const issueMiddleTop = issueToTop + issueHeight * (issueFromTop > issueToTop ? 1 : -1)
@@ -309,7 +310,7 @@ export default class extends Controller {
             issueFromRightRel,
             issueMiddleTop
           ],
-          { stroke: color, "stroke-width": RELATION_STROKE_WIDTH, fill: "none" }
+          lineAttributes
         )
         this.#drawPath(
           [
@@ -320,7 +321,7 @@ export default class extends Controller {
             issueToLeftRel,
             issueMiddleTop
           ],
-          { stroke: color, "stroke-width": RELATION_STROKE_WIDTH, fill: "none" }
+          lineAttributes
         )
         this.#drawPath(
           [
@@ -331,7 +332,7 @@ export default class extends Controller {
             issueToLeftRel,
             issueToTop
           ],
-          { stroke: color, "stroke-width": RELATION_STROKE_WIDTH, fill: "none" }
+          lineAttributes
         )
         this.#drawPath(
           [
@@ -342,7 +343,7 @@ export default class extends Controller {
             issueToLeft,
             issueToTop
           ],
-          { stroke: color, "stroke-width": RELATION_STROKE_WIDTH, fill: "none" }
+          lineAttributes
         )
       }
       this.#drawPath(
@@ -359,8 +360,7 @@ export default class extends Controller {
           "z"
         ],
         {
-          stroke: "none",
-          fill: color
+          class: `${relationClass} gantt-relation-arrow`
         }
       )
     })
@@ -435,7 +435,6 @@ export default class extends Controller {
     if (!this.hasTodayTarget) return
 
     const progressLines = this.#progressLinesArray
-    const color = this.$(this.todayTarget).css("border-inline-start-color") || "#ff0000"
 
     for (let index = 1; index < progressLines.length; index += 1) {
       const current = progressLines[index]
@@ -452,9 +451,7 @@ export default class extends Controller {
         const x2 = current.left
 
         this.#drawPath(["M", x1, previous.top, "L", x2, current.top], {
-          stroke: color,
-          "stroke-width": 2,
-          fill: "none"
+          class: "gantt-progress-line"
         })
       }
     }
