@@ -240,7 +240,7 @@
   inset-inline-start: var(--gantt-today-start);
   inline-size: 10px;
   block-size: var(--gantt-content-height);
-  border-inline-start: 1px dashed var(--oc-red-6);
+  border-inline-start: 1px dashed var(--oc-red-7);
   pointer-events: none;
 }
 
@@ -273,11 +273,11 @@
 }
 
 .gantt-relation-precedes {
-  color: var(--oc-blue-6);
+  color: var(--oc-blue-7);
 }
 
 .gantt-progress-line {
-  stroke: var(--oc-red-6);
+  stroke: var(--oc-red-7);
   stroke-width: 2;
   fill: none;
 }
@@ -340,8 +340,8 @@
 
 .gantt-task-done {
   block-size: 10px;
-  background-color: var(--oc-green-7);
-  border: 1px solid var(--oc-green-7);
+  background-color: var(--oc-green-6);
+  border: 1px solid var(--oc-green-6);
 }
 
 .gantt-task-todo {
