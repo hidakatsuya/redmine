@@ -334,8 +334,8 @@
 
 .gantt-task-late {
   block-size: 10px;
-  background-color: var(--oc-red-5);
-  border: 1px solid var(--oc-red-5);
+  background-color: var(--oc-red-4);
+  border: 1px solid var(--oc-red-4);
 }
 
 .gantt-task-done {
@@ -378,6 +378,12 @@
 .gantt-row:is([data-gantt-row-type="project"], [data-gantt-row-type="version"]) .gantt-task:is(.gantt-task-todo, .gantt-task-late, .gantt-task-done) {
   block-size: 4px;
   margin-block-start: 3px;
+}
+
+.gantt-row:is([data-gantt-row-type="project"], [data-gantt-row-type="version"]) .gantt-task-todo {
+  background-color: var(--oc-gray-5);
+  border-color: transparent;
+  background-clip: padding-box;
 }
 
 .gantt-row[data-gantt-row-type="version"] .gantt-task-marker {
