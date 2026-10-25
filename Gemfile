@@ -20,7 +20,7 @@ gem 'propshaft', '~> 1.3.0'
 gem 'rack', '>= 3.1.3'
 gem "stimulus-rails", "~> 1.3"
 gem "importmap-rails", "~> 2.0"
-gem 'commonmarker', '2.10.0'
+gem 'commonmarker', '~> 2.10.0'
 gem 'doorkeeper', '~> 5.9.6'
 gem "bcrypt", require: false
 gem "doorkeeper-i18n", "~> 5.2"
@@ -117,7 +117,7 @@ group :test do
   gem "capybara", ">= 3.39"
   gem 'selenium-webdriver', '>= 4.11.0'
   # RuboCop
-  gem 'rubocop', '~> 1.91.0', require: false
+  gem 'rubocop', '~> 1.92.1', require: false
   gem 'rubocop-performance', '~> 1.27.0', require: false
   gem 'rubocop-rails', '~> 2.38.0', require: false
   gem 'bundle-audit', require: false
