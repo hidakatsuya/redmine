@@ -197,6 +197,14 @@ class TimelogControllerTest < Redmine::ControllerTest
     assert_response :success
     assert_select 'a[href=?]', 'invalid', {:text => 'Cancel', :count => 0}
     assert_select 'a[href=?]', '/projects/ecookbook/time_entries', {:text => 'Cancel'}
+
+    get :edit, :params => {:id => 2, :project_id => nil, :back_url => '/\\example.com/'}
+    assert_response :success
+    assert_select 'a[href=?]', '/projects/ecookbook/time_entries', {:text => 'Cancel'}
+
+    get :edit, :params => {:id => 2, :project_id => nil, :back_url => ['/valid']}
+    assert_response :success
+    assert_select 'a[href=?]', '/projects/ecookbook/time_entries', {:text => 'Cancel'}
   end
 
   def test_get_edit_with_an_existing_time_entry_with_locked_user
@@ -821,6 +829,19 @@ class TimelogControllerTest < Redmine::ControllerTest
     assert_response :found
     # check that the issues were updated
     assert_equal [9, 9, 9], TimeEntry.where(:id => [1, 2, 4]).collect {|i| i.activity_id}
+  end
+
+  def test_bulk_update_to_another_project_should_update_activity
+    override = TimeEntryActivity.create!(:name => 'Design', :parent_id => 9, :project_id => 3)
+    entry = TimeEntry.generate!(:project_id => 1, :issue_id => nil, :activity_id => 9)
+    @request.session[:user_id] = 1
+
+    post :bulk_update, :params => {:ids => [entry.id], :time_entry => {:project_id => 3, :activity_id => ''}}
+
+    assert_response :found
+    entry.reload
+    assert_equal 3, entry.project_id
+    assert_equal override.id, entry.activity_id
   end
 
   def test_bulk_update_on_different_projects_without_rights

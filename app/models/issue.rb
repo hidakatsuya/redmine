@@ -1718,7 +1718,7 @@ class Issue < ApplicationRecord
     if project
       scope = project.trackers.sorted
       unless user.admin?
-        roles = user.roles_for_project(project).select {|r| r.has_permission?(:add_issues)}
+        roles = user.roles_for_project(project).select {|r| r.allowed_to?(:add_issues, user.oauth_scope)}
         unless roles.any? {|r| r.permissions_all_trackers?(:add_issues)}
           tracker_ids = roles.map {|r| r.permissions_tracker_ids(:add_issues)}.flatten.uniq
           if current_tracker
@@ -1744,7 +1744,7 @@ class Issue < ApplicationRecord
     if user.admin?
       true
     else
-      roles = user.roles_for_project(project).select {|r| r.has_permission?(permission)}
+      roles = user.roles_for_project(project).select {|r| r.allowed_to?(permission, user.oauth_scope)}
       roles.any? do |r|
         r.permissions_all_trackers?(permission) ||
           r.permissions_tracker_ids?(permission, tracker_id)
@@ -1753,8 +1753,13 @@ class Issue < ApplicationRecord
   end
 
   def after_project_change
-    # Update project_id on related time entries
-    TimeEntry.where({:issue_id => id}).update_all(["project_id = ?", project_id])
+    # Update project_id and activity_id on related time entries
+    TimeEntry.where(:issue_id => id).distinct.pluck(:activity_id).each do |activity_id|
+      TimeEntry.where(:issue_id => id, :activity_id => activity_id).update_all(
+        :project_id => project_id,
+        :activity_id => TimeEntryActivity.activity_id_for_project(activity_id, project)
+      )
+    end
 
     # Delete issue relations
     unless Setting.cross_project_issue_relations?

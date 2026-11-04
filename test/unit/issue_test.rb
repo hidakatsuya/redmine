@@ -597,6 +597,27 @@ class IssueTest < ActiveSupport::TestCase
     assert_equal false, issue.attributes_editable?(User.find_by_login('dlopper'))
   end
 
+  def test_tracker_permissions_should_respect_oauth_scope
+    issue = Issue.find(1)
+    user = User.find_by_login('jsmith')
+
+    user.oauth_scope = [:view_issues]
+    assert_equal false, issue.attributes_editable?(user)
+    assert_equal false, issue.notes_addable?(user)
+    assert_equal false, issue.deletable?(user)
+    assert_equal false, issue.attachments_addable?(user)
+    assert_equal false, issue.attachments_editable?(user)
+    assert_equal false, issue.attachments_deletable?(user)
+
+    user.oauth_scope = [:view_issues, :edit_issues, :add_issue_notes, :delete_issues]
+    assert_equal true, issue.attributes_editable?(user)
+    assert_equal true, issue.notes_addable?(user)
+    assert_equal true, issue.deletable?(user)
+    assert_equal true, issue.attachments_addable?(user)
+    assert_equal true, issue.attachments_editable?(user)
+    assert_equal true, issue.attachments_deletable?(user)
+  end
+
   def test_errors_full_messages_should_include_custom_fields_errors
     field = IssueCustomField.find_by_name('Database')
 
@@ -1970,6 +1991,17 @@ class IssueTest < ActiveSupport::TestCase
     assert_equal [1, 3], Issue.new(:project => Project.find(1)).allowed_target_trackers(user).ids.sort
   end
 
+  def test_allowed_target_trackers_should_respect_oauth_scope
+    user = User.find(2)
+    issue = Issue.find(1)
+
+    user.oauth_scope = [:view_issues, :edit_issues]
+    assert_equal [1], issue.allowed_target_trackers(user).ids
+
+    user.oauth_scope = [:view_issues, :edit_issues, :add_issues]
+    assert_equal [1, 2, 3], issue.allowed_target_trackers(user).ids.sort
+  end
+
   def test_allowed_target_trackers_without_project_should_be_empty
     issue = Issue.new
     assert_nil issue.project
@@ -2095,6 +2127,34 @@ class IssueTest < ActiveSupport::TestCase
     assert_include(
       "Subtask ##{child.id} could not be moved to the new project: Tracker is not included in the list",
       parent.errors[:base])
+  end
+
+  def test_move_to_another_project_should_update_time_entries_activity
+    override = TimeEntryActivity.create!(:name => 'Design', :parent_id => 9, :project_id => 2)
+    issue = Issue.find(1)
+    assert_equal [9, 9], issue.time_entries.order(:id).pluck(:activity_id)
+
+    issue.project = Project.find(2)
+    assert issue.save
+    assert_equal [[2, override.id]] * 2, issue.time_entries.order(:id).pluck(:project_id, :activity_id)
+
+    issue.project = Project.find(1)
+    assert issue.save
+    assert_equal [[1, 9]] * 2, issue.time_entries.order(:id).pluck(:project_id, :activity_id)
+  end
+
+  def test_move_to_another_project_should_update_subtasks_time_entries_activity
+    override = TimeEntryActivity.create!(:name => 'Design', :parent_id => 9, :project_id => 2)
+    parent = Issue.generate!(:project_id => 1)
+    child = Issue.generate!(:project_id => 1, :parent_issue_id => parent.id)
+    time_entry = TimeEntry.generate!(:issue => child, :activity_id => 9)
+
+    parent.reload
+    parent.project = Project.find(2)
+    assert parent.save
+    time_entry.reload
+    assert_equal 2, time_entry.project_id
+    assert_equal override.id, time_entry.activity_id
   end
 
   def test_copy_to_the_same_project

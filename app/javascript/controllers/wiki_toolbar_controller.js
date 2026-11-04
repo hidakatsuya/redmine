@@ -7,18 +7,19 @@ import { Controller } from '@hotwired/stimulus'
 
 const isMac = /mac|iphone|ipad/i.test(navigator.userAgentData?.platform || navigator.platform)
 
-// Wiki toolbar rendered by Redmine::WikiToolbar.
+// Wiki toolbar rendered by app/views/wiki_toolbar/_toolbar.html.erb around
+// its textarea (the field target).
 //
-// The toolbar is rendered after the textarea and moves itself to the
-// textarea's position on connect, so that existing views only need to call
-// wikitoolbar_for. The text formatting syntax is given by the button
-// parameters, so this controller is shared by all text formatters.
+// The markup inserted by each button is defined by the text formatter in
+// app/javascript/wiki_formatting/<format>.js, which is loaded on connect.
 export default class extends Controller {
-  static targets = ['editor', 'preview', 'editTab', 'previewTab', 'toolbar', 'precodeMenu', 'tableMenu']
+  static targets = ['field', 'editor', 'preview', 'editTab', 'previewTab', 'toolbar']
   static values = {
-    fieldId: String,
+    format: String,
     previewUrl: String,
-    helpUrl: String
+    helpUrl: String,
+    // Only set by the deprecated wikitoolbar_for helper
+    fieldId: String
   }
 
   // Editor whose preview was displayed last, switched back to edit mode
@@ -26,39 +27,44 @@ export default class extends Controller {
   static lastPreviewed = null
 
   connect() {
-    this.field = document.getElementById(this.fieldIdValue)
-    if (!this.field) return
+    if (!this.hasFieldTarget && this.hasFieldIdValue) this.adoptField()
+    if (!this.hasFieldTarget) return
 
-    if (!this.editorTarget.contains(this.field)) {
-      // Moving the element reconnects the controller
-      this.field.before(this.element)
-      this.editorTarget.prepend(this.field)
-    }
+    this.syntaxLoaded ??= import(`wiki_formatting/${this.formatValue}`)
+      .then((module) => { this.syntax = module.default })
+      .catch((error) => console.error(`Wiki toolbar syntax not found for ${this.formatValue}`, error))
     this.addShortcutsToTitles()
-    this.element.hidden = false
   }
 
   disconnect() {
     this.closeMenu()
+    this.previewRequest?.abort()
     if (this.constructor.lastPreviewed === this) this.constructor.lastPreviewed = null
+  }
+
+  get field() {
+    return this.fieldTarget
   }
 
   // Actions
 
-  wrap({ params: { prefix, suffix } }) {
-    this.encloseSelection(String(prefix), String(suffix ?? prefix))
+  async apply({ params: { button } }) {
+    await this.syntaxLoaded
+    if (this.syntax?.[button]) {
+      this.syntax[button](this)
+    } else {
+      this.dispatch('button', { detail: { button, format: this.formatValue, editor: this } })
+    }
   }
 
-  wrapLines({ params: { prefix = '', suffix = '', strip, pattern, replacement = '' } }) {
-    this.encloseLineSelection(String(prefix), String(suffix), (str) => {
-      if (strip) {
-        str = str.replace(new RegExp(strip), '')
-      }
-      if (pattern) {
-        str = str.replace(/\r/g, '').replace(new RegExp(`(\\n|^)${pattern}`, 'g'), `$1${replacement}`)
-      }
-      return str
-    })
+  async insertPrecode({ params: { lang } }) {
+    await this.syntaxLoaded
+    this.syntax?.precode?.(this, String(lang))
+  }
+
+  async insertTable({ params: { cols, rows } }) {
+    await this.syntaxLoaded
+    this.syntax?.table?.(this, cols, rows)
   }
 
   help() {
@@ -66,7 +72,8 @@ export default class extends Controller {
   }
 
   shortcut(event) {
-    if (event.target !== this.field || !(isMac ? event.metaKey : event.ctrlKey)) return
+    if (event.target !== this.field || event.shiftKey || event.altKey) return
+    if (!(isMac ? event.metaKey : event.ctrlKey)) return
 
     const button = this.toolbarTarget.querySelector(`[data-wiki-toolbar-shortcut="${event.key.toLowerCase()}"]`)
     if (button) {
@@ -80,7 +87,7 @@ export default class extends Controller {
   edit() {
     if (!this.previewing) return
 
-    this.previewRequest = null
+    this.previewRequest?.abort()
     this.previewTarget.classList.add('hidden')
     this.field.classList.remove('hidden')
     this.toolbarTarget.classList.remove('hidden')
@@ -99,13 +106,12 @@ export default class extends Controller {
     this.selectTab(this.previewTabTarget, this.editTabTarget)
     this.closeMenu()
 
-    const request = this.previewRequest = this.fetchPreview()
-    const html = await request
-    if (request === this.previewRequest && html !== null) {
-      this.previewTarget.innerHTML = html
-    }
+    const html = await this.fetchPreview()
+    if (html !== null) this.previewTarget.innerHTML = html
   }
 
+  // Ctrl/Cmd+Shift+P previews the focused textarea, or switches the last
+  // previewed one back to edit mode
   togglePreview(event) {
     if (event.target === this.field) {
       event.preventDefault()
@@ -124,10 +130,11 @@ export default class extends Controller {
     this.closeMenu()
     if (opened) return
 
-    const template = this[`${params.menu}MenuTarget`]
+    const template = this.element.querySelector(`template[data-wiki-toolbar-menu="${params.menu}"]`)
+    if (!template) return
+
     this.menu = template.content.firstElementChild.cloneNode(true)
     this.menu.dataset.name = params.menu
-    this.menuParams = params
     this.element.append(this.menu)
     this.positionMenu(currentTarget)
 
@@ -147,17 +154,6 @@ export default class extends Controller {
     this.closeMenuOnOutsideClick = null
   }
 
-  insertTable({ params: { cols, rows } }) {
-    const { headerCell, separatorCell } = this.menuParams
-    const names = 'ABCDEFGHIJ'.slice(0, cols).split('')
-    const line = (cells) => `|${cells.join('|')}|\n`
-
-    let table = line(names.map((name) => String(headerCell).replace('%{name}', name)))
-    if (separatorCell) table += line(Array(cols).fill(separatorCell))
-    table += line(Array(cols).fill('  ')).repeat(rows)
-    this.encloseLineSelection(table, '')
-  }
-
   highlightTable({ target }) {
     const button = target.closest('button')
     if (!button) return
@@ -170,7 +166,46 @@ export default class extends Controller {
     })
   }
 
+  // Editing helpers used by the text formatter syntaxes
+
+  // Wraps the selection, e.g. wrap('**') or wrap('<u>', '</u>')
+  wrap(prefix, suffix = prefix) {
+    this.encloseSelection(prefix, suffix)
+  }
+
+  // Wraps the selected lines, optionally transforming them
+  wrapLines(prefix, suffix = '', transform = (text) => text) {
+    this.encloseLineSelection(prefix, suffix, transform)
+  }
+
+  // Replaces in the selected lines, e.g. to turn them into a list
+  replaceLines(pattern, replacement) {
+    this.wrapLines('', '', (text) => text.replace(/\r/g, '').replace(pattern, replacement))
+  }
+
+  columnNames(count) {
+    return 'ABCDEFGHIJ'.slice(0, count).split('')
+  }
+
   // Private
+
+  // Moves the textarea into the toolbar (deprecated wikitoolbar_for helper)
+  adoptField() {
+    const field = document.getElementById(this.fieldIdValue)
+    if (!field) return
+
+    const hadFocus = document.activeElement === field
+    field.setAttribute('data-wiki-toolbar-target', 'field')
+    this.element.hidden = false
+    // Moving the element reconnects the controller
+    field.before(this.element)
+    if ('moveBefore' in Element.prototype) {
+      this.editorTarget.moveBefore(field, this.editorTarget.firstChild)
+    } else {
+      this.editorTarget.prepend(field)
+    }
+    if (hadFocus && document.activeElement !== field) field.focus()
+  }
 
   get previewing() {
     return this.previewTabTarget.classList.contains('selected')
@@ -183,7 +218,10 @@ export default class extends Controller {
     unselected.setAttribute('aria-selected', 'false')
   }
 
+  // Returns the preview HTML, or null if the request failed or was aborted
   async fetchPreview() {
+    this.previewRequest?.abort()
+    const request = this.previewRequest = new AbortController()
     const body = new FormData()
     body.append('text', this.field.value)
     this.field.form?.querySelectorAll('.attachments_fields input, [data-preview-param]').forEach((input) => {
@@ -194,6 +232,7 @@ export default class extends Controller {
       const response = await fetch(this.previewUrlValue, {
         method: 'POST',
         body: body,
+        signal: request.signal,
         headers: {
           'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content,
           'X-Requested-With': 'XMLHttpRequest'
@@ -201,7 +240,7 @@ export default class extends Controller {
       })
       if (response.ok) return await response.text()
     } catch (error) {
-      console.error('Preview failed', error)
+      if (error.name !== 'AbortError') console.error('Preview failed', error)
     }
     return null
   }
@@ -217,7 +256,9 @@ export default class extends Controller {
     const parent = this.menu.offsetParent || document.documentElement
     const parentRect = parent.getBoundingClientRect()
     const buttonRect = button.getBoundingClientRect()
-    this.menu.style.left = `${buttonRect.left - parentRect.left + parent.scrollLeft}px`
+    const left = buttonRect.left - parentRect.left + parent.scrollLeft
+    const maxLeft = this.element.clientWidth - this.menu.offsetWidth
+    this.menu.style.left = `${Math.max(0, Math.min(left, maxLeft))}px`
     this.menu.style.top = `${buttonRect.bottom - parentRect.top + parent.scrollTop}px`
   }
 

@@ -165,6 +165,68 @@ class WikiToolbarTest < ApplicationSystemTestCase
     assert_equal 'issue_description', page.evaluate_script('document.activeElement.id')
   end
 
+  def test_wiki_page_editor
+    log_user('jsmith', 'jsmith')
+    visit '/projects/ecookbook/wiki/CookBook_documentation/edit'
+
+    assert_selector 'div.jstBlock div.jstEditor textarea#content_text'
+    find('#content_text').click.send_keys([:control, :shift, 'p'])
+    assert_selector 'div.wiki-preview', :visible => true, :text => 'CookBook documentation'
+  end
+
+  def test_journal_notes_edit_should_keep_textarea_focus
+    log_user('admin', 'admin')
+    visit '/issues/1'
+
+    within '#change-1' do
+      first('a.icon-edit').click
+      assert_selector 'div.jstBlock div.jstEditor textarea#journal_1_notes'
+    end
+    assert_equal 'journal_1_notes', page.evaluate_script('document.activeElement.id')
+  end
+
+  def test_custom_button_should_dispatch_button_event
+    log_user('jsmith', 'jsmith')
+    visit '/projects/ecookbook/issues/new'
+
+    assert_selector 'div.jstBlock .jstElements'
+    page.execute_script(<<~JS)
+      const block = document.querySelector('div.jstBlock')
+      block.addEventListener('wiki-toolbar:button', ({ detail: { button, format, editor } }) => {
+        editor.wrap(`[${button}:${format}]`, `[/${button}]`)
+      })
+      const btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'jstb_custom'
+      btn.dataset.action = 'wiki-toolbar#apply'
+      btn.dataset.wikiToolbarButtonParam = 'custom'
+      block.querySelector('.jstElements').prepend(btn)
+    JS
+
+    fill_in 'Description', :with => 'hello'
+    select_text('issue_description', 0, 5)
+    find('button.jstb_custom').click
+    assert_equal '[custom:common_mark]hello[/custom]', find('#issue_description').value
+  end
+
+  def test_table_menu_should_stay_inside_toolbar_bounds
+    log_user('jsmith', 'jsmith')
+    visit '/projects/ecookbook/issues/new'
+
+    assert_selector 'button.jstb_table'
+    page.execute_script("document.querySelector('div.jstBlock').style.width = '750px'")
+    find('button.jstb_table').click
+    assert_selector 'table.table-generator'
+    overflow = page.evaluate_script(<<~JS)
+      (() => {
+        const block = document.querySelector('div.jstBlock').getBoundingClientRect()
+        const menu = document.querySelector('table.table-generator').getBoundingClientRect()
+        return menu.right > block.right || menu.left < block.left
+      })()
+    JS
+    assert_equal false, overflow
+  end
+
   private
 
   def select_text(id, start, finish)

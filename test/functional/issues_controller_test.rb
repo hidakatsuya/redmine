@@ -180,6 +180,28 @@ class IssuesControllerTest < Redmine::ControllerTest
     assert_query_filters [['tracker_id', '=', '1']]
   end
 
+  def test_index_with_too_many_tokens_in_filter_should_display_warning_and_results
+    get(
+      :index,
+      :params => {
+        :project_id => 1,
+        :set_filter => 1,
+        :f => ['subject'],
+        :op => {'subject' => '*~'},
+        :v => {'subject' => ['one two print <script>alert(1)</script> three four']}
+      }
+    )
+    assert_response :success
+
+    assert_select '#errorExplanation', 0
+    assert_select 'p.warning', :count => 1,
+                  :text => 'Subject: A maximum of 5 search terms can be used. Only the following terms were used: ' \
+                           '"one", "two", "print", "<script>alert(1)</script>", "three"'
+    assert_not_include '<script>alert(1)</script>', response.body
+    # Issues are still displayed using the first 5 tokens
+    assert_select 'table.issues tr.issue'
+  end
+
   def test_index_with_short_filters
     to_test = {
       'status_id' => {
@@ -2330,7 +2352,7 @@ class IssuesControllerTest < Redmine::ControllerTest
     assert_select 'div.attachments a.icon-attachment[href=?]', '/attachments/4'
     assert_select 'div.attachments span.attachment-journal a', 1
     assert_select 'div.attachments span.attachment-journal a[href=?][title=?]', '#note-1', '#note-1' do
-      assert_select "svg.icon-svg use:match('href', ?)", /assets\/icons-\w+.svg#icon--chevrons-down/
+      assert_select "svg.icon-svg use:match('href', ?)", %r{assets/icons-[0-9a-f]+.svg#icon--chevrons-down}
     end
   end
 
@@ -2357,10 +2379,10 @@ class IssuesControllerTest < Redmine::ControllerTest
     assert_response :success
     assert_select 'div.attachments' do
       assert_select 'a.icon-attachment[href=?]', '/attachments/1' do
-        assert_select "svg.icon-svg use:match('href', ?)", /assets\/icons-\w+.svg#icon--text-plain/
+        assert_select "svg.icon-svg use:match('href', ?)", %r{assets/icons-[0-9a-f]+.svg#icon--text-plain}
       end
       assert_select 'a.icon-attachment[href=?]', '/attachments/6' do
-        assert_select "svg.icon-svg use:match('href', ?)", /assets\/icons-\w+.svg#icon--application-zip/
+        assert_select "svg.icon-svg use:match('href', ?)", %r{assets/icons-[0-9a-f]+.svg#icon--application-zip}
       end
     end
   end
@@ -6440,7 +6462,7 @@ class IssuesControllerTest < Redmine::ControllerTest
     assert_response :success
     reason = l(:notice_issue_not_closable_by_blocking_issue)
     assert_select 'span.icon-warning[title=?]', reason do
-      assert_select "svg.icon-svg use:match('href', ?)", /assets\/icons-\w+.svg#icon--warning/
+      assert_select "svg.icon-svg use:match('href', ?)", %r{assets/icons-[0-9a-f]+.svg#icon--warning}
       assert_select 'span.icon-label', test: reason
     end
   end
