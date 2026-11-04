@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 ruby '>= 3.3.0', '< 4.1.0'
 
-gem 'rails', '8.1.4'
+gem 'rails', '8.1.4.1'
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', require: false
 gem 'rouge', '~> 5.0'
@@ -81,7 +81,7 @@ if File.exist?(database_file)
       when /postgresql/
         gem 'pg', '~> 1.6.2'
       when /sqlite3/
-        gem 'sqlite3', '~> 2.9.4'
+        gem 'sqlite3', '~> 2.10.2'
       when /sqlserver/
         gem 'tiny_tds', '~> 3.4'
         gem 'activerecord-sqlserver-adapter', '~> 8.1.2'
