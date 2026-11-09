@@ -18,8 +18,44 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 require_relative '../../../test_helper'
+require 'open3'
+require 'tmpdir'
 
 class Redmine::ThumbnailTest < ActiveSupport::TestCase
+  def test_thumbnail_preserves_supported_raster_formats
+    skip unless convert_installed?
+
+    Dir.mktmpdir do |directory|
+      %w(bmp gif jpeg png webp).each do |format|
+        source = File.join(directory, "image.#{format}")
+        target = File.join(directory, "#{format}.thumb")
+        _, error, status = Open3.capture3(Redmine::ImageMagick.environment,
+                                         Redmine::Thumbnail::CONVERT_BIN,
+                                         '-size', '20x10', 'xc:white', source)
+        assert status.success?, error
+        assert_equal target, Redmine::Thumbnail.generate(source, target, 10)
+        assert File.size?(target)
+      end
+    end
+  end
+
+  def test_thumbnail_rejects_cr3_disguised_as_jpeg_without_invoking_raw_decoder
+    skip unless convert_installed?
+
+    Dir.mktmpdir do |directory|
+      source = File.join(directory, 'image.jpg')
+      target = File.join(directory, 'image.thumb')
+      File.binwrite(source, "\xff\xd8\xff\x00ftypcrx ".b + "\x00".b * 100)
+      Rails.logger.expects(:error).with(regexp_matches(/Creating thumbnail failed/))
+      _, error = capture_subprocess_io do
+        assert_nil Redmine::Thumbnail.generate(source, target, 100)
+      end
+      # Older ImageMagick versions select the JPEG reader instead of CR3.
+      assert_match(/security policy.*CR3|error\/jpeg\.c/i, error)
+      assert_not File.exist?(target)
+    end
+  end
+
   def test_valid_pdf_magic_returns_false_when_postscript_magic_comes_first
     # This PostScript file has a string '%PDF-' after '%!PS'.
     # Marcel currently misclassifies it as application/pdf, so we use

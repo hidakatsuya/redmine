@@ -793,7 +793,7 @@ class AttachmentTest < ActiveSupport::TestCase
       Redmine::Platform.stubs(:mswin?).returns(false)
       Redmine::Thumbnail.stubs(:gs_available?).returns(true)
       Process.expects(:spawn).
-        with(anything, {:pgroup => true}).
+        with(Redmine::ImageMagick.environment, anything, {:pgroup => true}).
         returns(dummy_pid)
       Process.expects(:wait2).
         with(dummy_pid).
