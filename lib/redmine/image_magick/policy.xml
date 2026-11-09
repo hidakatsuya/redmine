@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Read in addition to the host policy, for both ImageMagick 6 and 7.
+  MIME detection does not constrain the coder ImageMagick selects.
+  Use coder rules (including aliases), since older ImageMagick 6 versions
+  do not support module policies. Later host rules may override these rules.
+-->
+<policymap>
+  <policy domain="coder" rights="none" pattern="*"/>
+  <!-- Attachment images and their thumbnail encoders. -->
+  <policy domain="coder" rights="read | write" pattern="{AVIF,BMP,BMP2,BMP3,GIF,JPEG,JPG,JPE,PNG*,WEBP}"/>
+  <!-- Older ImageMagick versions identify AVIF input and its output as HEIC. -->
+  <policy domain="coder" rights="read | write" pattern="HEIC"/>
+  <!-- PDF-compatible Illustrator attachments use the PDF reader as well. -->
+  <policy domain="coder" rights="read" pattern="{PDF,AI,EPDF}"/>
+  <!-- Raster output of Ghostscript, including older delegate configurations. -->
+  <policy domain="coder" rights="read" pattern="{PNM,PAM,PBM,PGM,PPM}"/>
+  <!-- Blank canvas used when drawing Gantt charts. -->
+  <policy domain="coder" rights="read" pattern="{XC,CANVAS}"/>
+</policymap>

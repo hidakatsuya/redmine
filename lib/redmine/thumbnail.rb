@@ -70,7 +70,7 @@ module Redmine
             # files) can be killed on timeout. Process groups are not
             # available on Windows.
             spawn_options = Redmine::Platform.mswin? ? {} : {:pgroup => true}
-            pid = Process.spawn(cmd, spawn_options)
+            pid = Process.spawn(Redmine::ImageMagick.environment, cmd, spawn_options)
             _, status = Process.wait2(pid)
             unless status.success?
               logger.error("Creating thumbnail failed (#{status.exitstatus}):\nCommand: #{cmd}")
