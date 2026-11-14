@@ -78,6 +78,8 @@ Rails.application.config.to_prepare do
         deny_access
       end
     end
+
+    Redmine::Hook.call_hook :configure_doorkeeper, :builder => self
   end
 
   # Use Redmine standard layouts and helpers for Doorkeeper OAuth2 screens

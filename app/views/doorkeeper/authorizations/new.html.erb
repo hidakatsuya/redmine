@@ -33,6 +33,9 @@
     <%= hidden_field_tag :scope, @pre_auth.scope %>
     <%= hidden_field_tag :code_challenge, @pre_auth.code_challenge %>
     <%= hidden_field_tag :code_challenge_method, @pre_auth.code_challenge_method %>
+    <% Array(@pre_auth.resource_indicators).each do |resource| %>
+      <%= hidden_field_tag 'resource[]', resource, id: nil %>
+    <% end %>
     <%= submit_tag t('doorkeeper.authorizations.buttons.authorize') %>
   <% end %>
   <%= form_tag oauth_authorization_path, method: :delete do %>
@@ -43,6 +46,9 @@
     <%= hidden_field_tag :scope, @pre_auth.scope %>
     <%= hidden_field_tag :code_challenge, @pre_auth.code_challenge %>
     <%= hidden_field_tag :code_challenge_method, @pre_auth.code_challenge_method %>
+    <% Array(@pre_auth.resource_indicators).each do |resource| %>
+      <%= hidden_field_tag 'resource[]', resource, id: nil %>
+    <% end %>
     <%= submit_tag t('doorkeeper.authorizations.buttons.deny') %>
   <% end %>
 </p>

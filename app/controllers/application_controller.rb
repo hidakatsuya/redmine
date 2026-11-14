@@ -148,16 +148,19 @@ class ApplicationController < ActionController::Base
       end
     end
     if user.nil? && Setting.rest_api_enabled? && accept_api_auth?
-      if (key = api_key_from_request)
+      # A trusted in-process caller can pass a token it has already authenticated.
+      # The Rack key cannot be supplied by an HTTP client.
+      if (access_token = request.env['redmine.internal_oauth_token']).is_a?(Doorkeeper::AccessToken)
+        user = user_from_oauth_token(access_token)
+      elsif (key = api_key_from_request)
         # Use API key
         user = User.find_by_api_key(key)
       elsif access_token = Doorkeeper.authenticate(request)
-        # Oauth
-        if access_token.accessible?
-          user = User.active.find_by_id(access_token.resource_owner_id)
-          user&.oauth_scope = access_token.scopes.all.map(&:to_sym)
+        # This REST API accepts the original Redmine tokens without a resource binding.
+        if access_token.resource.present?
+          head :unauthorized
         else
-          doorkeeper_render_error
+          user = user_from_oauth_token(access_token)
         end
       elsif /\ABasic /i.match?(request.authorization.to_s)
         # HTTP Basic, either username/password or API key/random
@@ -191,6 +194,18 @@ class ApplicationController < ActionController::Base
     user.remote_ip = request.remote_ip if user
     user
   end
+
+  def user_from_oauth_token(access_token)
+    unless access_token.accessible?
+      head :unauthorized
+      return
+    end
+
+    user = User.active.find_by_id(access_token.resource_owner_id)
+    user&.oauth_scope = access_token.scopes.all.map(&:to_sym)
+    user
+  end
+  private :user_from_oauth_token
 
   def autologin_cookie_name
     Redmine::Configuration['autologin_cookie_name'].presence || 'autologin'
