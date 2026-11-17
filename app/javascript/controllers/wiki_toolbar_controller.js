@@ -72,6 +72,7 @@ export default class extends Controller {
   }
 
   shortcut(event) {
+    if (!this.hasFieldTarget) return
     if (event.target !== this.field || event.shiftKey || event.altKey) return
     if (!(isMac ? event.metaKey : event.ctrlKey)) return
 
@@ -113,6 +114,7 @@ export default class extends Controller {
   // Ctrl/Cmd+Shift+P previews the focused textarea, or switches the last
   // previewed one back to edit mode
   togglePreview(event) {
+    if (!this.hasFieldTarget) return
     if (event.target === this.field) {
       event.preventDefault()
       this.preview()
@@ -142,6 +144,10 @@ export default class extends Controller {
       if (!this.menu.contains(event.target) && !currentTarget.contains(event.target)) this.closeMenu()
     }
     document.addEventListener('mousedown', this.closeMenuOnOutsideClick)
+    // The menu has a fixed position so that it is not clipped by the form
+    this.repositionMenu = () => this.positionMenu(currentTarget)
+    window.addEventListener('scroll', this.repositionMenu, { capture: true, passive: true })
+    window.addEventListener('resize', this.repositionMenu)
     this.menu.querySelector('button')?.focus()
   }
 
@@ -149,9 +155,12 @@ export default class extends Controller {
     if (!this.menu) return
 
     document.removeEventListener('mousedown', this.closeMenuOnOutsideClick)
+    window.removeEventListener('scroll', this.repositionMenu, { capture: true })
+    window.removeEventListener('resize', this.repositionMenu)
     this.menu.remove()
     this.menu = null
     this.closeMenuOnOutsideClick = null
+    this.repositionMenu = null
   }
 
   highlightTable({ target }) {
@@ -253,13 +262,11 @@ export default class extends Controller {
   }
 
   positionMenu(button) {
-    const parent = this.menu.offsetParent || document.documentElement
-    const parentRect = parent.getBoundingClientRect()
+    const blockRect = this.element.getBoundingClientRect()
     const buttonRect = button.getBoundingClientRect()
-    const left = buttonRect.left - parentRect.left + parent.scrollLeft
-    const maxLeft = this.element.clientWidth - this.menu.offsetWidth
-    this.menu.style.left = `${Math.max(0, Math.min(left, maxLeft))}px`
-    this.menu.style.top = `${buttonRect.bottom - parentRect.top + parent.scrollTop}px`
+    const maxLeft = blockRect.left + this.element.clientWidth - this.menu.offsetWidth
+    this.menu.style.left = `${Math.max(blockRect.left, Math.min(buttonRect.left, maxLeft))}px`
+    this.menu.style.top = `${buttonRect.bottom}px`
   }
 
   encloseSelection(prefix, suffix) {

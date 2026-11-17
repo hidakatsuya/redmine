@@ -56,6 +56,19 @@ class WikiToolbarHelperTest < Redmine::HelperTest
     end
   end
 
+  def test_wiki_textarea_tag_should_render_the_editor_of_a_formatter_without_toolbar_buttons
+    helper = Module.new do
+      def wikitoolbar_for(field_id, preview_url)
+        tag.div(:id => "editor-for-#{field_id}")
+      end
+    end
+    Redmine::WikiFormatting.stubs(:helper_for).returns(helper)
+
+    html = render_erb("<%= wiki_textarea_tag('notes') %>")
+    assert_select_in html, 'textarea#notes + div#editor-for-notes'
+    assert_select_in html, 'div.jstBlock', 0
+  end
+
   def test_wiki_textarea_tag_should_not_duplicate_the_wiki_edit_class
     with_settings :text_formatting => 'textile' do
       html = render_erb("<%= wiki_textarea_tag('notes', '', :class => 'wiki-edit other') %>")
@@ -90,6 +103,13 @@ class WikiToolbarHelperTest < Redmine::HelperTest
         assert_select 'button.jstb_tl', 0
       end
     end
+  end
+
+  def test_buttons_of_a_helper_including_a_core_helper
+    helper = Module.new {include Redmine::WikiFormatting::CommonMark::Helper}
+    Redmine::WikiFormatting.stubs(:helper_for).with('foo').returns(helper)
+
+    assert_equal Redmine::WikiFormatting::CommonMark::Helper::WIKI_TOOLBAR_BUTTONS, Redmine::WikiToolbar.buttons('foo')
   end
 
   def test_buttons_should_be_translated
@@ -208,6 +228,15 @@ class WikiToolbarHelperTest < Redmine::HelperTest
 
   def test_wikitoolbar_for_should_render_nothing_without_text_formatting
     with_settings :text_formatting => '' do
+      assert_nil wikitoolbar_for('issue_description')
+    end
+  end
+
+  def test_wikitoolbar_for_should_render_nothing_without_buttons
+    helper = Module.new {include Redmine::WikiToolbar::Helper}
+    Redmine::WikiFormatting.stubs(:helper_for).returns(helper)
+
+    assert_deprecated(/wikitoolbar_for is deprecated/, Rails.application.deprecators[:redmine]) do
       assert_nil wikitoolbar_for('issue_description')
     end
   end
