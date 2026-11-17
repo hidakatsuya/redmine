@@ -451,6 +451,7 @@ module Redmine
       # Generates a gantt image
       # Only defined if MiniMagick is avalaible
       def to_image(format='PNG')
+        Redmine::ImageMagick.configure_mini_magick
         date_to = (@date_from >> @months) - 1
         show_weeks = @zoom > 1
         show_days = @zoom > 2

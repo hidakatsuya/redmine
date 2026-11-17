@@ -30,6 +30,20 @@ Optional:
 Supported browsers:
 The current version of Firefox, Safari, Chrome, Chromium and Microsoft Edge.
 
+ImageMagick security policy:
+Redmine ships lib/redmine/image_magick/policy.xml and adds its directory to
+MAGICK_CONFIGURE_PATH for thumbnail generation (including avatars) and Gantt
+PNG exports. The policy denies coders by default and allows only those needed
+for supported images, PDF thumbnails and Gantt rendering; MIME type detection
+alone is not a security boundary. Delegate, filter and path restrictions remain
+under the host's policy.
+
+ImageMagick also reads the host's policy.xml. Existing MAGICK_CONFIGURE_PATH
+entries are preserved. Later matching rules take precedence: host restrictions
+(such as disabling PDF) still apply, and host allow rules can override Redmine's
+restrictions. Review the effective policy using `convert -list policy` with the
+same MAGICK_CONFIGURE_PATH. Keep ImageMagick and Ghostscript up to date.
+
 == Installation
 
 1. Uncompress the program archive
