@@ -24,6 +24,7 @@ module Redmine
         button_params = {
           data: {
             action: 'quote-reply#quote',
+            quote_reply_target: 'button',
             quote_reply_url_param: url,
             quote_reply_text_formatting_param: Setting.text_formatting
           },
