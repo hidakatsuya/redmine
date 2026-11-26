@@ -180,6 +180,21 @@ class MailHandlerTest < ActiveSupport::TestCase
     assert_equal true, issue.reload.is_private
   end
 
+  def test_add_issue_with_private_keyword_no_should_override_tracker_private_by_default_setting
+    User.find_by_mail('jsmith@somenet.foo').update_attribute 'language', 'fr'
+    MemberRole.create! member_id: 3, role_id: 1
+    Project.find(2).trackers.update_all(:private_by_default => true)
+
+    issue =
+      submit_email(
+        'ticket_with_localized_private_flag.eml',
+        :allow_override => 'is_private,tracker,category,priority'
+      ) {|email| email.sub!('oui', 'non')}
+    assert issue.is_a?(Issue)
+    assert_not issue.new_record?
+    assert_equal false, issue.reload.is_private
+  end
+
   def test_add_issue_with_group_assignment
     with_settings :issue_group_assignment => '1' do
       issue = submit_email('ticket_on_given_project.eml', :allow_override => ['assigned_to']) do |email|
@@ -990,6 +1005,16 @@ class MailHandlerTest < ActiveSupport::TestCase
     # keywords should be removed from the email body
     assert !journal.notes.match(/^Status:/i)
     assert !journal.notes.match(/^Start Date:/i)
+  end
+
+  def test_update_issue_with_private_keyword_no
+    Role.find(1).add_permission! :set_issues_private
+    Issue.find(2).update_columns(:is_private => true)
+    journal = submit_email('ticket_reply_with_status.eml', :allow_override => 'is_private') do |email|
+      email.gsub!('Status: Resolved', 'Private: No')
+    end
+    assert journal.is_a?(Journal)
+    assert_equal false, Issue.find(2).is_private
   end
 
   def test_update_issue_with_attachment

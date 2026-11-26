@@ -15,21 +15,34 @@ let mermaidInitialized = false;
 let mermaidLoadPromise = null;
 let renderCount = 0;
 
+// If the page contains an element with id="mermaid" or id="MermaidAssetUrl",
+// it can also be accessed as a property of window, so these functions make
+// sure that the value has the expected type before it is used.
+function loadedMermaid() {
+  return typeof window.mermaid?.render === 'function' ? window.mermaid : null;
+}
+
+function mermaidAssetUrl() {
+  return typeof window.MermaidAssetUrl === 'string' ? window.MermaidAssetUrl : null;
+}
+
 // Mermaid.js is not bundled with Redmine; administrators install it with
 // `bin/rails redmine:mermaid:install`. When it is available, javascript_heads
 // exposes its URL as window.MermaidAssetUrl. It is several MB, so it is only
 // fetched (as a classic <script>) once a Mermaid code block actually needs
 // rendering.
 function loadMermaid() {
-  if (typeof mermaid !== 'undefined') return Promise.resolve(mermaid);
+  const mermaid = loadedMermaid();
+  if (mermaid) return Promise.resolve(mermaid);
   if (mermaidLoadPromise) return mermaidLoadPromise;
 
   const loading = new Promise((resolve, reject) => {
     const script = document.createElement('script');
-    script.src = window.MermaidAssetUrl;
+    script.src = mermaidAssetUrl();
     script.onload = () => {
-      if (window.mermaid) {
-        resolve(window.mermaid);
+      const mermaid = loadedMermaid();
+      if (mermaid) {
+        resolve(mermaid);
       } else {
         script.remove();
         reject(new Error('Mermaid.js loaded but window.mermaid is not defined'));
@@ -67,11 +80,11 @@ function dedent(text) {
 export default class extends Controller {
   connect() {
     // Mermaid.js is not installed: leave the code block as it is.
-    if (!window.MermaidAssetUrl && typeof mermaid === 'undefined') return;
+    if (!mermaidAssetUrl() && !loadedMermaid()) return;
 
     loadMermaid().then((mermaid) => {
       // The block may have left the DOM while Mermaid.js was loading.
-      if (this.element.isConnected) this.render(mermaid);
+      if (this.element.isConnected) this.renderWhenShown(mermaid);
     }).catch((error) => {
       console.error('Failed to load Mermaid.js:', error);
       // Show the source that the mermaid-available CSS rule hides.
@@ -80,6 +93,8 @@ export default class extends Controller {
   }
 
   disconnect() {
+    this.visibilityObserver?.disconnect();
+    this.visibilityObserver = null;
     // Undo everything render() added so that a reconnect starts clean.
     this.container?.remove();
     this.errorElement?.remove();
@@ -90,6 +105,30 @@ export default class extends Controller {
       pre.style.display = '';
       pre.classList.remove('mermaid-failed');
     }
+  }
+
+  // Mermaid.js lays out a diagram by measuring its text, which has no size
+  // while the block is not displayed, e.g. inside a collapsed {{collapse}}
+  // macro. Such a block is rendered once it is shown.
+  renderWhenShown(mermaid) {
+    const pre = this.element.closest('pre');
+    if (!pre) return;
+
+    const isShown = () => pre.getClientRects().length > 0;
+    if (isShown()) {
+      this.render(mermaid);
+      return;
+    }
+
+    // The size of the block changes from zero when it is shown.
+    const observer = new ResizeObserver(() => {
+      if (!isShown()) return;
+      observer.disconnect();
+      if (this.visibilityObserver === observer) this.visibilityObserver = null;
+      this.render(mermaid);
+    });
+    observer.observe(pre);
+    this.visibilityObserver = observer;
   }
 
   render(mermaid) {
