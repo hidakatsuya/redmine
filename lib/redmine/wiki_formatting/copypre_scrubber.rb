@@ -11,15 +11,11 @@ module Redmine
         return unless node.name == 'pre'
 
         node['data-clipboard-target'] = 'pre'
-        # Wrap the <pre> element with a container and add a copy button
-        node.wrap(wrapper)
+        # Create the wrapper in the current document so a shared node does not retain processed documents.
+        node.wrap('<div class="pre-wrapper" data-controller="clipboard"></div>')
 
         # Copy the contents of the pre tag when copyButton is clicked
         node.parent.prepend_child(button)
-      end
-
-      def wrapper
-        @wrapper ||= Nokogiri::HTML5.fragment('<div class="pre-wrapper" data-controller="clipboard"></div>').children.first
       end
 
       def button
